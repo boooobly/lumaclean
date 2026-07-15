@@ -1,13 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import {Golos_Text, Onest} from "next/font/google";
+import {hasLocale} from "next-intl";
 import {setRequestLocale} from "next-intl/server";
+import {notFound} from "next/navigation";
 import {ApartmentExperience} from "@/components/apartment-experience";
 import {Estimate} from "@/components/site/estimate";
 import {JourneyHandoff} from "@/components/site/journey-handoff";
 import {SiteHeader} from "@/components/site/site-header";
 import {Rates} from "@/components/site/rates";
-import type {Locale} from "@/i18n/routing";
+import {routing, type Locale} from "@/i18n/routing";
 import {getMessengerLinks} from "@/lib/contacts";
 import {siteContent} from "@/lib/content";
 import {extrasPrices, formatRsd} from "@/lib/pricing";
@@ -17,8 +19,9 @@ import "./site.css";
 const displayFont = Onest({subsets: ["latin", "cyrillic"], variable: "--font-lc-display", display: "swap"});
 const textFont = Golos_Text({subsets: ["latin", "cyrillic"], variable: "--font-lc-text", display: "swap"});
 
-export default async function HomePage({params}: {params: Promise<{locale: Locale}>}) {
+export default async function HomePage({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   const c = siteContent[locale];
   const v = editorialContent[locale];

@@ -14,6 +14,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({locale, namespace: "Metadata"});
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://lumaclean.rs";
   return {
