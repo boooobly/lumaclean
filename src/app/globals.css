@@ -409,7 +409,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 @media (max-width: 680px) {
   .journey-track { height: 660svh; }
-  .journey-image { object-position: 58% center; }
+  .journey-image { object-position: center; }
   .journey-video { object-position: center; }
   .journey-shade {
     background: linear-gradient(0deg, rgba(3,16,23,.82) 0, rgba(3,16,23,.23) 65%, rgba(3,16,23,.12));
@@ -474,6 +474,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .kitchen-feature { gap: 4px; min-height: 0; padding: 11px 13px; border-radius: 15px; }
   .kitchen-feature strong { font-size: 13px; }
   .kitchen-feature small { font-size: 9px; }
+}
+
+@media (max-width: 680px) and (orientation: portrait) {
+  /* Match the 4:3 hero stills to the video's centered 16:9 source crop. */
+  .journey-image { transform: scale(1.333333); }
 }
 
 @media (prefers-reduced-motion: reduce) {
