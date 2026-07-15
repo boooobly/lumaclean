@@ -1,0 +1,6 @@
+<svg width="294" height="64" viewBox="0 0 294 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>LumaClean light logo</title>
+  <path d="M14 10V40C14 47.732 20.268 54 28 54H54" stroke="#FBFAF6" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M28 10V28C28 34.627 33.373 40 40 40H54" stroke="#5FC5CC" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="80" y="42" fill="#FBFAF6" font-family="Onest, Arial, sans-serif" font-size="31" font-weight="620" letter-spacing="-1.4">LumaClean</text>
+</svg>

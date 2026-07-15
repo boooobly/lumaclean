@@ -1,0 +1,485 @@
+:root {
+  --ink: #10252b;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: #f3f0e9; }
+body { margin: 0; color: var(--ink); background: #f3f0e9; font-family: var(--font-geist), Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+button, input, textarea { font: inherit; }
+a { color: inherit; text-decoration: none; }
+button, a { -webkit-tap-highlight-color: transparent; }
+::selection { color: var(--ink); background: #5fc5cc; }
+
+.button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 0 24px; border: 0; border-radius: 999px; color: #fff; background: var(--ink); font-size: 13px; font-weight: 580; cursor: pointer; transition: transform .25s, background .25s, box-shadow .25s; }
+.button:hover { transform: translateY(-2px); background: #173d50; box-shadow: 0 12px 25px rgba(12,43,58,.16); }
+.button-light { color: var(--ink); background: #fff; }
+.button-light:hover { background: #eaffff; }
+.cinematic-kicker { display: inline-flex; align-items: center; gap: 11px; font-size: 10px; font-weight: 650; letter-spacing: .19em; text-transform: uppercase; }
+.cinematic-kicker::before { content: ""; width: 31px; height: 1px; background: #86e2ec; }
+.cinematic-actions { display: flex; align-items: center; gap: 25px; margin-top: 35px; }
+.cinematic-link { display: inline-flex; align-items: center; gap: 9px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.35); font-size: 12px; }
+.pointer-coarse-copy { display: none; }
+@media (pointer: coarse) { .pointer-fine-copy { display: none; } .pointer-coarse-copy { display: inline; } }
+
+/* Continuous apartment journey */
+.journey-track {
+  position: relative;
+  z-index: 1;
+  height: 780svh;
+  background: #081a22;
+}
+.journey-sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #081a22;
+}
+.journey-track.journey-handed-off {
+  background: transparent;
+  pointer-events: none;
+}
+.journey-track.journey-handed-off .journey-sticky {
+  visibility: hidden;
+}
+.journey-hero,
+.journey-video-shell {
+  position: absolute;
+  inset: 0;
+}
+.journey-hero {
+  z-index: 2;
+  touch-action: pan-y;
+  background: #c4c5bd url("/media/living-room-preview.jpg") center / cover no-repeat;
+}
+.journey-image {
+  object-fit: cover;
+  object-position: center;
+}
+.journey-clean {
+  z-index: 0;
+}
+.journey-dirty {
+  z-index: 1;
+  opacity: 0;
+  transition: opacity .75s cubic-bezier(.2,.75,.25,1);
+}
+.journey-hero.is-before .journey-dirty {
+  opacity: 1;
+}
+.journey-shade {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(4,17,24,.72) 0, rgba(4,17,24,.34) 39%, transparent 68%),
+    linear-gradient(0deg, rgba(4,17,24,.31), transparent 38%);
+  pointer-events: none;
+}
+.journey-video-shell {
+  z-index: 3;
+  opacity: 0;
+  visibility: hidden;
+}
+.journey-final-kitchen {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+.journey-final-kitchen img {
+  object-fit: cover;
+  object-position: center;
+}
+.journey-video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: contents;
+}
+.journey-video-vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(3,15,20,.2), transparent 34%);
+  pointer-events: none;
+}
+.journey-copy {
+  position: absolute;
+  z-index: 8;
+  left: max(5.5vw, calc((100vw - 1380px)/2));
+  top: 50%;
+  width: min(650px, 47vw);
+  color: #fff;
+  transform: translateY(-46%);
+  will-change: transform, opacity;
+}
+.journey-copy h1 {
+  margin: 23px 0 25px;
+  max-width: 700px;
+  font-size: clamp(64px, 7.2vw, 124px);
+  font-weight: 260;
+  line-height: .86;
+  letter-spacing: -.075em;
+  text-wrap: balance;
+  text-shadow: 0 3px 30px rgba(0,0,0,.2);
+}
+.journey-copy p {
+  max-width: 480px;
+  margin: 0;
+  color: rgba(241,252,254,.84);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.journey-hover-hint {
+  position: absolute;
+  z-index: 9;
+  left: 50%;
+  bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  border: 1px solid rgba(255,255,255,.32);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(6,26,35,.35);
+  backdrop-filter: blur(14px);
+  font-size: 9px;
+  font-weight: 560;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+}
+.journey-progress {
+  position: absolute;
+  z-index: 9;
+  right: 31px;
+  bottom: 27px;
+  display: grid;
+  grid-template-columns: auto 54px minmax(62px, auto);
+  align-items: center;
+  gap: 10px;
+  color: rgba(255,255,255,.9);
+  opacity: 0;
+  visibility: hidden;
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.journey-phase-number {
+  font-variant-numeric: tabular-nums;
+}
+.journey-phase-line {
+  height: 1px;
+  overflow: hidden;
+  background: rgba(255,255,255,.28);
+}
+.journey-phase-line i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  transform-origin: left;
+  transition: transform .45s ease;
+}
+.journey-phase-name {
+  min-width: 68px;
+}
+.journey-scroll-label {
+  grid-column: 1 / -1;
+  justify-self: end;
+  color: rgba(255,255,255,.55);
+  font-size: 8px;
+}
+.journey-chapter-intro {
+  position: absolute;
+  z-index: 7;
+  left: max(5vw, calc((100vw - 1380px)/2));
+  bottom: 12%;
+  width: min(760px, 62vw);
+  color: #fff;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  text-shadow: 0 4px 35px rgba(0,0,0,.32);
+}
+.journey-chapter-intro span {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.journey-chapter-intro span::before {
+  content: "";
+  width: 38px;
+  height: 1px;
+  background: #fff;
+}
+.journey-chapter-intro h2 {
+  margin: 17px 0 0;
+  font-size: clamp(52px, 6.2vw, 102px);
+  font-weight: 260;
+  line-height: .9;
+  letter-spacing: -.07em;
+  text-wrap: balance;
+}
+.journey-infographic {
+  position: absolute;
+  z-index: 7;
+  color: #fff;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.infographic-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: rgba(236,250,252,.82);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.infographic-eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: #fff;
+}
+.journey-infographic h2 {
+  margin: 16px 0 0;
+  font-size: clamp(38px, 4.2vw, 68px);
+  font-weight: 290;
+  line-height: .94;
+  letter-spacing: -.06em;
+  text-wrap: balance;
+}
+.bathroom-infographic {
+  left: max(5vw, calc((100vw - 1380px)/2));
+  top: 15%;
+  width: min(760px, 62vw);
+  text-shadow: 0 3px 28px rgba(0,0,0,.25);
+}
+.infographic-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 25px;
+}
+.infographic-item {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 14px;
+  min-height: 100px;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 19px;
+  background: linear-gradient(145deg, rgba(5,22,29,.7), rgba(8,31,38,.48));
+  box-shadow: 0 16px 45px rgba(3,16,22,.16), inset 0 1px rgba(255,255,255,.08);
+  backdrop-filter: blur(18px) saturate(1.08);
+}
+.infographic-item > span {
+  display: grid;
+  place-items: center;
+  align-self: start;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  color: rgba(235,249,251,.78);
+  font-size: 9px;
+  letter-spacing: .12em;
+}
+.infographic-item div {
+  display: grid;
+  gap: 7px;
+}
+.infographic-item strong {
+  font-size: 16px;
+  font-weight: 610;
+  letter-spacing: -.015em;
+}
+.infographic-item small {
+  color: rgba(234,247,249,.76);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.faucet-infographic {
+  left: 60vw;
+  right: auto;
+  top: 42%;
+  width: min(520px, 35vw);
+  padding: 31px 33px;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 29px;
+  background: linear-gradient(145deg, rgba(5,22,29,.72), rgba(8,31,38,.5));
+  box-shadow: 0 28px 80px rgba(3,15,20,.22), inset 0 1px rgba(255,255,255,.1);
+  backdrop-filter: blur(22px) saturate(1.08);
+}
+.faucet-infographic h2 {
+  font-size: clamp(42px, 4vw, 66px);
+}
+.faucet-infographic p {
+  margin: 21px 0 0;
+  color: rgba(236,249,251,.8);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.infographic-focus-line {
+  position: absolute;
+  right: calc(100% + 18px);
+  top: 58%;
+  width: 21vw;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,.9), rgba(255,255,255,.34));
+}
+.infographic-focus-line::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(255,255,255,.9);
+  border-radius: 50%;
+  box-shadow: 0 0 16px rgba(255,255,255,.5);
+}
+.kitchen-infographic {
+  left: max(5vw, calc((100vw - 1380px)/2));
+  bottom: 8%;
+  width: min(840px, 72vw);
+  text-shadow: 0 3px 28px rgba(0,0,0,.25);
+}
+.kitchen-infographic h2 {
+  max-width: 700px;
+  font-size: clamp(42px, 4.7vw, 76px);
+}
+.kitchen-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 24px;
+}
+.kitchen-feature {
+  display: grid;
+  gap: 7px;
+  min-height: 132px;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 19px;
+  background: linear-gradient(145deg, rgba(5,22,29,.7), rgba(8,31,38,.48));
+  box-shadow: 0 16px 45px rgba(3,16,22,.16), inset 0 1px rgba(255,255,255,.08);
+  backdrop-filter: blur(18px) saturate(1.08);
+}
+.kitchen-feature > span {
+  color: rgba(220,245,248,.58);
+  font-size: 9px;
+  letter-spacing: .14em;
+}
+.kitchen-feature strong {
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 610;
+}
+.kitchen-feature small {
+  color: rgba(234,247,249,.76);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.final-water-ribbon {
+  display: none;
+}
+
+@media (max-width: 1000px) {
+  .journey-track { height: 720svh; }
+  .journey-copy { left: 5vw; width: min(650px, 70vw); }
+  .journey-copy h1 { font-size: clamp(60px, 10vw, 96px); }
+}
+
+@media (max-width: 680px) {
+  .journey-track { height: 660svh; }
+  .journey-image { object-position: 58% center; }
+  .journey-video { object-position: center; }
+  .journey-shade {
+    background: linear-gradient(0deg, rgba(3,16,23,.82) 0, rgba(3,16,23,.23) 65%, rgba(3,16,23,.12));
+  }
+  .journey-copy {
+    left: 18px;
+    right: 18px;
+    top: auto;
+    bottom: 78px;
+    width: auto;
+    transform: none;
+  }
+  .journey-copy h1 {
+    max-width: 520px;
+    margin: 15px 0;
+    font-size: clamp(48px, 15vw, 72px);
+    line-height: .9;
+  }
+  .journey-copy p { max-width: 390px; font-size: 12px; }
+  .journey-hover-hint { bottom: 18px; }
+  .journey-progress {
+    right: 16px;
+    bottom: 18px;
+    grid-template-columns: auto 38px auto;
+  }
+  .journey-scroll-label { display: none; }
+  .journey-chapter-intro {
+    left: 18px;
+    right: 18px;
+    bottom: 96px;
+    width: auto;
+  }
+  .journey-chapter-intro h2 { font-size: clamp(48px, 14vw, 68px); }
+  .bathroom-infographic {
+    left: 14px;
+    right: 14px;
+    top: auto;
+    bottom: 70px;
+    width: auto;
+  }
+  .journey-infographic h2 {
+    margin-top: 11px;
+    font-size: 34px;
+  }
+  .infographic-list { grid-template-columns: 1fr; gap: 6px; margin-top: 14px; }
+  .infographic-item { grid-template-columns: 28px 1fr; gap: 9px; min-height: 0; padding: 11px 12px; border-radius: 15px; }
+  .infographic-item > span { width: 24px; height: 24px; font-size: 8px; }
+  .infographic-item strong { font-size: 13px; }
+  .infographic-item small { font-size: 9px; }
+  .faucet-infographic {
+    left: 14px;
+    right: 14px;
+    top: auto;
+    bottom: 76px;
+    width: auto;
+    padding: 19px;
+  }
+  .faucet-infographic p { margin-top: 12px; font-size: 11px; }
+  .infographic-focus-line { display: none; }
+  .kitchen-infographic { left: 16px; right: 16px; bottom: 70px; width: auto; }
+  .kitchen-feature-grid { grid-template-columns: 1fr; gap: 6px; margin-top: 14px; }
+  .kitchen-feature { gap: 4px; min-height: 0; padding: 11px 13px; border-radius: 15px; }
+  .kitchen-feature strong { font-size: 13px; }
+  .kitchen-feature small { font-size: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-track { height: 100svh; }
+  .journey-sticky { position: relative; }
+  .journey-video-shell,
+  .journey-progress { display: none; }
+  .journey-dirty { transition: none; }
+}

@@ -1,0 +1,18 @@
+:root {
+  --lc-paper: #f3f0e9;
+  --lc-paper-bright: #fbfaf6;
+  --lc-ink: #10252b;
+  --lc-ink-soft: #506168;
+  --lc-stone: #b8aa98;
+  --lc-chrome: #d5d9d6;
+  --lc-teal: #2ba7b2;
+  --lc-teal-light: #5fc5cc;
+  --lc-line: rgba(16, 37, 43, 0.18);
+  --lc-font-display: "Onest", "Arial", sans-serif;
+  --lc-font-text: "Golos Text", "Arial", sans-serif;
+  --lc-radius-sm: 12px;
+  --lc-radius-md: 24px;
+  --lc-space-unit: 8px;
+  --lc-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --lc-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}

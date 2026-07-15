@@ -1,0 +1,24 @@
+<svg width="1200" height="520" viewBox="0 0 1200 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>LumaClean apartment route diagram</title>
+  <g stroke="#10252B" stroke-opacity="0.26" stroke-width="2">
+    <path d="M60 60H560V290H770V60H1140V460H770V350H560V460H60V60Z"/>
+    <path d="M560 60V180H770"/>
+    <path d="M235 60V290"/>
+    <path d="M60 290H560"/>
+    <path d="M940 60V230H1140"/>
+    <path d="M940 230V460"/>
+  </g>
+  <path d="M155 205C250 205 330 205 410 205C490 205 520 238 600 238H690C740 238 754 210 754 168C754 138 780 120 820 120C900 120 930 170 930 230C930 302 875 333 820 333C760 333 733 308 690 308H650C622 308 612 336 638 352C700 389 780 398 870 398H1050" stroke="#2BA7B2" stroke-width="5" stroke-linecap="round"/>
+  <g fill="#F3F0E9" stroke="#2BA7B2" stroke-width="4">
+    <circle cx="155" cy="205" r="12"/>
+    <circle cx="754" cy="168" r="12"/>
+    <circle cx="820" cy="333" r="12"/>
+    <circle cx="1050" cy="398" r="12"/>
+  </g>
+  <g fill="#10252B" font-family="Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="1.5">
+    <text x="110" y="170">01 LIVING</text>
+    <text x="700" y="115">02 BATH</text>
+    <text x="840" y="325">03 DETAIL</text>
+    <text x="988" y="368">04 KITCHEN</text>
+  </g>
+</svg>
