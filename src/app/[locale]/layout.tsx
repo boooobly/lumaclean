@@ -16,7 +16,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   const {locale} = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({locale, namespace: "Metadata"});
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://lumaclean.rs";
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://lumacleanrs.com";
   return {
     metadataBase: new URL(base),
     title: t("title"),

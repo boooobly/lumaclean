@@ -27,7 +27,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
   const v = editorialContent[locale];
   const messengerLinks = getMessengerLinks(locale);
   const extraKeys = ["standardWindow", "largeWindow", "balcony", "fridge", "oven", "cabinets", "ironing", "steam", "petHair", "linen"] as const;
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://lumaclean.rs").replace(/\/$/, "");
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://lumacleanrs.com").replace(/\/$/, "");
   const localBusinessJsonLd = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
