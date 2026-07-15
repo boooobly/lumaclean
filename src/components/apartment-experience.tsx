@@ -106,6 +106,7 @@ const copy = {
 } as const;
 
 const VIDEO_START = 0.075;
+const VIDEO_FRAME_RATE = 30;
 
 function interpolate(from: number, to: number, progress: number) {
   return from + (to - from) * progress;
@@ -137,8 +138,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
   const hero = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const targetTime = useRef(0);
-  const renderedTime = useRef(0);
   const duration = useRef(7.8);
+  const seekInFlight = useRef(false);
   const animationFrame = useRef<number | null>(null);
   const activePhaseRef = useRef(0);
   const [activePhase, setActivePhase] = useState(0);
@@ -147,16 +148,24 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
   useEffect(() => {
     const trackElement = track.current;
     if (!trackElement) return;
+    const videoElement = video.current;
+
+    const releaseSeek = () => {
+      seekInFlight.current = false;
+    };
+
+    videoElement?.addEventListener("seeked", releaseSeek);
+
     const renderVideo = () => {
       const element = video.current;
       if (element && element.readyState >= HTMLMediaElement.HAVE_METADATA) {
-        const delta = targetTime.current - renderedTime.current;
-        renderedTime.current = Math.abs(delta) < 0.008
-          ? targetTime.current
-          : renderedTime.current + delta * 0.13;
+        const lastFrame = Math.max(0, Math.floor(duration.current * VIDEO_FRAME_RATE) - 1);
+        const targetFrame = Math.max(0, Math.min(lastFrame, Math.round(targetTime.current * VIDEO_FRAME_RATE)));
+        const currentFrame = Math.max(0, Math.round(element.currentTime * VIDEO_FRAME_RATE));
 
-        if (!element.seeking && Math.abs(element.currentTime - renderedTime.current) > 0.006) {
-          element.currentTime = Math.max(0, Math.min(duration.current, renderedTime.current));
+        if (!seekInFlight.current && !element.seeking && targetFrame !== currentFrame) {
+          seekInFlight.current = true;
+          element.currentTime = Math.min(duration.current - 0.001, targetFrame / VIDEO_FRAME_RATE);
         }
       }
       animationFrame.current = requestAnimationFrame(renderVideo);
@@ -215,6 +224,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     return () => {
       trackElement.classList.remove("journey-handed-off");
       context.revert();
+      videoElement?.removeEventListener("seeked", releaseSeek);
+      seekInFlight.current = false;
       if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
     };
   }, [finalFrameSrc]);
@@ -244,8 +255,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
           <video
             ref={video}
             className="journey-video"
-            src="/media/apartment-journey.mp4"
-            poster="/media/living-room-clean.jpg"
+            poster="/media/apartment-journey-poster.jpg"
             preload="auto"
             muted
             playsInline
@@ -254,10 +264,17 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
               event.currentTarget.pause();
               event.currentTarget.currentTime = 0.001;
               targetTime.current = 0;
-              renderedTime.current = 0;
+              seekInFlight.current = false;
               ScrollTrigger.refresh();
             }}
-          />
+          >
+            <source
+              src="/media/apartment-journey-mobile.mp4"
+              media="(max-width: 680px) and (orientation: portrait)"
+              type="video/mp4"
+            />
+            <source src="/media/apartment-journey.mp4" type="video/mp4" />
+          </video>
           <div className="journey-video-vignette" />
         </div>
 

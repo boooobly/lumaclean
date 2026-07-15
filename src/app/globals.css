@@ -102,7 +102,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   object-position: center;
   backface-visibility: hidden;
   transform: translateZ(0);
-  will-change: contents;
+  will-change: transform;
 }
 .journey-video-vignette {
   position: absolute;
@@ -459,6 +459,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .infographic-item > span { width: 24px; height: 24px; font-size: 8px; }
   .infographic-item strong { font-size: 13px; }
   .infographic-item small { font-size: 9px; }
+  .infographic-item,
+  .faucet-infographic,
+  .kitchen-feature {
+    background: linear-gradient(145deg, rgba(5,22,29,.88), rgba(8,31,38,.8));
+    backdrop-filter: none;
+  }
   .faucet-infographic {
     left: 14px;
     right: 14px;
