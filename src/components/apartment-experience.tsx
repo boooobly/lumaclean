@@ -149,6 +149,23 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     const trackElement = track.current;
     if (!trackElement) return;
     const videoElement = video.current;
+    let preloadTimeout: ReturnType<typeof setTimeout> | undefined;
+    let preloadIdle: number | undefined;
+
+    const warmVideo = () => {
+      const load = () => {
+        if (videoElement && videoElement.preload !== "auto") {
+          videoElement.preload = "auto";
+          videoElement.load();
+        }
+      };
+      const requestIdle = typeof window.requestIdleCallback === "function" ? window.requestIdleCallback.bind(window) : null;
+      if (requestIdle) preloadIdle = requestIdle(load, {timeout: 1200});
+      else preloadTimeout = setTimeout(load, 400);
+    };
+
+    if (document.readyState === "complete") warmVideo();
+    else window.addEventListener("load", warmVideo, {once: true});
 
     const releaseSeek = () => {
       seekInFlight.current = false;
@@ -225,6 +242,9 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       trackElement.classList.remove("journey-handed-off");
       context.revert();
       videoElement?.removeEventListener("seeked", releaseSeek);
+      window.removeEventListener("load", warmVideo);
+      if (preloadTimeout) clearTimeout(preloadTimeout);
+      if (preloadIdle) window.cancelIdleCallback(preloadIdle);
       seekInFlight.current = false;
       if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
     };
@@ -246,8 +266,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
           onPointerUp={() => revealBefore(false)}
           onPointerCancel={() => revealBefore(false)}
         >
-          <Image className="journey-image journey-clean" src="/media/living-room-clean.jpg" alt="" fill priority unoptimized placeholder="blur" blurDataURL="/media/living-room-preview.jpg" sizes="100vw" />
-          <Image className="journey-image journey-dirty" src="/media/living-room-dirty.jpg" alt="" fill priority unoptimized sizes="100vw" />
+          <Image className="journey-image journey-clean" src="/media/living-room-clean.jpg" alt="" fill priority placeholder="blur" blurDataURL="/media/living-room-preview.jpg" sizes="100vw" />
+          <Image className="journey-image journey-dirty" src="/media/living-room-dirty.jpg" alt="" fill loading="eager" sizes="100vw" />
           <div className="journey-shade" />
         </div>
 
@@ -256,7 +276,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
             ref={video}
             className="journey-video"
             poster="/media/apartment-journey-poster.jpg"
-            preload="auto"
+            preload="metadata"
             muted
             playsInline
             onLoadedMetadata={(event) => {

@@ -32,6 +32,8 @@ npm run dev
 | Переменная | Назначение |
 | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Публичный origin без завершающего `/`, используется в canonical URL, sitemap и JSON-LD. |
+| `GOOGLE_SITE_VERIFICATION` | Код подтверждения Google Search Console для метатега. Не нужен при DNS-подтверждении. |
+| `YANDEX_SITE_VERIFICATION` | Код подтверждения Яндекс Вебмастера для метатега. Не нужен при DNS-подтверждении. |
 | `TELEGRAM_BOT_TOKEN` | Секретный токен Telegram-бота. Добавляется только на сервере. |
 | `TELEGRAM_CHAT_ID` | Числовой ID чата или канала, куда бот отправляет заявки. |
 
@@ -48,6 +50,7 @@ npm run start  # запуск собранного приложения
 ## Маршруты
 
 - `/ru`, `/sr`, `/en` — локализованные страницы;
+- `/{locale}/services/{service}` — 15 локализованных SEO-страниц для пяти видов уборки;
 - `/api/lead` — серверная отправка заявки в Telegram;
 - `/sitemap.xml` и `/robots.txt` — SEO-файлы.
 
@@ -56,7 +59,7 @@ npm run start  # запуск собранного приложения
 ## Развёртывание на Vercel
 
 1. Импортируйте GitHub-репозиторий в Vercel.
-2. Добавьте три переменные из `.env.example` в Project Settings → Environment Variables.
+2. Добавьте рабочие переменные из `.env.example` в Project Settings → Environment Variables.
 3. Выполните deployment без дополнительных build-настроек: Vercel автоматически определит Next.js.
 4. После подключения домена обновите `NEXT_PUBLIC_SITE_URL` и повторно разверните проект.
 

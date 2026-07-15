@@ -14,8 +14,8 @@ type ToggleExtra = "balcony" | "fridge" | "oven" | "steam" | "petHair" | "linen"
 const countKeys: CountExtra[] = ["standardWindow", "largeWindow", "cabinets", "ironing"];
 const toggleKeys: ToggleExtra[] = ["balcony", "fridge", "oven", "steam", "petHair", "linen"];
 
-export function Estimate({locale, copy, content}: {locale: Locale; copy: EditorialContent["estimate"]; content: SiteContent}) {
-  const [service, setService] = useState<ServiceId>("regular");
+export function Estimate({locale, copy, content, initialService = "regular"}: {locale: Locale; copy: EditorialContent["estimate"]; content: SiteContent; initialService?: ServiceId}) {
+  const [service, setService] = useState<ServiceId>(initialService);
   const [area, setArea] = useState(55);
   const [counts, setCounts] = useState<Record<CountExtra, number>>({standardWindow: 0, largeWindow: 0, cabinets: 0, ironing: 0});
   const [toggles, setToggles] = useState<Record<ToggleExtra, boolean>>({balcony: false, fridge: false, oven: false, steam: false, petHair: false, linen: false});

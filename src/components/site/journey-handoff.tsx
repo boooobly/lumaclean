@@ -52,7 +52,7 @@ export function JourneyHandoff({copy}: {copy: EditorialContent["handoff"]}) {
         </figure>
         <div ref={copyRef} className="handoff-copy">
           <span className="kicker">{copy.kicker}</span>
-          <h1>{copy.title}</h1>
+          <h2>{copy.title}</h2>
           <p>{copy.body}</p>
         </div>
         <Image ref={routeRef} className="handoff-route" src="/media/floorplan-route.svg" alt="" width={1400} height={900} />

@@ -13,6 +13,7 @@ import {routing, type Locale} from "@/i18n/routing";
 import {getMessengerLinks} from "@/lib/contacts";
 import {siteContent} from "@/lib/content";
 import {extrasPrices, formatRsd} from "@/lib/pricing";
+import {getServicePath} from "@/lib/seo-services";
 import {editorialContent} from "@/lib/site-content";
 import "./site.css";
 
@@ -28,16 +29,34 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
   const messengerLinks = getMessengerLinks(locale);
   const extraKeys = ["standardWindow", "largeWindow", "balcony", "fridge", "oven", "cabinets", "ironing", "steam", "petHair", "linen"] as const;
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://lumacleanrs.com").replace(/\/$/, "");
-  const localBusinessJsonLd = {
+  const organizationJsonLd = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: "LumaClean",
-    url: `${siteUrl}/${locale}`,
-    description: c.hero.body,
-    areaServed: {"@type": "City", name: "Belgrade"},
-    currenciesAccepted: "RSD",
-    availableLanguage: ["sr", "ru", "en"],
-    priceRange: "$$",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: "LumaClean",
+        url: siteUrl,
+        logo: `${siteUrl}/brand/logo-primary.svg`,
+        image: `${siteUrl}/media/living-room-clean.jpg`,
+        description: c.hero.body,
+        areaServed: {"@type": "City", name: "Belgrade", containedInPlace: {"@type": "Country", name: "Serbia"}},
+        knowsLanguage: ["sr", "ru", "en"],
+        contactPoint: [
+          {"@type": "ContactPoint", telephone: "+381653470308", contactType: "customer service", availableLanguage: ["sr", "ru", "en"]},
+          {"@type": "ContactPoint", telephone: "+79887013006", contactType: "customer service", availableLanguage: ["ru", "en"]},
+        ],
+        sameAs: ["https://t.me/luma_clean"],
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        name: "LumaClean",
+        url: siteUrl,
+        publisher: {"@id": `${siteUrl}/#organization`},
+        inLanguage: ["sr", "ru", "en"],
+      },
+    ],
   };
   const faqJsonLd = {
     "@context": "https://schema.org",
@@ -51,7 +70,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
 
   return (
     <div id="top" className={`site-page ${displayFont.variable} ${textFont.variable}`}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(localBusinessJsonLd).replace(/</g, "\\u003c")}}/>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c")}}/>
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c")}}/>
       <SiteHeader locale={locale} copy={v.nav}/>
       <main>
@@ -72,6 +91,13 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
                 </article>
               ))}
             </div>
+            <nav className="service-directory" aria-label={v.nav.services}>
+              {c.services.map((service, index) => (
+                <Link href={getServicePath(locale, service.id)} key={service.id}>
+                  <span>{String(index + 1).padStart(2, "0")}</span><div><strong>{service.name}</strong><p>{service.description}</p></div><i aria-hidden="true">↗</i>
+                </Link>
+              ))}
+            </nav>
           </div>
         </section>
 

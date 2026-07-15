@@ -17,6 +17,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({locale, namespace: "Metadata"});
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://lumacleanrs.com";
+  const openGraphLocale = {ru: "ru_RU", sr: "sr_RS", en: "en_US"}[locale];
   return {
     metadataBase: new URL(base),
     title: t("title"),
@@ -25,9 +26,14 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
       canonical: `/${locale}`,
       languages: {sr: "/sr", ru: "/ru", en: "/en", "x-default": "/ru"},
     },
-    openGraph: {title: t("title"), description: t("description"), type: "website", locale, siteName: "LumaClean", url: `/${locale}`},
-    twitter: {card: "summary_large_image", title: t("title"), description: t("description")},
+    openGraph: {title: t("title"), description: t("description"), type: "website", locale: openGraphLocale, siteName: "LumaClean", url: `/${locale}`, images: [{url: "/media/apartment-journey-poster.jpg", width: 1280, height: 720, alt: "LumaClean — cleaning in Belgrade"}]},
+    twitter: {card: "summary_large_image", title: t("title"), description: t("description"), images: ["/media/apartment-journey-poster.jpg"]},
     robots: {index: true, follow: true},
+    verification: {
+      google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+      yandex: process.env.YANDEX_SITE_VERIFICATION || undefined,
+    },
+    other: {"geo.region": "RS-00", "geo.placename": "Belgrade"},
   };
 }
 
