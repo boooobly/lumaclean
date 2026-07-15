@@ -30,7 +30,9 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
     twitter: {card: "summary_large_image", title: t("title"), description: t("description"), images: ["/media/apartment-journey-poster.jpg"]},
     robots: {index: true, follow: true},
     verification: {
-      google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+      google:
+        process.env.GOOGLE_SITE_VERIFICATION ||
+        "zgG5SSwresZFL8dIqWx9S52oIR8Y9GwLhS4mDAQ9tGQ",
       yandex: process.env.YANDEX_SITE_VERIFICATION || undefined,
     },
     other: {"geo.region": "RS-00", "geo.placename": "Belgrade"},
