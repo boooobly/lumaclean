@@ -197,7 +197,12 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
         if (disposed) return;
         unlockScroll();
         const handoffTop = trackElement.offsetTop + trackElement.offsetHeight - window.innerHeight;
+        const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+        document.documentElement.style.scrollBehavior = "auto";
         window.scrollTo({top: Math.max(0, handoffTop), behavior: "auto"});
+        requestAnimationFrame(() => {
+          document.documentElement.style.scrollBehavior = previousScrollBehavior;
+        });
         ScrollTrigger.update();
       }, 90);
     };
