@@ -12,7 +12,7 @@ import {Rates} from "@/components/site/rates";
 import {routing, type Locale} from "@/i18n/routing";
 import {getMessengerLinks} from "@/lib/contacts";
 import {siteContent} from "@/lib/content";
-import {extrasPrices, formatRsd} from "@/lib/pricing";
+import {extrasPrices, formatRsd, priceMatrix} from "@/lib/pricing";
 import {getServicePath} from "@/lib/seo-services";
 import {editorialContent} from "@/lib/site-content";
 import "./site.css";
@@ -87,7 +87,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
                   <div className="scope-index">{index ? v.scope.deep : v.scope.regular}</div>
                   <h3>{item.title}</h3><p>{item.text}</p>
                   <ul>{item.items.map((line) => <li key={line}>{line}</li>)}</ul>
-                  <div className="scope-price"><span>{c.pricing.from}</span><strong>{new Intl.NumberFormat(locale === "en" ? "en-US" : locale === "ru" ? "ru-RU" : "sr-Latn-RS").format(index ? 9800 : 4100)}</strong><small>RSD</small></div>
+                  <div className="scope-price"><span>{c.pricing.from}</span><strong>{new Intl.NumberFormat(locale === "en" ? "en-US" : locale === "ru" ? "ru-RU" : "sr-Latn-RS").format(index ? priceMatrix.deep[0] : priceMatrix.regular[0])}</strong><small>RSD</small></div>
                 </article>
               ))}
             </div>

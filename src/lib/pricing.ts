@@ -2,24 +2,24 @@ export const serviceIds = ["regular", "deep", "move", "airbnb", "office"] as con
 export type ServiceId = (typeof serviceIds)[number];
 
 export const priceMatrix: Record<ServiceId, [number, number, number, number, number]> = {
-  regular: [4100, 4900, 6000, 7600, 90],
-  deep: [9800, 11300, 13700, 15700, 190],
-  move: [10800, 12400, 15100, 17300, 210],
-  airbnb: [4000, 4800, 5800, 7300, 85],
-  office: [4000, 5000, 6200, 7600, 80],
+  regular: [4000, 4600, 5700, 7200, 85],
+  deep: [9300, 10700, 12900, 14900, 180],
+  move: [10200, 11700, 14300, 16400, 200],
+  airbnb: [4000, 4500, 5500, 6900, 80],
+  office: [4000, 4700, 5900, 7200, 75],
 };
 
 export const extrasPrices = {
-  standardWindow: 950,
-  largeWindow: 1300,
-  balcony: 1200,
-  fridge: 1000,
-  oven: 1200,
-  cabinets: 1000,
-  ironing: 1000,
-  steam: 3000,
-  linen: 800,
-  petHair: 1000,
+  standardWindow: 900,
+  largeWindow: 1200,
+  balcony: 1100,
+  fridge: 900,
+  oven: 1100,
+  cabinets: 900,
+  ironing: 900,
+  steam: 2800,
+  linen: 750,
+  petHair: 900,
 } as const;
 
 export function basePrice(service: ServiceId, area: number) {
