@@ -32,14 +32,16 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .journey-track {
   position: relative;
   z-index: 1;
-  height: 180svh;
+  height: 180vh;
+  height: 180dvh;
   background: #081a22;
 }
 .journey-sticky {
   position: sticky;
   top: 0;
   width: 100%;
-  height: 100svh;
+  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   isolation: isolate;
   background: #081a22;
@@ -529,13 +531,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 @media (max-width: 1000px) {
-  .journey-track { height: 175svh; }
+  .journey-track { height: 175vh; height: 175dvh; }
   .journey-copy { left: 5vw; width: min(650px, 70vw); }
   .journey-copy h1 { font-size: clamp(60px, 10vw, 96px); }
 }
 
 @media (max-width: 680px) {
-  .journey-track { height: 165svh; }
+  .journey-track { height: 165vh; height: 165dvh; }
   .journey-image { object-position: center; }
   .journey-video { object-position: center; }
   .journey-shade {
@@ -618,7 +620,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .journey-track { height: 100svh; }
+  .journey-track { height: 100vh; height: 100dvh; }
   .journey-sticky { position: relative; }
   .journey-video-shell,
   .journey-progress { display: none; }

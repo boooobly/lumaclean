@@ -25,8 +25,96 @@
 .site-cta-short { display: none; }
 
 .site-page .journey-track { position: relative; z-index: 2; }
-.site-page .handoff { z-index: 1; margin-top: -100svh; }
-.site-page .kitchen-frame img,
+.site-page .handoff {
+  position: relative;
+  z-index: 1;
+  height: auto;
+  margin-top: 0;
+  padding: clamp(112px, 11vw, 184px) 0;
+  overflow: hidden;
+  background: var(--lc-paper) url("/media/paper-texture.webp") center / 900px auto;
+}
+.site-page .handoff-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(180px, 5fr) minmax(480px, 7fr);
+  align-items: end;
+  min-height: clamp(430px, 45vw, 620px);
+  border-top: 1px solid var(--lc-line);
+}
+.site-page .handoff-marker {
+  position: relative;
+  z-index: 2;
+  align-self: start;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 20px;
+  color: var(--lc-ink-soft);
+  font-size: 10px;
+  letter-spacing: .14em;
+}
+.site-page .handoff-marker i {
+  width: 54px;
+  height: 1px;
+  background: var(--lc-teal);
+}
+.site-page .handoff-copy {
+  position: relative;
+  z-index: 2;
+  right: auto;
+  top: auto;
+  grid-column: 2;
+  width: min(720px, 100%);
+  padding: 72px 0 12px clamp(40px, 5vw, 86px);
+  color: var(--lc-ink);
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+.site-page .handoff-copy h2 {
+  margin: 28px 0 32px;
+  font-family: var(--lc-font-display);
+  font-size: clamp(72px, 7.2vw, 116px);
+  font-weight: 300;
+  line-height: .86;
+  letter-spacing: -.07em;
+}
+.site-page .handoff-copy p {
+  max-width: 580px;
+  margin: 0;
+  color: var(--lc-ink-soft);
+  font-size: 17px;
+  line-height: 1.65;
+}
+.site-page .handoff-copy small {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 48px;
+  color: var(--lc-ink-soft);
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.site-page .handoff-copy small::before {
+  content: "";
+  width: 34px;
+  height: 1px;
+  background: var(--lc-teal);
+}
+.site-page .handoff-route {
+  position: absolute;
+  z-index: 0;
+  right: -13%;
+  bottom: -25%;
+  width: min(920px, 67%);
+  height: auto;
+  opacity: .13;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
 .site-page .material-stories img { object-fit: cover; }
 
 .site-page .ledger-button {
@@ -237,6 +325,24 @@
   .site-page .site-lead-fields { grid-template-columns: 1fr; }
   .site-page .site-consent { grid-column: 1; }
   .site-page .evidence-title { min-height: 390px; }
+  .site-page .handoff { padding: 96px 0 104px; }
+  .site-page .handoff-inner {
+    grid-template-columns: 1fr;
+    min-height: 480px;
+  }
+  .site-page .handoff-marker { grid-column: 1; }
+  .site-page .handoff-copy {
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    grid-column: 1;
+    width: min(680px, 100%);
+    padding: 96px 0 0;
+  }
+  .site-page .handoff-copy h2 { font-size: clamp(66px, 12vw, 96px); }
+  .site-page .handoff-copy p { max-width: 560px; font-size: 15px; }
+  .site-page .handoff-route { right: -34%; bottom: -13%; width: 115%; }
   .service-boundaries { grid-template-columns: 1fr; gap: 22px; padding: 26px 24px; }
   .site-faq-list { margin-left: 0; }
   .site-direct-contacts { margin-top: 46px; }
@@ -248,6 +354,11 @@
   .site-page .header-cta { font-size: 10px; }
   .site-page .closing-grid > * { min-width: 0; }
   .site-page .closing-grid h2 { font-size: 54px; }
+  .site-page .handoff { padding: 72px 0 84px; }
+  .site-page .handoff-inner { min-height: 440px; }
+  .site-page .handoff-copy { padding-top: 76px; }
+  .site-page .handoff-copy h2 { margin: 22px 0 26px; font-size: 58px; }
+  .site-page .handoff-copy small { margin-top: 36px; line-height: 1.5; }
   .service-boundaries ul { grid-template-columns: 1fr; }
   .site-faq-list summary { grid-template-columns: 32px 1fr auto; min-height: 76px; }
   .site-faq-list summary strong { font-size: 16px; }
