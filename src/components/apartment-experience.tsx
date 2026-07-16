@@ -2,7 +2,7 @@
 
 import gsap from "gsap";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
-import {ArrowDown, ArrowRight, MousePointer2, SkipForward} from "lucide-react";
+import {ArrowDown, ArrowRight, MousePointer2} from "lucide-react";
 import Image from "next/image";
 import {useEffect, useRef, useState} from "react";
 import type {Locale} from "@/i18n/routing";
@@ -105,184 +105,56 @@ const copy = {
   }
 } as const;
 
-type SequenceState = "idle" | "playing" | "complete";
-type PauseId = "bathroom" | "faucet" | "kitchen";
+const VIDEO_START = 0.075;
+const VIDEO_FRAME_RATE = 30;
 
-const PAUSE_MARKERS: ReadonlyArray<{id: PauseId; time: number; hold: number; phase: number}> = [
-  {id: "bathroom", time: 3.25, hold: 2400, phase: 1},
-  {id: "faucet", time: 4.85, hold: 2200, phase: 2},
-  {id: "kitchen", time: 7.55, hold: 2500, phase: 3},
-];
+function interpolate(from: number, to: number, progress: number) {
+  return from + (to - from) * progress;
+}
 
-const PAUSE_FRAMES: ReadonlyArray<{id: PauseId; src: string}> = [
-  {id: "bathroom", src: "/media/journey-pause-bathroom.webp"},
-  {id: "faucet", src: "/media/journey-pause-faucet.webp"},
-  {id: "kitchen", src: "/media/journey-pause-kitchen.webp"},
-];
+function mapVideoTime(progress: number, videoDuration: number) {
+  const scale = videoDuration / 7.8;
+  const bathroomTime = 2.95 * scale;
+  const faucetTime = 4.55 * scale;
+  const kitchenTime = Math.min(videoDuration - 0.08, 7.65 * scale);
 
-const skipCopy: Record<Locale, string> = {
-  sr: "Preskoči",
-  ru: "Пропустить",
-  en: "Skip",
-};
+  if (progress <= 0.25) return interpolate(0, bathroomTime, progress / 0.25);
+  if (progress <= 0.43) return bathroomTime;
+  if (progress <= 0.58) return interpolate(bathroomTime, faucetTime, (progress - 0.43) / 0.15);
+  if (progress <= 0.73) return faucetTime;
+  if (progress <= 0.95) return interpolate(faucetTime, kitchenTime, (progress - 0.73) / 0.22);
+  return kitchenTime;
+}
 
-const playbackCopy: Record<Locale, string> = {
-  sr: "Automatski obilazak",
-  ru: "Автоматический маршрут",
-  en: "Automatic tour",
-};
+function getPhase(progress: number) {
+  if (progress < 0.2) return 0;
+  if (progress < 0.5) return 1;
+  if (progress < 0.73) return 2;
+  return 3;
+}
 
 export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {locale: Locale; calculatorHref: string; finalFrameSrc?: string}) {
   const track = useRef<HTMLElement>(null);
   const hero = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
-  const finishSequenceRef = useRef<() => void>(() => undefined);
-  const [sequenceState, setSequenceState] = useState<SequenceState>("idle");
-  const [activeStop, setActiveStop] = useState<PauseId | null>(null);
+  const targetTime = useRef(0);
+  const duration = useRef(7.8);
+  const seekInFlight = useRef(false);
+  const animationFrame = useRef<number | null>(null);
+  const activePhaseRef = useRef(0);
   const [activePhase, setActivePhase] = useState(0);
   const text = copy[locale];
 
   useEffect(() => {
     const trackElement = track.current;
-    if (!trackElement || !video.current) return;
+    if (!trackElement) return;
     const videoElement = video.current;
-
     let preloadTimeout: ReturnType<typeof setTimeout> | undefined;
     let preloadIdle: number | undefined;
-    let playbackFrame: number | undefined;
-    let pauseTimeout: ReturnType<typeof setTimeout> | undefined;
-    let resumeTimeout: ReturnType<typeof setTimeout> | undefined;
-    let safetyTimeout: ReturnType<typeof setTimeout> | undefined;
-    let markerIndex = 0;
-    let hasStarted = false;
-    let hasFinished = false;
-    let scrollLocked = false;
-    let disposed = false;
-
-    const clearSequenceTimers = () => {
-      if (playbackFrame) cancelAnimationFrame(playbackFrame);
-      if (pauseTimeout) clearTimeout(pauseTimeout);
-      if (resumeTimeout) clearTimeout(resumeTimeout);
-      if (safetyTimeout) clearTimeout(safetyTimeout);
-      playbackFrame = undefined;
-      pauseTimeout = undefined;
-      resumeTimeout = undefined;
-      safetyTimeout = undefined;
-    };
-
-    const lockScroll = () => {
-      if (scrollLocked) return;
-      scrollLocked = true;
-      document.documentElement.classList.add("journey-scroll-locked");
-      document.body.classList.add("journey-scroll-locked");
-    };
-
-    const unlockScroll = () => {
-      if (!scrollLocked) return;
-      scrollLocked = false;
-      document.documentElement.classList.remove("journey-scroll-locked");
-      document.body.classList.remove("journey-scroll-locked");
-    };
-
-    const finishSequence = () => {
-      if (hasFinished || disposed) return;
-      hasFinished = true;
-      clearSequenceTimers();
-      videoElement.pause();
-      setActiveStop(null);
-      setActivePhase(3);
-      setSequenceState("complete");
-
-      resumeTimeout = setTimeout(() => {
-        if (disposed) return;
-        unlockScroll();
-        const handoffTop = trackElement.offsetTop + trackElement.offsetHeight - window.innerHeight;
-        const previousScrollBehavior = document.documentElement.style.scrollBehavior;
-        document.documentElement.style.scrollBehavior = "auto";
-        window.scrollTo({top: Math.max(0, handoffTop), behavior: "auto"});
-        requestAnimationFrame(() => {
-          document.documentElement.style.scrollBehavior = previousScrollBehavior;
-        });
-        ScrollTrigger.update();
-      }, 90);
-    };
-
-    finishSequenceRef.current = finishSequence;
-
-    const resumeVideo = async () => {
-      if (hasFinished || disposed) return;
-      try {
-        await videoElement.play();
-        playbackFrame = requestAnimationFrame(monitorPlayback);
-      } catch {
-        finishSequence();
-      }
-    };
-
-    const pauseAtMarker = (marker: (typeof PAUSE_MARKERS)[number]) => {
-      videoElement.pause();
-      setActivePhase(marker.phase);
-      setActiveStop(marker.id);
-
-      pauseTimeout = setTimeout(() => {
-        if (marker.id === "kitchen") {
-          finishSequence();
-          return;
-        }
-
-        setActiveStop(null);
-        markerIndex += 1;
-        resumeTimeout = setTimeout(() => void resumeVideo(), 320);
-      }, marker.hold);
-    };
-
-    function monitorPlayback() {
-      if (hasFinished || disposed) return;
-      const marker = PAUSE_MARKERS[markerIndex];
-      if (!marker || videoElement.ended) {
-        finishSequence();
-        return;
-      }
-      if (videoElement.currentTime >= marker.time - 1 / 60) {
-        pauseAtMarker(marker);
-        return;
-      }
-      playbackFrame = requestAnimationFrame(monitorPlayback);
-    }
-
-    const startSequence = async () => {
-      if (hasStarted || hasFinished || disposed) return;
-      hasStarted = true;
-      markerIndex = 0;
-      setActiveStop(null);
-      setActivePhase(0);
-      setSequenceState("playing");
-      lockScroll();
-
-      videoElement.pause();
-      videoElement.playbackRate = 1;
-      videoElement.currentTime = 0.001;
-      safetyTimeout = setTimeout(finishSequence, 30000);
-      await resumeVideo();
-    };
-
-    const resetSequence = () => {
-      if (!hasFinished || disposed) return;
-      clearSequenceTimers();
-      unlockScroll();
-      hasStarted = false;
-      hasFinished = false;
-      markerIndex = 0;
-      videoElement.pause();
-      videoElement.currentTime = 0.001;
-      setActiveStop(null);
-      setActivePhase(0);
-      setSequenceState("idle");
-    };
 
     const warmVideo = () => {
       const load = () => {
-        if (videoElement.preload !== "auto") {
+        if (videoElement && videoElement.preload !== "auto") {
           videoElement.preload = "auto";
           videoElement.load();
         }
@@ -295,41 +167,95 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     if (document.readyState === "complete") warmVideo();
     else window.addEventListener("load", warmVideo, {once: true});
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const trigger = reducedMotion.matches ? undefined : ScrollTrigger.create({
-      trigger: trackElement,
-      start: "top top-=2",
-      end: "bottom bottom",
-      onEnter: () => {
-        const rect = trackElement.getBoundingClientRect();
-        if (rect.top > -window.innerHeight * 0.35) void startSequence();
-      },
-      onLeaveBack: resetSequence,
-    });
+    const releaseSeek = () => {
+      seekInFlight.current = false;
+    };
 
-    const handleVideoError = () => finishSequence();
-    videoElement.addEventListener("error", handleVideoError);
+    videoElement?.addEventListener("seeked", releaseSeek);
+
+    const renderVideo = () => {
+      const element = video.current;
+      if (element && element.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        const lastFrame = Math.max(0, Math.floor(duration.current * VIDEO_FRAME_RATE) - 1);
+        const targetFrame = Math.max(0, Math.min(lastFrame, Math.round(targetTime.current * VIDEO_FRAME_RATE)));
+        const currentFrame = Math.max(0, Math.round(element.currentTime * VIDEO_FRAME_RATE));
+
+        if (!seekInFlight.current && !element.seeking && targetFrame !== currentFrame) {
+          seekInFlight.current = true;
+          element.currentTime = Math.min(duration.current - 0.001, targetFrame / VIDEO_FRAME_RATE);
+        }
+      }
+      animationFrame.current = requestAnimationFrame(renderVideo);
+    };
+
+    animationFrame.current = requestAnimationFrame(renderVideo);
+
+    const context = gsap.context(() => {
+      const timelineClock = {progress: 0};
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: track.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: ({progress}) => {
+            if (finalFrameSrc) trackElement.classList.toggle("journey-handed-off", progress >= 0.999);
+            const videoProgress = Math.max(0, Math.min(1, (progress - VIDEO_START) / (1 - VIDEO_START)));
+            targetTime.current = mapVideoTime(videoProgress, duration.current);
+
+            const nextPhase = getPhase(videoProgress);
+            if (nextPhase !== activePhaseRef.current) {
+              activePhaseRef.current = nextPhase;
+              setActivePhase(nextPhase);
+            }
+          }
+        }
+      });
+
+      timeline
+        .to(timelineClock, {progress: 1, duration: 1, ease: "none"}, 0)
+        .to(".journey-copy", {autoAlpha: 0, yPercent: -18, duration: 0.045, ease: "power1.in"}, 0)
+        .to(".journey-hover-hint", {autoAlpha: 0, duration: 0.025}, 0)
+        .to(".journey-video-shell", {autoAlpha: 1, duration: 0.045, ease: "none"}, 0.025)
+        .to(".journey-hero", {autoAlpha: 0, duration: 0.045, ease: "none"}, 0.045)
+        .fromTo(".journey-progress", {autoAlpha: 0}, {autoAlpha: 1, duration: 0.04}, 0.07)
+        .fromTo(".journey-chapter-intro", {autoAlpha: 0, y: 24}, {autoAlpha: 1, y: 0, duration: 0.035}, 0.105)
+        .to(".journey-chapter-intro", {autoAlpha: 0, y: -22, duration: 0.03}, 0.275)
+        .fromTo(".bathroom-infographic", {autoAlpha: 0}, {autoAlpha: 1, duration: 0.03}, 0.285)
+        .fromTo(".bathroom-infographic .infographic-item", {autoAlpha: 0, y: 18}, {autoAlpha: 1, y: 0, duration: 0.04, stagger: 0.014}, 0.3)
+        .to(".bathroom-infographic", {autoAlpha: 0, y: -18, duration: 0.03}, 0.535)
+        .fromTo(".faucet-infographic", {autoAlpha: 0, x: 32}, {autoAlpha: 1, x: 0, duration: 0.04}, 0.57)
+        .to(".faucet-infographic", {autoAlpha: 0, x: -24, duration: 0.03}, 0.76)
+        .fromTo(".kitchen-infographic", {autoAlpha: 0, y: 22}, {autoAlpha: 1, y: 0, duration: 0.04}, 0.84)
+        .fromTo(".kitchen-feature", {autoAlpha: 0, y: 14}, {autoAlpha: 1, y: 0, duration: 0.035, stagger: 0.012}, 0.855);
+
+      if (finalFrameSrc) {
+        timeline
+          .to(".kitchen-infographic", {autoAlpha: 0, y: -14, duration: 0.026, ease: "power1.in"}, 0.945)
+          .fromTo(".journey-final-kitchen", {autoAlpha: 0}, {autoAlpha: 1, duration: 0.032, ease: "power1.inOut"}, 0.946)
+          .to(".journey-progress", {autoAlpha: 0, duration: 0.018}, 0.978);
+      }
+    }, trackElement);
 
     return () => {
-      disposed = true;
-      trigger?.kill();
-      videoElement.removeEventListener("error", handleVideoError);
-      videoElement.pause();
+      trackElement.classList.remove("journey-handed-off");
+      context.revert();
+      videoElement?.removeEventListener("seeked", releaseSeek);
       window.removeEventListener("load", warmVideo);
       if (preloadTimeout) clearTimeout(preloadTimeout);
       if (preloadIdle) window.cancelIdleCallback(preloadIdle);
-      clearSequenceTimers();
-      unlockScroll();
-      finishSequenceRef.current = () => undefined;
+      seekInFlight.current = false;
+      if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
     };
-  }, []);
+  }, [finalFrameSrc]);
 
   function revealBefore(show: boolean) {
     hero.current?.classList.toggle("is-before", show);
   }
 
   return (
-    <section ref={track} className={`journey-track journey-sequence-${sequenceState}`} aria-label={text.scroll}>
+    <section ref={track} className="journey-track" aria-label={text.scroll}>
       <div className="journey-sticky">
         <div
           ref={hero}
@@ -353,7 +279,14 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
             preload="metadata"
             muted
             playsInline
-            onLoadedMetadata={() => ScrollTrigger.refresh()}
+            onLoadedMetadata={(event) => {
+              duration.current = event.currentTarget.duration || 7.8;
+              event.currentTarget.pause();
+              event.currentTarget.currentTime = 0.001;
+              targetTime.current = 0;
+              seekInFlight.current = false;
+              ScrollTrigger.refresh();
+            }}
           >
             <source
               src="/media/apartment-journey-mobile.mp4"
@@ -365,14 +298,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
           <div className="journey-video-vignette" />
         </div>
 
-        {PAUSE_FRAMES.map((frame) => (
-          <div className={`journey-pause-frame ${activeStop === frame.id ? "is-active" : ""}`} aria-hidden="true" key={frame.id}>
-            <Image src={frame.src} alt="" fill sizes="100vw" loading="eager" />
-          </div>
-        ))}
-
         {finalFrameSrc && (
-          <div className={`journey-final-kitchen ${sequenceState === "complete" ? "is-active" : ""}`} aria-hidden="true">
+          <div className="journey-final-kitchen" aria-hidden="true">
             <Image src={finalFrameSrc} alt="" fill sizes="100vw" />
           </div>
         )}
@@ -382,7 +309,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
           <h2>{text.transitionTitle}</h2>
         </aside>
 
-        <aside className={`journey-infographic bathroom-infographic ${activeStop === "bathroom" ? "is-active" : ""}`}>
+        <aside className="journey-infographic bathroom-infographic">
           <span className="infographic-eyebrow">{text.bathroomEyebrow}</span>
           <h2>{text.bathroomTitle}</h2>
           <div className="infographic-list">
@@ -395,14 +322,14 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
           </div>
         </aside>
 
-        <aside className={`journey-infographic faucet-infographic ${activeStop === "faucet" ? "is-active" : ""}`}>
+        <aside className="journey-infographic faucet-infographic">
           <span className="infographic-eyebrow">{text.faucetEyebrow}</span>
           <h2>{text.faucetTitle}</h2>
           <p>{text.faucetBody}</p>
           <i className="infographic-focus-line" aria-hidden="true" />
         </aside>
 
-        <aside className={`journey-infographic kitchen-infographic ${activeStop === "kitchen" ? "is-active" : ""}`}>
+        <aside className="journey-infographic kitchen-infographic">
           <span className="infographic-eyebrow">{text.kitchenEyebrow}</span>
           <h2>{text.kitchenTitle}</h2>
           <div className="kitchen-feature-grid">
@@ -432,16 +359,11 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
           <span className="pointer-coarse-copy">{text.touch}</span>
         </div>
 
-        <button className="journey-skip" type="button" onClick={() => finishSequenceRef.current()}>
-          <span>{skipCopy[locale]}</span>
-          <SkipForward size={14} aria-hidden="true" />
-        </button>
-
         <div className="journey-progress" aria-live="polite">
           <div className="journey-phase-number">0{activePhase + 1}</div>
           <div className="journey-phase-line"><i style={{transform: `scaleX(${(activePhase + 1) / 4})`}} /></div>
           <div className="journey-phase-name">{text.phases[activePhase]}</div>
-          <span className="journey-scroll-label">{playbackCopy[locale]}</span>
+          <span className="journey-scroll-label">{text.scroll}</span>
         </div>
       </div>
     </section>
