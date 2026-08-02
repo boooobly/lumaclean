@@ -45,7 +45,15 @@ export function SiteHeader({locale, copy, homeHref = "", estimateHref = "#estima
   return (
     <header className={`proto-header site-header ${paper ? "is-paper" : ""}`}>
       <a href={homeHref || "#top"} className="proto-brand" aria-label="LumaClean">
-        <Image src={paper ? "/brand/logo-primary.svg" : "/brand/logo-light.svg"} alt="LumaClean" width={622} height={132} priority />
+        <span className="proto-brand-mark">
+          <Image
+            src={paper ? "/brand/logo-primary.svg" : "/brand/logo-light.svg"}
+            alt="LumaClean"
+            fill
+            priority
+            sizes="(max-width: 900px) 140px, 210px"
+          />
+        </span>
       </a>
       <nav aria-label={copy.navLabel}>
         <a href={`${homeHref}#scope`}>{copy.services}</a>

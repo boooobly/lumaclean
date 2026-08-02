@@ -1,13 +1,9 @@
 "use client";
 
-import gsap from "gsap";
-import {ScrollTrigger} from "gsap/ScrollTrigger";
 import {ArrowDown, ArrowRight, MousePointer2} from "lucide-react";
 import Image from "next/image";
 import {useEffect, useRef, useState} from "react";
 import type {Locale} from "@/i18n/routing";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const copy = {
   sr: {
@@ -105,148 +101,346 @@ const copy = {
   }
 } as const;
 
-const VIDEO_START = 0.075;
-const VIDEO_FRAME_RATE = 30;
+type Direction = "forward" | "reverse";
 
-function interpolate(from: number, to: number, progress: number) {
-  return from + (to - from) * progress;
+const TOTAL_STEPS = 32;
+const CHAPTER_STEPS = [0, 12, 20, TOTAL_STEPS] as const;
+const SCRUB_CLIPS = [
+  {start: 0, end: 12, file: "01"},
+  {start: 12, end: 20, file: "02"},
+  {start: 20, end: TOTAL_STEPS, file: "03"},
+] as const;
+
+type ScrollState = {
+  step: number;
+  chapter: number | null;
+};
+
+function mapScrollProgress(progress: number): ScrollState {
+  const value = Math.max(0, Math.min(1, progress));
+
+  if (value < 0.26) return {step: (value / 0.26) * CHAPTER_STEPS[1], chapter: null};
+  if (value < 0.38) return {step: CHAPTER_STEPS[1], chapter: CHAPTER_STEPS[1]};
+  if (value < 0.55) {
+    const local = (value - 0.38) / (0.55 - 0.38);
+    return {
+      step: CHAPTER_STEPS[1] + local * (CHAPTER_STEPS[2] - CHAPTER_STEPS[1]),
+      chapter: null,
+    };
+  }
+  if (value < 0.66) return {step: CHAPTER_STEPS[2], chapter: CHAPTER_STEPS[2]};
+  if (value < 0.91) {
+    const local = (value - 0.66) / (0.91 - 0.66);
+    return {
+      step: CHAPTER_STEPS[2] + local * (CHAPTER_STEPS[3] - CHAPTER_STEPS[2]),
+      chapter: null,
+    };
+  }
+  return {step: TOTAL_STEPS, chapter: TOTAL_STEPS};
 }
 
-function mapVideoTime(progress: number, videoDuration: number) {
-  const scale = videoDuration / 7.8;
-  const bathroomTime = 2.95 * scale;
-  const faucetTime = 4.55 * scale;
-  const kitchenTime = Math.min(videoDuration - 0.08, 7.65 * scale);
-
-  if (progress <= 0.25) return interpolate(0, bathroomTime, progress / 0.25);
-  if (progress <= 0.43) return bathroomTime;
-  if (progress <= 0.58) return interpolate(bathroomTime, faucetTime, (progress - 0.43) / 0.15);
-  if (progress <= 0.73) return faucetTime;
-  if (progress <= 0.95) return interpolate(faucetTime, kitchenTime, (progress - 0.73) / 0.22);
-  return kitchenTime;
-}
-
-function getPhase(progress: number) {
-  if (progress < 0.2) return 0;
-  if (progress < 0.5) return 1;
-  if (progress < 0.73) return 2;
+function getPhase(step: number) {
+  if (step < CHAPTER_STEPS[1]) return 0;
+  if (step < CHAPTER_STEPS[2]) return 1;
+  if (step < CHAPTER_STEPS[3]) return 2;
   return 3;
+}
+
+function getScrubSource(index: number, mobile: boolean) {
+  const folder = mobile ? "mobile" : "desktop";
+  return `/media/journey-v5/${folder}/${SCRUB_CLIPS[index].file}.mp4`;
 }
 
 export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {locale: Locale; calculatorHref: string; finalFrameSrc?: string}) {
   const track = useRef<HTMLElement>(null);
   const hero = useRef<HTMLDivElement>(null);
-  const video = useRef<HTMLVideoElement>(null);
-  const targetTime = useRef(0);
-  const duration = useRef(7.8);
-  const seekInFlight = useRef(false);
-  const animationFrame = useRef<number | null>(null);
-  const activePhaseRef = useRef(0);
-  const [activePhase, setActivePhase] = useState(0);
+  const videos = useRef<Array<HTMLVideoElement | null>>([]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [activeChapter, setActiveChapter] = useState<number | null>(null);
+  const [isSeeking, setIsSeeking] = useState(false);
   const text = copy[locale];
+  const activePhase = getPhase(currentStep);
+  const firstTransitionActive = currentStep > 0
+    && currentStep < CHAPTER_STEPS[1]
+    && activeChapter === null;
 
   useEffect(() => {
     const trackElement = track.current;
-    if (!trackElement) return;
-    const videoElement = video.current;
-    let preloadTimeout: ReturnType<typeof setTimeout> | undefined;
-    let preloadIdle: number | undefined;
+    const videoElements = videos.current.slice(0, SCRUB_CLIPS.length);
+    if (!trackElement || videoElements.length !== SCRUB_CLIPS.length || videoElements.some((element) => !element)) return;
 
-    const warmVideo = () => {
-      const load = () => {
-        if (videoElement && videoElement.preload !== "auto") {
-          videoElement.preload = "auto";
-          videoElement.load();
-        }
-      };
-      const requestIdle = typeof window.requestIdleCallback === "function" ? window.requestIdleCallback.bind(window) : null;
-      if (requestIdle) preloadIdle = requestIdle(load, {timeout: 1200});
-      else preloadTimeout = setTimeout(load, 400);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const abortController = new AbortController();
+    const resolvedVideos = videoElements as HTMLVideoElement[];
+    const mediaCleanups: Array<() => void> = [];
+    const objectUrls: string[] = [];
+    let step = 0;
+    let requestedClip = 0;
+    let activeClip = -1;
+    let seekRevision = 0;
+    let firstGesture = false;
+    let renderedStep = 0;
+    let targetStep = 0;
+    let targetChapter: number | null = null;
+    let lastDirection: Direction = "forward";
+    let scrollProgress = 0;
+    let scrollReadFrame = 0;
+    let motionFrame = 0;
+    let motionFrom = 0;
+    let motionStarted = 0;
+    let motionDuration = 140;
+    let laidOutWidth = window.innerWidth;
+
+    const isMobileVideo = () => window.innerWidth <= 680 && window.innerHeight >= window.innerWidth;
+
+    type ClipState = {
+      index: number;
+      element: HTMLVideoElement;
+      ready: boolean;
+      desiredTime: number;
+      revision: number;
+    };
+    const clipStates: ClipState[] = resolvedVideos.map((element, index) => ({
+      index,
+      element,
+      ready: false,
+      desiredTime: 0,
+      revision: 0,
+    }));
+
+    const paintClip = (state: ClipState, revision: number) => {
+      if (revision !== seekRevision || state.index !== requestedClip) return;
+      resolvedVideos.forEach((element, index) => element.classList.toggle("is-active", index === state.index));
+      activeClip = state.index;
+      trackElement.classList.add("is-video-painted");
+      trackElement.classList.remove("is-video-loading");
+      setIsSeeking(false);
     };
 
-    if (document.readyState === "complete") warmVideo();
-    else window.addEventListener("load", warmVideo, {once: true});
-
-    const releaseSeek = () => {
-      seekInFlight.current = false;
+    const revealOnPaint = (state: ClipState, revision: number) => {
+      // `seeked` fires only after the requested frame is decoded. Switching the
+      // opaque layer here avoids both a poster/video dissolve and the rVFC stall
+      // browsers can produce for a fully transparent paused video.
+      paintClip(state, revision);
     };
 
-    videoElement?.addEventListener("seeked", releaseSeek);
-
-    const renderVideo = () => {
-      const element = video.current;
-      if (element && element.readyState >= HTMLMediaElement.HAVE_METADATA) {
-        const lastFrame = Math.max(0, Math.floor(duration.current * VIDEO_FRAME_RATE) - 1);
-        const targetFrame = Math.max(0, Math.min(lastFrame, Math.round(targetTime.current * VIDEO_FRAME_RATE)));
-        const currentFrame = Math.max(0, Math.round(element.currentTime * VIDEO_FRAME_RATE));
-
-        if (!seekInFlight.current && !element.seeking && targetFrame !== currentFrame) {
-          seekInFlight.current = true;
-          element.currentTime = Math.min(duration.current - 0.001, targetFrame / VIDEO_FRAME_RATE);
-        }
+    const performSeek = (state: ClipState) => {
+      if (!state.ready || state.index !== requestedClip || state.element.seeking) return;
+      const target = state.desiredTime;
+      const frameTolerance = 1 / 120;
+      if (Math.abs(state.element.currentTime - target) <= frameTolerance) {
+        revealOnPaint(state, state.revision);
+        return;
       }
-      animationFrame.current = requestAnimationFrame(renderVideo);
+      try {
+        state.element.currentTime = target;
+      } catch {
+        trackElement.classList.add("is-video-loading");
+      }
     };
 
-    animationFrame.current = requestAnimationFrame(renderVideo);
+    const getClipPosition = (targetStep: number, direction: Direction) => {
+      if (targetStep <= CHAPTER_STEPS[1]) {
+        if (targetStep === CHAPTER_STEPS[1] && direction === "reverse") return {index: 1, local: 0};
+        return {index: 0, local: targetStep / CHAPTER_STEPS[1]};
+      }
+      if (targetStep <= CHAPTER_STEPS[2]) {
+        if (targetStep === CHAPTER_STEPS[2] && direction === "reverse") return {index: 2, local: 0};
+        return {
+          index: 1,
+          local: (targetStep - CHAPTER_STEPS[1]) / (CHAPTER_STEPS[2] - CHAPTER_STEPS[1]),
+        };
+      }
+      return {
+        index: 2,
+        local: (targetStep - CHAPTER_STEPS[2]) / (CHAPTER_STEPS[3] - CHAPTER_STEPS[2]),
+      };
+    };
 
-    const context = gsap.context(() => {
-      const timelineClock = {progress: 0};
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: track.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: ({progress}) => {
-            if (finalFrameSrc) trackElement.classList.toggle("journey-handed-off", progress >= 0.999);
-            const videoProgress = Math.max(0, Math.min(1, (progress - VIDEO_START) / (1 - VIDEO_START)));
-            targetTime.current = mapVideoTime(videoProgress, duration.current);
+    const seekToStep = (targetStep: number, direction: Direction, chapter: number | null) => {
+      step = Math.max(0, Math.min(TOTAL_STEPS, targetStep));
+      setCurrentStep(step);
+      setActiveChapter(chapter);
+      trackElement.classList.toggle("journey-started", step > 0);
+      if (step < TOTAL_STEPS) trackElement.classList.remove("journey-handed-off");
+      if (reducedMotion || step <= 0) {
+        setIsSeeking(false);
+        return;
+      }
 
-            const nextPhase = getPhase(videoProgress);
-            if (nextPhase !== activePhaseRef.current) {
-              activePhaseRef.current = nextPhase;
-              setActivePhase(nextPhase);
-            }
-          }
+      const position = getClipPosition(step, direction);
+      const state = clipStates[position.index];
+      requestedClip = position.index;
+      const duration = state.element.duration || 1;
+      const lastFrameTime = Math.max(0, duration - 1 / 60);
+      state.desiredTime = position.local >= 1
+        ? lastFrameTime
+        : Math.max(0, position.local * duration);
+      state.revision = ++seekRevision;
+      setIsSeeking(true);
+
+      if (!state.ready) {
+        trackElement.classList.add("is-video-loading");
+        return;
+      }
+      trackElement.classList.remove("is-video-loading");
+      performSeek(state);
+    };
+
+    const updateHandoff = () => {
+      trackElement.classList.toggle(
+        "journey-handed-off",
+        scrollProgress >= 0.999 && renderedStep >= TOTAL_STEPS - 0.01,
+      );
+    };
+
+    const renderMotion = (now: number) => {
+      const progress = Math.max(0, Math.min(1, (now - motionStarted) / motionDuration));
+      const eased = 1 - Math.pow(1 - progress, 3);
+      renderedStep = motionFrom + (targetStep - motionFrom) * eased;
+      seekToStep(renderedStep, lastDirection, progress >= 1 ? targetChapter : null);
+
+      if (progress < 1) {
+        motionFrame = requestAnimationFrame(renderMotion);
+        return;
+      }
+
+      renderedStep = targetStep;
+      motionFrame = 0;
+      seekToStep(renderedStep, lastDirection, targetChapter);
+      updateHandoff();
+    };
+
+    const setScrollTarget = (next: ScrollState) => {
+      targetStep = Math.max(0, Math.min(TOTAL_STEPS, next.step));
+      targetChapter = next.chapter;
+      const distance = Math.abs(targetStep - renderedStep);
+
+      if (distance < 0.0005) {
+        renderedStep = targetStep;
+        seekToStep(renderedStep, lastDirection, targetChapter);
+        updateHandoff();
+        return;
+      }
+
+      lastDirection = targetStep > renderedStep ? "forward" : "reverse";
+      motionFrom = renderedStep;
+      motionStarted = performance.now();
+      motionDuration = Math.max(120, Math.min(180, 130 + distance * 20));
+      if (!motionFrame) motionFrame = requestAnimationFrame(renderMotion);
+    };
+
+    const readScrollPosition = () => {
+      scrollReadFrame = 0;
+      const travel = Math.max(1, trackElement.offsetHeight - window.innerHeight);
+      scrollProgress = Math.max(
+        0,
+        Math.min(1, (window.scrollY - trackElement.offsetTop) / travel),
+      );
+      if (scrollProgress < 0.999) trackElement.classList.remove("journey-handed-off");
+      setScrollTarget(mapScrollProgress(scrollProgress));
+    };
+
+    const requestScrollRead = () => {
+      if (!scrollReadFrame) scrollReadFrame = requestAnimationFrame(readScrollPosition);
+    };
+
+    const handleResize = () => {
+      const widthChanged = window.innerWidth !== laidOutWidth;
+      if (isMobileVideo() && !widthChanged) return;
+      laidOutWidth = window.innerWidth;
+      requestScrollRead();
+    };
+
+    const primeClip = (element: HTMLVideoElement) => {
+      if (!/iPad|iPhone|iPod/.test(navigator.userAgent)) return;
+      const promise = element.play();
+      if (!promise) return;
+      void promise.then(() => element.pause()).catch(() => undefined);
+    };
+
+    if (!reducedMotion) clipStates.forEach((state) => {
+      const handleLoadedMetadata = () => {
+        state.ready = true;
+        state.element.pause();
+        if (firstGesture) primeClip(state.element);
+        if (state.index === requestedClip && step > 0) performSeek(state);
+      };
+      const handleSeeked = () => {
+        if (state.index !== requestedClip) return;
+        const frameTolerance = 1 / 120;
+        if (Math.abs(state.element.currentTime - state.desiredTime) > frameTolerance) {
+          performSeek(state);
+          return;
         }
+        revealOnPaint(state, state.revision);
+      };
+      const handleError = () => {
+        if (state.index !== requestedClip) return;
+        trackElement.classList.remove("is-video-loading");
+        setIsSeeking(false);
+        if (activeClip < 0) trackElement.classList.remove("is-video-painted");
+      };
+
+      state.element.addEventListener("loadedmetadata", handleLoadedMetadata);
+      state.element.addEventListener("seeked", handleSeeked);
+      state.element.addEventListener("error", handleError);
+      mediaCleanups.push(() => {
+        state.element.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        state.element.removeEventListener("seeked", handleSeeked);
+        state.element.removeEventListener("error", handleError);
       });
 
-      timeline
-        .to(timelineClock, {progress: 1, duration: 1, ease: "none"}, 0)
-        .to(".journey-copy", {autoAlpha: 0, yPercent: -18, duration: 0.045, ease: "power1.in"}, 0)
-        .to(".journey-hover-hint", {autoAlpha: 0, duration: 0.025}, 0)
-        .to(".journey-video-shell", {autoAlpha: 1, duration: 0.045, ease: "none"}, 0.025)
-        .to(".journey-hero", {autoAlpha: 0, duration: 0.045, ease: "none"}, 0.045)
-        .fromTo(".journey-progress", {autoAlpha: 0}, {autoAlpha: 1, duration: 0.04}, 0.07)
-        .fromTo(".journey-chapter-intro", {autoAlpha: 0, y: 24}, {autoAlpha: 1, y: 0, duration: 0.035}, 0.105)
-        .to(".journey-chapter-intro", {autoAlpha: 0, y: -22, duration: 0.03}, 0.275)
-        .fromTo(".bathroom-infographic", {autoAlpha: 0}, {autoAlpha: 1, duration: 0.03}, 0.285)
-        .fromTo(".bathroom-infographic .infographic-item", {autoAlpha: 0, y: 18}, {autoAlpha: 1, y: 0, duration: 0.04, stagger: 0.014}, 0.3)
-        .to(".bathroom-infographic", {autoAlpha: 0, y: -18, duration: 0.03}, 0.535)
-        .fromTo(".faucet-infographic", {autoAlpha: 0, x: 32}, {autoAlpha: 1, x: 0, duration: 0.04}, 0.57)
-        .to(".faucet-infographic", {autoAlpha: 0, x: -24, duration: 0.03}, 0.76)
-        .fromTo(".kitchen-infographic", {autoAlpha: 0, y: 22}, {autoAlpha: 1, y: 0, duration: 0.04}, 0.84)
-        .fromTo(".kitchen-feature", {autoAlpha: 0, y: 14}, {autoAlpha: 1, y: 0, duration: 0.035, stagger: 0.012}, 0.855);
+      const source = getScrubSource(state.index, isMobileVideo());
+      void fetch(source, {cache: "force-cache", signal: abortController.signal})
+        .then((response) => {
+          if (!response.ok) throw new Error(`Failed to load ${source}`);
+          return response.blob();
+        })
+        .then((blob) => {
+          if (abortController.signal.aborted) return;
+          const objectUrl = URL.createObjectURL(blob);
+          objectUrls.push(objectUrl);
+          state.element.src = objectUrl;
+          state.element.load();
+        })
+        .catch(() => {
+          if (!abortController.signal.aborted) handleError();
+        });
+    });
 
-      if (finalFrameSrc) {
-        timeline
-          .to(".kitchen-infographic", {autoAlpha: 0, y: -14, duration: 0.026, ease: "power1.in"}, 0.945)
-          .fromTo(".journey-final-kitchen", {autoAlpha: 0}, {autoAlpha: 1, duration: 0.032, ease: "power1.inOut"}, 0.946)
-          .to(".journey-progress", {autoAlpha: 0, duration: 0.018}, 0.978);
-      }
-    }, trackElement);
+    const handleFirstGesture = () => {
+      if (firstGesture) return;
+      firstGesture = true;
+      clipStates.forEach((state) => state.ready && primeClip(state.element));
+    };
+
+    window.addEventListener("scroll", requestScrollRead, {passive: true});
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", requestScrollRead);
+    window.addEventListener("pointerdown", handleFirstGesture, {once: true, passive: true});
+    window.addEventListener("touchstart", handleFirstGesture, {once: true, passive: true});
+    readScrollPosition();
 
     return () => {
-      trackElement.classList.remove("journey-handed-off");
-      context.revert();
-      videoElement?.removeEventListener("seeked", releaseSeek);
-      window.removeEventListener("load", warmVideo);
-      if (preloadTimeout) clearTimeout(preloadTimeout);
-      if (preloadIdle) window.cancelIdleCallback(preloadIdle);
-      seekInFlight.current = false;
-      if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
+      abortController.abort();
+      seekRevision += 1;
+      if (scrollReadFrame) cancelAnimationFrame(scrollReadFrame);
+      if (motionFrame) cancelAnimationFrame(motionFrame);
+      trackElement.classList.remove("journey-started", "journey-handed-off", "is-transitioning", "is-video-painted", "is-video-loading");
+      window.removeEventListener("scroll", requestScrollRead);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", requestScrollRead);
+      window.removeEventListener("pointerdown", handleFirstGesture);
+      window.removeEventListener("touchstart", handleFirstGesture);
+      mediaCleanups.forEach((cleanup) => cleanup());
+      resolvedVideos.forEach((element) => {
+        element.pause();
+        element.classList.remove("is-active");
+        element.removeAttribute("src");
+        element.load();
+      });
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [finalFrameSrc]);
 
@@ -266,50 +460,46 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
           onPointerUp={() => revealBefore(false)}
           onPointerCancel={() => revealBefore(false)}
         >
-          <Image className="journey-image journey-clean" src="/media/living-room-clean.jpg" alt="" fill priority placeholder="blur" blurDataURL="/media/living-room-preview.jpg" sizes="100vw" />
-          <Image className="journey-image journey-dirty" src="/media/living-room-dirty.jpg" alt="" fill loading="eager" sizes="100vw" />
+          <Image className="journey-image journey-clean" src="/media/journey-v5/stills/000.webp" alt="" fill priority unoptimized sizes="100vw" />
+          <Image className="journey-image journey-dirty" src="/media/journey-v5/stills/000-before.webp" alt="" fill loading="eager" unoptimized sizes="100vw" />
           <div className="journey-shade" />
         </div>
 
-        <div className="journey-video-shell" aria-hidden="true">
-          <video
-            ref={video}
-            className="journey-video"
-            poster="/media/apartment-journey-poster.jpg"
-            preload="metadata"
-            muted
-            playsInline
-            onLoadedMetadata={(event) => {
-              duration.current = event.currentTarget.duration || 7.8;
-              event.currentTarget.pause();
-              event.currentTarget.currentTime = 0.001;
-              targetTime.current = 0;
-              seekInFlight.current = false;
-              ScrollTrigger.refresh();
-            }}
-          >
-            <source
-              src="/media/apartment-journey-mobile.mp4"
-              media="(max-width: 680px) and (orientation: portrait)"
-              type="video/mp4"
+        <div className="journey-stage" aria-hidden="true">
+          {SCRUB_CLIPS.map((clip, index) => (
+            <video
+              ref={(element) => {
+                videos.current[index] = element;
+              }}
+              className="journey-video"
+              preload="auto"
+              muted
+              playsInline
+              disablePictureInPicture
+              key={clip.file}
             />
-            <source src="/media/apartment-journey.mp4" type="video/mp4" />
-          </video>
+          ))}
+          <div className="journey-stage-stills">
+            <Image
+              className="journey-stage-image is-active"
+              src="/media/journey-v5/stills/000.webp"
+              alt=""
+              fill
+              sizes="100vw"
+              unoptimized
+              priority
+            />
+          </div>
           <div className="journey-video-vignette" />
+          <div className="journey-loading-indicator" />
         </div>
 
-        {finalFrameSrc && (
-          <div className="journey-final-kitchen" aria-hidden="true">
-            <Image src={finalFrameSrc} alt="" fill sizes="100vw" />
-          </div>
-        )}
-
-        <aside className="journey-chapter-intro">
+        <aside className={`journey-chapter-intro${firstTransitionActive ? " is-active" : ""}`}>
           <span>{text.transitionEyebrow}</span>
           <h2>{text.transitionTitle}</h2>
         </aside>
 
-        <aside className="journey-infographic bathroom-infographic">
+        <aside className={`journey-infographic bathroom-infographic${activeChapter === CHAPTER_STEPS[1] && !isSeeking ? " is-active" : ""}`}>
           <span className="infographic-eyebrow">{text.bathroomEyebrow}</span>
           <h2>{text.bathroomTitle}</h2>
           <div className="infographic-list">
@@ -322,14 +512,14 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
           </div>
         </aside>
 
-        <aside className="journey-infographic faucet-infographic">
+        <aside className={`journey-infographic faucet-infographic${activeChapter === CHAPTER_STEPS[2] && !isSeeking ? " is-active" : ""}`}>
           <span className="infographic-eyebrow">{text.faucetEyebrow}</span>
           <h2>{text.faucetTitle}</h2>
           <p>{text.faucetBody}</p>
           <i className="infographic-focus-line" aria-hidden="true" />
         </aside>
 
-        <aside className="journey-infographic kitchen-infographic">
+        <aside className={`journey-infographic kitchen-infographic${activeChapter === CHAPTER_STEPS[3] && !isSeeking ? " is-active" : ""}`}>
           <span className="infographic-eyebrow">{text.kitchenEyebrow}</span>
           <h2>{text.kitchenTitle}</h2>
           <div className="kitchen-feature-grid">
@@ -361,7 +551,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
 
         <div className="journey-progress" aria-live="polite">
           <div className="journey-phase-number">0{activePhase + 1}</div>
-          <div className="journey-phase-line"><i style={{transform: `scaleX(${(activePhase + 1) / 4})`}} /></div>
+          <div className="journey-phase-line"><i style={{transform: `scaleX(${currentStep / TOTAL_STEPS})`}} /></div>
           <div className="journey-phase-name">{text.phases[activePhase]}</div>
           <span className="journey-scroll-label">{text.scroll}</span>
         </div>

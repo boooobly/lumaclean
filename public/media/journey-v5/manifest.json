@@ -1,0 +1,22 @@
+﻿{
+    "version":  5,
+    "mode":  "continuous-scroll-scrub",
+    "chapterSteps":  [
+                         0,
+                         12,
+                         20,
+                         32
+                     ],
+    "desktop":  {
+                    "width":  1920,
+                    "height":  1080,
+                    "fps":  60,
+                    "gop":  4
+                },
+    "mobile":  {
+                   "width":  608,
+                   "height":  1080,
+                   "fps":  60,
+                   "gop":  2
+               }
+}

@@ -205,7 +205,7 @@
 
 @media (max-width: 900px) {
   .site-page :is(section, aside)[id] { scroll-margin-top: 70px; }
-  .site-page .proto-brand img { width: 140px; }
+  .site-page .proto-brand { width: 140px; }
   .site-header-actions { gap: 8px; }
   .site-locales { display: flex; gap: 5px; font-size: 8px; }
   .site-page .header-cta { gap: 7px; padding: 9px 10px; }

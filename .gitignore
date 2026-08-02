@@ -35,6 +35,7 @@ yarn-error.log*
 # local verification output
 /artifacts/
 /work/
+/incoming/
 .next-server.*
 server-*.log
 
