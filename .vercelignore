@@ -1,0 +1,10 @@
+3d/
+artifacts/
+incoming/
+node_modules/
+.next/
+public/media/journey-v3/
+public/media/lumaclean-living-room-3d-poster.png
+public/models/
+scripts/
+*.log
