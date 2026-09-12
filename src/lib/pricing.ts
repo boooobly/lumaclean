@@ -27,7 +27,7 @@ export function basePrice(service: ServiceId, area: number) {
   if (area <= 40) return row[0];
   if (area <= 60) return row[1];
   if (area <= 80) return row[2];
-  if (area <= 100) return row[3];
+  if (area < 100) return row[3];
   return Math.max(4000, Math.round((area * row[4]) / 100) * 100);
 }
 
