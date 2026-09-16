@@ -1,8 +1,9 @@
+import type {Metadata} from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {Golos_Text, Onest} from "next/font/google";
 import {hasLocale} from "next-intl";
-import {setRequestLocale} from "next-intl/server";
+import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 import {ApartmentExperience} from "@/components/apartment-experience";
 import {Estimate} from "@/components/site/estimate";
@@ -15,10 +16,30 @@ import {siteContent} from "@/lib/content";
 import {extrasPrices, formatRsd, priceMatrix} from "@/lib/pricing";
 import {getServicePath} from "@/lib/seo-services";
 import {editorialContent} from "@/lib/site-content";
+import {siteUrl} from "@/lib/seo";
+import {articleUi, getVisibleArticles} from "@/lib/articles";
 import "./site.css";
 
 const displayFont = Onest({subsets: ["latin", "cyrillic"], variable: "--font-lc-display", display: "swap"});
 const textFont = Golos_Text({subsets: ["latin", "cyrillic"], variable: "--font-lc-text", display: "swap"});
+
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
+  const {locale} = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+  const t = await getTranslations({locale, namespace: "Metadata"});
+  const openGraphLocale = {ru: "ru_RU", sr: "sr_RS", en: "en_US"}[locale];
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {sr: "/sr", ru: "/ru", en: "/en", "x-default": "/ru"},
+    },
+    openGraph: {title: t("title"), description: t("description"), type: "website", locale: openGraphLocale, siteName: "LumaClean", url: `/${locale}`, images: [{url: "/media/apartment-journey-poster.jpg", width: 1280, height: 720, alt: "LumaClean — cleaning in Belgrade"}]},
+    twitter: {card: "summary_large_image", title: t("title"), description: t("description"), images: ["/media/apartment-journey-poster.jpg"]},
+    other: {"geo.region": "RS-00", "geo.placename": "Belgrade"},
+  };
+}
 
 export default async function HomePage({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
@@ -28,7 +49,6 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
   const v = editorialContent[locale];
   const messengerLinks = getMessengerLinks(locale);
   const extraKeys = ["standardWindow", "largeWindow", "balcony", "fridge", "oven", "cabinets", "ironing", "steam", "petHair", "linen"] as const;
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://lumacleanrs.com").replace(/\/$/, "");
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -72,7 +92,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
     <div id="top" className={`site-page ${displayFont.variable} ${textFont.variable}`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c")}}/>
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c")}}/>
-      <SiteHeader locale={locale} copy={v.nav}/>
+      <SiteHeader articlesLabel={getVisibleArticles().length ? articleUi[locale].all : undefined} locale={locale} copy={v.nav}/>
       <main>
         <ApartmentExperience locale={locale} calculatorHref="#estimate" finalFrameSrc="/media/kitchen-clean.webp"/>
         <JourneyHandoff copy={v.handoff}/>
@@ -167,7 +187,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
 
         <section className="closing-section"><div className="shell closing-grid"><div><div className="section-number light">{v.closing.number}</div><h2>{v.closing.title}</h2></div><div><p>{v.closing.body}</p><a className="site-closing-primary" href="#estimate">{v.closing.cta} ↗</a><div className="site-direct-contacts"><span>{v.closing.direct}</span><div>{messengerLinks.map((contact) => <a className="site-contact-link" href={contact.href} target={contact.id === "viber" ? undefined : "_blank"} rel={contact.id === "viber" ? undefined : "noreferrer"} key={contact.id}><small>{contact.label}</small><strong>{contact.value}</strong><i aria-hidden="true">↗</i></a>)}</div></div></div></div></section>
       </main>
-      <footer className="site-footer"><div className="shell"><Image src="/brand/logo-primary.svg" alt="LumaClean" width={622} height={132}/><span>{v.footer}</span><div className="site-footer-locales">{(["ru", "sr", "en"] as Locale[]).map((item) => <Link className={item === locale ? "active" : ""} href={`/${item}`} key={item}>{item.toUpperCase()}</Link>)}</div></div></footer>
+      <footer className="site-footer"><div className="shell"><Image src="/brand/logo-primary.svg" alt="LumaClean" width={622} height={132}/><span>{v.footer}</span>{getVisibleArticles().length > 0 && <Link href={`/${locale}/articles`}>{articleUi[locale].all}</Link>}<div className="site-footer-locales">{(["ru", "sr", "en"] as Locale[]).map((item) => <Link className={item === locale ? "active" : ""} href={`/${item}`} key={item}>{item.toUpperCase()}</Link>)}</div></div></footer>
     </div>
   );
 }

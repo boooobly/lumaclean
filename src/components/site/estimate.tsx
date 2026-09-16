@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import {Minus, Plus} from "lucide-react";
-import {useMemo, useState} from "react";
+import {useMemo, useRef, useState} from "react";
 import type {Locale} from "@/i18n/routing";
 import type {SiteContent} from "@/lib/content";
 import {basePrice, extrasPrices, formatRsd, serviceIds, type ServiceId} from "@/lib/pricing";
 import type {EditorialContent} from "@/lib/site-content";
+
+import {leadAttribution, trackEvent} from "@/lib/analytics";
 
 type CountExtra = "standardWindow" | "largeWindow" | "cabinets" | "ironing";
 type ToggleExtra = "balcony" | "fridge" | "oven" | "steam" | "petHair" | "linen";
@@ -15,6 +17,8 @@ const countKeys: CountExtra[] = ["standardWindow", "largeWindow", "cabinets", "i
 const toggleKeys: ToggleExtra[] = ["balcony", "fridge", "oven", "steam", "petHair", "linen"];
 
 export function Estimate({locale, copy, content, initialService = "regular"}: {locale: Locale; copy: EditorialContent["estimate"]; content: SiteContent; initialService?: ServiceId}) {
+  const started = useRef(false);
+  const submitting = useRef(false);
   const [service, setService] = useState<ServiceId>(initialService);
   const [area, setArea] = useState(55);
   const [counts, setCounts] = useState<Record<CountExtra, number>>({standardWindow: 0, largeWindow: 0, cabinets: 0, ironing: 0});
@@ -45,24 +49,31 @@ export function Estimate({locale, copy, content, initialService = "regular"}: {l
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting.current) return;
     if (name.trim().length < 2 || phone.trim().length < 6 || !consent) {
       setStatus("validation");
+      trackEvent("lead_error", {locale, service, error_type: "validation"});
       return;
     }
+    submitting.current = true;
     setStatus("sending");
     const details = calculation.lines.map((line) => `${line.label}: ${formatRsd(line.value, locale)}`).join("\n");
     const estimate = `${copy.calculation}\n${details}\n${copy.total}: ${formatRsd(calculation.total, locale)}`;
     try {
-      const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({name, phone, comment: comment.trim() || undefined, estimate, locale, consent})});
-      setStatus(response.ok ? "success" : "error");
+      const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({name, phone, comment: comment.trim() || undefined, estimate, locale, consent, attribution: leadAttribution()})});
+      const result = await response.json().catch(() => null);
+      const success = response.ok && result?.ok === true;
+      setStatus(success ? "success" : "error");
+      trackEvent(success ? "generate_lead" : "lead_error", {locale, service, ...(success ? {} : {error_type: "server"})});
     } catch {
       setStatus("error");
-    }
+      trackEvent("lead_error", {locale, service, error_type: "network"});
+    } finally { submitting.current = false; }
   }
 
   return (
-    <form className="estimate-sheet" onSubmit={submit} noValidate>
-      <div className="estimate-form">
+    <form className="estimate-sheet" onSubmit={submit} onFocusCapture={() => { if (!started.current) { started.current = true; trackEvent("form_start", {locale, service}); } }} noValidate>
+      <div className="estimate-form" onChange={() => trackEvent("calculator_interaction", {locale, service})} onClick={(event) => { if ((event.target as HTMLElement).closest("button")) trackEvent("calculator_interaction", {locale, service}); }}>
         <fieldset>
           <legend>{copy.service}</legend>
           <div className="service-options">

@@ -8,3 +8,5 @@ public/media/lumaclean-living-room-3d-poster.png
 public/models/
 scripts/
 *.log
+.env*
+docs/seo-audit/

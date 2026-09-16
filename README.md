@@ -63,4 +63,20 @@ npm run start  # запуск собранного приложения
 3. Выполните deployment без дополнительных build-настроек: Vercel автоматически определит Next.js.
 4. После подключения домена обновите `NEXT_PUBLIC_SITE_URL` и повторно разверните проект.
 
-Все необходимые медиа находятся в `public/media`; крупнейший файл — оптимизированное видео прогулки размером около 7.3 МБ, поэтому Git LFS не требуется.
+Все необходимые медиа находятся в `public/media`. Активная прогулка journey-v5 содержит три ролика на формат: суммарно 27,2 МБ для desktop и 12,0 МБ для mobile; крупнейший ролик — 10,4 МБ. Нужный ролик загружается при движении по сцене; следующий подготавливается ближе к концу текущего. До начала движения все три ролика не скачиваются. Первый экран использует адаптивные изображения Next Image.
+
+## SEO-аудит
+
+Результаты проверки от 11 сентября 2026 года: [docs/SEO_AUDIT_2026-09-11.md](docs/SEO_AUDIT_2026-09-11.md).
+
+После production-сборки запустите `npm run start -- --port 3100`, затем:
+
+```bash
+node docs/seo-audit/check-seo.mjs http://localhost:3100 docs/seo-audit/local-after.json
+```
+
+Проверка читает страницы и SEO-файлы; заявки не отправляет.
+
+## Articles
+
+Multilingual articles, draft previews and publication: [editor guide](docs/articles/README.md). Search Console and Yandex setup: [indexing](docs/articles/indexing.md).

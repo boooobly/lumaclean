@@ -197,6 +197,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       index: number;
       element: HTMLVideoElement;
       ready: boolean;
+      loading: boolean;
+      failed: boolean;
       desiredTime: number;
       revision: number;
     };
@@ -204,6 +206,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       index,
       element,
       ready: false,
+      loading: false,
+      failed: false,
       desiredTime: 0,
       revision: 0,
     }));
@@ -280,9 +284,11 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       setIsSeeking(true);
 
       if (!state.ready) {
-        trackElement.classList.add("is-video-loading");
+        if (!state.failed) { trackElement.classList.add("is-video-loading"); void loadClip(state); }
+        else { trackElement.classList.remove("is-video-loading"); setIsSeeking(false); }
         return;
       }
+      if (position.local > 0.7 && direction === "forward" && clipStates[position.index + 1]) void loadClip(clipStates[position.index + 1]);
       trackElement.classList.remove("is-video-loading");
       performSeek(state);
     };
@@ -359,12 +365,14 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       void promise.then(() => element.pause()).catch(() => undefined);
     };
 
-    if (!reducedMotion) clipStates.forEach((state) => {
+    const loadClip = async (state: ClipState) => {
+      if (state.loading || state.ready || state.failed || reducedMotion || abortController.signal.aborted) return;
+      state.loading = true;
       const handleLoadedMetadata = () => {
         state.ready = true;
         state.element.pause();
         if (firstGesture) primeClip(state.element);
-        if (state.index === requestedClip && step > 0) performSeek(state);
+        if (state.index === requestedClip && step > 0) seekToStep(step, lastDirection, targetChapter);
       };
       const handleSeeked = () => {
         if (state.index !== requestedClip) return;
@@ -376,6 +384,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
         revealOnPaint(state, state.revision);
       };
       const handleError = () => {
+        state.failed = true;
         if (state.index !== requestedClip) return;
         trackElement.classList.remove("is-video-loading");
         setIsSeeking(false);
@@ -392,7 +401,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       });
 
       const source = getScrubSource(state.index, isMobileVideo());
-      void fetch(source, {cache: "force-cache", signal: abortController.signal})
+      await fetch(source, {cache: "force-cache", signal: abortController.signal})
         .then((response) => {
           if (!response.ok) throw new Error(`Failed to load ${source}`);
           return response.blob();
@@ -407,7 +416,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
         .catch(() => {
           if (!abortController.signal.aborted) handleError();
         });
-    });
+    };
 
     const handleFirstGesture = () => {
       if (firstGesture) return;
@@ -460,8 +469,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
           onPointerUp={() => revealBefore(false)}
           onPointerCancel={() => revealBefore(false)}
         >
-          <Image className="journey-image journey-clean" src="/media/journey-v5/stills/000.webp" alt="" fill priority unoptimized sizes="100vw" />
-          <Image className="journey-image journey-dirty" src="/media/journey-v5/stills/000-before.webp" alt="" fill loading="eager" unoptimized sizes="100vw" />
+          <Image className="journey-image journey-clean" src="/media/journey-v5/stills/000.webp" alt="" fill preload sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" />
+          <Image className="journey-image journey-dirty" src="/media/journey-v5/stills/000-before.webp" alt="" fill loading="eager" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" />
           <div className="journey-shade" />
         </div>
 
@@ -472,7 +481,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
                 videos.current[index] = element;
               }}
               className="journey-video"
-              preload="auto"
+              preload="none"
               muted
               playsInline
               disablePictureInPicture
@@ -485,9 +494,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
               src="/media/journey-v5/stills/000.webp"
               alt=""
               fill
-              sizes="100vw"
-              unoptimized
-              priority
+              sizes="(max-aspect-ratio: 16/9) 178vh, 100vw"
+              loading="eager"
             />
           </div>
           <div className="journey-video-vignette" />

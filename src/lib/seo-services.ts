@@ -87,7 +87,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
   ru: {
     regular: {
       slug: "uborka-kvartir",
-      title: "Уборка квартир в Белграде — цены от 4 000 RSD | LumaClean",
+      title: "Поддерживающая уборка квартир в Белграде | LumaClean",
       description: "Поддерживающая уборка квартир по всему Белграду: комнаты, кухня, санузел и полы. Цена от 4 000 RSD, расчёт до выезда.",
       eyebrow: "Регулярный уход · Белград",
       h1: "Поддерживающая уборка квартир в Белграде",
@@ -224,7 +224,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
   sr: {
     regular: {
       slug: "ciscenje-stanova",
-      title: "Čišćenje stanova Beograd — cena od 4.000 RSD | LumaClean",
+      title: "Redovno čišćenje stanova Beograd | LumaClean",
       description: "Održavajuće čišćenje stanova u svim delovima Beograda: sobe, kuhinja, kupatilo i podovi. Cena od 4.000 RSD.",
       eyebrow: "Redovno održavanje · Beograd",
       h1: "Održavajuće čišćenje stanova u Beogradu",
@@ -292,7 +292,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
       details: [
         {title: "Nakon iznošenja stvari", text: "Najbolji rezultat se postiže kada su kutije i lični predmeti uklonjeni i sve dogovorene površine dostupne."},
         {title: "Unutrašnje zone", text: "Ormarići, frižider i rerna iznutra dodaju se posebno. Količinu i stanje potvrđujemo pre konačne cene."},
-        {title: "Nije post-renovation", text: "Ova usluga je namenjena kućnim tragovima nakon stanovanja. Građevinska prašina i materijali traže drugačiju tehnologiju."},
+        {title: "Ne obuhvata čišćenje nakon renoviranja", text: "Ova usluga je namenjena kućnim tragovima nakon stanovanja. Građevinska prašina i materijali traže drugačiju tehnologiju."},
       ],
       faq: [
         {q: "Kada je najbolje zakazati čišćenje pri selidbi?", a: "Nakon iznošenja stvari i pre predaje ključeva, kako bi podovi, lajsne i prazne površine bili dostupni."},
@@ -361,10 +361,10 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
   en: {
     regular: {
       slug: "apartment-cleaning",
-      title: "Apartment Cleaning Belgrade — from 4,000 RSD | LumaClean",
+      title: "Regular Apartment Cleaning Belgrade | LumaClean",
       description: "Regular apartment cleaning across Belgrade: rooms, kitchen, bathroom and floors. Prices from 4,000 RSD with an upfront estimate.",
       eyebrow: "Regular home care · Belgrade",
-      h1: "Apartment cleaning in Belgrade",
+      h1: "Regular apartment cleaning in Belgrade",
       lead: "We restore a calm everyday finish: dusting, floors, kitchen exteriors, bathroom fixtures and mirrors.",
       intro: [
         "Regular cleaning suits a home without heavy or long-standing soiling. It works well weekly, every two weeks or before guests arrive.",

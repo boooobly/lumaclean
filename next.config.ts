@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      ...(process.env.VERCEL_ENV === "preview" || (process.env.VERCEL_ENV !== "production" && !process.env.VERCEL && process.env.ARTICLES_PREVIEW === "1") ? [{source: "/:path*", headers: [{key: "X-Robots-Tag", value: "noindex, nofollow"}]}] : []),
       {
         source: "/media/journey-v5/:path*",
         headers: [
