@@ -110,7 +110,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Нужно ли покупать чистящие средства?", a: "Нет. Мы можем приехать со своими средствами или использовать ваши — как удобнее и безопаснее для поверхностей."},
       ],
       image: "/media/living-room-clean.jpg",
-      imageAlt: "Чистая гостиная после поддерживающей уборки квартиры в Белграде",
+      imageAlt: "Интерьер светлой гостиной",
     },
     deep: {
       slug: "generalnaya-uborka",
@@ -137,7 +137,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Можно добавить духовку и холодильник?", a: "Да. Мойка внутри духовки стоит 1 100 RSD, холодильника — 900 RSD."},
       ],
       image: "/media/material-chrome.webp",
-      imageAlt: "Бережно очищенный смеситель после генеральной уборки",
+      imageAlt: "Хромированный смеситель крупным планом",
     },
     move: {
       slug: "uborka-pri-pereezde",
@@ -247,7 +247,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Da li moram da kupim sredstva?", a: "Ne. Možemo doneti svoja sredstva ili koristiti vaša, u zavisnosti od vaših želja i površina."},
       ],
       image: "/media/living-room-clean.jpg",
-      imageAlt: "Čista dnevna soba nakon održavajućeg čišćenja stana u Beogradu",
+      imageAlt: "Enterijer svetle dnevne sobe",
     },
     deep: {
       slug: "generalno-ciscenje",
@@ -274,7 +274,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Mogu li da dodam rernu i frižider?", a: "Da. Rerna iznutra je 1.100 RSD, a frižider iznutra 900 RSD."},
       ],
       image: "/media/material-chrome.webp",
-      imageAlt: "Pažljivo očišćena slavina nakon generalnog čišćenja",
+      imageAlt: "Hromirana slavina izbliza",
     },
     move: {
       slug: "ciscenje-pri-selidbi",
@@ -384,7 +384,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Do I need to buy cleaning products?", a: "No. We can bring our own or use yours, depending on your preferences and the surfaces in your home."},
       ],
       image: "/media/living-room-clean.jpg",
-      imageAlt: "Clean living room after regular apartment cleaning in Belgrade",
+      imageAlt: "Bright living room interior",
     },
     deep: {
       slug: "deep-cleaning",
@@ -411,7 +411,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Can I add the oven and fridge?", a: "Yes. Oven interior cleaning is 1,100 RSD and fridge interior cleaning is 900 RSD."},
       ],
       image: "/media/material-chrome.webp",
-      imageAlt: "Carefully cleaned fixture after a deep apartment clean",
+      imageAlt: "Close-up of a chrome tap",
     },
     move: {
       slug: "move-in-move-out-cleaning",

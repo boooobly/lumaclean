@@ -18,8 +18,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       en: `${base}${getServicePath("en", service)}`,
       "x-default": `${base}${getServicePath("ru", service)}`,
     };
-    // Editorial links added to all service pages on this date; update on substantive edits.
-    return routing.locales.map((locale) => ({url: `${base}${getServicePath(locale, service)}`, lastModified: new Date("2026-09-15"), changeFrequency: "monthly" as const, priority: 0.9, alternates: {languages}}));
+    // Price guides and service-specific enquiry checklists updated on this date.
+    return routing.locales.map((locale) => ({url: `${base}${getServicePath(locale, service)}`, lastModified: new Date("2026-09-16"), changeFrequency: "monthly" as const, priority: 0.9, alternates: {languages}}));
   });
   const published = getPublishedArticles();
   const absoluteLanguages = (languages: Record<string, string>) => Object.fromEntries(Object.entries(languages).map(([locale, path]) => [locale, base + path]));

@@ -6,6 +6,7 @@ import {hasLocale} from "next-intl";
 import {setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 import {Estimate} from "@/components/site/estimate";
+import {ServiceBrief, ServicePrices} from "@/components/site/service-planning";
 import {SiteHeader} from "@/components/site/site-header";
 import {routing, type Locale} from "@/i18n/routing";
 import {getMessengerLinks} from "@/lib/contacts";
@@ -15,6 +16,7 @@ import {findServiceBySlug, getServicePath, servicePageUi, serviceSeoContent} fro
 import {editorialContent} from "@/lib/site-content";
 import {siteUrl} from "@/lib/seo";
 import {articlePath, articleUi, getServiceArticles, getVisibleArticles} from "@/lib/articles";
+import {servicePlanningUi} from "@/lib/service-planning";
 import "../../site.css";
 import "./service.css";
 
@@ -70,6 +72,7 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
 
   const {id, content} = match;
   const ui = servicePageUi[locale];
+  const planningUi = servicePlanningUi[locale];
   const pageContent = siteContent[locale];
   const editorial = editorialContent[locale];
   const messengerLinks = getMessengerLinks(locale);
@@ -127,6 +130,13 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
           </div>
         </section>
 
+        <nav className="service-page-nav shell" aria-label={planningUi.navigation}>
+          <a href="#service-prices">{planningUi.prices}</a>
+          <a href="#service-scope">{ui.included}</a>
+          <a href="#service-preparation">{planningUi.prepare}</a>
+          <a href="#estimate">{ui.estimate} ↘</a>
+        </nav>
+
         <section className="service-overview">
           <div className="shell service-overview-grid">
             <div className="service-overview-index">01 · {ui.services}</div>
@@ -135,7 +145,9 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
           </div>
         </section>
 
-        <section className="service-scope">
+        <ServicePrices locale={locale} service={id}/>
+
+        <section className="service-scope" id="service-scope">
           <div className="shell">
             <div className="section-number">02 · {ui.included}</div>
             <div className="service-section-heading"><h2>{ui.included}</h2><p>{ui.includedLead}</p></div>
@@ -151,13 +163,7 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
           </div>
         </section>
 
-        <section className="service-process">
-          <div className="shell">
-            <div className="section-number">04 · {ui.process}</div>
-            <div className="service-section-heading"><h2>{ui.process}</h2><p>{pageContent.process.title}</p></div>
-            <ol>{pageContent.process.steps.map((step) => <li key={step.number}><span>{step.number}</span><div><strong>{step.title}</strong><p>{step.text}</p></div></li>)}</ol>
-          </div>
-        </section>
+        <ServiceBrief locale={locale} service={id}/>
 
         <section className="service-faq">
           <div className="shell">
