@@ -1,5 +1,10 @@
 import type {Locale} from "@/i18n/routing";
 
+export const googleBusinessProfile = {
+  url: "https://maps.app.goo.gl/u8RBLQWzo7ocCssw7",
+  reviewUrl: "https://g.page/r/CVrDJ1HHTF49EBM/review",
+} as const;
+
 const whatsappMessage: Record<Locale, string> = {
   ru: "Здравствуйте! Хочу узнать стоимость уборки.",
   sr: "Zdravo! Želim da saznam cenu čišćenja.",

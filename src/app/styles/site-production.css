@@ -198,7 +198,7 @@
 .site-contact-link:hover i { transform: translate(2px,-2px); }
 
 .site-page .site-footer { background: var(--lc-paper); }
-.site-page .site-footer .shell { border-top: 1px solid var(--lc-line); }
+.site-page .site-footer .shell { flex-wrap: wrap; gap: 24px; border-top: 1px solid var(--lc-line); }
 .site-footer-locales { display: flex; gap: 12px; font-size: 10px; font-weight: 650; letter-spacing: .08em; }
 .site-footer-locales a { opacity: .45; transition: opacity .2s; }
 .site-footer-locales a:hover, .site-footer-locales a.active { opacity: 1; }

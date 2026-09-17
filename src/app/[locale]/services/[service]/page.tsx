@@ -7,6 +7,7 @@ import {setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 import {Estimate} from "@/components/site/estimate";
 import {ServiceBrief, ServicePrices} from "@/components/site/service-planning";
+import {GoogleProfileLinks} from "@/components/site/google-profile-links";
 import {SiteHeader} from "@/components/site/site-header";
 import {routing, type Locale} from "@/i18n/routing";
 import {getMessengerLinks} from "@/lib/contacts";
@@ -202,7 +203,7 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
           </div>
         </section>
       </main>
-      <footer className="site-footer"><div className="shell"><Link href={`/${locale}`}><Image src="/brand/logo-primary.svg" alt="LumaClean" width={622} height={132}/></Link><span>{editorial.footer}</span><div className="site-footer-locales">{routing.locales.map((item) => <Link className={item === locale ? "active" : ""} href={localeHrefs[item]} key={item}>{item.toUpperCase()}</Link>)}</div><div className="service-footer-contacts">{messengerLinks.map((contact) => <a href={contact.href} key={contact.id} target={contact.id === "viber" ? undefined : "_blank"} rel={contact.id === "viber" ? undefined : "noreferrer"}>{contact.label}</a>)}</div></div></footer>
+      <footer className="site-footer"><div className="shell"><Link href={`/${locale}`}><Image src="/brand/logo-primary.svg" alt="LumaClean" width={622} height={132}/></Link><span>{editorial.footer}</span><div className="site-footer-locales">{routing.locales.map((item) => <Link className={item === locale ? "active" : ""} href={localeHrefs[item]} key={item}>{item.toUpperCase()}</Link>)}</div><div className="service-footer-contacts">{messengerLinks.map((contact) => <a href={contact.href} key={contact.id} target={contact.id === "viber" ? undefined : "_blank"} rel={contact.id === "viber" ? undefined : "noreferrer"}>{contact.label}</a>)}</div><GoogleProfileLinks locale={locale}/></div></footer>
     </div>
   );
 }

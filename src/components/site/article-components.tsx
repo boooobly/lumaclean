@@ -1,3 +1,4 @@
+import {GoogleProfileLinks} from "@/components/site/google-profile-links";
 import Image from "next/image";
 import Link from "next/link";
 import type {Locale} from "@/i18n/routing";
@@ -23,7 +24,7 @@ export function ArticleCta({locale}: {locale: Locale}) {
 
 export function ArticleFooter({locale}: {locale: Locale}) {
   const ui = articleUi[locale];
-  return <footer className="journal-footer"><Link href={`/${locale}`}>LumaClean <span>© {new Date().getFullYear()}</span></Link><p>{ui.footer}</p><Link href={`/${locale}/articles`}>{ui.all}</Link></footer>;
+  return <footer className="journal-footer"><Link href={`/${locale}`}>LumaClean <span>© {new Date().getFullYear()}</span></Link><p>{ui.footer}</p><Link href={`/${locale}/articles`}>{ui.all}</Link><GoogleProfileLinks locale={locale}/></footer>;
 }
 
 export function PreviewNotice({locale}: {locale: Locale}) {
