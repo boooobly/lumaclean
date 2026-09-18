@@ -1,5 +1,5 @@
 import type {Locale} from "@/i18n/routing";
-import {googleBusinessProfile} from "@/lib/contacts";
+import {businessContact, businessContactCopy, getMessengerLinks, googleBusinessProfile} from "@/lib/contacts";
 import styles from "./google-profile-links.module.css";
 
 const copy = {
@@ -9,8 +9,19 @@ const copy = {
 } satisfies Record<Locale, {profile: string; review: string}>;
 
 export function GoogleProfileLinks({locale}: {locale: Locale}) {
-  return <div className={styles.links}>
-    <a href={googleBusinessProfile.url}>{copy[locale].profile} ↗</a>
-    <a href={googleBusinessProfile.reviewUrl}>{copy[locale].review} ↗</a>
+  const contact = businessContactCopy[locale];
+  return <div className={styles.contact}>
+    <section className={styles.details} aria-label={contact.title}>
+      <div><h2>{contact.title}</h2><p>{contact.area}</p></div>
+      <div><p>{contact.hours}</p><p>{contact.languages}</p></div>
+      <div className={styles.actions}>
+        <a href={`tel:${businessContact.telephone}`}><span>{contact.call}</span><strong>{businessContact.displayTelephone}</strong></a>
+        <a href={getMessengerLinks(locale)[1].href}>{contact.viber} ↗</a>
+      </div>
+    </section>
+    <div className={styles.links}>
+      <a href={googleBusinessProfile.url}>{copy[locale].profile} ↗</a>
+      <a href={googleBusinessProfile.reviewUrl}>{copy[locale].review} ↗</a>
+    </div>
   </div>;
 }
