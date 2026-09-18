@@ -158,6 +158,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
   const [currentStep, setCurrentStep] = useState(0);
   const [activeChapter, setActiveChapter] = useState<number | null>(null);
   const [isSeeking, setIsSeeking] = useState(false);
+  const [beforeRequested, setBeforeRequested] = useState(false);
   const text = copy[locale];
   const activePhase = getPhase(currentStep);
   const firstTransitionActive = currentStep > 0
@@ -454,6 +455,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
   }, [finalFrameSrc]);
 
   function revealBefore(show: boolean) {
+    if (show) setBeforeRequested(true);
     hero.current?.classList.toggle("is-before", show);
   }
 
@@ -470,7 +472,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
           onPointerCancel={() => revealBefore(false)}
         >
           <Image className="journey-image journey-clean" src="/media/journey-v5/stills/000.webp" alt="" fill preload sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" />
-          <Image className="journey-image journey-dirty" src="/media/journey-v5/stills/000-before.webp" alt="" fill loading="eager" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" />
+          {beforeRequested && <Image className="journey-image journey-dirty" src="/media/journey-v5/stills/000-before.webp" alt="" fill loading="eager" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" />}
           <div className="journey-shade" />
         </div>
 
