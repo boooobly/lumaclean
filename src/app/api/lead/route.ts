@@ -4,6 +4,7 @@ import {articlePath, getPublishedArticles} from "@/lib/articles";
 import {getServicePath} from "@/lib/seo-services";
 import {serviceIds} from "@/lib/pricing";
 import {routing} from "@/i18n/routing";
+import {entrySources} from "@/lib/analytics";
 
 const publicPaths = new Set(routing.locales.flatMap(locale => [`/${locale}`, `/${locale}/articles`, ...serviceIds.map(s => getServicePath(locale, s)), ...getPublishedArticles().map(a => articlePath(a, locale))]));
 
@@ -14,7 +15,7 @@ const schema = z.object({
   estimate: z.string().trim().max(3000).optional(),
   locale: z.enum(["ru", "sr", "en"]).optional(),
   consent: z.literal(true),
-  attribution: z.object({landing: z.string().refine(value => publicPaths.has(value)), source: z.enum(["google", "yandex", "bing", "internal", "referral", "direct_or_unknown"])}).optional().catch(undefined),
+  attribution: z.object({landing: z.string().refine(value => publicPaths.has(value)), source: z.enum(entrySources)}).optional().catch(undefined),
 });
 
 const localeNames = {ru: "Русский", sr: "Srpski", en: "English"} as const;

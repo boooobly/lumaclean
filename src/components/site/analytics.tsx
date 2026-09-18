@@ -4,7 +4,7 @@ import Script from "next/script";
 import {usePathname} from "next/navigation";
 import {useEffect, useRef, useState, useSyncExternalStore} from "react";
 import type {Locale} from "@/i18n/routing";
-import {eventNames, safeEventData, sourceFromReferrer} from "@/lib/analytics";
+import {acquisitionContext, entrySource, entrySources, eventNames, safeEventData} from "@/lib/analytics";
 import "./analytics.css";
 
 const key = "lc-analytics-consent-v1";
@@ -45,21 +45,24 @@ export function Analytics({locale, measurementId, enabled, paths}: {locale: Loca
     // eslint-disable-next-line prefer-rest-params -- Google's documented command queue uses IArguments.
     w.gtag ||= function () { w.dataLayer!.push(arguments); };
     const gtag = w.gtag;
+    let landing = pathname;
+    let source = entrySource(document.referrer, window.location.search);
+    let debug = new URLSearchParams(window.location.search).get("analytics_debug") === "1";
+    try {
+      const previous = JSON.parse(sessionStorage.getItem("lc-analytics-entry") || "null");
+      if (previous && paths.includes(previous.landing) && entrySources.includes(previous.source)) { landing = previous.landing; source = previous.source; }
+      else sessionStorage.setItem("lc-analytics-entry", JSON.stringify({landing, source}));
+      if (debug) sessionStorage.setItem("lc-analytics-debug", "1");
+      debug ||= sessionStorage.getItem("lc-analytics-debug") === "1";
+    } catch { /* Analytics still works without session storage. */ }
+    const acquisition = acquisitionContext(source);
     if (!initialized.current) {
       gtag("consent", "default", {analytics_storage: "granted", ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied"});
       gtag("js", new Date());
-      gtag("config", measurementId, {send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false, page_location: `https://lumacleanrs.com${pathname}`, page_referrer: ""});
+      gtag("config", measurementId, {send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false, page_location: `https://lumacleanrs.com${pathname}`, ...acquisition, ...(debug ? {debug_mode: true, traffic_type: "internal"} : {})});
       initialized.current = true;
     }
-    let landing = pathname;
-    let source = sourceFromReferrer(document.referrer);
-    try {
-      const previous = JSON.parse(sessionStorage.getItem("lc-analytics-entry") || "null");
-      if (previous && paths.includes(previous.landing) && ["google", "yandex", "bing", "internal", "referral", "direct_or_unknown"].includes(previous.source)) { landing = previous.landing; source = previous.source; }
-      else sessionStorage.setItem("lc-analytics-entry", JSON.stringify({landing, source}));
-    } catch { /* Analytics still works without session storage. */ }
-    const debug = new URLSearchParams(window.location.search).get("analytics_debug") === "1";
-    const context = {page_location: `https://lumacleanrs.com${pathname}`, page_referrer: "", page_title: document.title, locale, landing_page: landing, entry_source: source, ...(debug ? {debug_mode: true, traffic_type: "internal"} : {})};
+    const context = {page_location: `https://lumacleanrs.com${pathname}`, ...acquisition, page_title: document.title, locale, landing_page: landing, entry_source: source, ...(debug ? {debug_mode: true, traffic_type: "internal"} : {})};
     gtag("set", context);
     if (lastPage.current !== pathname) { gtag("event", "page_view", context); lastPage.current = pathname; }
     w.lcTrack = (name, data) => {
