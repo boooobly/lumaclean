@@ -139,7 +139,7 @@
 }
 @media (max-width: 380px) {
   .journal .proto-brand { width: 112px; }
-  .journal .site-locales a { min-width: 20px; }
+  .journal .site-locales a { min-width: 24px; }
   .journal .site-header-actions { gap: 6px; }
   .journal .header-cta { padding: 8px; gap: 4px; }
 }
