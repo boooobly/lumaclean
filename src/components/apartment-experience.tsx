@@ -171,10 +171,9 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     if (!trackElement || videoElements.length !== SCRUB_CLIPS.length || videoElements.some((element) => !element)) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const abortController = new AbortController();
+    let disposed = false;
     const resolvedVideos = videoElements as HTMLVideoElement[];
     const mediaCleanups: Array<() => void> = [];
-    const objectUrls: string[] = [];
     let step = 0;
     let requestedClip = 0;
     let activeClip = -1;
@@ -214,7 +213,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     }));
 
     const paintClip = (state: ClipState, revision: number) => {
-      if (revision !== seekRevision || state.index !== requestedClip) return;
+      if (disposed || step <= 0 || revision !== seekRevision || state.index !== requestedClip
+        || state.element.seeking || state.element.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
       resolvedVideos.forEach((element, index) => element.classList.toggle("is-active", index === state.index));
       activeClip = state.index;
       trackElement.classList.add("is-video-painted");
@@ -269,12 +269,15 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       trackElement.classList.toggle("journey-started", step > 0);
       if (step < TOTAL_STEPS) trackElement.classList.remove("journey-handed-off");
       if (reducedMotion || step <= 0) {
+        seekRevision += 1;
+        trackElement.classList.remove("is-video-loading");
         setIsSeeking(false);
         return;
       }
 
       const position = getClipPosition(step, direction);
       const state = clipStates[position.index];
+      if (state.loading) state.element.preload = "auto";
       requestedClip = position.index;
       const duration = state.element.duration || 1;
       const lastFrameTime = Math.max(0, duration - 1 / 60);
@@ -289,8 +292,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
         else { trackElement.classList.remove("is-video-loading"); setIsSeeking(false); }
         return;
       }
-      if (position.local > 0.7 && direction === "forward" && clipStates[position.index + 1]) void loadClip(clipStates[position.index + 1]);
-      trackElement.classList.remove("is-video-loading");
+      if (position.local > 0.7 && direction === "forward" && clipStates[position.index + 1]) loadClip(clipStates[position.index + 1], "metadata");
+      trackElement.classList.add("is-video-loading");
       performSeek(state);
     };
 
@@ -366,8 +369,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       void promise.then(() => element.pause()).catch(() => undefined);
     };
 
-    const loadClip = async (state: ClipState) => {
-      if (state.loading || state.ready || state.failed || reducedMotion || abortController.signal.aborted) return;
+    const loadClip = (state: ClipState, preload: "auto" | "metadata" = "auto") => {
+      if (state.loading || state.ready || state.failed || reducedMotion || disposed) return;
       state.loading = true;
       const handleLoadedMetadata = () => {
         state.ready = true;
@@ -376,7 +379,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
         if (state.index === requestedClip && step > 0) seekToStep(step, lastDirection, targetChapter);
       };
       const handleSeeked = () => {
-        if (state.index !== requestedClip) return;
+        if (disposed || step <= 0 || state.index !== requestedClip) return;
         const frameTolerance = 1 / 120;
         if (Math.abs(state.element.currentTime - state.desiredTime) > frameTolerance) {
           performSeek(state);
@@ -386,6 +389,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       };
       const handleError = () => {
         state.failed = true;
+        state.ready = false;
         if (state.index !== requestedClip) return;
         trackElement.classList.remove("is-video-loading");
         setIsSeeking(false);
@@ -394,29 +398,22 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
 
       state.element.addEventListener("loadedmetadata", handleLoadedMetadata);
       state.element.addEventListener("seeked", handleSeeked);
+      state.element.addEventListener("loadeddata", handleSeeked);
+      state.element.addEventListener("canplay", handleSeeked);
       state.element.addEventListener("error", handleError);
       mediaCleanups.push(() => {
         state.element.removeEventListener("loadedmetadata", handleLoadedMetadata);
         state.element.removeEventListener("seeked", handleSeeked);
+        state.element.removeEventListener("loadeddata", handleSeeked);
+        state.element.removeEventListener("canplay", handleSeeked);
         state.element.removeEventListener("error", handleError);
       });
 
-      const source = getScrubSource(state.index, isMobileVideo());
-      await fetch(source, {cache: "force-cache", signal: abortController.signal})
-        .then((response) => {
-          if (!response.ok) throw new Error(`Failed to load ${source}`);
-          return response.blob();
-        })
-        .then((blob) => {
-          if (abortController.signal.aborted) return;
-          const objectUrl = URL.createObjectURL(blob);
-          objectUrls.push(objectUrl);
-          state.element.src = objectUrl;
-          state.element.load();
-        })
-        .catch(() => {
-          if (!abortController.signal.aborted) handleError();
-        });
+      // Direct URLs let the media loader request only the byte ranges needed
+      // for a seek, instead of waiting for a complete multi-megabyte Blob.
+      state.element.preload = preload;
+      state.element.src = getScrubSource(state.index, isMobileVideo());
+      state.element.load();
     };
 
     const handleFirstGesture = () => {
@@ -433,7 +430,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     readScrollPosition();
 
     return () => {
-      abortController.abort();
+      disposed = true;
       seekRevision += 1;
       if (scrollReadFrame) cancelAnimationFrame(scrollReadFrame);
       if (motionFrame) cancelAnimationFrame(motionFrame);
@@ -450,7 +447,6 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
         element.removeAttribute("src");
         element.load();
       });
-      objectUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [finalFrameSrc]);
 
