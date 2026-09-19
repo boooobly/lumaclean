@@ -13,3 +13,5 @@ Validation:
 - Real iOS Safari hardware was not available; retained muted, playsInline and existing first-gesture priming. No claim of device-level Safari verification.
 
 Reproducible local slow/failure proxy: docs/seo-audit/video-test-proxy.cjs. It blocks non-read HTTP methods and is not a production route. Its bandwidth limit applies per media response, not to all page traffic.
+
+Production deployed: dpl_DaKbFezHzCWBRciLRNKUUE2zDEFx (code commit 6131b8d), aliased to https://lumacleanrs.com. Production browser verification: no initial video sources; scrolling attached a direct mobile MP4 URL, decoded and painted the frame; no console errors. RU/SR/EN homepages returned 200 with no noindex, sitemap returned 200 with 63 URLs.
