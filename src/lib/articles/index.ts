@@ -15,13 +15,14 @@ import {office} from "./office";
 import {duration} from "./duration";
 import {petHair} from "./pet-hair";
 import {bathroom} from "./bathroom";
+import {sameDay} from "./same-day";
 
 // Vercel production always wins over an accidentally retained local preview flag.
 export const articlesPreview = process.env.VERCEL_ENV !== "production" && (
   process.env.VERCEL_ENV === "preview" || process.env.NODE_ENV === "development" ||
   (!process.env.VERCEL && process.env.ARTICLES_PREVIEW === "1")
 );
-const articles: Article[] = [choose, moveOut, windows, airbnb, frequency, kitchen, office, duration, petHair, bathroom, regularDeep, moveIn, cost, prepare];
+const articles: Article[] = [sameDay, choose, moveOut, windows, airbnb, frequency, kitchen, office, duration, petHair, bathroom, regularDeep, moveIn, cost, prepare];
 
 // Fail the build rather than publish ambiguous dates or overlapping URLs.
 for (const article of articles) {
