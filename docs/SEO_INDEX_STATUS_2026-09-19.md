@@ -1,6 +1,6 @@
 # Index status by sitemap URL — 2026-09-19
 
-Checked against the live 63-URL sitemap, Google Search Console URL Inspection and Yandex Webmaster on 19 September 2026. A selected 10-URL Google indexing-request batch was submitted and accepted on 20 September 2026.
+Checked against the live 63-URL sitemap, Google Search Console URL Inspection and Yandex Webmaster on 19 September 2026. A selected 10-URL Google indexing-request batch was submitted and accepted on 20 September 2026. A separate recrawl request for the substantially updated SR apartment-cleaning page was accepted later the same day.
 
 ## Summary
 
@@ -55,7 +55,7 @@ Abbreviations: `Indexed` = Google URL Inspection says the URL is in Google; `Unk
 | `/ru/articles/stoimost-uborki-kvartiry-v-belgrade` | Indexed | 16 Sep 07:50 | Search | 15 Sep | Observe |
 | `/ru/articles/kak-podgotovitsya-k-priezdu-klinerov` | Unknown | — | Search | 15 Sep | Google indexing candidate |
 | `/sr` | Indexed | 4 Sep | Not listed | — | Google recrawl candidate; Yandex discovery candidate |
-| `/sr/services/ciscenje-stanova` | Indexed | 16 Jul 06:18 | Not listed | — | Google recrawl candidate; Yandex discovery candidate |
+| `/sr/services/ciscenje-stanova` | Indexed | 16 Jul 06:18 | Not listed | — | Google recrawl requested 20 Sep after the SEO update; do not resubmit |
 | `/sr/services/generalno-ciscenje` | Indexed | 16 Jul 06:42 | Not listed | — | Google recrawl candidate; Yandex discovery candidate |
 | `/sr/services/ciscenje-pri-selidbi` | Indexed | 16 Jul 06:44 | Not listed | — | Google recrawl candidate; Yandex discovery candidate |
 | `/sr/services/ciscenje-airbnb-apartmana` | Indexed | 16 Jul 07:55 | Not listed | — | Google recrawl candidate; Yandex discovery candidate |
@@ -113,5 +113,7 @@ Google Search Console accepted all 10 selected requests and displayed “URL add
 10. `/ru/services/generalnaya-uborka`
 
 These are crawl/indexing requests, not proof of index inclusion. Do not resubmit them while they are queued. Verify URL Inspection status and crawl dates again after Google has had time to process the batch.
+
+After the production update, URL Inspection confirmed that `/sr/services/ciscenje-stanova` was already in Google. Search Console then accepted one separate recrawl request and displayed “URL added to a priority crawl queue”. This confirms the request only; it does not confirm that Google has fetched the 20 September version yet.
 
 Yandex already processed the 15 service recrawl requests made on 16 September. The five RU service entries still show pre-update visit dates, so do not repeat the same request yet. Recheck for a new visit or status change before another submission.
