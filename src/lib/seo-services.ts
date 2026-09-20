@@ -224,24 +224,25 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
   sr: {
     regular: {
       slug: "ciscenje-stanova",
-      title: "Redovno čišćenje stanova Beograd | LumaClean",
-      description: "Održavajuće čišćenje stanova u svim delovima Beograda: sobe, kuhinja, kupatilo i podovi. Cena od 4.000 RSD.",
+      title: "Čišćenje stanova Beograd — cena od 4.000 RSD | LumaClean",
+      description: "Redovno čišćenje stanova širom Beograda: sobe, kuhinja, kupatilo i podovi. Jasne cene prema kvadraturi od 4.000 RSD, dodatni radovi posebno.",
       eyebrow: "Redovno održavanje · Beograd",
-      h1: "Održavajuće čišćenje stanova u Beogradu",
-      lead: "Vraćamo stanu uredan svakodnevni izgled: brišemo prašinu, čistimo podove, kuhinju, kupatilo i ogledala.",
+      h1: "Čišćenje stanova u Beogradu za redovno održavanje",
+      lead: "Vraćamo stanu uredan svakodnevni izgled: brišemo prašinu i čistimo podove, kuhinju, kupatilo i ogledala.",
       intro: [
-        "Održavajuće čišćenje je namenjeno stanu bez jakih i starih zaprljanja. Dobar je izbor za negu jednom nedeljno, na dve nedelje ili pre dolaska gostiju.",
-        "Pre dolaska proveravamo kvadraturu, deo grada i stanje prostora. Unapred vidite okvirnu cenu, a prozore, balkon, rernu, frižider, ormariće ili promenu posteljine dodajete po potrebi.",
+        "Redovno čišćenje, koje se u svakodnevnom govoru često naziva i spremanje stana, namenjeno je prostoru bez jakih i starih zaprljanja. Dobar je izbor za negu jednom nedeljno, na dve nedelje ili pre dolaska gostiju.",
+        "Pre dolaska proveravamo kvadraturu, deo Beograda i stanje prostora. Unapred vidite okvirnu cenu, a prozore, balkon, rernu, frižider, ormariće ili promenu posteljine dodajete samo ako su vam potrebni.",
       ],
       included: ["Brisanje prašine sa dostupnih otvorenih površina", "Usisavanje i vlažno čišćenje podova", "Kuhinjski frontovi i radne površine spolja", "Kupatilo, sanitarije i ogledala", "Odnošenje kućnog otpada po dogovoru", "Završno sređivanje prostorija"],
       suitable: ["Za redovno održavanje stana", "Pre dolaska gostiju ili nakon naporne nedelje", "Kada detaljno generalno čišćenje još nije potrebno"],
       details: [
         {title: "Kuhinja i kupatilo", text: "Fokusiramo se na svakodnevno korišćene zone: uklanjamo sveže tragove, masnoću sa dostupnih površina, kapljice i naslage sapuna."},
-        {title: "Jasna cena", text: "Okvir zavisi od kvadrature. Dlake kućnih ljubimaca, jača zaprljanja i dodatni radovi potvrđuju se pre početka."},
+        {title: "Cena prema kvadraturi", text: "Osnovna cena počinje od 4.000 RSD. Prozore, balkon, unutrašnjost uređaja i ormarića, mnogo dlaka i jača zaprljanja dogovaramo i obračunavamo odvojeno."},
         {title: "Sredstva", text: "Možemo doneti svoja sredstva ili koristiti vaša. Za odgovarajuće površine dostupna je i parna obrada bez kućne hemije."},
       ],
       faq: [
         {q: "Koliko košta čišćenje stana u Beogradu?", a: "Održavajuće čišćenje počinje od 4.000 RSD. Tačan okvir zavisi od kvadrature, stanja i dodatnih radova."},
+        {q: "Koja je razlika između redovnog i generalnog čišćenja?", a: "Redovno čišćenje obuhvata prašinu, podove, kuhinjske površine spolja, kupatilo i ogledala. Generalno čišćenje predviđa više vremena za vrata, lajsne, prekidače, frontove i zahtevne zone."},
         {q: "Mogu li da zakažem čišćenje istog dana?", a: "Da, ako postoji slobodan termin. Hitni dolazak istog dana uvećava cenu za 20%."},
         {q: "Da li su prozori uključeni?", a: "Prozori se dodaju posebno: standardni je 900 RSD, a veliki ili panoramski od 1.200 RSD."},
         {q: "Da li moram da kupim sredstva?", a: "Ne. Možemo doneti svoja sredstva ili koristiti vaša, u zavisnosti od vaših želja i površina."},
