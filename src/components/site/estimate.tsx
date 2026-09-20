@@ -9,6 +9,7 @@ import {basePrice, extrasPrices, formatRsd, serviceIds, type ServiceId} from "@/
 import type {EditorialContent} from "@/lib/site-content";
 
 import {leadAttribution, trackEvent} from "@/lib/analytics";
+import {ArrowIcon} from "@/components/site/arrow-icon";
 
 type CountExtra = "standardWindow" | "largeWindow" | "cabinets" | "ironing";
 type ToggleExtra = "balcony" | "fridge" | "oven" | "steam" | "petHair" | "linen";
@@ -85,7 +86,7 @@ export function Estimate({locale, copy, content, initialService = "regular"}: {l
           <input className="site-area-range" type="range" min="25" max="180" value={area} onChange={(event) => setArea(Number(event.target.value))} aria-label={copy.area} />
         </fieldset>
         <a className="site-mobile-total" href="#receipt">
-          <span>{copy.total}</span><strong>{formatRsd(calculation.total, locale)}</strong><i>{copy.toReceipt} ↓</i>
+          <span>{copy.total}</span><strong>{formatRsd(calculation.total, locale)}</strong><i>{copy.toReceipt}<ArrowIcon direction="down" /></i>
         </a>
         <fieldset>
           <legend>{copy.extras}</legend>
@@ -114,7 +115,7 @@ export function Estimate({locale, copy, content, initialService = "regular"}: {l
             <label className="site-comment"><span>{copy.comment}</span><textarea name="comment" value={comment} onChange={(event) => setComment(event.target.value)} placeholder={copy.commentHint} maxLength={1000} rows={4}/></label>
             <label className="site-consent"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} required aria-invalid={status === "validation" && !consent}/><span>{copy.consent}</span></label>
           </div>
-          <button type="submit" disabled={status === "sending"}>{status === "sending" ? copy.sending : copy.send}<span>↗</span></button>
+          <button type="submit" disabled={status === "sending"}>{status === "sending" ? copy.sending : copy.send}<span><ArrowIcon /></span></button>
           {status === "success" && <p className="site-form-status success" role="status">{copy.success}</p>}
           {status === "validation" && <p className="site-form-status error" role="alert">{copy.validation}</p>}
           {status === "error" && <p className="site-form-status error" role="alert">{copy.error}</p>}

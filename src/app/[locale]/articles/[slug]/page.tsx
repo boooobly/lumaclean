@@ -12,6 +12,7 @@ import {editorialContent} from "@/lib/site-content";
 import {siteContent} from "@/lib/content";
 import {getServicePath} from "@/lib/seo-services";
 import {siteUrl} from "@/lib/seo";
+import {ArrowIcon} from "@/components/site/arrow-icon";
 
 type Props = {params: Promise<{locale: string; slug: string}>};
 export function generateStaticParams() {
@@ -60,14 +61,14 @@ export default async function ArticlePage({params}: Props) {
       <article>
         <header className="journal-article-heading"><div className="journal-meta"><span>{t.category}</span><span>{readingMinutes(article, locale)} {ui.minutes}</span>{article.status === "draft" && <span>{ui.draft}</span>}</div><h1>{t.title}</h1><p className="journal-lead">{t.lead}</p><div className="journal-byline"><span>LumaClean</span>{date && <span>{dateLabel} <time dateTime={date}>{new Intl.DateTimeFormat(locale, {day: "numeric", month: "long", year: "numeric", timeZone: "UTC"}).format(new Date(date))}</time></span>}</div></header>
         <figure className="journal-cover"><Image src={article.image} alt={t.imageAlt} width={1536} height={1024} preload sizes="(max-width: 760px) 100vw, 1200px" /><figcaption>{article.id === "prepare" && article.image.endsWith(".svg") ? ui.placeholder : ui.illustration}</figcaption></figure>
-        <div className="journal-reading-layout"><aside className="journal-toc"><details open><summary>{ui.contents}</summary><ol>{t.sections.map(section => <li key={section.id}><a href={`#${section.id}`}>{section.title}</a></li>)}</ol></details><Link className="journal-toc-estimate" href={`/${locale}#estimate`}>{ui.cta} ↗</Link></aside>
+        <div className="journal-reading-layout"><aside className="journal-toc"><details open><summary>{ui.contents}</summary><ol>{t.sections.map(section => <li key={section.id}><a href={`#${section.id}`}>{section.title}</a></li>)}</ol></details><Link className="journal-toc-estimate" href={`/${locale}#estimate`}>{ui.cta}<ArrowIcon /></Link></aside>
           <div className="journal-prose">{t.sections.map(section => <section id={section.id} key={section.id}><h2>{section.title}</h2>{section.paragraphs.map(p => <p key={p}>{p}</p>)}{section.bullets && <ul>{section.bullets.map(item => <li key={item}>{item}</li>)}</ul>}{section.tip && <aside className="journal-tip"><strong>{ui.tip}</strong><p>{section.tip}</p></aside>}</section>)}
-            <section className="journal-service-links"><h2>{ui.services}</h2>{article.services.map(service => <Link key={service} href={getServicePath(locale as Locale, service)}>{siteContent[locale].pricing.serviceNames[service]}<span aria-hidden="true">↗</span></Link>)}</section>
+            <section className="journal-service-links"><h2>{ui.services}</h2>{article.services.map(service => <Link key={service} href={getServicePath(locale as Locale, service)}>{siteContent[locale].pricing.serviceNames[service]}<span aria-hidden="true"><ArrowIcon /></span></Link>)}</section>
           </div>
         </div>
       </article>
       <ArticleCta locale={locale} />
-      {related.length > 0 && <section className="journal-related"><div className="journal-section-heading"><h2>{ui.related}</h2><Link href={`/${locale}/articles`}>{ui.all} ↗</Link></div><div className="journal-grid">{related.map(other => <ArticleCard article={other} locale={locale} key={other.id} />)}</div></section>}
+      {related.length > 0 && <section className="journal-related"><div className="journal-section-heading"><h2>{ui.related}</h2><Link href={`/${locale}/articles`}>{ui.all}<ArrowIcon /></Link></div><div className="journal-grid">{related.map(other => <ArticleCard article={other} locale={locale} key={other.id} />)}</div></section>}
     </main><ArticleFooter locale={locale} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(schema).replace(/</g, "\\u003c")}} />
   </>;

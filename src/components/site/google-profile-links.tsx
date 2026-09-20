@@ -1,6 +1,7 @@
 import type {Locale} from "@/i18n/routing";
 import {businessContact, businessContactCopy, getMessengerLinks, googleBusinessProfile} from "@/lib/contacts";
 import styles from "./google-profile-links.module.css";
+import {ArrowIcon} from "@/components/site/arrow-icon";
 
 const copy = {
   ru: {profile: "LumaClean в Google Картах", review: "Оставить отзыв в Google"},
@@ -16,12 +17,12 @@ export function GoogleProfileLinks({locale}: {locale: Locale}) {
       <div><p>{contact.hours}</p><p>{contact.languages}</p></div>
       <div className={styles.actions}>
         <a href={`tel:${businessContact.telephone}`}><span>{contact.call}</span><strong>{businessContact.displayTelephone}</strong></a>
-        <a href={getMessengerLinks(locale)[1].href}>{contact.viber} ↗</a>
+        <a href={getMessengerLinks(locale)[1].href}>{contact.viber}<ArrowIcon /></a>
       </div>
     </section>
     <div className={styles.links}>
-      <a href={googleBusinessProfile.url}>{copy[locale].profile} ↗</a>
-      <a href={googleBusinessProfile.reviewUrl}>{copy[locale].review} ↗</a>
+      <a href={googleBusinessProfile.url}>{copy[locale].profile}<ArrowIcon /></a>
+      <a href={googleBusinessProfile.reviewUrl}>{copy[locale].review}<ArrowIcon /></a>
     </div>
   </div>;
 }

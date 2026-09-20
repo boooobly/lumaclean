@@ -18,6 +18,7 @@ import {editorialContent} from "@/lib/site-content";
 import {siteUrl} from "@/lib/seo";
 import {articlePath, articleUi, getServiceArticles, getVisibleArticles} from "@/lib/articles";
 import {servicePlanningUi} from "@/lib/service-planning";
+import {ArrowIcon} from "@/components/site/arrow-icon";
 import "../../site.css";
 import "./service.css";
 
@@ -126,7 +127,7 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
               <span>{content.eyebrow}</span>
               <h1>{content.h1}</h1>
               <p>{content.lead}</p>
-              <div className="service-hero-actions"><a href="#estimate">{ui.estimate}<i>↘</i></a><small>{ui.allBelgrade}</small></div>
+              <div className="service-hero-actions"><a href="#estimate">{ui.estimate}<i><ArrowIcon direction="down-right" /></i></a><small>{ui.allBelgrade}</small></div>
             </div>
           </div>
         </section>
@@ -135,14 +136,14 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
           <a href="#service-prices">{planningUi.prices}</a>
           <a href="#service-scope">{ui.included}</a>
           <a href="#service-preparation">{planningUi.prepare}</a>
-          <a href="#estimate">{ui.estimate} ↘</a>
+          <a href="#estimate">{ui.estimate}<ArrowIcon direction="down-right" /></a>
         </nav>
 
         <section className="service-overview">
           <div className="shell service-overview-grid">
             <div className="service-overview-index">01 · {ui.services}</div>
             <div className="service-overview-copy">{content.intro.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
-            <aside className="service-price-card"><span>{ui.priceFrom}</span><strong>{formatRsd(priceMatrix[id][0], locale)}</strong><p>{ui.priceNote}</p><a href="#estimate">{ui.estimate} ↘</a></aside>
+            <aside className="service-price-card"><span>{ui.priceFrom}</span><strong>{formatRsd(priceMatrix[id][0], locale)}</strong><p>{ui.priceNote}</p><a href="#estimate">{ui.estimate}<ArrowIcon direction="down-right" /></a></aside>
           </div>
         </section>
 
@@ -153,7 +154,7 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
             <div className="section-number">02 · {ui.included}</div>
             <div className="service-section-heading"><h2>{ui.included}</h2><p>{ui.includedLead}</p></div>
             <ol className="service-included-list">{content.included.map((item, index) => <li key={item}><span>{String(index + 1).padStart(2, "0")}</span><strong>{item}</strong></li>)}</ol>
-            <div className="service-suitable"><h3>{ui.suitable}</h3><ul>{content.suitable.map((item) => <li key={item}>{item}</li>)}</ul></div>
+            <div className="service-suitable"><h3>{ui.suitable}</h3><ul>{content.suitable.map((item) => <li key={item}><ArrowIcon direction="down-right" /><span>{item}</span></li>)}</ul></div>
           </div>
         </section>
 
@@ -178,18 +179,18 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
           <div className="shell">
             <div className="section-number light">06 · {ui.related}</div>
             <h2>{ui.related}</h2>
-            <nav aria-label={ui.navLabel}>{related.map((serviceId, index) => <Link href={getServicePath(locale, serviceId)} key={serviceId}><span>{String(index + 1).padStart(2, "0")}</span><strong>{pageContent.pricing.serviceNames[serviceId]}</strong><i>↗</i></Link>)}</nav>
+            <nav aria-label={ui.navLabel}>{related.map((serviceId, index) => <Link href={getServicePath(locale, serviceId)} key={serviceId}><span>{String(index + 1).padStart(2, "0")}</span><strong>{pageContent.pricing.serviceNames[serviceId]}</strong><i><ArrowIcon /></i></Link>)}</nav>
           </div>
         </section>
 
         <section className="service-reading" aria-labelledby="service-reading-title">
           <div className="shell">
-            <div className="service-reading-heading"><h2 id="service-reading-title">{articleUi[locale].related}</h2><Link href={`/${locale}/articles`}>{articleUi[locale].all} ↗</Link></div>
+            <div className="service-reading-heading"><h2 id="service-reading-title">{articleUi[locale].related}</h2><Link href={`/${locale}/articles`}>{articleUi[locale].all}<ArrowIcon /></Link></div>
             <div className="service-reading-grid">{getServiceArticles(id).map(article => {
               const translation = article.translations[locale];
               return <article key={article.id}><Link href={articlePath(article, locale)}>
                 <div className="service-reading-image"><Image src={article.image} alt={translation.imageAlt} fill sizes="(max-width: 760px) 100vw, 33vw" /></div>
-                <h3>{translation.title}</h3><p>{translation.description}</p><span>{articleUi[locale].read} ↗</span>
+                <h3>{translation.title}</h3><p>{translation.description}</p><span>{articleUi[locale].read}<ArrowIcon /></span>
               </Link></article>;
             })}</div>
           </div>

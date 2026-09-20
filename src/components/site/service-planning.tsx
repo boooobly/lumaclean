@@ -3,6 +3,7 @@ import {siteContent} from "@/lib/content";
 import {basePrice, extrasPrices, formatRsd, priceMatrix, type ServiceId} from "@/lib/pricing";
 import {serviceBriefs, serviceExamples, servicePlanningUi} from "@/lib/service-planning";
 import {servicePageUi} from "@/lib/seo-services";
+import {ArrowIcon} from "@/components/site/arrow-icon";
 
 type Props = {locale: Locale; service: ServiceId};
 
@@ -36,7 +37,7 @@ export function ServicePrices({locale, service}: Props) {
             <div className="service-example-total"><dt>{ui.total}</dt><dd>{formatRsd(total, locale)}</dd></div>
           </dl>
           <p>{ui.exampleNote}</p>
-          <a href="#estimate">{servicePageUi[locale].estimate} ↘</a>
+          <a href="#estimate">{servicePageUi[locale].estimate}<ArrowIcon direction="down-right" /></a>
         </aside>
       </div>
     </div>
@@ -51,7 +52,7 @@ export function ServiceBrief({locale, service}: Props) {
       <div className="section-number">04 · {ui.prepare}</div>
       <h2 id="service-brief-title">{brief.title}</h2>
       <ol>{brief.items.map((item, index) => <li key={item}><span aria-hidden="true">0{index + 1}</span><p>{item}</p></li>)}</ol>
-      <div className="service-brief-footer"><p>{brief.note}</p><div><h3>{ui.next}</h3><p>{ui.nextText}</p><a href="#estimate">{servicePageUi[locale].estimate} ↘</a></div></div>
+      <div className="service-brief-footer"><p>{brief.note}</p><div><h3>{ui.next}</h3><p>{ui.nextText}</p><a href="#estimate">{servicePageUi[locale].estimate}<ArrowIcon direction="down-right" /></a></div></div>
     </div>
   </section>;
 }

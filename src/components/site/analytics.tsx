@@ -5,6 +5,7 @@ import {usePathname} from "next/navigation";
 import {useEffect, useRef, useState, useSyncExternalStore} from "react";
 import type {Locale} from "@/i18n/routing";
 import {acquisitionContext, entrySource, entrySources, eventNames, safeEventData} from "@/lib/analytics";
+import {ArrowIcon} from "@/components/site/arrow-icon";
 import "./analytics.css";
 
 const key = "lc-analytics-consent-v1";
@@ -110,7 +111,7 @@ export function Analytics({locale, measurementId, enabled, paths}: {locale: Loca
     <button className="lc-privacy-toggle" onClick={() => setOpen(true)} aria-expanded={open || (hydrated && consent === null)} aria-controls="lc-privacy-panel">{c.settings}</button>
     {(open || (hydrated && consent === null)) && <aside id="lc-privacy-panel" className="lc-privacy-panel" aria-label={c.settings}>
       <h2>{c.title}</h2><p>{c.body}</p>
-      <details><summary>{c.details}</summary><p>{c.detail}</p><a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noreferrer">{c.google} ↗</a></details>
+      <details><summary>{c.details}</summary><p>{c.detail}</p><a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noreferrer">{c.google}{" "}<ArrowIcon /></a></details>
       <div><button onClick={() => choose("yes")}>{c.accept}</button><button onClick={() => choose("no")}>{c.deny}</button>{consent && <button onClick={() => setOpen(false)}>{c.close}</button>}</div>
     </aside>}
   </>;

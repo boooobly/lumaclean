@@ -19,6 +19,7 @@ import {getServicePath} from "@/lib/seo-services";
 import {editorialContent} from "@/lib/site-content";
 import {siteUrl} from "@/lib/seo";
 import {articleUi, getVisibleArticles} from "@/lib/articles";
+import {ArrowIcon} from "@/components/site/arrow-icon";
 import "./site.css";
 
 const displayFont = Onest({subsets: ["latin", "cyrillic"], variable: "--font-lc-display", display: "swap"});
@@ -116,7 +117,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
             <nav className="service-directory" aria-label={v.nav.services}>
               {c.services.map((service, index) => (
                 <Link href={getServicePath(locale, service.id)} key={service.id}>
-                  <span>{String(index + 1).padStart(2, "0")}</span><div><strong>{service.name}</strong><p>{service.description}</p></div><i aria-hidden="true">↗</i>
+                  <span>{String(index + 1).padStart(2, "0")}</span><div><strong>{service.name}</strong><p>{service.description}</p></div><i aria-hidden="true"><ArrowIcon /></i>
                 </Link>
               ))}
             </nav>
@@ -126,7 +127,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
         <section className="editorial-section rates-section" id="rates">
           <div className="shell">
             <div className="section-number">{v.rates.number}</div>
-            <div className="rates-head"><h2>{v.rates.title}</h2><div><p>{v.rates.body}</p><a href="#estimate">{v.rates.link} ↘</a></div></div>
+            <div className="rates-head"><h2>{v.rates.title}</h2><div><p>{v.rates.body}</p><a href="#estimate">{v.rates.link}<ArrowIcon direction="down-right" /></a></div></div>
             <Rates locale={locale} copy={v.rates} pricing={c.pricing}/>
           </div>
         </section>
@@ -187,7 +188,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
           </div>
         </section>
 
-        <section className="closing-section"><div className="shell closing-grid"><div><div className="section-number light">{v.closing.number}</div><h2>{v.closing.title}</h2></div><div><p>{v.closing.body}</p><a className="site-closing-primary" href="#estimate">{v.closing.cta} ↗</a><div className="site-direct-contacts"><span>{v.closing.direct}</span><div>{messengerLinks.map((contact) => <a className="site-contact-link" href={contact.href} target={contact.id === "viber" ? undefined : "_blank"} rel={contact.id === "viber" ? undefined : "noreferrer"} key={contact.id}><small>{contact.label}</small><strong>{contact.value}</strong><i aria-hidden="true">↗</i></a>)}</div></div></div></div></section>
+        <section className="closing-section"><div className="shell closing-grid"><div><div className="section-number light">{v.closing.number}</div><h2>{v.closing.title}</h2></div><div><p>{v.closing.body}</p><a className="site-closing-primary" href="#estimate">{v.closing.cta}<ArrowIcon /></a><div className="site-direct-contacts"><span>{v.closing.direct}</span><div>{messengerLinks.map((contact) => <a className="site-contact-link" href={contact.href} target={contact.id === "viber" ? undefined : "_blank"} rel={contact.id === "viber" ? undefined : "noreferrer"} key={contact.id}><small>{contact.label}</small><strong>{contact.value}</strong><i aria-hidden="true"><ArrowIcon /></i></a>)}</div></div></div></div></section>
       </main>
       <footer className="site-footer"><div className="shell"><Image src="/brand/logo-primary.svg" alt="LumaClean" width={622} height={132}/><span>{v.footer}</span>{getVisibleArticles().length > 0 && <Link href={`/${locale}/articles`}>{articleUi[locale].all}</Link>}<div className="site-footer-locales">{(["ru", "sr", "en"] as Locale[]).map((item) => <Link className={item === locale ? "active" : ""} href={`/${item}`} key={item}>{item.toUpperCase()}</Link>)}</div><GoogleProfileLinks locale={locale}/></div></footer>
     </div>

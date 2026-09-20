@@ -187,8 +187,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
   max-width: 700px;
   font-size: clamp(64px, 7.2vw, 124px);
   font-weight: 260;
-  line-height: .86;
-  letter-spacing: -.075em;
+  line-height: .96;
+  letter-spacing: -.065em;
   text-wrap: balance;
   text-shadow: 0 3px 30px rgba(0,0,0,.2);
 }
@@ -314,8 +314,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
   margin: 17px 0 0;
   font-size: clamp(52px, 6.2vw, 102px);
   font-weight: 260;
-  line-height: .9;
-  letter-spacing: -.07em;
+  line-height: .98;
+  letter-spacing: -.06em;
   text-wrap: balance;
 }
 .journey-infographic {
@@ -518,7 +518,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
     max-width: 520px;
     margin: 15px 0;
     font-size: clamp(48px, 15vw, 72px);
-    line-height: .9;
+    line-height: .96;
   }
   .journey-copy p { max-width: 390px; font-size: 12px; }
   .journey-hover-hint { bottom: 18px; }

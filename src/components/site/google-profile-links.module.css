@@ -14,6 +14,7 @@
 .details p { margin: 0 0 8px; font-size: inherit; max-width: 46ch; }
 .actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 .actions a { display: flex; flex-direction: column; justify-content: center; min-height: 44px; }
+.actions a:last-child { flex-direction: row; align-items: center; gap: 7px; }
 .actions strong { font-size: 16px; white-space: nowrap; }
 .contact a:hover { text-decoration: underline; text-underline-offset: 4px; }
 .contact a:focus-visible { outline: 2px solid #287d87; outline-offset: 4px; }
@@ -25,7 +26,7 @@
   font-size: 12px;
   line-height: 1.5;
 }
-.links a { display: inline-flex; align-items: center; min-height: 44px; }
+.links a { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; }
 @media (max-width: 760px) {
   .details { grid-template-columns: 1fr; gap: 16px; }
 }
