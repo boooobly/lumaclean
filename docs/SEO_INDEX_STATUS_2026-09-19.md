@@ -1,6 +1,6 @@
 # Index status by sitemap URL — 2026-09-19
 
-Checked against the live 63-URL sitemap, Google Search Console URL Inspection and Yandex Webmaster on 19 September 2026.
+Checked against the live 63-URL sitemap, Google Search Console URL Inspection and Yandex Webmaster on 19 September 2026. A selected 10-URL Google indexing-request batch was submitted and accepted on 20 September 2026.
 
 ## Summary
 
@@ -34,14 +34,14 @@ Abbreviations: `Indexed` = Google URL Inspection says the URL is in Google; `Unk
 | URL | Google | Google crawl | Yandex | Yandex visit | Next action |
 | --- | --- | --- | --- | --- | --- |
 | `/ru` | Indexed | 18 Sep 09:49 | Search | 5 Sep | Observe |
-| `/ru/services/uborka-kvartir` | Indexed | 4 Sep | Low value | 4 Sep | Google recrawl candidate; wait for Yandex reassessment |
-| `/ru/services/generalnaya-uborka` | Indexed | 25 Aug | Low value | 6 Sep | Google recrawl candidate; wait for Yandex reassessment |
+| `/ru/services/uborka-kvartir` | Indexed | 4 Sep | Low value | 4 Sep | Google recrawl requested 20 Sep; wait for Yandex reassessment |
+| `/ru/services/generalnaya-uborka` | Indexed | 25 Aug | Low value | 6 Sep | Google recrawl requested 20 Sep; wait for Yandex reassessment |
 | `/ru/services/uborka-pri-pereezde` | Indexed | 24 Aug | Low value | 3 Sep | Google recrawl candidate; wait for Yandex reassessment |
 | `/ru/services/uborka-airbnb` | Indexed | 26 Aug | Low value | 8 Sep | Google recrawl candidate; wait for Yandex reassessment |
 | `/ru/services/uborka-ofisov` | Indexed | 25 Aug | Low value | 21 Jul | Google recrawl candidate; wait for Yandex reassessment |
 | `/ru/articles` | Indexed | 16 Sep 07:47 | Not listed | — | Observe Google; Yandex discovery candidate |
-| `/ru/articles/kak-vybrat-klining-v-belgrade` | Unknown | — | Search | 15 Sep | Google indexing candidate |
-| `/ru/articles/uborka-pered-sdachey-kvartiry` | Unknown | — | Search | 15 Sep | Google indexing candidate |
+| `/ru/articles/kak-vybrat-klining-v-belgrade` | Unknown | — | Search | 15 Sep | Google indexing requested 20 Sep |
+| `/ru/articles/uborka-pered-sdachey-kvartiry` | Unknown | — | Search | 15 Sep | Google indexing requested 20 Sep |
 | `/ru/articles/mytyo-okon-chto-vhodit` | Unknown | — | Search | 15 Sep | Google indexing candidate |
 | `/ru/articles/uborka-airbnb-mezhdu-gostyami` | Unknown | — | Search | 15 Sep | Google indexing candidate |
 | `/ru/articles/kak-chasto-zakazyvat-uborku` | Unknown | — | Search | 15 Sep | Google indexing candidate |
@@ -60,9 +60,9 @@ Abbreviations: `Indexed` = Google URL Inspection says the URL is in Google; `Unk
 | `/sr/services/ciscenje-pri-selidbi` | Indexed | 16 Jul 06:44 | Not listed | — | Google recrawl candidate; Yandex discovery candidate |
 | `/sr/services/ciscenje-airbnb-apartmana` | Indexed | 16 Jul 07:55 | Not listed | — | Google recrawl candidate; Yandex discovery candidate |
 | `/sr/services/ciscenje-kancelarija` | Indexed | 16 Jul 06:52 | Not listed | — | Google recrawl candidate; Yandex discovery candidate |
-| `/sr/articles` | Unknown | — | Not listed | — | Indexing candidate |
-| `/sr/articles/kako-izabrati-agenciju-za-ciscenje` | Unknown | — | Not listed | — | Indexing candidate |
-| `/sr/articles/ciscenje-pre-predaje-stana` | Unknown | — | Not listed | — | Indexing candidate |
+| `/sr/articles` | Unknown | — | Not listed | — | Google indexing requested 20 Sep |
+| `/sr/articles/kako-izabrati-agenciju-za-ciscenje` | Unknown | — | Not listed | — | Google indexing requested 20 Sep |
+| `/sr/articles/ciscenje-pre-predaje-stana` | Unknown | — | Not listed | — | Google indexing requested 20 Sep |
 | `/sr/articles/sta-ukljucuje-pranje-prozora` | Unknown | — | Not listed | — | Indexing candidate |
 | `/sr/articles/ciscenje-apartmana-izmedju-gostiju` | Unknown | — | Not listed | — | Indexing candidate |
 | `/sr/articles/koliko-cesto-zakazivati-ciscenje` | Unknown | — | Not listed | — | Indexing candidate |
@@ -81,9 +81,9 @@ Abbreviations: `Indexed` = Google URL Inspection says the URL is in Google; `Unk
 | `/en/services/move-in-move-out-cleaning` | Indexed | 16 Jul 06:24 | Search | 3 Sep | Google recrawl candidate |
 | `/en/services/airbnb-cleaning` | Indexed | 16 Jul 07:21 | Search | 4 Sep | Google recrawl candidate |
 | `/en/services/office-cleaning` | Indexed | 16 Jul 06:22 | Search | 21 Jul | Google recrawl candidate |
-| `/en/articles` | Unknown | — | Not listed | — | Indexing candidate |
-| `/en/articles/choose-cleaning-service-belgrade` | Unknown | — | Not listed | — | Indexing candidate |
-| `/en/articles/move-out-cleaning-checklist` | Unknown | — | Not listed | — | Indexing candidate |
+| `/en/articles` | Unknown | — | Not listed | — | Google indexing requested 20 Sep |
+| `/en/articles/choose-cleaning-service-belgrade` | Unknown | — | Not listed | — | Google indexing requested 20 Sep |
+| `/en/articles/move-out-cleaning-checklist` | Unknown | — | Not listed | — | Google indexing requested 20 Sep |
 | `/en/articles/what-window-cleaning-includes` | Unknown | — | Not listed | — | Indexing candidate |
 | `/en/articles/airbnb-turnover-cleaning-checklist` | Unknown | — | Not listed | — | Indexing candidate |
 | `/en/articles/how-often-to-book-cleaning` | Unknown | — | Not listed | — | Indexing candidate |
@@ -97,18 +97,21 @@ Abbreviations: `Indexed` = Google URL Inspection says the URL is in Google; `Unk
 | `/en/articles/apartment-cleaning-cost-belgrade` | Unknown | — | Not listed | — | Indexing candidate |
 | `/en/articles/prepare-for-cleaners-arrival` | Unknown | — | Not listed | — | Indexing candidate |
 
-## Recommended request batch
+## Indexing requests submitted — 2026-09-20
 
-Do not submit all 42 unknown Google URLs at once. The first balanced batch should use eight discovery requests and two recrawl requests:
+Google Search Console accepted all 10 selected requests and displayed “URL added to a priority crawl queue” for each one:
 
 1. `/sr/articles`
 2. `/en/articles`
-3. RU/SR/EN versions of the “choose a cleaning service” article
-4. RU/SR/EN versions of the move-out/hand-over article
-5. `/ru/services/uborka-kvartir`
-6. `/ru/services/generalnaya-uborka`
+3. `/ru/articles/kak-vybrat-klining-v-belgrade`
+4. `/sr/articles/kako-izabrati-agenciju-za-ciscenje`
+5. `/en/articles/choose-cleaning-service-belgrade`
+6. `/ru/articles/uborka-pered-sdachey-kvartiry`
+7. `/sr/articles/ciscenje-pre-predaje-stana`
+8. `/en/articles/move-out-cleaning-checklist`
+9. `/ru/services/uborka-kvartir`
+10. `/ru/services/generalnaya-uborka`
 
-The two RU services were substantially rewritten on 16 September and have not been crawled since. The article index and article requests can expose their language clusters through internal links and hreflang. Record accepted requests as requests only; verify index status again later.
+These are crawl/indexing requests, not proof of index inclusion. Do not resubmit them while they are queued. Verify URL Inspection status and crawl dates again after Google has had time to process the batch.
 
 Yandex already processed the 15 service recrawl requests made on 16 September. The five RU service entries still show pre-update visit dates, so do not repeat the same request yet. Recheck for a new visit or status change before another submission.
-
