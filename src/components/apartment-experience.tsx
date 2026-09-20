@@ -151,7 +151,7 @@ function getScrubSource(index: number, mobile: boolean) {
   return `/media/journey-v5/${folder}/${SCRUB_CLIPS[index].file}.mp4`;
 }
 
-export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {locale: Locale; calculatorHref: string; finalFrameSrc?: string}) {
+export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; calculatorHref: string}) {
   const track = useRef<HTMLElement>(null);
   const hero = useRef<HTMLDivElement>(null);
   const videos = useRef<Array<HTMLVideoElement | null>>([]);
@@ -190,6 +190,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     let motionStarted = 0;
     let motionDuration = 140;
     let laidOutWidth = window.innerWidth;
+    let finalFramePainted = false;
 
     const isMobileVideo = () => window.innerWidth <= 680 && window.innerHeight >= window.innerWidth;
 
@@ -217,9 +218,11 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
         || state.element.seeking || state.element.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
       resolvedVideos.forEach((element, index) => element.classList.toggle("is-active", index === state.index));
       activeClip = state.index;
+      if (state.index === SCRUB_CLIPS.length - 1 && step >= TOTAL_STEPS - 0.01) finalFramePainted = true;
       trackElement.classList.add("is-video-painted");
       trackElement.classList.remove("is-video-loading");
       setIsSeeking(false);
+      updateHandoff();
     };
 
     const revealOnPaint = (state: ClipState, revision: number) => {
@@ -267,7 +270,10 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       setCurrentStep(step);
       setActiveChapter(chapter);
       trackElement.classList.toggle("journey-started", step > 0);
-      if (step < TOTAL_STEPS) trackElement.classList.remove("journey-handed-off");
+      if (step < TOTAL_STEPS - 0.01) {
+        finalFramePainted = false;
+        trackElement.classList.remove("journey-handed-off");
+      }
       if (reducedMotion || step <= 0) {
         seekRevision += 1;
         trackElement.classList.remove("is-video-loading");
@@ -300,7 +306,9 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     const updateHandoff = () => {
       trackElement.classList.toggle(
         "journey-handed-off",
-        scrollProgress >= 0.999 && renderedStep >= TOTAL_STEPS - 0.01,
+        scrollProgress >= 0.999
+          && renderedStep >= TOTAL_STEPS - 0.01
+          && (reducedMotion || finalFramePainted),
       );
     };
 
@@ -393,6 +401,10 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
         if (state.index !== requestedClip) return;
         trackElement.classList.remove("is-video-loading");
         setIsSeeking(false);
+        if (step >= TOTAL_STEPS - 0.01) {
+          finalFramePainted = true;
+          updateHandoff();
+        }
         if (activeClip < 0) trackElement.classList.remove("is-video-painted");
       };
 
@@ -448,7 +460,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
         element.load();
       });
     };
-  }, [finalFrameSrc]);
+  }, []);
 
   function revealBefore(show: boolean) {
     if (show) setBeforeRequested(true);

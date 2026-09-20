@@ -97,7 +97,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c")}}/>
       <SiteHeader articlesLabel={getVisibleArticles().length ? articleUi[locale].all : undefined} locale={locale} copy={v.nav}/>
       <main>
-        <ApartmentExperience locale={locale} calculatorHref="#estimate" finalFrameSrc="/media/kitchen-clean.webp"/>
+        <ApartmentExperience locale={locale} calculatorHref="#estimate"/>
         <JourneyHandoff copy={v.handoff}/>
 
         <section className="editorial-section scope-section" id="scope">

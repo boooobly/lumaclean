@@ -42,7 +42,10 @@
 .site-cta-short { display: none; }
 
 .site-page .journey-track { position: relative; z-index: 2; }
-.site-page .handoff { z-index: 1; margin-top: -100svh; }
+.site-page .handoff { z-index: 1; margin-top: -100dvh; }
+.site-page .handoff-sticky { height: 100dvh; }
+.site-page .kitchen-frame picture { display: block; width: 100%; height: 100%; }
+.site-page .kitchen-frame img { display: block; object-position: center; }
 .site-page .kitchen-frame img,
 .site-page .material-stories img { object-fit: cover; }
 
