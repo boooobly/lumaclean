@@ -29,3 +29,12 @@
 2. Compare new Serbian query-to-page data for apartment and office cleaning after a larger observation window.
 3. Check Yandex crawl dates for the five Russian service pages before considering another recrawl request.
 4. Obtain native Serbian editorial review and real work photos/reviews when the owner can provide them.
+
+## Production
+
+- Code commit: `06130de`.
+- Deployment: `dpl_HXCsxCXouNRGkotJWxNxLRpM8fZW`, READY, aliased to `https://lumacleanrs.com`.
+- The production office page returned HTTP 200 with the expected title and canonical, five FAQ entities and no `noindex`.
+- The production sitemap returned 63 URLs and the Serbian office page has `lastmod` `2026-09-21T00:00:00.000Z`.
+- Mobile production browser verification at 390 × 844 found no horizontal overflow, framework overlay, console warning or error.
+- Vercel runtime error scan after deployment returned no errors.
