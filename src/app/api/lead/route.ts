@@ -1,3 +1,4 @@
+import {randomUUID} from "node:crypto";
 import {NextResponse} from "next/server";
 import {z} from "zod";
 import {articlePath, getPublishedArticles} from "@/lib/articles";
@@ -19,23 +20,53 @@ const schema = z.object({
 });
 
 const localeNames = {ru: "Русский", sr: "Srpski", en: "English"} as const;
+const route = "/api/lead";
+
+function leadReference(now: Date) {
+  const dateParts = Object.fromEntries(new Intl.DateTimeFormat("en", {
+    timeZone: "Europe/Belgrade",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now).map(part => [part.type, part.value]));
+  return `LC-${dateParts.year}${dateParts.month}${dateParts.day}-${randomUUID().slice(0, 8).toUpperCase()}`;
+}
 
 export async function POST(request: Request) {
+  const started = Date.now();
+  const requestId = request.headers.get("x-vercel-id") || undefined;
   const parsed = schema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ok: false}, {status: 400});
+  if (!parsed.success) {
+    console.warn(JSON.stringify({level: "warning", msg: "lead_validation_failed", route, requestId, ms: Date.now() - started}));
+    return NextResponse.json({ok: false}, {status: 400});
+  }
 
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return NextResponse.json({ok: false, reason: "not-configured"}, {status: 503});
+  if (!token || !chatId) {
+    console.error(JSON.stringify({level: "error", msg: "lead_delivery_not_configured", route, requestId, ms: Date.now() - started}));
+    return NextResponse.json({ok: false, reason: "not-configured"}, {status: 503});
+  }
 
   const {name, phone, comment, estimate, locale, attribution} = parsed.data;
+  const now = new Date();
+  const reference = leadReference(now);
+  const logContext = {
+    route,
+    requestId,
+    leadReference: reference,
+    locale: locale || "unknown",
+    entrySource: attribution?.source || "unavailable",
+    landingPage: attribution?.landing || "unavailable",
+  };
   const submittedAt = new Intl.DateTimeFormat("ru-RU", {
     timeZone: "Europe/Belgrade",
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date());
+  }).format(now);
   const text = [
     "🧹 Новая заявка LumaClean",
+    `Номер: ${reference}`,
     "",
     `Имя: ${name}`,
     `Телефон: ${phone}`,
@@ -47,6 +78,7 @@ export async function POST(request: Request) {
   ].filter(Boolean).join("\n");
 
   try {
+    console.log(JSON.stringify({level: "info", msg: "lead_delivery_started", ...logContext}));
     const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
@@ -54,9 +86,14 @@ export async function POST(request: Request) {
       cache: "no-store",
       signal: AbortSignal.timeout(10_000),
     });
-    if (!response.ok) return NextResponse.json({ok: false}, {status: 502});
+    if (!response.ok) {
+      console.error(JSON.stringify({level: "error", msg: "lead_delivery_failed", ...logContext, upstreamStatus: response.status, ms: Date.now() - started}));
+      return NextResponse.json({ok: false}, {status: 502});
+    }
+    console.log(JSON.stringify({level: "info", msg: "lead_delivered", ...logContext, ms: Date.now() - started}));
     return NextResponse.json({ok: true});
   } catch {
+    console.error(JSON.stringify({level: "error", msg: "lead_delivery_failed", ...logContext, errorType: "network_or_timeout", ms: Date.now() - started}));
     return NextResponse.json({ok: false}, {status: 502});
   }
 }
