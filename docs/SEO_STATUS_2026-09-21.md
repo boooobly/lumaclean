@@ -38,3 +38,15 @@
 - The production sitemap returned 63 URLs and the Serbian office page has `lastmod` `2026-09-21T00:00:00.000Z`.
 - Mobile production browser verification at 390 × 844 found no horizontal overflow, framework overlay, console warning or error.
 - Vercel runtime error scan after deployment returned no errors.
+
+## Lead measurement follow-up
+
+- Added a privacy-safe reference in the form `LC-YYYYMMDD-XXXXXXXX` to each validated delivery attempt. The reference is included in the Telegram message so the manager can reconcile an enquiry with an agreed booking and completed job without copying personal details into analytics.
+- Added structured server logs for validation, delivery start, confirmed delivery and delivery failure. Logs contain only the reference, locale, whitelisted source/landing data, request ID, technical result and duration; they exclude names, phone numbers, comments and estimates.
+- Added a 30/60/90-day measurement plan that keeps search visibility, enquiries, agreed bookings and completed jobs as separate stages.
+- The automated test uses a mocked Telegram request and explicitly checks that server logs contain no test name or phone. No real enquiry was generated during verification.
+- Local checks passed: SEO event test, article fixture, ESLint, TypeScript, `git diff --check` and the 69-route production build.
+- Production at 390 × 844 returned one H1, one form, no `noindex`, no horizontal overflow and no framework overlay. Empty submission marked all three required fields and made zero `/api/lead` requests.
+- A deliberate empty API payload returned HTTP 400 and produced only the expected privacy-safe `lead_validation_failed` warning. It did not contact Telegram. No production runtime errors were present after deployment.
+- Code commit: `15cb8ae`.
+- Deployment: `dpl_BFebQYRFsAS5zXuJ5HeVdNdS92Wc`, READY, aliased to `https://lumacleanrs.com`.
