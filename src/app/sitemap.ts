@@ -1,10 +1,14 @@
 import type {MetadataRoute} from "next";
-import {routing} from "@/i18n/routing";
-import {serviceIds} from "@/lib/pricing";
+import {routing, type Locale} from "@/i18n/routing";
+import {serviceIds, type ServiceId} from "@/lib/pricing";
 import {getServicePath} from "@/lib/seo-services";
 
 import {siteUrl} from "@/lib/seo";
 import {articleLanguages, articlePath, getPublishedArticles} from "@/lib/articles";
+
+const serviceLastModified: Partial<Record<Locale, Partial<Record<ServiceId, string>>>> = {
+  sr: {regular: "2026-09-20", office: "2026-09-21"},
+};
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl;
@@ -20,7 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     };
     return routing.locales.map((locale) => ({
       url: `${base}${getServicePath(locale, service)}`,
-      lastModified: new Date(locale === "sr" && service === "regular" ? "2026-09-20" : "2026-09-16"),
+      lastModified: new Date(serviceLastModified[locale]?.[service] ?? "2026-09-16"),
       changeFrequency: "monthly" as const,
       priority: 0.9,
       alternates: {languages},

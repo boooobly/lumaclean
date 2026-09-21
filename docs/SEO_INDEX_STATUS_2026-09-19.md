@@ -117,3 +117,15 @@ These are crawl/indexing requests, not proof of index inclusion. Do not resubmit
 After the production update, URL Inspection confirmed that `/sr/services/ciscenje-stanova` was already in Google. Search Console then accepted one separate recrawl request and displayed “URL added to a priority crawl queue”. This confirms the request only; it does not confirm that Google has fetched the 20 September version yet.
 
 Yandex already processed the 15 service recrawl requests made on 16 September. The five RU service entries still show pre-update visit dates, so do not repeat the same request yet. Recheck for a new visit or status change before another submission.
+
+## Google follow-up — 2026-09-21
+
+Read-only URL Inspection checks confirmed that the following URLs are now in Google:
+
+- `/sr/articles`;
+- `/en/articles`;
+- `/sr/articles/kako-izabrati-agenciju-za-ciscenje`.
+
+The Serbian article index was last crawled by Googlebot Smartphone on 20 September 2026 at 13:38:56. Fetching succeeded, indexing was allowed and Google selected the submitted canonical. No new indexing requests were submitted during this check.
+
+The aggregate page-indexing report shows 22 indexed and 11 non-indexed URLs, but it is dated 18 September and therefore lags the URL Inspection results. It must not be used to infer the current status of all 63 sitemap URLs.
