@@ -1,5 +1,7 @@
 # Index status by sitemap URL — 2026-09-19
 
+> Historical snapshot. For the latest verified Google/Yandex counts and 24 September sitemap action, see `SEO_CHECKPOINT_2026-09-24.md`. Do not use the 19 September states below as current indexing status.
+
 Checked against the live 63-URL sitemap, Google Search Console URL Inspection and Yandex Webmaster on 19 September 2026. A selected 10-URL Google indexing-request batch was submitted and accepted on 20 September 2026. A separate recrawl request for the substantially updated SR apartment-cleaning page was accepted later the same day.
 
 ## Summary
