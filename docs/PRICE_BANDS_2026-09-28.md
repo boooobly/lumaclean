@@ -22,4 +22,15 @@ The owner confirmed the new bands: **up to 39 / 40–59 / 60–79 / 80–99 / 10
 
 ## Production verification
 
-Pending deployment and post-deployment checks.
+- Code commit: `ae751d3`.
+- Deployment: `dpl_9XUbfnBqfXwvnb6Xu1N9Fv59ztSM`, production, READY, aliased to `https://lumacleanrs.com` (Next.js 16.3.5; cloud build 20 seconds).
+- `node docs/check-pricing.cjs https://lumacleanrs.com`: passed for all 18 public price pages and the sitemap.
+- Repeated the 50 hydrated-browser boundary calculations on production: passed. No production enquiry was submitted.
+- Production browser checks at 390 × 844 and 1440 × 900: revised bands visible, no horizontal page overflow or framework overlay. No console warnings/errors were returned.
+- Serbian office page: five correct table ranges, office selected by default, 55 m² estimate remains 4,700 RSD.
+- Deployment-specific runtime error scan (`vercel logs ... --level error --since 1h --json`) returned no error entries. This is an immediate post-deployment check, not a guarantee about future traffic; configured drains were not audited in this pricing change.
+- Screenshot saved locally as `docs/seo-audit/price-bands-production.png`.
+
+## External price mentions
+
+All five existing Google Business Profile services were inspected. Each has an empty description and an unspecified price, so none contains an obsolete floor-area band. No unrelated public-profile changes were made.
