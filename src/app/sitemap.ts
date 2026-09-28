@@ -1,20 +1,18 @@
 import type {MetadataRoute} from "next";
-import {routing, type Locale} from "@/i18n/routing";
-import {serviceIds, type ServiceId} from "@/lib/pricing";
+import {routing} from "@/i18n/routing";
+import {serviceIds} from "@/lib/pricing";
 import {getServicePath} from "@/lib/seo-services";
 
 import {siteUrl} from "@/lib/seo";
 import {articleLanguages, articlePath, getPublishedArticles} from "@/lib/articles";
 
-const serviceLastModified: Partial<Record<Locale, Partial<Record<ServiceId, string>>>> = {
-  sr: {regular: "2026-09-20", office: "2026-09-21"},
-};
+// The revised price bands affect all homepage and service price tables.
+const pricingLastModified = new Date("2026-09-28");
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl;
-  // Omit lastmod until each page has a maintained content modification date.
   const homeLanguages = {sr: `${base}/sr`, ru: `${base}/ru`, en: `${base}/en`, "x-default": `${base}/ru`};
-  const homePages = routing.locales.map((locale) => ({url: `${base}/${locale}`, changeFrequency: "weekly" as const, priority: 1, alternates: {languages: homeLanguages}}));
+  const homePages = routing.locales.map((locale) => ({url: `${base}/${locale}`, lastModified: pricingLastModified, changeFrequency: "weekly" as const, priority: 1, alternates: {languages: homeLanguages}}));
   const servicePages = serviceIds.flatMap((service) => {
     const languages = {
       sr: `${base}${getServicePath("sr", service)}`,
@@ -24,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     };
     return routing.locales.map((locale) => ({
       url: `${base}${getServicePath(locale, service)}`,
-      lastModified: new Date(serviceLastModified[locale]?.[service] ?? "2026-09-16"),
+      lastModified: pricingLastModified,
       changeFrequency: "monthly" as const,
       priority: 0.9,
       alternates: {languages},

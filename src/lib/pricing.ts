@@ -1,6 +1,13 @@
 export const serviceIds = ["regular", "deep", "move", "airbnb", "office"] as const;
 export type ServiceId = (typeof serviceIds)[number];
 
+// Shared by the homepage price list and every service's price table.
+export const priceAreaLabels: Record<"ru" | "sr" | "en", [string, string, string, string, string]> = {
+  ru: ["До 39 м²", "40–59 м²", "60–79 м²", "80–99 м²", "От 100 м²"],
+  sr: ["Do 39 m²", "40–59 m²", "60–79 m²", "80–99 m²", "Od 100 m²"],
+  en: ["Up to 39 m²", "40–59 m²", "60–79 m²", "80–99 m²", "100 m² and up"],
+};
+
 export const priceMatrix: Record<ServiceId, [number, number, number, number, number]> = {
   regular: [4000, 4600, 5700, 7200, 85],
   deep: [9300, 10700, 12900, 14900, 180],
@@ -24,9 +31,9 @@ export const extrasPrices = {
 
 export function basePrice(service: ServiceId, area: number) {
   const row = priceMatrix[service];
-  if (area <= 40) return row[0];
-  if (area <= 60) return row[1];
-  if (area <= 80) return row[2];
+  if (area < 40) return row[0];
+  if (area < 60) return row[1];
+  if (area < 80) return row[2];
   if (area < 100) return row[3];
   return Math.max(4000, Math.round((area * row[4]) / 100) * 100);
 }

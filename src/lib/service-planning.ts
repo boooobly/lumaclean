@@ -1,5 +1,6 @@
 import type {Locale} from "@/i18n/routing";
 import type {ServiceId, extrasPrices} from "@/lib/pricing";
+import {priceAreaLabels} from "@/lib/pricing";
 
 // Examples explain the current tariff; they are not completed jobs or fixed offers.
 export const serviceExamples: Record<ServiceId, {area: number; extras: {id: keyof typeof extrasPrices; quantity: number}[]}> = {
@@ -21,7 +22,7 @@ type PlanningUi = {
 export const servicePlanningUi: Record<Locale, PlanningUi> = {
   ru: {
     navigation: "На этой странице", prices: "Стоимость по площади", area: "Площадь", base: "Базовый ориентир", perMetre: "за м²",
-    ranges: ["До 40 м²", "41–60 м²", "61–80 м²", "81–99 м²", "От 100 м²"],
+    ranges: priceAreaLabels.ru,
     priceNote: "Ориентиры для уборки без дополнений. Укажите площадь и нужные работы в калькуляторе; состояние помещения уточним до подтверждения цены. Срочный выезд в день обращения — при наличии времени, с доплатой 20%.",
     example: "Как складывается цена", exampleNote: "Пример по действующим тарифам, без срочного выезда. Точную стоимость согласуем после описания или фото помещения.",
     exampleBase: "Уборка", total: "В этом примере", prepare: "Что указать в заявке", next: "Что дальше",
@@ -29,7 +30,7 @@ export const servicePlanningUi: Record<Locale, PlanningUi> = {
   },
   sr: {
     navigation: "Na ovoj stranici", prices: "Cena prema kvadraturi", area: "Površina", base: "Osnovna procena", perMetre: "po m²",
-    ranges: ["Do 40 m²", "41–60 m²", "61–80 m²", "81–99 m²", "Od 100 m²"],
+    ranges: priceAreaLabels.sr,
     priceNote: "Okvirne cene bez dodatnih radova. Unesite kvadraturu i izaberite dodatke u kalkulatoru; stanje prostora proveravamo pre potvrde cene. Dolazak istog dana moguć je ako ima slobodnih termina, uz doplatu od 20%.",
     example: "Kako se formira cena", exampleNote: "Primer prema važećem cenovniku, bez hitnog dolaska. Konačnu cenu dogovaramo na osnovu opisa ili fotografija prostora.",
     exampleBase: "Čišćenje", total: "Ukupno u ovom primeru", prepare: "Šta navesti u upitu", next: "Šta sledi",
@@ -37,7 +38,7 @@ export const servicePlanningUi: Record<Locale, PlanningUi> = {
   },
   en: {
     navigation: "On this page", prices: "Prices by floor area", area: "Floor area", base: "Base estimate", perMetre: "per m²",
-    ranges: ["Up to 40 m²", "41–60 m²", "61–80 m²", "81–99 m²", "100 m² and up"],
+    ranges: priceAreaLabels.en,
     priceNote: "Estimates exclude extras. Enter your floor area and tasks in the calculator; we check the condition before confirming the price. Same-day cleaning is subject to availability and carries a 20% surcharge.",
     example: "How the price adds up", exampleNote: "An example using current rates, without same-day service. We agree the final price after reviewing your description or photos of the space.",
     exampleBase: "Cleaning", total: "Total in this example", prepare: "What to include in your enquiry", next: "What happens next",

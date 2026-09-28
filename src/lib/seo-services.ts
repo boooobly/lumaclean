@@ -350,7 +350,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {title: "Granice usluge", text: "Ne radimo industrijsko čišćenje, fasade, opasna zaprljanja ni specijalizovane proizvodne prostore."},
       ],
       faq: [
-        {q: "Koliko košta čišćenje male kancelarije u Beogradu?", a: "Cena počinje od 4.000 RSD za prostor do 40 m². Za 41–60 m² osnovna cena je 4.700 RSD, za 61–80 m² 5.900 RSD, a za 81–99 m² 7.200 RSD. Od 100 m² obračun je 75 RSD po m²."},
+        {q: "Koliko košta čišćenje male kancelarije u Beogradu?", a: "Cena počinje od 4.000 RSD za prostor do 39 m². Za 40–59 m² osnovna cena je 4.700 RSD, za 60–79 m² 5.900 RSD, a za 80–99 m² 7.200 RSD. Od 100 m² obračun je 75 RSD po m²."},
         {q: "Da li radite po redovnom rasporedu?", a: "Da, za manju kancelariju možemo dogovoriti ponavljajuću listu i odgovarajuću učestalost."},
         {q: "Može li čišćenje van radnog vremena?", a: "Navedite željeno vreme u upitu. Dostupan termin potvrđujemo pre dolaska."},
         {q: "Da li čistite velike poslovne objekte?", a: "Ne. Specijalizovani smo za manje kancelarije i ne pružamo industrijsko ili fasadno čišćenje."},
