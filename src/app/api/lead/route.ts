@@ -15,11 +15,13 @@ const schema = z.object({
   comment: z.string().trim().max(1000).optional(),
   estimate: z.string().trim().max(3000).optional(),
   locale: z.enum(["ru", "sr", "en"]).optional(),
+  service: z.enum(serviceIds).optional(),
   consent: z.literal(true),
   attribution: z.object({landing: z.string().refine(value => publicPaths.has(value)), source: z.enum(entrySources)}).optional().catch(undefined),
 });
 
 const localeNames = {ru: "Русский", sr: "Srpski", en: "English"} as const;
+const serviceNames = {regular: "Поддерживающая", deep: "Генеральная", move: "Въезд / выезд", airbnb: "Airbnb", office: "Офис"} as const;
 const route = "/api/lead";
 
 function leadReference(now: Date) {
@@ -48,7 +50,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ok: false, reason: "not-configured"}, {status: 503});
   }
 
-  const {name, phone, comment, estimate, locale, attribution} = parsed.data;
+  const {name, phone, comment, estimate, locale, service, attribution} = parsed.data;
   const now = new Date();
   const reference = leadReference(now);
   const logContext = {
@@ -56,6 +58,7 @@ export async function POST(request: Request) {
     requestId,
     leadReference: reference,
     locale: locale || "unknown",
+    service: service || "unknown",
     entrySource: attribution?.source || "unavailable",
     landingPage: attribution?.landing || "unavailable",
   };
@@ -71,6 +74,7 @@ export async function POST(request: Request) {
     `Имя: ${name}`,
     `Телефон: ${phone}`,
     locale ? `Язык: ${localeNames[locale]}` : "",
+    service ? `Услуга: ${serviceNames[service]}` : "",
     attribution ? `Источник (по браузеру): ${attribution.source}\nСтраница входа: ${attribution.landing}` : "Источник: не определён (можно уточнить у клиента)",
     comment ? `Комментарий: ${comment}` : "Комментарий: —",
     estimate ? `\n${estimate}` : "",

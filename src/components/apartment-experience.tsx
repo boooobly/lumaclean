@@ -154,6 +154,7 @@ function getScrubSource(index: number, mobile: boolean) {
 export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; calculatorHref: string}) {
   const track = useRef<HTMLElement>(null);
   const hero = useRef<HTMLDivElement>(null);
+  const finalStill = useRef<HTMLImageElement>(null);
   const videos = useRef<Array<HTMLVideoElement | null>>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [activeChapter, setActiveChapter] = useState<number | null>(null);
@@ -189,8 +190,12 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
     let motionFrom = 0;
     let motionStarted = 0;
     let motionDuration = 140;
-    let laidOutWidth = window.innerWidth;
-    let finalFramePainted = false;
+    const finalStillElement = finalStill.current;
+    let finalStillReady = Boolean(finalStillElement?.complete && finalStillElement.naturalWidth);
+
+    const syncFinalStill = () => {
+      trackElement.classList.toggle("is-final-still", finalStillReady && step >= TOTAL_STEPS - 0.01);
+    };
 
     const isMobileVideo = () => window.innerWidth <= 680 && window.innerHeight >= window.innerWidth;
 
@@ -218,7 +223,6 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
         || state.element.seeking || state.element.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
       resolvedVideos.forEach((element, index) => element.classList.toggle("is-active", index === state.index));
       activeClip = state.index;
-      if (state.index === SCRUB_CLIPS.length - 1 && step >= TOTAL_STEPS - 0.01) finalFramePainted = true;
       trackElement.classList.add("is-video-painted");
       trackElement.classList.remove("is-video-loading");
       setIsSeeking(false);
@@ -267,11 +271,11 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
 
     const seekToStep = (targetStep: number, direction: Direction, chapter: number | null) => {
       step = Math.max(0, Math.min(TOTAL_STEPS, targetStep));
+      syncFinalStill();
       setCurrentStep(step);
       setActiveChapter(chapter);
       trackElement.classList.toggle("journey-started", step > 0);
       if (step < TOTAL_STEPS - 0.01) {
-        finalFramePainted = false;
         trackElement.classList.remove("journey-handed-off");
       }
       if (reducedMotion || step <= 0) {
@@ -306,9 +310,11 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
     const updateHandoff = () => {
       trackElement.classList.toggle(
         "journey-handed-off",
-        scrollProgress >= 0.999
+        !reducedMotion
+          && scrollProgress >= 1
           && renderedStep >= TOTAL_STEPS - 0.01
-          && (reducedMotion || finalFramePainted),
+          && finalStillReady
+          && (document.getElementById("handoff")?.getBoundingClientRect().top ?? 1) <= 0,
       );
     };
 
@@ -350,12 +356,13 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
 
     const readScrollPosition = () => {
       scrollReadFrame = 0;
-      const travel = Math.max(1, trackElement.offsetHeight - window.innerHeight);
+      const stickyHeight = trackElement.firstElementChild?.getBoundingClientRect().height ?? window.innerHeight;
+      const travel = Math.max(1, trackElement.getBoundingClientRect().height - stickyHeight);
       scrollProgress = Math.max(
         0,
         Math.min(1, (window.scrollY - trackElement.offsetTop) / travel),
       );
-      if (scrollProgress < 0.999) trackElement.classList.remove("journey-handed-off");
+      if (scrollProgress < 1) trackElement.classList.remove("journey-handed-off");
       setScrollTarget(mapScrollProgress(scrollProgress));
     };
 
@@ -364,9 +371,6 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
     };
 
     const handleResize = () => {
-      const widthChanged = window.innerWidth !== laidOutWidth;
-      if (isMobileVideo() && !widthChanged) return;
-      laidOutWidth = window.innerWidth;
       requestScrollRead();
     };
 
@@ -401,10 +405,7 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
         if (state.index !== requestedClip) return;
         trackElement.classList.remove("is-video-loading");
         setIsSeeking(false);
-        if (step >= TOTAL_STEPS - 0.01) {
-          finalFramePainted = true;
-          updateHandoff();
-        }
+        updateHandoff();
         if (activeClip < 0) trackElement.classList.remove("is-video-painted");
       };
 
@@ -434,6 +435,14 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
       clipStates.forEach((state) => state.ready && primeClip(state.element));
     };
 
+    const handleFinalStillLoad = () => {
+      finalStillReady = true;
+      syncFinalStill();
+      updateHandoff();
+    };
+
+    finalStillElement?.addEventListener("load", handleFinalStillLoad);
+
     window.addEventListener("scroll", requestScrollRead, {passive: true});
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", requestScrollRead);
@@ -446,7 +455,8 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
       seekRevision += 1;
       if (scrollReadFrame) cancelAnimationFrame(scrollReadFrame);
       if (motionFrame) cancelAnimationFrame(motionFrame);
-      trackElement.classList.remove("journey-started", "journey-handed-off", "is-transitioning", "is-video-painted", "is-video-loading");
+      trackElement.classList.remove("journey-started", "journey-handed-off", "is-transitioning", "is-video-painted", "is-video-loading", "is-final-still");
+      finalStillElement?.removeEventListener("load", handleFinalStillLoad);
       window.removeEventListener("scroll", requestScrollRead);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", requestScrollRead);
@@ -509,6 +519,11 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
             />
           </div>
           <div className="journey-video-vignette" />
+          <picture className="journey-final-still">
+            <source media="(min-width: 681px), (orientation: landscape)" srcSet="/media/journey-v5/stills/032-desktop.webp" />
+            <source media="(max-width: 680px) and (orientation: portrait)" srcSet="/media/journey-v5/stills/032-mobile.webp" />
+            <img ref={finalStill} src="/media/journey-v5/stills/032-mobile.webp" alt="" width={608} height={1080} loading="eager" />
+          </picture>
           <div className="journey-loading-indicator" />
         </div>
 

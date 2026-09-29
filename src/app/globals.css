@@ -141,9 +141,31 @@ button, a { -webkit-tap-highlight-color: transparent; }
   background: linear-gradient(0deg, rgba(3,15,20,.2), transparent 34%);
   pointer-events: none;
 }
-.journey-loading-indicator {
+.journey-final-still {
   position: absolute;
   z-index: 4;
+  inset: 0;
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+}
+.journey-final-still img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.journey-final-still::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(16,37,43,.22), transparent 50%);
+}
+.journey-track.is-final-still .journey-final-still { opacity: 1; }
+.journey-loading-indicator {
+  position: absolute;
+  z-index: 5;
   left: 50%;
   bottom: 24px;
   width: 42px;

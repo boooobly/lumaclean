@@ -17,7 +17,7 @@ assert.equal(analytics.sourceFromReferrer('https://google.com.attacker.example/'
 
 const jsx = {jsx:(type,props)=>({type,props}),jsxs:(type,props)=>({type,props})};
 function renderEstimate({valid=true,responseOk=true,bodyOk=true,reject=false,pending=false}={}) {
-  let stateIndex=0; const states=[]; const events=[]; let requests=0; let release;
+  let stateIndex=0; const states=[]; const events=[]; let requests=0; let release; let payload;
   const values=['regular',55,{standardWindow:0,largeWindow:0,cabinets:0,ironing:0},{},false,valid?'Test':'','12345678','',true,'idle'];
   const hooks={useMemo:fn=>fn(),useRef:value=>({current:value}),useState:()=>{const i=stateIndex++;return[values[i],value=>states.push(value)];}};
   const mod=load('src/components/site/estimate.tsx',{
@@ -25,15 +25,16 @@ function renderEstimate({valid=true,responseOk=true,bodyOk=true,reject=false,pen
     '@/lib/pricing':{serviceIds:['regular'],basePrice:()=>4600,extrasPrices:{},formatRsd:v=>String(v)},
     '@/lib/analytics':{trackEvent:(...args)=>events.push(args),leadAttribution:()=>undefined},
     '@/components/site/arrow-icon':{ArrowIcon:()=>null},
-  },{fetch:async()=>{requests++;if(pending) await new Promise(resolve=>release=resolve);if(reject)throw Error('network');return {ok:responseOk,json:async()=>({ok:bodyOk})};}});
+  },{fetch:async(_url,options)=>{requests++;payload=JSON.parse(options.body);if(pending) await new Promise(resolve=>release=resolve);if(reject)throw Error('network');return {ok:responseOk,json:async()=>({ok:bodyOk})};}});
   const tree=mod.Estimate({locale:'ru',copy:{calculation:'Estimate',total:'Total'},content:{pricing:{serviceNames:{regular:'Regular'}},calculator:{labels:{}}}});
-  return {submit:()=>tree.props.onSubmit({preventDefault(){}}),events,states,requests:()=>requests,release:()=>release?.()};
+  return {submit:()=>tree.props.onSubmit({preventDefault(){}}),events,states,requests:()=>requests,payload:()=>payload,release:()=>release?.()};
 }
 (async()=>{
   for(const scenario of [{}, {responseOk:false}, {bodyOk:false}, {reject:true}, {valid:false}]) {
     const test=renderEstimate(scenario); await test.submit();
     const expected=Object.keys(scenario).length===0?'generate_lead':'lead_error';
     assert.equal(test.events.at(-1)[0],expected);
+    if (scenario.valid!==false) assert.equal(test.payload().service,'regular');
     if(scenario.valid===false)assert.equal(test.requests(),0);
   }
   const duplicate=renderEstimate({pending:true}); const first=duplicate.submit(); await duplicate.submit(); assert.equal(duplicate.requests(),1); duplicate.release(); await first; assert.equal(duplicate.events.filter(e=>e[0]==='generate_lead').length,1);
@@ -46,12 +47,14 @@ function renderEstimate({valid=true,responseOk=true,bodyOk=true,reject=false,pen
   });
   assert.equal((await api.POST(new Request('https://example.test/api/lead',{method:'POST',body:'{}'}))).status,400);
   assert.equal(networkCalls,0);
-  assert.equal((await api.POST(new Request('https://example.test/api/lead',{method:'POST',body:JSON.stringify({name:'Test',phone:'12345678',consent:true,locale:'ru'})}))).status,200);
+  assert.equal((await api.POST(new Request('https://example.test/api/lead',{method:'POST',body:JSON.stringify({name:'Test',phone:'12345678',consent:true,locale:'ru',service:'regular'})}))).status,200);
   assert.equal(networkCalls,1);
   assert.match(telegramText,/Номер: LC-\d{8}-[A-F0-9]{8}/);
+  assert.match(telegramText,/Услуга: Поддерживающая/);
   assert(!logLines.join('\n').includes('Test'));
   assert(!logLines.join('\n').includes('12345678'));
   assert(logLines.some(line=>line.includes('lead_delivered')));
+  assert(logLines.some(line=>line.includes('"service":"regular"')));
   delete process.env.TELEGRAM_BOT_TOKEN;
   assert.equal((await api.POST(new Request('https://example.test/api/lead',{method:'POST',body:JSON.stringify({name:'Test',phone:'12345678',consent:true})}))).status,503);
   if(oldToken!==undefined) process.env.TELEGRAM_BOT_TOKEN=oldToken;

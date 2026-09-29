@@ -61,7 +61,7 @@ export function Estimate({locale, copy, content, initialService = "regular"}: {l
     const details = calculation.lines.map((line) => `${line.label}: ${formatRsd(line.value, locale)}`).join("\n");
     const estimate = `${copy.calculation}\n${details}\n${copy.total}: ${formatRsd(calculation.total, locale)}`;
     try {
-      const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({name, phone, comment: comment.trim() || undefined, estimate, locale, consent, attribution: leadAttribution()})});
+      const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({name, phone, comment: comment.trim() || undefined, estimate, locale, service, consent, attribution: leadAttribution()})});
       const result = await response.json().catch(() => null);
       const success = response.ok && result?.ok === true;
       setStatus(success ? "success" : "error");

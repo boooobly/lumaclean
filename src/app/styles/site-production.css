@@ -279,4 +279,9 @@
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto !important; }
   .site-page *, .site-page *::before, .site-page *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  .site-page .handoff { height: auto; margin-top: 0; }
+  .site-page .handoff-sticky { position: relative; height: auto; min-height: 100dvh; }
+  .site-page .kitchen-frame { position: relative; inset: auto; height: 60dvh; transform: none !important; }
+  .site-page .handoff-copy { position: relative; inset: auto; width: min(720px, calc(100% - 36px)); margin: 36px auto 60px; opacity: 1 !important; transform: none !important; }
+  .site-page .handoff-route, .site-page .scroll-note { display: none; }
 }
