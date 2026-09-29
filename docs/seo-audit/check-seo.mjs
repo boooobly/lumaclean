@@ -20,9 +20,10 @@ const entries = [...sitemap.html.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) =>
   url: m[1].match(/<loc>(.*?)<\/loc>/)?.[1],
   languages: Object.fromEntries(tags(m[1], 'xhtml:link').map((t) => [t.hreflang, t.href])),
 }));
-check(sitemap.status === 200 && entries.length === 18, 'Sitemap must contain 18 URLs and return 200');
+check(sitemap.status === 200 && entries.length === 63, 'Published sitemap must contain 63 URLs and return 200');
 const urls = new Set(entries.map((e) => e.url));
-check(urls.size === 18, 'Duplicate sitemap URLs');
+check(urls.size === entries.length, 'Duplicate sitemap URLs');
+check(entries.every(e => new URL(e.url).origin === canonicalOrigin), 'Sitemap contains another origin');
 const pages = [];
 for (const entry of entries) {
   const path = new URL(entry.url).pathname;
@@ -36,7 +37,8 @@ for (const entry of entries) {
   const description = meta.find((m) => m.name === 'description')?.content;
   const schemas = [...result.html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
   const graph = schemas.flatMap((s) => s['@graph'] || [s]);
-  const internalLinks = tags(result.html, 'a').map((a) => a.href).filter((href) => href?.startsWith('/'));
+  const internalLinks = tags(result.html, 'a').map((a) => a.href).filter((href) => href && (href.startsWith('/') || href.startsWith('#') || href.startsWith(canonicalOrigin + '/')));
+  const ids = [...result.html.matchAll(/\bid="([^"]+)"/g)].map(m => decode(m[1]));
   const images = tags(result.html, 'img');
   check(result.status === 200, `${path}: status ${result.status}`);
   check(canonical.length === 1 && canonical[0] === entry.url, `${path}: canonical mismatch`);
@@ -61,19 +63,42 @@ for (const entry of entries) {
   if (path.includes('/services/')) {
     check(Boolean(service && graph.some((s) => s['@type'] === 'BreadcrumbList')), `${path}: service/breadcrumb schema missing`);
     check(service?.url === entry.url, `${path}: Service URL mismatch`);
-  } else check(graph.some((s) => s['@type'] === 'Organization'), `${path}: organization missing`);
+  } else if (!path.includes('/articles')) check(graph.some((s) => s['@type'] === 'Organization'), `${path}: organization missing`);
+  if (path.includes('/articles/')) {
+    const article = graph.find(s => s['@type'] === 'Article');
+    check(Boolean(article && graph.some(s => s['@type'] === 'BreadcrumbList')), `${path}: article/breadcrumb schema missing`);
+    check(article?.mainEntityOfPage === entry.url && article?.inLanguage === path.split('/')[1], `${path}: article URL/language mismatch`);
+    check(Boolean(article?.datePublished && article?.dateModified && article.dateModified >= article.datePublished), `${path}: article dates invalid`);
+  } else if (path.endsWith('/articles')) {
+    check(graph.some(s => s['@type'] === 'BreadcrumbList'), `${path}: journal breadcrumb missing`);
+  }
   const faq = graph.find((s) => s['@type'] === 'FAQPage');
-  check(Boolean(faq), `${path}: FAQ schema missing`);
+  if (!path.includes('/articles')) check(Boolean(faq), `${path}: FAQ schema missing`);
   const visible = text(result.html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, ''));
   for (const question of faq?.mainEntity || []) check(visible.includes(question.name) && visible.includes(question.acceptedAnswer.text), `${path}: FAQ not in server HTML`);
   for (const href of internalLinks) {
-    const target = new URL(href, canonicalOrigin);
+    const target = new URL(href, entry.url);
     check(urls.has(target.origin + target.pathname), `${path}: internal link outside sitemap ${href}`);
   }
-  pages.push({path, status: result.status, title, description, h1, canonical, languages, httpLink: result.link, schemaTypes: graph.map((g) => g['@type']), internalLinks: [...new Set(internalLinks)], imageCount: images.length, emptyAltCount: images.filter((i) => i.alt === '').length, htmlBytes: Buffer.byteLength(result.html)});
+  pages.push({path, status: result.status, title, description, h1, canonical, languages, httpLink: result.link, schemaTypes: graph.map((g) => g['@type']), internalLinks: [...new Set(internalLinks)], ids, imageCount: images.length, emptyAltCount: images.filter((i) => i.alt === '').length, htmlBytes: Buffer.byteLength(result.html)});
 }
-check(new Set(pages.map((p) => p.title)).size === 18, 'Duplicate page titles');
-check(new Set(pages.map((p) => p.description)).size === 18, 'Duplicate descriptions');
+check(new Set(pages.map((p) => p.title)).size === pages.length, 'Duplicate page titles');
+check(new Set(pages.map((p) => p.description)).size === pages.length, 'Duplicate descriptions');
+const reachable = new Set(['/ru', '/sr', '/en']);
+for (let changed = true; changed;) {
+  changed = false;
+  for (const page of pages.filter(p => reachable.has(p.path))) for (const href of page.internalLinks) {
+    const target = new URL(href, canonicalOrigin + page.path);
+    if (!reachable.has(target.pathname)) {reachable.add(target.pathname); changed = true;}
+  }
+}
+for (const page of pages) {
+  check(reachable.has(page.path), `${page.path}: orphaned from home navigation`);
+  for (const href of page.internalLinks) {
+    const target = new URL(href, canonicalOrigin + page.path);
+    if (target.hash) check(pages.find(p => p.path === target.pathname)?.ids.includes(decodeURIComponent(target.hash.slice(1))), `${page.path}: broken fragment ${href}`);
+  }
+}
 const checks = [];
 for (const [path, expected] of [['/robots.txt',200],['/google5cb91d680e5bbb09.html',200],['/yandex_62602564e7246208.html',200],['/icon.svg',200],['/ru/',308],['/sr/',308],['/en/',308],['/ru/v2',308],['/sr/v2',308],['/en/v2',308],['/ru/services/not-a-service',404],['/sr/services/uborka-kvartir',404],['/en/services/ciscenje-stanova',404],['/ru/not-a-page',404],['/ru/de',404],['/missing-file.html',404]]) {
   const r = await get(path);

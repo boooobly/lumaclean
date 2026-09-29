@@ -68,7 +68,7 @@ export function articleLanguages(article?: Article) {
 }
 export function readingMinutes(article: Article, locale: Locale) {
   const t = article.translations[locale];
-  const words = [t.lead, ...t.sections.flatMap(s => [s.title, ...s.paragraphs, ...(s.bullets || []), s.tip || ""])].join(" ").split(/\s+/).length;
+  const words = [t.lead, ...t.sections.flatMap(s => [s.title, ...s.paragraphs, ...(s.bullets || []), s.tip || "", s.table?.caption || "", ...(s.table?.headings || []), ...(s.table?.rows.flat() || [])])].join(" ").split(/\s+/).length;
   return Math.max(1, Math.ceil(words / 180));
 }
 

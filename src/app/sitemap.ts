@@ -30,7 +30,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   });
   const published = getPublishedArticles();
   const absoluteLanguages = (languages: Record<string, string>) => Object.fromEntries(Object.entries(languages).map(([locale, path]) => [locale, base + path]));
-  const articleIndexes = published.length ? routing.locales.map(locale => ({url: base + '/' + locale + '/articles', changeFrequency: 'weekly' as const, priority: 0.7, alternates: {languages: absoluteLanguages(articleLanguages())}})) : [];
+  const journalLastModified = new Date(Math.max(Date.parse("2026-09-29"), ...published.map(article => Date.parse(article.updatedAt))));
+  const articleIndexes = published.length ? routing.locales.map(locale => ({url: base + '/' + locale + '/articles', lastModified: journalLastModified, changeFrequency: 'weekly' as const, priority: 0.7, alternates: {languages: absoluteLanguages(articleLanguages())}})) : [];
   const articlePages = published.flatMap(article => routing.locales.map(locale => ({url: base + articlePath(article, locale), lastModified: new Date(article.updatedAt), changeFrequency: 'monthly' as const, priority: 0.7, alternates: {languages: absoluteLanguages(articleLanguages(article))}})));
   return [...homePages, ...servicePages, ...articleIndexes, ...articlePages];
 }

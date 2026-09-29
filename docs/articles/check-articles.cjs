@@ -39,6 +39,28 @@ async function main() {
   const prod = {NODE_ENV: 'production', VERCEL_ENV: 'production', VERCEL: '1', ARTICLES_PREVIEW: '1'};
   const publicLoad = modules(prod);
   const publishedCount = publicLoad('@/lib/articles').getPublishedArticles().length;
+  const pricing = publicLoad('@/lib/pricing');
+  const paths = publicLoad('@/lib/articles/reading-paths').readingPaths.flatMap(p => p.ids);
+  assert.equal(new Set(paths).size, paths.length, 'Reading paths must not duplicate guides');
+  assert.equal([...paths].sort().join(','), publicLoad('@/lib/articles').getPublishedArticles().map(a => a.id).sort().join(','), 'All published guides need a reading path; no drafts');
+  const cost = publicLoad('@/lib/articles').getPublishedArticles().find(a => a.id === 'cost');
+  for (const locale of ['ru', 'sr', 'en']) {
+    const table = cost.translations[locale].sections.find(s => s.id === 'price-list').table;
+    assert.equal(table.headings.length, 4);
+    assert.equal(table.rows.length, 5);
+    table.rows.forEach((row, index) => {
+      assert.equal(row.length, table.headings.length);
+      assert.equal(row[0], pricing.priceAreaLabels[locale][index]);
+      ['regular', 'deep', 'move'].forEach((service, column) => {
+        assert.ok(row[column + 1].startsWith(pricing.formatRsd(pricing.priceMatrix[service][index], locale)));
+        assert.equal(row[column + 1].includes(' / '), index === 4, 'Only the last row is a per-m² rate');
+      });
+    });
+    const metadata = await publicLoad('@/app/[locale]/articles/page').generateMetadata({params: Promise.resolve({locale})});
+    assert.equal(metadata.openGraph.images.length, 1);
+    assert.equal(metadata.openGraph.locale, {ru:'ru_RU', sr:'sr_RS', en:'en_US'}[locale]);
+    assert.equal(metadata.twitter.card, 'summary_large_image');
+  }
   assert.equal(publicLoad('@/lib/articles').getVisibleArticles().length, publishedCount, 'Production must ignore the preview flag');
   for (const article of publicLoad('@/lib/articles').getVisibleArticles()) {
     const related = publicLoad('@/lib/articles').getRelatedArticles(article);
@@ -95,6 +117,11 @@ async function main() {
   for (const locale of ['ru', 'sr', 'en']) {
     const index = await page('/' + locale + '/articles');
     assert.equal(index.status, 200);
+    const indexSchemas = [...index.html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => JSON.parse(m[1]));
+    const collection = indexSchemas.flatMap(s => s['@graph'] || [s]).find(s => s['@type'] === 'CollectionPage');
+    assert.equal(collection.inLanguage, locale);
+    assert.equal(collection.mainEntity.itemListElement.length, mode === 'preview' ? allCount : publishedCount);
+    assert.ok(index.html.includes('id="journal-paths-title"'));
     for (const article of records) {
       const t = article.translations[locale];
       const route = catalog.articlePath(article, locale);
@@ -106,6 +133,10 @@ async function main() {
         continue;
       }
       assert.equal(result.status, 200, route);
+      if (article.id === 'cost') {
+        assert.match(result.html, /<table class="journal-data-table">/);
+        for (const row of t.sections.find(s => s.id === 'price-list').table.rows) for (const cell of row) assert.ok(result.html.includes(cell), 'Missing server-rendered price cell: ' + cell);
+      }
       assert.match(result.html, new RegExp('<html[^>]+lang="' + locale + '"'));
       assert.equal((result.html.match(/<h1[\s>]/g) || []).length, 1);
       assert.ok(result.html.includes(t.lead.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')), 'Server-rendered lead missing: ' + route);
