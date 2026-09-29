@@ -12,6 +12,7 @@ Current checkpoint. The September 24 report remains a historical snapshot. Scope
 - Indexing aggregate remains **29 indexed / 12 excluded**, but the report is still dated **September 21**. Seven historical invalid/mixed-locale 404s and five redirects; do not turn these into doorway pages.
 - Sitemap: successfully processed September 24, **63 discovered URLs**. No redundant resubmission.
 - Serbian office URL: indexed, smartphone crawl still **16 July**; declared and selected canonicals match. September 24 indexing request has not yet produced a new visible crawl date; no repeated request today.
+- Updated Serbian price guide: URL inspection still reports **unknown to Google / no recorded crawl**. After the production checks, one new indexing request was accepted into the priority crawl queue. This is not confirmation of indexing.
 - Core Web Vitals updated September 27: **insufficient field data for both mobile and desktop**. This is not a failed CWV assessment and not a pass.
 
 ### Yandex Webmaster
@@ -48,7 +49,23 @@ Current checkpoint. The September 24 report remains a historical snapshot. Scope
 - Lead delivery tests use mocked external calls: no real test enquiries sent.
 - Connected Vercel runtime-error scan before deployment: no clusters in the preceding seven days. This does not prove there were no validation errors or unsuccessful customer actions.
 
-Production rollout and targeted reindex confirmation will be recorded after verification.
+## Production rollout and post-deploy verification
+
+- Code commit: `6007337` (`Improve journal navigation and practical pricing SEO`).
+- Deployment `dpl_6srrhw6XNFppNhgY2TQwNQHNfvB4`: **READY**, production alias `https://lumacleanrs.com`; deployment URL `https://lumaclean-m3ft5uklv-vladislavs-projects-0eae0ea3.vercel.app`.
+- Repeated against the real domain: 63-page audit / 19 auxiliary checks / **zero issues**; article checks (45 URLs including draft isolation, 3 hubs, 246 internal links/anchors); all 18 existing price pages and 800 area/service cases: pass.
+- Real-domain browser checks: all six changed pages at 320/390/1440 px, no horizontal overflow or framework error overlay; browser error log empty. Inspected production desktop journal and Serbian mobile price-table screenshots.
+- Clicked the new Serbian journal reading-path link to the price guide, switched to its Russian translation, and followed the mobile price-list anchor: expected destinations/content confirmed. Analytics consent was declined during these tests.
+- Connected Vercel runtime scan after rollout: no runtime errors reported in the preceding hour. This is a bounded check, not a guarantee about all future visits.
+- Yandex accepted a five-URL batch **29 September, 13:12 (Webmaster UI time)**, each shown as **В очереди**: `/sr`, `/ru/articles`, `/sr/articles`, `/ru/articles/stoimost-uborki-kvartiry-v-belgrade`, `/sr/articles/od-cega-zavisi-cena-ciscenja-stana-beograd`.
+- Google accepted one request for the updated Serbian price guide. Previously queued office request was not repeated. Neither engine's queue status means an indexed result or a ranking improvement.
+- Reopened all five Google Business Profile service editors and confirmed the saved Serbian descriptions; no prices/categories changed.
+
+### Local evidence
+
+- HTTP report: `docs/seo-audit/checkpoint-production-2026-09-29.json`.
+- Production screenshots: `journal-production-2026-09-29.png`, `cost-production-mobile-2026-09-29.png` in `docs/seo-audit/`.
+- Saved browser confirmations in the same folder: `gbp-service-2026-09-29.png`, `ga4-errors-2026-09-29.png`, `yandex-reindex-2026-09-29.png`, `google-reindex-2026-09-29.png`.
 
 ## Remaining work, without photos/reviews
 
