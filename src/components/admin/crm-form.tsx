@@ -11,8 +11,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { CommandName } from "@/lib/validation/crm";
 import { extrasPrices } from "@/lib/pricing";
+import type { SchedulingIssue } from "@/lib/domain/scheduling-types";
 type Errors = { field: string; message: string }[];
-const FormContext = createContext<{ id: string; errors: Errors }>({
+export const FormContext = createContext<{ id: string; errors: Errors }>({
   id: "crm",
   errors: [],
 });
@@ -160,6 +161,9 @@ export function CrmForm({
       { id: string; name: string; phone: string }[]
     >([]),
     [allowDuplicate, setAllowDuplicate] = useState(false);
+  const [issues, setIssues] = useState<SchedulingIssue[]>([]),
+    [acknowledged, setAcknowledged] = useState(false),
+    [overrideReason, setOverrideReason] = useState("");
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy.current) return;
@@ -225,6 +229,10 @@ export function CrmForm({
           id,
           addressId: optional(f, "addressId") ?? undefined,
           order: order(f),
+          acknowledged: acknowledged
+            ? issues.filter((i) => i.severity === "WARNING").map((i) => i.key)
+            : [],
+          overrideReason: acknowledged ? overrideReason : null,
         };
         break;
     }
@@ -241,6 +249,7 @@ export function CrmForm({
       });
       const result = await response.json().catch(() => null);
       if (!response.ok || !result?.ok) {
+        setIssues(result?.issues ?? []);
         setErrors(result?.errors ?? []);
         setMessage(
           result?.matches?.length
@@ -252,6 +261,8 @@ export function CrmForm({
         return;
       }
       setMatches([]);
+      setIssues([]);
+      setAcknowledged(false);
       setOk(true);
       setMessage("Сохранено");
       if (redirectTo) router.push(redirectTo.replace("[id]", result.id));
@@ -271,6 +282,10 @@ export function CrmForm({
         onSubmit={submit}
         onChange={(e) => {
           const field = e.target.getAttribute("name");
+          if (field !== "scheduleAcknowledged" && field !== "overrideReason") {
+            setAcknowledged(false);
+            setIssues([]);
+          }
           if (field === "phone" || field === "clientId") {
             setMatches([]);
             setAllowDuplicate(false);
@@ -283,6 +298,42 @@ export function CrmForm({
         <fieldset disabled={pending} className="crm-form-fields">
           {children}
         </fieldset>
+        {issues.length > 0 && (
+          <aside className="schedule-issues" role="alert">
+            <strong>Проверка планирования</strong>
+            <ul>
+              {issues.map((i) => (
+                <li key={i.key}>
+                  <b>{i.severity === "ERROR" ? "Конфликт" : "Внимание"}</b> ·{" "}
+                  {i.message}
+                </li>
+              ))}
+            </ul>
+            {!issues.some((i) => i.severity === "ERROR") && (
+              <>
+                <label className="crm-check">
+                  <input
+                    name="scheduleAcknowledged"
+                    type="checkbox"
+                    checked={acknowledged}
+                    onChange={(e) => setAcknowledged(e.target.checked)}
+                  />
+                  Подтверждаю перечисленные предупреждения
+                </label>
+                <label htmlFor={formId + "-overrideReason"}>
+                  Причина подтверждения
+                </label>
+                <textarea
+                  id={formId + "-overrideReason"}
+                  name="overrideReason"
+                  maxLength={1000}
+                  value={overrideReason}
+                  onChange={(e) => setOverrideReason(e.target.value)}
+                />
+              </>
+            )}
+          </aside>
+        )}
         {matches.length > 0 && (
           <aside className="crm-duplicate" role="alert">
             <strong>Возможно, клиент уже существует</strong>

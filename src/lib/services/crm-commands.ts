@@ -11,6 +11,7 @@ import {
 } from "@/lib/domain/crm";
 import { quote, priceSnapshot } from "@/lib/domain/crm-pricing";
 import { writeAudit, type AuditChanges } from "./audit";
+import { lockCrew, enforceScheduling } from "./scheduling-commands";
 
 type Tx = Prisma.TransactionClient;
 export class DuplicateClientError extends CrmError {
@@ -421,13 +422,18 @@ export async function runCrmCommand(
       if (command === "order-update" || command === "order-status") {
         const v = commandSchemas[command].parse(payload);
         await lock(tx, "order", v.id);
-        const storedOrder = await tx.order.findUnique({where:{id:v.id}});
+        const storedOrder = await tx.order.findUnique({ where: { id: v.id } });
         if (!storedOrder) throw new CrmError("NOT_FOUND", "Заказ не найден");
         // One query at a time on the transaction connection. Prisma relation
         // loading otherwise runs sibling queries concurrently in adapter-pg.
-        const extras = await tx.orderExtra.findMany({where:{orderId:v.id}});
-        const service = await tx.service.findUniqueOrThrow({where:{id:storedOrder.serviceId},select:{code:true}});
-        const order = {...storedOrder,extras,service};
+        const extras = await tx.orderExtra.findMany({
+          where: { orderId: v.id },
+        });
+        const service = await tx.service.findUniqueOrThrow({
+          where: { id: storedOrder.serviceId },
+          select: { code: true },
+        });
+        const order = { ...storedOrder, extras, service };
         if (command === "order-status") {
           const input = commandSchemas[command].parse(payload);
           assertTransition("Order", order.status, input.status);
@@ -535,6 +541,44 @@ export async function runCrmCommand(
             clientComment: input.clientComment,
             internalComment: input.internalComment,
           };
+          if (
+            input.scheduleMode === "FLEXIBLE" &&
+            order.scheduleMode === "FLEXIBLE"
+          )
+            data.scheduledStart = input.scheduledStart
+              ? localInstant(input.scheduledStart)
+              : order.scheduledStart;
+          const planChanged = [
+            "scheduleMode",
+            "scheduledStart",
+            "windowFrom",
+            "windowTo",
+            "manualDurationMinutes",
+            "requiredCleaners",
+          ].some(
+            (key) =>
+              String(order[key as keyof typeof order]) !==
+              String(data[key as keyof typeof data]),
+          );
+          if (planChanged) {
+            const assignments = await tx.orderCleaner.findMany({
+              where: { orderId: order.id, removedAt: null },
+              select: { cleanerId: true },
+            });
+            const cleanerIds = assignments.map((a) => a.cleanerId);
+            if (
+              cleanerIds.length ||
+              (data.scheduleMode === "FLEXIBLE" && data.scheduledStart)
+            ) {
+              await lockCrew(tx, cleanerIds);
+              await enforceScheduling(
+                tx,
+                { ...order, ...data, cleanerIds },
+                userId,
+                update,
+              );
+            }
+          }
           const changes: AuditChanges = {
             changedFields: { before: null, after: changedFields(order, data) },
           };
@@ -553,6 +597,7 @@ export async function runCrmCommand(
             "basePrice",
             "discountAmount",
             "priceAdjustment",
+            "manualDurationMinutes",
           ] as const) {
             if (
               key in data &&
@@ -582,6 +627,10 @@ export async function runCrmCommand(
             });
           }
           await audit("ORDER_UPDATED", "Order", order.id, changes);
+          if (changes.manualDurationMinutes)
+            await audit("ORDER_DURATION_CHANGED", "Order", order.id, {
+              manualDurationMinutes: changes.manualDurationMinutes,
+            });
           if (
             changes.scheduledStart ||
             changes.windowFrom ||

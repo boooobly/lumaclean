@@ -1,12 +1,17 @@
 import { getLead, findClientOptions } from "@/lib/services/crm-queries";
 import { CrmHeader } from "@/components/admin/crm-view";
 import { OrderForm } from "@/components/admin/crm-fields";
+import { localInstant, localInput } from "@/lib/domain/crm";
 import type { ServiceId, extrasPrices } from "@/lib/pricing";
 export const metadata = { title: "Новый заказ" };
 export default async function NewOrder({
   searchParams,
 }: {
-  searchParams: Promise<{ leadId?: string; clientId?: string }>;
+  searchParams: Promise<{
+    leadId?: string;
+    clientId?: string;
+    scheduledStart?: string;
+  }>;
 }) {
   const query = await searchParams,
     lead = query.leadId ? await getLead(query.leadId) : null,
@@ -14,6 +19,12 @@ export default async function NewOrder({
   const client = clientId
     ? (await findClientOptions("", clientId))[0]
     : undefined;
+  let scheduledStart: string | undefined;
+  if (typeof query.scheduledStart === "string") {
+    try {
+      scheduledStart = localInput(localInstant(query.scheduledStart));
+    } catch {}
+  }
   return (
     <>
       <CrmHeader
@@ -39,6 +50,9 @@ export default async function NewOrder({
         value={
           lead
             ? {
+                ...(scheduledStart
+                  ? { scheduleMode: "FIXED", scheduledStart }
+                  : {}),
                 service: lead.service?.code as ServiceId,
                 area: Number(lead.area ?? 55),
                 urgent: lead.urgent,
@@ -48,7 +62,9 @@ export default async function NewOrder({
                   quantity: Number(e.quantity),
                 })),
               }
-            : undefined
+            : scheduledStart
+              ? { scheduleMode: "FIXED", scheduledStart }
+              : undefined
         }
       />
     </>

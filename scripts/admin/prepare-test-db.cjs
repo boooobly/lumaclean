@@ -22,7 +22,11 @@ command(process.execPath,[require.resolve('tsx/cli'),'prisma/seed.ts'],environme
 const sql=`INSERT INTO "Client" ("id","name","phone","updatedAt") VALUES ('legacy-client','Migration fixture','0641234567',now());
 INSERT INTO "ClientAddress" ("id","clientId","fullAddress","updatedAt") VALUES ('legacy-address','legacy-client','Migration fixture address',now());
 INSERT INTO "Lead" ("id","name","phone","updatedAt") VALUES ('legacy-lead','Migration fixture','0641234567',now());
-INSERT INTO "Order" ("id","clientId","addressId","serviceId","area","soilLevel","travelBufferMinutes","updatedAt") SELECT 'legacy-order','legacy-client','legacy-address',"id",55,'HEAVY',30,now() FROM "Service" WHERE "code"='regular';`;
+INSERT INTO "Order" ("id","clientId","addressId","serviceId","area","soilLevel","travelBufferMinutes","updatedAt") SELECT 'legacy-order','legacy-client','legacy-address',"id",55,'HEAVY',30,now() FROM "Service" WHERE "code"='regular';
+UPDATE "Order" SET "scheduledStart"='2026-10-10T12:00Z',"estimatedDurationMinutes"=150 WHERE "id"='legacy-order';
+INSERT INTO "Cleaner" ("id","name","phone","updatedAt") VALUES ('legacy-cleaner','Legacy cleaner','0641234567',now());
+INSERT INTO "CleanerAvailability" ("id","cleanerId","kind","weekday","startMinute","endMinute","updatedAt") VALUES ('legacy-hours','legacy-cleaner','WEEKLY',6,540,1200,now());
+INSERT INTO "OrderCleaner" ("id","orderId","cleanerId") VALUES ('legacy-assignment','legacy-order','legacy-cleaner');`;
 command('docker',['exec',container,'psql','-U','postgres','-d','lumaclean_migration_test','-v','ON_ERROR_STOP=1','-c',sql]);
 for(const name of ['lumaclean_admin_test','lumaclean_admin_bootstrap_test','lumaclean_migration_test']){
  command(process.execPath,[prisma,'migrate','deploy'],environment(name));
@@ -32,4 +36,4 @@ for(const name of ['lumaclean_admin_test','lumaclean_admin_bootstrap_test','luma
 command(process.execPath,[require.resolve('tsx/cli'),'prisma/seed.ts'],environment('lumaclean_admin_test'));
 const preserved=command('docker',['exec',container,'psql','-U','postgres','-d','lumaclean_migration_test','-t','-A','-c',`SELECT "soilLevel"::text || '|' || "reference" FROM "Order" WHERE "id"='legacy-order';`]);
 if(preserved.trim()!=='HEAVY|ORD-LEGACY-legacy-order')throw Error('Legacy order was not preserved');
-console.log('PASS: all four migrations, empty schema diff on three local databases, legacy soil/order/client/lead preserved. No remote databases accessed.');
+console.log('PASS: all five migrations, empty schema diff on three local databases, legacy soil/order/client/lead preserved. No remote databases accessed.');

@@ -20,7 +20,8 @@
     "db:seed": "prisma db seed",
     "admin:bootstrap": "tsx scripts/admin/bootstrap.ts",
     "test:admin": "tsx --test tests/admin/*.test.ts",
-    "test:crm": "tsx --test tests/crm/*.test.ts"
+    "test:crm": "tsx --test tests/crm/*.test.ts",
+    "test:scheduling": "tsx --test tests/scheduling/*.test.ts"
   },
   "dependencies": {
     "@js-temporal/polyfill": "0.5.1",

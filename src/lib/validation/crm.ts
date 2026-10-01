@@ -29,7 +29,12 @@ export const entityId = z
   .regex(/^[a-zA-Z0-9_-]+$/);
 const optionalId = entityId.nullable().optional();
 const number = (min: number, max: number) =>
-  z.number().finite().min(min).max(max).multipleOf(0.01, "Допустимо не более двух знаков после запятой");
+  z
+    .number()
+    .finite()
+    .min(min)
+    .max(max)
+    .multipleOf(0.01, "Допустимо не более двух знаков после запятой");
 export const extrasSchema = z
   .array(
     z
@@ -210,6 +215,8 @@ export const commandSchemas = {
       id: entityId,
       addressId: entityId.optional(),
       order: orderSchema,
+      acknowledged: z.array(z.string().max(300)).max(200).default([]),
+      overrideReason: text(1000),
     })
     .strict(),
   "order-status": z

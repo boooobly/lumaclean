@@ -119,6 +119,7 @@ model User {
   messages         Message[]
   notifications    Notification[]
   resolvedHandoffs HumanHandoff[]
+  schedulingOverrides SchedulingOverride[]
 }
 
 model Session {
@@ -388,6 +389,8 @@ model Order {
   discountPercent          Decimal         @default(0) @db.Decimal(5, 2)
   scheduleMode             ScheduleMode    @default(FIXED)
   scheduledStart           DateTime?       @db.Timestamptz(3)
+  // Derived from the selected duration by a database trigger, never a guessed formula.
+  scheduledEnd             DateTime?       @db.Timestamptz(3)
   windowFrom               DateTime?       @db.Timestamptz(3)
   windowTo                 DateTime?       @db.Timestamptz(3)
   estimatedDurationMinutes Int?
@@ -408,6 +411,7 @@ model Order {
   source                   Channel         @default(MANUAL)
   completedAt              DateTime?       @db.Timestamptz(3)
   assignments              OrderCleaner[]
+  schedulingOverrides      SchedulingOverride[]
   extras                   OrderExtra[]
   conversations            Conversation[]
   expenses                 Expense[]
@@ -416,6 +420,7 @@ model Order {
   updatedAt                DateTime        @updatedAt @db.Timestamptz(3)
 
   @@index([status, scheduledStart])
+  @@index([scheduledEnd])
   @@index([windowFrom, windowTo])
   @@index([status, completedAt])
   @@index([clientId])
@@ -436,10 +441,25 @@ model OrderCleaner {
   acceptedAt DateTime? @db.Timestamptz(3)
   startedAt  DateTime? @db.Timestamptz(3)
   finishedAt DateTime? @db.Timestamptz(3)
+  removedAt  DateTime? @db.Timestamptz(3)
   notes      String?
 
   @@unique([orderId, cleanerId])
   @@index([cleanerId])
+}
+
+// Reasons are kept in this protected business record, not copied into audit diffs.
+model SchedulingOverride {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  issueKeys String[]
+  reason    String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([orderId, createdAt])
 }
 
 model OrderExtra {

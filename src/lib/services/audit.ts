@@ -1,7 +1,8 @@
 import type { Prisma } from "@/generated/prisma/client";
 
 type Actor =
-  { type: "USER"; userId: string } | { type: "AI" | "SYSTEM"; key: string };
+  | { type: "USER"; userId: string }
+  | { type: "AI" | "SYSTEM"; key: string };
 type AuditedField =
   | "status"
   | "scheduledStart"
@@ -17,7 +18,10 @@ type AuditedField =
   | "basePrice"
   | "discountPercent"
   | "discountAmount"
-  | "priceAdjustment";
+  | "priceAdjustment"
+  | "manualDurationMinutes"
+  | "overrideCodes"
+  | "date";
 export type AuditChanges = Partial<
   Record<
     AuditedField,
@@ -28,7 +32,26 @@ export type AuditChanges = Partial<
   >
 >;
 
-const allowedFields = new Set<AuditedField>(["status","scheduledStart","windowFrom","windowTo","finalPrice","cleanerIds","active","changedFields","clientId","orderId","scheduleMode","basePrice","discountPercent","discountAmount","priceAdjustment"]);
+const allowedFields = new Set<AuditedField>([
+  "status",
+  "scheduledStart",
+  "windowFrom",
+  "windowTo",
+  "finalPrice",
+  "cleanerIds",
+  "active",
+  "changedFields",
+  "clientId",
+  "orderId",
+  "scheduleMode",
+  "basePrice",
+  "discountPercent",
+  "discountAmount",
+  "priceAdjustment",
+  "manualDurationMinutes",
+  "overrideCodes",
+  "date",
+]);
 // Commands pass the same transaction used for their business mutation.
 export async function writeAudit(
   tx: Prisma.TransactionClient,
@@ -40,7 +63,14 @@ export async function writeAudit(
     changes?: AuditChanges;
   },
 ) {
-  const safeChanges=event.changes ? Object.fromEntries(Object.entries(event.changes).filter(([key,value])=>allowedFields.has(key as AuditedField) && value!==undefined)) : undefined;
+  const safeChanges = event.changes
+    ? Object.fromEntries(
+        Object.entries(event.changes).filter(
+          ([key, value]) =>
+            allowedFields.has(key as AuditedField) && value !== undefined,
+        ),
+      )
+    : undefined;
   return tx.auditLog.create({
     data: {
       actorType: actor.type,

@@ -142,8 +142,8 @@ Admin foundation опубликован: `https://lumacleanrs.com/admin`. Сна
 
 1. Neon, migrations, реальный владелец и production release уже готовы. Перед следующим этапом сверить [admin-verification.md](admin-verification.md).
 2. CRM core готов: Leads/Clients/Orders, website intake, конвертация и транзакционный audit. Проверки и ограничения: [admin-crm.md](admin-crm.md).
-3. Карточки клинеров/расписания и назначения; согласовать формулы длительности и выплаты.
-4. Календарь и scheduling engine с конфликтами/буферами и корректным DST.
+3. Клинеры, графики, назначения и календарь реализованы: [admin-scheduling.md](admin-scheduling.md). Ручная длительность без новой формулы, выплаты остаются будущим этапом.
+4. Scheduling engine проверяет пересечения, часы/исключения, flexible window, численность и операционные буферы с корректным DST.
 5. Транспортный provider и route cache; затем оптимизация маршрутов.
 6. Finance workflow, payments/expenses/payouts и ограниченный кабинет клинера.
 7. Каналы сообщений, notifications, human handoff и только затем AI command layer с отдельными permissions.

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getOrderPlanning } from "@/lib/services/scheduling-queries";
+import { OrderPlanningPanel } from "@/components/admin/order-planning";
 import { getOrder } from "@/lib/services/crm-queries";
 import {
   CrmHeader,
@@ -24,6 +26,7 @@ export default async function OrderPage({
   const { id } = await params,
     o = await getOrder(id),
     editable = !["COMPLETED", "CANCELLED", "NO_SHOW"].includes(o.status);
+  const planning = await getOrderPlanning(id);
   return (
     <>
       <CrmHeader
@@ -200,6 +203,16 @@ export default async function OrderPage({
           )}
         </div>
       </div>
+      <OrderPlanningPanel
+        order={planning.order}
+        cleaners={planning.cleaners}
+        overrides={planning.overrides.map((r) => ({
+          id: r.id,
+          reason: r.reason,
+          createdAt: r.createdAt.toISOString(),
+          name: r.user.name,
+        }))}
+      />
       <History type="Order" id={id} />
     </>
   );

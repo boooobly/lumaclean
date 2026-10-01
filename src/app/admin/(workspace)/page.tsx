@@ -1,11 +1,21 @@
 import Link from "next/link";
+import { getCalendarData } from "@/lib/services/scheduling-queries";
+import { wallLabel } from "@/lib/domain/scheduling-types";
 import { getDashboard } from "@/lib/services/admin-dashboard";
-import {Chip,date} from "@/components/admin/crm-view";
+import { Chip, date } from "@/components/admin/crm-view";
 
 export const metadata = { title: "Главная" };
 
 export default async function DashboardPage() {
-  const data = await getDashboard();
+  const [data, schedule] = await Promise.all([
+    getDashboard(),
+    getCalendarData({ mode: "day" }),
+  ]);
+  const attention = schedule.orders.filter(
+    (o) =>
+      o.issues.length &&
+      !["CANCELLED", "NO_SHOW", "COMPLETED"].includes(o.status),
+  );
   const number = (value: number | string) =>
     new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(
       Number(value),
@@ -88,24 +98,35 @@ export default async function DashboardPage() {
               Календарь <span aria-hidden="true">↗</span>
             </Link>
           </div>
-          <div className="admin-empty">
-            <span className="admin-empty-mark" aria-hidden="true">
-              └
-            </span>
-            <h3>
-              {data.today === 0
-                ? "На сегодня уборок нет"
-                : `Уборок сегодня: ${number(data.today)}`}
-            </h3>
-            <p>
-              {data.today === 0
-                ? "Когда появятся подтверждённые заказы, здесь будет видна загрузка дня. Заявки ждут согласования в своём разделе."
-                : "Количество учитывает подтверждённые, текущие и завершённые уборки. Подробное расписание появится на этапе календаря."}
+          {schedule.orders.length ? (
+            <ul className="crm-linked-list">
+              {schedule.orders.slice(0, 10).map((o) => (
+                <li key={o.id}>
+                  <Link href={"/admin/orders/" + o.id}>
+                    {wallLabel(o.start)} · {o.client}
+                    <small>
+                      {o.service} ·{" "}
+                      {o.cleaners.map((c) => c.name).join(", ") ||
+                        "Без команды"}{" "}
+                      · {o.cleaners.length}/{o.requiredCleaners}
+                    </small>
+                  </Link>
+                  <Chip status={o.status} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="admin-empty">
+              <h3>На сегодня уборок нет</h3>
+              <p>Создайте заказ или разместите согласованное гибкое окно.</p>
+              <Link href="/admin/orders/new">Создать заказ →</Link>
+            </div>
+          )}
+          {schedule.orders.length > 10 && (
+            <p className="crm-hint">
+              Показаны первые 10 уборок. Полный день — в календаре.
             </p>
-            <Link className="admin-text-link" href="/admin/leads">
-              Перейти к заявкам <span aria-hidden="true">↗</span>
-            </Link>
-          </div>
+          )}
         </section>
         <section className="admin-finance-summary">
           <div className="admin-section-heading">
@@ -135,9 +156,59 @@ export default async function DashboardPage() {
           </Link>
         </section>
       </div>
+      <section className="crm-section">
+        <div className="admin-section-heading">
+          <h2>Требует внимания · сегодня</h2>
+          <Link href="/admin/calendar?mode=day">Проверить день →</Link>
+        </div>
+        {attention.length ? (
+          <ul className="crm-linked-list">
+            {attention.slice(0, 8).map((o) => (
+              <li key={o.id}>
+                <Link href={"/admin/orders/" + o.id}>
+                  {o.reference} · {o.client}
+                  <small>{o.issues.map((i) => i.message).join(" · ")}</small>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="crm-hint">
+            В расписании на сегодня предупреждений нет. Проверка дороги пока
+            недоступна.
+          </p>
+        )}
+        {attention.length > 8 && (
+          <p>
+            Ещё {attention.length - 8} заказов требуют проверки в календаре.
+          </p>
+        )}
+      </section>
       <section className="crm-section crm-latest">
-        <div className="admin-section-heading"><h2>Последние заявки</h2><Link href="/admin/leads">Все заявки →</Link></div>
-        {data.latestLeads.length ? <ul className="crm-linked-list">{data.latestLeads.map(lead=><li key={lead.id}><Link href={`/admin/leads/${lead.id}`}>{lead.name}<small>{date(lead.createdAt)} · {lead.service?.name ?? "Услуга не указана"}</small></Link><Chip status={lead.status}/></li>)}</ul> : <p className="crm-hint">Новые обращения появятся здесь после отправки формы на сайте.</p>}
+        <div className="admin-section-heading">
+          <h2>Последние заявки</h2>
+          <Link href="/admin/leads">Все заявки →</Link>
+        </div>
+        {data.latestLeads.length ? (
+          <ul className="crm-linked-list">
+            {data.latestLeads.map((lead) => (
+              <li key={lead.id}>
+                <Link href={`/admin/leads/${lead.id}`}>
+                  {lead.name}
+                  <small>
+                    {date(lead.createdAt)} ·{" "}
+                    {lead.service?.name ?? "Услуга не указана"}
+                  </small>
+                </Link>
+                <Chip status={lead.status} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="crm-hint">
+            Новые обращения появятся здесь после отправки формы на сайте.
+          </p>
+        )}
       </section>
       <section className="admin-next">
         <span className="admin-eyebrow">Рабочий порядок</span>

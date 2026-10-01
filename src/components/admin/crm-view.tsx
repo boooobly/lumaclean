@@ -256,6 +256,18 @@ export function Facts({ items }: { items: [string, ReactNode][] }) {
   );
 }
 const actionLabels: Record<string, string> = {
+  CLEANER_CREATED: "Клинер создан",
+  CLEANER_UPDATED: "Клинер изменён",
+  CLEANER_ACTIVITY_CHANGED: "Активность клинера изменена",
+  AVAILABILITY_WEEK_UPDATED: "Недельный график изменён",
+  AVAILABILITY_EXCEPTION_UPDATED: "Исключение по дате сохранено",
+  AVAILABILITY_EXCEPTION_REMOVED: "Исключение убрано",
+  CLEANER_ASSIGNED: "Клинер назначен",
+  CLEANER_UNASSIGNED: "Назначение снято",
+  ORDER_DURATION_CHANGED: "Плановая длительность изменена",
+  ORDER_DRAGGED: "Заказ перенесён в календаре",
+  ORDER_UNPLACED: "Гибкий заказ снят с календаря",
+  SCHEDULING_OVERRIDE: "Предупреждения явно подтверждены",
   LEAD_CREATED: "Заявка создана",
   LEAD_STATUS_CHANGED: "Статус заявки изменён",
   LEAD_NOTE_CHANGED: "Внутренняя заметка изменена",
@@ -321,11 +333,7 @@ export async function History({ type, id }: { type: string; id: string }) {
                     </p>
                   )}
                   {diff?.active && (
-                    <p>
-                      {diff.active.after
-                        ? "Адрес активирован"
-                        : "Адрес деактивирован"}
-                    </p>
+                    <p>{diff.active.after ? "Активирован" : "Деактивирован"}</p>
                   )}
                   {["scheduledStart", "windowFrom", "windowTo"].map((key) => {
                     const change = diff?.[key as "scheduledStart"];
