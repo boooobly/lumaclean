@@ -421,11 +421,13 @@ export async function runCrmCommand(
       if (command === "order-update" || command === "order-status") {
         const v = commandSchemas[command].parse(payload);
         await lock(tx, "order", v.id);
-        const order = await tx.order.findUnique({
-          where: { id: v.id },
-          include: { extras: true, service: { select: { code: true } } },
-        });
-        if (!order) throw new CrmError("NOT_FOUND", "Заказ не найден");
+        const storedOrder = await tx.order.findUnique({where:{id:v.id}});
+        if (!storedOrder) throw new CrmError("NOT_FOUND", "Заказ не найден");
+        // One query at a time on the transaction connection. Prisma relation
+        // loading otherwise runs sibling queries concurrently in adapter-pg.
+        const extras = await tx.orderExtra.findMany({where:{orderId:v.id}});
+        const service = await tx.service.findUniqueOrThrow({where:{id:storedOrder.serviceId},select:{code:true}});
+        const order = {...storedOrder,extras,service};
         if (command === "order-status") {
           const input = commandSchemas[command].parse(payload);
           assertTransition("Order", order.status, input.status);

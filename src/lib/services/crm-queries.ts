@@ -27,7 +27,7 @@ export async function listLeads(query: Query) {
     options = listOptions(query),
     where = leadWhere(query);
   const [count, rows] = await read(() =>
-    db.$transaction([
+    Promise.all([
       db.lead.count({ where }),
       db.lead.findMany({
         where,
@@ -57,7 +57,7 @@ export async function listClients(query: Query) {
     options = listOptions(query),
     where = clientWhere(query);
   const [count, rows] = await read(() =>
-    db.$transaction([
+    Promise.all([
       db.client.count({ where }),
       db.client.findMany({
         where,
@@ -110,7 +110,7 @@ export async function listOrders(query: Query) {
     options = listOptions(query),
     where = orderWhere(query);
   const [count, rows] = await read(() =>
-    db.$transaction([
+    Promise.all([
       db.order.count({ where }),
       db.order.findMany({
         where,
@@ -203,7 +203,7 @@ export async function getClient(id: string) {
   );
   if (!client) notFound();
   const [stats, last] = await read(() =>
-    db.$transaction([
+    Promise.all([
       db.order.aggregate({
         where: { clientId: id, status: "COMPLETED", currency: "RSD" },
         _sum: { finalPrice: true },

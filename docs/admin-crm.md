@@ -84,6 +84,8 @@ CANCELLED/NO_SHOW требуют cancellationReason. COMPLETED требует fi
 
 Миграции: `20261001120000_crm_core` и `20261001121000_crm_search_indexes`. Soil меняет тип через USING cast, не DROP COLUMN; неизвестный legacy soil останавливает migration для ручной проверки. Legacy references заполняются без удаления записей. Release сначала preview Neon, затем после всех проверок production `migrate deploy` через DIRECT_URL, phone backfill и schema diff. Никаких reset/db push. Развёртывание только в существующий Vercel project.
 
+Чтение независимых агрегатов и реестров использует pool через `Promise.all`, без общей транзакции соединения. Business mutations остаются в одной транзакции; зависимые чтения заказа, extras и service внутри неё выполняются последовательно. Это устраняет воспроизведённое предупреждение pg 8.23 о параллельных запросах на одном client, не подавляя журналы.
+
 ## Ограничения следующего этапа
 
 Нет автоматического фонового retry Telegram: FAILED/PENDING видны в карточке, Lead сохранён. При остановке процесса между commit и доставкой остаётся PENDING; повтор submission не отправляет уведомление заново. Exactly-once внешняя доставка не обещается; дальнейший этап — durable outbox с контролируемым retry.

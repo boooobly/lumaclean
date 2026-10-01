@@ -15,7 +15,7 @@ export async function getDashboard() {
     settings.timezone,
   );
   const [today, leads, clients, cleaners, revenue, expenses, latestLeads] =
-    await db.$transaction([
+    await Promise.all([
       db.order.count({
         where: {
           status: { in: ["CONFIRMED", "SCHEDULED", "EN_ROUTE", "IN_PROGRESS", "COMPLETED"] },
