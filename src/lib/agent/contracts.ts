@@ -40,7 +40,9 @@ export const toolDescriptions:Record<ToolName,string> = {
   rescheduleOrder:"Move ONLY current conversation's existing order, after explicit request to reschedule, verified identity, fresh validated recap and explicit confirmation. No override or completed orders.",
   requestHumanHandoff:"Escalate complaint, discount, mold, renovation, unavailable rules/routes/prices, repeated errors or uncertainty. Never solve exceptional cases or claim a booking that failed.",
 };
-export const nativeTools = Object.entries(toolSchemas).map(([name,schema])=>({type:"function" as const,function:{name,description:toolDescriptions[name as ToolName],parameters:z.toJSONSchema(schema,{target:"draft-7"})}}));
+// Responses otherwise normalizes optional contact fields into required fields.
+// Argument validation remains strict on the server, including rejection of extra fields.
+export const nativeTools = Object.entries(toolSchemas).map(([name,schema])=>({type:"function" as const,function:{name,description:toolDescriptions[name as ToolName],strict:false,parameters:z.toJSONSchema(schema,{target:"draft-7"})}}));
 export type Qualification = z.infer<typeof qualificationSchema>;
 export type AgentState = {
   name?:string; phone?:string; qualification?:Qualification;

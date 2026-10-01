@@ -91,7 +91,9 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
     }else if(input.action==="read"){
       await tx.conversation.update({where:{id:c.id},data:{unreadCount:0}});
     }else if(input.action==="retry"){
-      await tx.agentJob.updateMany({where:{conversationId:c.id,status:{in:["FAILED","PENDING"]}},data:{status:"PENDING",leaseUntil:null,leaseKey:null,errorCode:null}});
+      const retried=await tx.agentJob.updateMany({where:{conversationId:c.id,status:{in:["FAILED","PENDING"]}},data:{status:"PENDING",leaseUntil:null,leaseKey:null,errorCode:null,completedAt:null}});
+      // A new revision also produces a new queue idempotency key for an explicit owner retry.
+      if(retried.count)await tx.conversation.update({where:{id:c.id},data:{revision:{increment:1},shadowProposal:Prisma.DbNull,needsAttention:true}});
     }else{
       const state=stateOf(c);delete state.pending;
       const control=input.action==="takeover"?"HUMAN_CONTROL":input.action==="close"?"CLOSED":"AI_CONTROL";
