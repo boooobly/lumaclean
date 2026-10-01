@@ -1,5 +1,6 @@
 import { CrmHeader } from "@/components/admin/crm-view";
 import { getDurationAnalytics } from "@/lib/services/finance-queries";
+import { AIAnalytics } from "@/components/admin/ai-analytics";
 export const metadata = { title: "Точность планирования" };
 export default async function Analytics() {
   const data = await getDurationAnalytics();
@@ -9,6 +10,7 @@ export default async function Analytics() {
         title="Аналитика"
         subtitle="Точность планирования · только завершённые заказы с фактическим временем."
       />
+      <AIAnalytics />
       <section className="crm-section">
         <h2>Плановая и фактическая длительность</h2>
         <p>

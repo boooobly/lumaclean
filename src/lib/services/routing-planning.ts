@@ -167,7 +167,7 @@ export async function dayLogistics(
     version: snapshot.version,
   };
 }
-export async function findSlots(db: RoutingDb, payload: unknown) {
+export async function findSlots(db: RoutingDb, payload: unknown, options: { reserveMinutes?: number; cacheOnly?: boolean; allowReschedule?: boolean } = {}) {
   const input = routingSchemas.slots.parse(payload),
     snapshot = await routingSnapshot(db, input.date),
     stored = input.orderId
@@ -218,7 +218,7 @@ export async function findSlots(db: RoutingDb, payload: unknown) {
     estimatedDurationMinutes: null,
     requiredCleaners: input.requiredCleaners,
     travelBufferMinutes: stored?.travelBufferMinutes ?? snapshot.defaultBuffer,
-    cleaningReserveMinutes: stored?.cleaningReserveMinutes ?? 0,
+    cleaningReserveMinutes: stored?.cleaningReserveMinutes ?? options.reserveMinutes ?? 0,
     cleanerIds:
       snapshot.orders.find((o) => o.id === stored?.id)?.cleanerIds ?? [],
     point: address
@@ -232,7 +232,9 @@ export async function findSlots(db: RoutingDb, payload: unknown) {
   };
   // A fixed agreement keeps its time. An unconfirmed draft can search a new fixed time without changing it yet.
   const searching =
-    stored?.scheduleMode === "FIXED" && stored.status !== "DRAFT"
+    options.allowReschedule
+      ? {...order,scheduleMode:"FLEXIBLE" as const,windowFrom:from,windowTo:to}
+      : stored?.scheduleMode === "FIXED" && stored.status !== "DRAFT"
       ? order
       : {
           ...order,
@@ -247,7 +249,7 @@ export async function findSlots(db: RoutingDb, payload: unknown) {
               : to,
         };
   const table = await new RoutingService(db).prepare(
-      preparationRequests(snapshot, [searching]),
+      preparationRequests(snapshot, [searching]), options.cacheOnly ?? false,
     ),
     slots = AvailabilityService.findAvailableSlots(searching, snapshot, table);
   return {

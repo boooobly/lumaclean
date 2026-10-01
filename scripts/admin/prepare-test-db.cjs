@@ -18,7 +18,8 @@ writeFileSync(path.join(staging,'migration_lock.toml'),'provider = "postgresql"\
 const oldSchema=path.resolve('artifacts/admin/foundation.prisma');writeFileSync(oldSchema,command('git',['show','codex/admin-foundation:prisma/schema.prisma']));
 const config=path.resolve('artifacts/admin/migration-old.config.ts');writeFileSync(config,`import {defineConfig} from "prisma/config"; export default defineConfig({schema:${JSON.stringify(oldSchema)},migrations:{path:${JSON.stringify(staging)}},datasource:{url:"postgresql://postgres@127.0.0.1:55439/lumaclean_migration_test"}});`);
 command(process.execPath,[prisma,'migrate','deploy','--config',config],environment('lumaclean_migration_test'));
-command(process.execPath,[require.resolve('tsx/cli'),'prisma/seed.ts'],environment('lumaclean_migration_test'));
+// Current Prisma client cannot seed a foundation-era schema with newer columns.
+command('docker',['exec',container,'psql','-U','postgres','-d','lumaclean_migration_test','-v','ON_ERROR_STOP=1','-c',`INSERT INTO "Service" (id,code,name,"updatedAt") VALUES ('foundation-regular','regular','Legacy fixture',now());`]);
 const sql=`INSERT INTO "Client" ("id","name","phone","updatedAt") VALUES ('legacy-client','Migration fixture','0641234567',now());
 INSERT INTO "ClientAddress" ("id","clientId","fullAddress","updatedAt") VALUES ('legacy-address','legacy-client','Migration fixture address',now());
 INSERT INTO "Lead" ("id","name","phone","updatedAt") VALUES ('legacy-lead','Migration fixture','0641234567',now());
@@ -36,4 +37,4 @@ for(const name of ['lumaclean_admin_test','lumaclean_admin_bootstrap_test','luma
 command(process.execPath,[require.resolve('tsx/cli'),'prisma/seed.ts'],environment('lumaclean_admin_test'));
 const preserved=command('docker',['exec',container,'psql','-U','postgres','-d','lumaclean_migration_test','-t','-A','-c',`SELECT "soilLevel"::text || '|' || "reference" FROM "Order" WHERE "id"='legacy-order';`]);
 if(preserved.trim()!=='HEAVY|ORD-LEGACY-legacy-order')throw Error('Legacy order was not preserved');
-console.log('PASS: all six migrations, empty schema diff on three local databases, legacy soil/order/client/lead preserved. No remote databases accessed.');
+console.log('PASS: all eight migrations, empty schema diff on three local databases, legacy soil/order/client/lead preserved. No remote databases accessed.');

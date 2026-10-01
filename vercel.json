@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "src/app/api/queues/agent/route.ts": {
+      "experimentalTriggers": [{"type":"queue/v2beta","topic":"lumaclean-agent","retryAfterSeconds":200}]
+    }
+  },
+  "crons": [{"path":"/api/agent/recover","schedule":"0 6 * * *"}]
+}

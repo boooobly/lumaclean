@@ -1,0 +1,6 @@
+import Link from "next/link";
+import {getDatabase} from "@/lib/database/client";
+export async function AIInboxSummary(){
+  const db=getDatabase(),[count,rows]=await Promise.all([db.conversation.count({where:{needsAttention:true,control:{not:"CLOSED"}}}),db.conversation.findMany({where:{needsAttention:true,control:{not:"CLOSED"}},take:5,orderBy:{lastMessageAt:"desc"},include:{client:{select:{name:true}},order:{select:{reference:true}},handoffs:{where:{resolvedAt:null},take:1}}})]);
+  return <section className="crm-section"><div className="admin-section-heading"><h2>Диалоги · требуют внимания: {count}</h2><Link href="/admin/messages?filter=HANDOFF">Inbox →</Link></div>{rows.length?<ul className="crm-linked-list">{rows.map(c=><li key={c.id}><Link href={`/admin/messages/${c.id}`}>{c.client?.name??"Новый диалог"}<small>{c.order?`AI-запись · ${c.order.reference}`:c.handoffs[0]?`Передача человеку · ${c.handoffs[0].reason}`:c.shadowProposal?"AI предложил ответ · SHADOW":"Клиент ожидает ответа"} · {c.channel}</small></Link></li>)}</ul>:<p className="crm-hint">Все диалоги обработаны. Новые сообщения, handoff и AI-записи появятся здесь.</p>}</section>;
+}

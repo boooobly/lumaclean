@@ -556,6 +556,25 @@ model Conversation {
   order            Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
   messages         Message[]
   handoffs         HumanHandoff[]
+  control          ConversationControl @default(AI_CONTROL)
+  stage            ConversationStage @default(DISCOVERY)
+  locale           String @default("ru")
+  state            Json @default("{}")
+  summary          String?
+  anonymousHash    String? @unique
+  sessionExpiresAt DateTime? @db.Timestamptz(3)
+  identityVerified Boolean @default(false)
+  ownerId          String?
+  revision         Int @default(0)
+  unreadCount      Int @default(0)
+  needsAttention   Boolean @default(false)
+  lastMessageAt    DateTime @default(now()) @db.Timestamptz(3)
+  shadowProposal   Json?
+  shadowState      Json @default("{}")
+  jobs             AgentJob[]
+  invocations      AIInvocation[]
+  toolTraces       AgentToolTrace[]
+  slots            AgentSlot[]
   createdAt        DateTime       @default(now()) @db.Timestamptz(3)
   updatedAt        DateTime       @updatedAt @db.Timestamptz(3)
 
@@ -563,6 +582,8 @@ model Conversation {
   @@index([clientId])
   @@index([leadId])
   @@index([orderId])
+  @@index([control, lastMessageAt])
+  @@index([needsAttention, lastMessageAt])
 }
 
 model Message {
@@ -575,6 +596,11 @@ model Message {
   text              String
   sentAt            DateTime      @default(now()) @db.Timestamptz(3)
   externalMessageId String?
+  deliveryStatus    String @default("DELIVERED")
+  deliveryError     String?
+  deliveryAttempts  Int @default(0)
+  channelMessageId  String?
+  structured        Json?
 
   @@unique([conversationId, externalMessageId])
   @@index([conversationId, sentAt])
@@ -680,7 +706,98 @@ model BusinessSettings {
   defaultCleanerPayoutPercent Decimal? @db.Decimal(5, 2)
   workdayStartMinute          Int?
   workdayEndMinute            Int?
+  aiAgentMode                 AgentMode @default(SHADOW)
   updatedAt                   DateTime @updatedAt @db.Timestamptz(3)
+}
+
+enum AgentMode {
+  OFF
+  SHADOW
+  AUTO
+}
+enum ConversationControl {
+  AI_CONTROL
+  HUMAN_CONTROL
+  CLOSED
+}
+enum ConversationStage {
+  DISCOVERY
+  QUALIFYING
+  QUOTING
+  SCHEDULING
+  AWAITING_CONFIRMATION
+  BOOKED
+  HANDOFF
+  CLOSED
+}
+// A persisted inbox job survives process death. Lease + conversation lock prevent concurrent turns.
+model AgentJob {
+  id String @id @default(cuid())
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  messageId String @unique
+  status String @default("PENDING")
+  attempts Int @default(0)
+  leaseUntil DateTime? @db.Timestamptz(3)
+  leaseKey String?
+  errorCode String?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  completedAt DateTime? @db.Timestamptz(3)
+  @@index([status, leaseUntil, createdAt])
+  @@index([conversationId, createdAt])
+}
+model AIInvocation {
+  id String @id @default(cuid())
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  jobId String
+  provider String
+  model String
+  inputTokens Int @default(0)
+  cachedInputTokens Int @default(0)
+  outputTokens Int @default(0)
+  latencyMs Int
+  estimatedCostUsd Decimal? @db.Decimal(12, 8)
+  toolCallCount Int @default(0)
+  success Boolean
+  errorCode String?
+  mode AgentMode
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([createdAt, provider, model])
+  @@index([conversationId, createdAt])
+}
+// Allowlisted diagnostics only; no raw arguments, full prompts, contacts or reasoning.
+model AgentToolTrace {
+  id String @id @default(cuid())
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  jobId String
+  tool String
+  outcome String
+  entityId String?
+  latencyMs Int
+  shadow Boolean
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([conversationId, createdAt])
+  @@index([createdAt, outcome])
+}
+// Opaque random token, scoped to one conversation and its quote/address/duration/revision.
+model AgentSlot {
+  id String @id @default(uuid())
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  fingerprint String
+  scheduleVersion String
+  start DateTime @db.Timestamptz(3)
+  durationMinutes Int
+  requiredCleaners Int
+  cleanerIds String[]
+  routingSnapshot Json
+  expiresAt DateTime @db.Timestamptz(3)
+  usedAt DateTime? @db.Timestamptz(3)
+  result Json?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([conversationId, expiresAt])
 }
 
 // Preview is owner-bound. Applying selected rows is explicit and transactional.

@@ -3,6 +3,7 @@ import { getCalendarData } from "@/lib/services/scheduling-queries";
 import { wallLabel } from "@/lib/domain/scheduling-types";
 import { getDashboard } from "@/lib/services/admin-dashboard";
 import { Chip, date } from "@/components/admin/crm-view";
+import { AIInboxSummary } from "@/components/admin/ai-inbox-summary";
 
 export const metadata = { title: "Главная" };
 
@@ -210,6 +211,7 @@ export default async function DashboardPage() {
           </p>
         )}
       </section>
+      <AIInboxSummary />
       <section className="admin-next">
         <span className="admin-eyebrow">Рабочий порядок</span>
         <h2>

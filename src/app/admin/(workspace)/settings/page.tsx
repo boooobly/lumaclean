@@ -6,15 +6,19 @@ import {
   DurationRulesEditor,
 } from "@/components/admin/finance-forms";
 import { getDurationSettings } from "@/lib/services/finance-queries";
+import { AgentModeControl } from "@/components/admin/inbox-controls";
+import { getDatabase } from "@/lib/database/client";
 export const metadata = { title: "Настройки бизнеса" };
 export default async function Settings() {
   const data = await getDurationSettings();
+  const ai = await getDatabase().businessSettings.findUniqueOrThrow({where:{id:"default"},select:{aiAgentMode:true}});
   return (
     <>
       <CrmHeader
         title="Настройки"
         subtitle="Правила длительности и условий выплат."
       />
+      <AgentModeControl mode={ai.aiAgentMode} enabled={process.env.AI_AGENT_ENABLED === "true"} />
       <section className="crm-section">
         <h2>Основные правила</h2>
         <dl className="crm-facts">

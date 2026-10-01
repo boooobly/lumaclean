@@ -20,7 +20,8 @@ function createAuth() {
   return betterAuth({
     appName: "LumaClean Admin",
     logger: { disabled: true },
-    baseURL: process.env.BETTER_AUTH_URL,
+    baseURL: process.env.VERCEL_ENV==='preview'&&process.env.VERCEL_URL?`https://${process.env.VERCEL_URL}`:process.env.BETTER_AUTH_URL,
+    trustedOrigins: [process.env.BETTER_AUTH_URL!,...(process.env.VERCEL_ENV==='preview'&&process.env.VERCEL_URL?[`https://${process.env.VERCEL_URL}`]:[])],
     secret: process.env.BETTER_AUTH_SECRET,
     database: prismaAdapter(db, { provider: "postgresql" }),
     emailAndPassword: {
