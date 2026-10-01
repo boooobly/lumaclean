@@ -22,7 +22,8 @@
     "test:admin": "tsx --test tests/admin/*.test.ts",
     "test:crm": "tsx --test tests/crm/*.test.ts",
     "test:scheduling": "tsx --test tests/scheduling/*.test.ts",
-    "test:routing": "tsx --test tests/routing/*.test.ts"
+    "test:routing": "tsx --test tests/routing/*.test.ts",
+    "test:finance": "tsx --test tests/finance/*.test.ts"
   },
   "dependencies": {
     "@js-temporal/polyfill": "0.5.1",
@@ -31,6 +32,7 @@
     "@prisma/client": "7.10.0",
     "@vercel/functions": "3.9.9",
     "better-auth": "1.7.7",
+    "exceljs": "4.4.0",
     "gsap": "^3.15.0",
     "libphonenumber-js": "1.13.14",
     "lucide-react": "^1.24.0",
@@ -60,6 +62,9 @@
     },
     "prisma": {
       "mysql2": "3.24.5"
+    },
+    "exceljs": {
+      "uuid": "11.1.1"
     }
   }
 }

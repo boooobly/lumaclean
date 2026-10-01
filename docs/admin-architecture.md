@@ -2,6 +2,8 @@
 
 Обновлено для этапа 2, CRM core, 1 октября 2026. Работающие Leads, Clients и Orders поверх фундамента диспетчерской и ERP. Подробные workflow, ограничения и результаты выпуска: [admin-crm.md](admin-crm.md).
 
+Этап финансов, правил длительности и legacy Excel описан в [admin-finance-duration.md](admin-finance-duration.md). Текущие CRM, календарь и маршрутизация сохранены; финансовые снимки, preview/apply и дополнительные ограничения добавлены отдельным слоем.
+
 ## 1. Границы и стек
 
 Публичные маршруты `/{locale}/...` сохраняют свой root layout, next-intl, SEO, аналитику, калькулятор и Telegram `/api/lead`. `/admin/...` имеет отдельный root layout с `lang="ru"`, Onest/Golos Text, общими brand tokens и собственным `admin.css`. Locale proxy исключает только `/admin` и его дочерние пути. Маркетинговые CSS в админку не импортируются.

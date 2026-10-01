@@ -11,6 +11,7 @@ import {
   money,
 } from "@/components/admin/crm-view";
 import { CrmForm, Field } from "@/components/admin/crm-form";
+import { OrderEconomics } from "@/components/admin/order-economics";
 import {
   orderLabels,
   orderTransitions,
@@ -53,7 +54,23 @@ export default async function OrderPage({
               ["Площадь", `${o.area} м²`],
               ["Загрязнение", o.soilLevel ? soilLabels[o.soilLevel] : "—"],
               ["Срочность", o.urgent ? "Да" : "Нет"],
-              ["Клинеров необходимо", o.requiredCleaners],
+              [
+                "Клинеров необходимо",
+                o.historical ? "Команда не восстановлена" : o.requiredCleaners,
+              ],
+              [
+                "Версия расчёта",
+                o.durationRuleVersion === null
+                  ? "Не настроено"
+                  : "v" + o.durationRuleVersion,
+              ],
+              ["Причина ручной длительности", o.durationOverrideReason],
+              [
+                "Происхождение",
+                o.historical
+                  ? "Excel import · legacy ID " + o.legacyId
+                  : "Рабочий заказ",
+              ],
               [
                 "Расчётная длительность",
                 o.estimatedDurationMinutes
@@ -213,8 +230,28 @@ export default async function OrderPage({
           name: r.user.name,
         }))}
       />
+      {o.status === "COMPLETED" && (
+        <OrderEconomics
+          id={id}
+          price={Number(o.finalPrice)}
+          updatedAt={o.updatedAt.toISOString()}
+          historical={o.historical}
+          planned={o.manualDurationMinutes ?? o.estimatedDurationMinutes}
+          actual={o.actualDurationMinutes}
+          ruleVersion={o.durationRuleVersion}
+          overrideReason={o.durationOverrideReason}
+        />
+      )}
       <History type="Order" id={id} />
-      <RoutingWorkspace date={(planning.order.localStart||planning.order.windowFrom||new Date().toISOString()).slice(0,10)} order={planning.order} cleaners={planning.cleaners} />
+      <RoutingWorkspace
+        date={(
+          planning.order.localStart ||
+          planning.order.windowFrom ||
+          new Date().toISOString()
+        ).slice(0, 10)}
+        order={planning.order}
+        cleaners={planning.cleaners}
+      />
     </>
   );
 }

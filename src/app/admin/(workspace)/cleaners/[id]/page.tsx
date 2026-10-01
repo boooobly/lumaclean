@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { getCleaner } from "@/lib/services/scheduling-queries";
-import { CrmHeader, Facts, History, date } from "@/components/admin/crm-view";
+import {
+  CrmHeader,
+  Facts,
+  History,
+  date,
+  money,
+} from "@/components/admin/crm-view";
+import { getCleanerFinance } from "@/lib/services/finance-queries";
 import {
   CleanerForm,
   CleanerActivity,
@@ -15,6 +22,7 @@ export default async function CleanerDetail({
 }) {
   const { id } = await params,
     c = await getCleaner(id);
+  const finance = await getCleanerFinance(id);
   return (
     <>
       <CrmHeader
@@ -51,7 +59,8 @@ export default async function CleanerDetail({
                 phone: c.phone,
                 additionalContact: c.additionalContact,
                 homeAddress: c.homeAddress,
-                homeConfirmed: c.homeLatitude!==null&&c.homeLongitude!==null,
+                homeConfirmed:
+                  c.homeLatitude !== null && c.homeLongitude !== null,
                 languages: c.languages,
                 skills: c.skills,
                 notes: c.notes,
@@ -75,7 +84,8 @@ export default async function CleanerDetail({
           </Link>
           <CleanerActivity id={id} active={c.active} />
           <p className="crm-hint">
-            Основная логистика — общественный транспорт с пешими участками. Подробности маршрутов доступны в календаре.
+            Основная логистика — общественный транспорт с пешими участками.
+            Подробности маршрутов доступны в календаре.
           </p>
         </section>
       </div>
@@ -96,6 +106,28 @@ export default async function CleanerDetail({
         }))}
       />
       <History type="Cleaner" id={id} />
+      <section className="crm-section">
+        <h2>Финансы клинера</h2>
+        <Facts
+          items={[
+            ["Выполнено заказов", finance.orders],
+            ["Выручка заказов с участием клинера", money(finance.revenue)],
+            ["Начислено лично клинеру", money(finance.accrued)],
+            ["Выплачено", money(finance.paid)],
+            ["Ожидает выплаты", money(finance.pending)],
+            [
+              "Текущий применяемый процент",
+              finance.percent === null
+                ? "Процент выплаты не настроен"
+                : finance.percent + "%",
+            ],
+          ]}
+        />
+        <p className="crm-hint">
+          Стоимость заказов с участием — оборот бизнеса, а не личный доход
+          клинера.
+        </p>
+      </section>
     </>
   );
 }

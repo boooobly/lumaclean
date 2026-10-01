@@ -1,9 +1,14 @@
 import type { Prisma } from "@/generated/prisma/client";
 
 type Actor =
-  | { type: "USER"; userId: string }
-  | { type: "AI" | "SYSTEM"; key: string };
+  { type: "USER"; userId: string } | { type: "AI" | "SYSTEM"; key: string };
 type AuditedField =
+  | "amount"
+  | "appliedPercent"
+  | "basisAmount"
+  | "version"
+  | "estimatedDurationMinutes"
+  | "actualDurationMinutes"
   | "status"
   | "scheduledStart"
   | "windowFrom"
@@ -34,6 +39,12 @@ export type AuditChanges = Partial<
 >;
 
 const allowedFields = new Set<AuditedField>([
+  "amount",
+  "appliedPercent",
+  "basisAmount",
+  "version",
+  "estimatedDurationMinutes",
+  "actualDurationMinutes",
   "status",
   "scheduledStart",
   "windowFrom",

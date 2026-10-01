@@ -16,6 +16,7 @@ import {
 import { quantityExtras } from "@/lib/domain/crm-pricing";
 import { AddressAutocomplete } from "./address-autocomplete";
 import { SlotSearch } from "./routing-workspace";
+import { DurationEstimate } from "./duration-estimate";
 export function Options({
   labels,
   empty,
@@ -211,6 +212,8 @@ export type OrderValues = {
   extras?: { code: keyof typeof extrasPrices; quantity: number }[];
   requiredCleaners?: number;
   manualDurationMinutes?: number | null;
+  estimatedDurationMinutes?: number | null;
+  durationOverrideReason?: string | null;
   scheduleMode?: "FIXED" | "FLEXIBLE";
   scheduledStart?: string;
   windowFrom?: string;
@@ -254,6 +257,10 @@ export function OrderForm({
       ]),
     ) as Record<keyof typeof extrasPrices, number>,
   );
+  const [soilLevel, setSoilLevel] = useState(value.soilLevel ?? "NORMAL"),
+    [requiredCleaners, setRequiredCleaners] = useState(
+      value.requiredCleaners ?? 1,
+    );
   const sameScope =
     Boolean(id) &&
     service === value.service &&
@@ -366,6 +373,9 @@ export function OrderForm({
             const t = e.target as HTMLInputElement;
             if (t.name === "service") setService(t.value as ServiceId);
             if (t.name === "area") setArea(Number(t.value));
+            if (t.name === "soilLevel") setSoilLevel(t.value);
+            if (t.name === "requiredCleaners")
+              setRequiredCleaners(Number(t.value));
           }}
         >
           <Field name="service" label="Услуга" value={service}>
@@ -406,10 +416,28 @@ export function OrderForm({
             max={1440}
             step={1}
           />
-          <p className="crm-hint">
-            Расчётная длительность: не рассчитано. Ручное значение хранится
-            отдельно.
-          </p>
+          <Field
+            name="durationOverrideReason"
+            label="Причина ручной длительности"
+            type="textarea"
+            value={value.durationOverrideReason}
+          />
+          <DurationEstimate
+            service={service}
+            area={area}
+            soilLevel={soilLevel}
+            requiredCleaners={requiredCleaners}
+            extras={Object.entries(extras).map(([code, quantity]) => ({
+              code,
+              quantity,
+            }))}
+            unchanged={
+              sameScope &&
+              soilLevel === (value.soilLevel ?? "NORMAL") &&
+              requiredCleaners === (value.requiredCleaners ?? 1)
+            }
+            stored={value.estimatedDurationMinutes ?? null}
+          />
         </div>
         <div className="crm-extras">
           {Object.entries(extraLabels).map(([code, label]) => (

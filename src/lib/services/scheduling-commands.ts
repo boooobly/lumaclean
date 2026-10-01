@@ -22,6 +22,8 @@ import {
 } from "@/lib/domain/logistics";
 import { plainDate } from "@/lib/domain/scheduling-conflicts";
 import { geo } from "@/lib/domain/routing";
+import { durationData, overrideReason } from "./duration-engine";
+import { completeEconomics } from "./payout-calculation";
 type Tx = Prisma.TransactionClient;
 export async function schedulingLock(tx: Tx, kind: string, id: string) {
   await tx.$queryRawUnsafe(
@@ -299,8 +301,34 @@ export async function runSchedulingCommand(
               "Перед завершением укажите финальную цену.",
             );
         }
+        const nextRequired = input.requiredCleaners ?? stored.requiredCleaners;
+        const nextDuration =
+          nextRequired === stored.requiredCleaners
+            ? {}
+            : await durationData(tx, {
+                serviceId: stored.serviceId,
+                area: Number(stored.area),
+                soilLevel: stored.soilLevel ?? "NORMAL",
+                requiredCleaners: nextRequired,
+                extras: (
+                  await tx.orderExtra.findMany({
+                    where: { orderId: stored.id },
+                    include: { extra: true },
+                  })
+                ).map((e) => ({
+                  code: e.extra.code,
+                  quantity: Number(e.quantity),
+                })),
+              });
+        const nextReason = overrideReason(
+          input.manualDurationMinutes,
+          stored.estimatedDurationMinutes,
+          input.durationOverrideReason,
+          stored,
+        );
         const proposed: PlanningOrder = {
           ...stored,
+          ...nextDuration,
           scheduledStart: input.scheduledStart
             ? localInstant(input.scheduledStart)
             : null,
@@ -344,6 +372,8 @@ export async function runSchedulingCommand(
           data: {
             scheduledStart: proposed.scheduledStart,
             manualDurationMinutes: proposed.manualDurationMinutes,
+            durationOverrideReason: nextReason,
+            ...nextDuration,
             requiredCleaners: proposed.requiredCleaners,
             status: input.status,
             ...(input.status === "COMPLETED"
@@ -375,6 +405,8 @@ export async function runSchedulingCommand(
             cleanerIds: { before: [], after: [id] },
           });
         }
+        if (input.status === "COMPLETED")
+          await completeEconomics(tx, stored.id, userId);
         if (changes.scheduledStart)
           await audit(
             proposed.scheduledStart === null

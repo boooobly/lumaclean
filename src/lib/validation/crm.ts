@@ -114,6 +114,7 @@ export const orderSchema = z
     extras: extrasSchema.default([]),
     requiredCleaners: number(1, 30).int().default(1),
     manualDurationMinutes: number(1, 1440).int().nullable().optional(),
+    durationOverrideReason: text(1000),
     finalPrice: number(0, 10000000).nullable().optional(),
     priceChangeReason: text(1000),
     clientComment: text(),

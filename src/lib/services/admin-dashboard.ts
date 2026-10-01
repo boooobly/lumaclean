@@ -18,7 +18,15 @@ export async function getDashboard() {
     await Promise.all([
       db.order.count({
         where: {
-          status: { in: ["CONFIRMED", "SCHEDULED", "EN_ROUTE", "IN_PROGRESS", "COMPLETED"] },
+          status: {
+            in: [
+              "CONFIRMED",
+              "SCHEDULED",
+              "EN_ROUTE",
+              "IN_PROGRESS",
+              "COMPLETED",
+            ],
+          },
           OR: [
             { scheduledStart: { gte: dayFrom, lt: dayTo } },
             {
@@ -43,12 +51,24 @@ export async function getDashboard() {
       }),
       db.expense.aggregate({
         where: {
+          deletedAt: null,
+          payoutId: null,
           occurredAt: { gte: monthFrom, lt: monthTo },
           currency: settings.currency,
         },
         _sum: { amount: true },
       }),
-      db.lead.findMany({take:5,orderBy:{createdAt:"desc"},select:{id:true,name:true,createdAt:true,status:true,service:{select:{name:true}}}}),
+      db.lead.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          createdAt: true,
+          status: true,
+          service: { select: { name: true } },
+        },
+      }),
     ]);
   return {
     today,

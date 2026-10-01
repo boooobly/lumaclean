@@ -80,6 +80,9 @@ export function PlanEditor({
     [reason, setReason] = useState(""),
     [pending, setPending] = useState(false),
     [error, setError] = useState("");
+  const [durationReason, setDurationReason] = useState(
+    draft.duration === undefined ? "" : "Выбран проверенный свободный слот",
+  );
   useEffect(() => {
     dialog.current?.showModal();
   }, []);
@@ -102,6 +105,7 @@ export function PlanEditor({
         expectedUpdatedAt: order.updatedAt,
         scheduledStart: clear ? null : start || null,
         manualDurationMinutes: duration ? Number(duration) : null,
+        durationOverrideReason: durationReason || null,
         ...(draft.requiredCleaners === undefined
           ? {}
           : { requiredCleaners: draft.requiredCleaners }),
@@ -223,6 +227,16 @@ export function PlanEditor({
               />
             </label>
           </div>
+          <label className="crm-field" htmlFor={id + "-duration-reason"}>
+            Причина ручной длительности
+            <textarea
+              id={id + "-duration-reason"}
+              name="durationOverrideReason"
+              value={durationReason}
+              onChange={(e) => setDurationReason(e.target.value)}
+              maxLength={1000}
+            />
+          </label>
           <div
             className="schedule-duration-presets"
             aria-label="Быстрая длительность"

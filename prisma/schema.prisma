@@ -85,6 +85,8 @@ enum ExpenseCategory {
   CHEMICALS
   EQUIPMENT
   PAYOUT
+  MARKETING
+  SOFTWARE
   OTHER
 }
 
@@ -121,6 +123,7 @@ model User {
   resolvedHandoffs HumanHandoff[]
   schedulingOverrides SchedulingOverride[]
   schedulingProposals SchedulingProposal[]
+  importBatches ImportBatch[]
 }
 
 model Session {
@@ -386,6 +389,12 @@ model Order {
   soilLevel                SoilLevel?      @default(NORMAL)
   urgent                   Boolean         @default(false)
   manualDurationMinutes    Int?
+  durationOverrideReason   String?
+  durationSnapshot         Json?
+  durationRuleVersion      Int?
+  historical               Boolean         @default(false)
+  legacyId                 String?
+  legacyFinance            Json?
   cancellationReason       String?
   discountPercent          Decimal         @default(0) @db.Decimal(5, 2)
   scheduleMode             ScheduleMode    @default(FIXED)
@@ -487,6 +496,10 @@ model DurationRule {
   maxArea          Decimal? @db.Decimal(10, 2)
   cleanerCount     Int
   soilLevel        String?
+  referenceArea    Decimal  @default(0) @db.Decimal(10, 2)
+  soilMultipliers  Json     @default("{\"LIGHT\":1,\"NORMAL\":1,\"HEAVY\":1,\"EXTREME\":1}")
+  extraMinutes     Json     @default("{}")
+  reserveMinutes   Int      @default(0)
   baseMinutes      Int?
   minutesPerSquare Decimal? @db.Decimal(10, 4)
   notes            String?
@@ -592,6 +605,8 @@ model Expense {
   payoutId    String?         @unique
   payout      CleanerPayout?  @relation(fields: [payoutId], references: [id], onDelete: Restrict)
   description String
+  deletedAt DateTime? @db.Timestamptz(3)
+  deletionReason String?
   createdAt   DateTime        @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime        @updatedAt @db.Timestamptz(3)
 
@@ -611,6 +626,7 @@ model CleanerPayout {
   currency       String        @default("RSD") @db.VarChar(3)
   status         PaymentStatus @default(PENDING)
   paidAt         DateTime?     @db.Timestamptz(3)
+  adjustmentReason String?
   expense        Expense?
   createdAt      DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
@@ -665,4 +681,43 @@ model BusinessSettings {
   workdayStartMinute          Int?
   workdayEndMinute            Int?
   updatedAt                   DateTime @updatedAt @db.Timestamptz(3)
+}
+
+// Preview is owner-bound. Applying selected rows is explicit and transactional.
+model ImportBatch {
+  id        String @id @default(cuid())
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  fileHash  String
+  fileName  String
+  preview   Json
+  result    Json?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  appliedAt DateTime? @db.Timestamptz(3)
+  records   ImportRecord[]
+  @@unique([userId, fileHash])
+  @@index([userId, createdAt])
+}
+
+// Stable legacy ID survives re-export; changed source content requires review.
+model ImportRecord {
+  sourceKey String @id
+  rowHash   String
+  batchId   String
+  batch     ImportBatch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  entityType String
+  entityId   String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+}
+
+model Investment {
+  id        String @id @default(cuid())
+  occurredAt DateTime @db.Timestamptz(3)
+  paidBy    String
+  description String
+  amount    Decimal @db.Decimal(12, 2)
+  returnedAmount Decimal @default(0) @db.Decimal(12, 2)
+  currency String @default("RSD") @db.VarChar(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
 }

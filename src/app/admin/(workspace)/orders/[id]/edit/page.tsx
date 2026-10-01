@@ -47,6 +47,8 @@ export default async function EditOrder({
             })),
             requiredCleaners: o.requiredCleaners,
             manualDurationMinutes: o.manualDurationMinutes,
+            estimatedDurationMinutes: o.estimatedDurationMinutes,
+            durationOverrideReason: o.durationOverrideReason,
             scheduleMode: o.scheduleMode,
             scheduledStart: localInput(o.scheduledStart),
             windowFrom: localInput(o.windowFrom),

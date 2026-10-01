@@ -113,6 +113,7 @@ function order(f: FormData) {
     urgent: f.get("urgent") === "on",
     requiredCleaners: num(f, "requiredCleaners"),
     manualDurationMinutes: num(f, "manualDurationMinutes"),
+    durationOverrideReason: optional(f, "durationOverrideReason"),
     scheduleMode: str(f, "scheduleMode"),
     scheduledStart: optional(f, "scheduledStart"),
     windowFrom: optional(f, "windowFrom"),
@@ -223,7 +224,9 @@ export function CrmForm({
           newAddress: optional(f, "addressId") ? null : address(f),
           allowDuplicate,
           order: order(f),
-          suggestedCleanerIds: JSON.parse(str(f,"suggestedCleanerIds")||"[]"),
+          suggestedCleanerIds: JSON.parse(
+            str(f, "suggestedCleanerIds") || "[]",
+          ),
         };
         break;
       case "order-update":

@@ -1,7 +1,7 @@
 // Transport-independent commands. HTTP callers supply a session-derived actor;
 // every transaction checks that actor against the current database role again.
 import { randomUUID } from "node:crypto";
-import type { PrismaClient, Prisma } from "@/generated/prisma/client";
+import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 import { commandSchemas, type CommandName } from "@/lib/validation/crm";
 import {
   assertTransition,
@@ -13,6 +13,8 @@ import { quote, priceSnapshot } from "@/lib/domain/crm-pricing";
 import { writeAudit, type AuditChanges } from "./audit";
 import { lockCrew, enforceScheduling } from "./scheduling-commands";
 import { normalizeAddress } from "./google-places";
+import { durationData, overrideReason } from "./duration-engine";
+import { completeEconomics } from "./payout-calculation";
 
 type Tx = Prisma.TransactionClient;
 export class DuplicateClientError extends CrmError {
@@ -129,6 +131,13 @@ async function orderData(
     urgent: input.urgent,
     requiredCleaners: input.requiredCleaners,
     manualDurationMinutes: input.manualDurationMinutes ?? null,
+    ...(await durationData(tx, {
+      serviceId: service.id,
+      area: input.area,
+      soilLevel: input.soilLevel,
+      requiredCleaners: input.requiredCleaners,
+      extras: input.extras,
+    })),
     clientComment: input.clientComment,
     internalComment: input.internalComment,
     ...schedule(input),
@@ -406,9 +415,15 @@ export async function runCrmCommand(
           v.order.scheduledStart
         )
           result.data.scheduledStart = localInstant(v.order.scheduledStart);
+        const durationOverrideReason = overrideReason(
+          v.order.manualDurationMinutes ?? null,
+          result.data.estimatedDurationMinutes,
+          v.order.durationOverrideReason,
+        );
         const order = await tx.order.create({
           data: {
             ...result.data,
+            durationOverrideReason,
             reference: reference("ORD"),
             requestId: v.requestId,
             clientId: client.id,
@@ -421,6 +436,20 @@ export async function runCrmCommand(
           },
         });
         await audit("ORDER_CREATED", "Order", order.id);
+        if (order.manualDurationMinutes !== null)
+          await audit("ORDER_DURATION_OVERRIDDEN", "Order", order.id, {
+            manualDurationMinutes: {
+              before: null,
+              after: String(order.manualDurationMinutes),
+            },
+            estimatedDurationMinutes: {
+              before: null,
+              after:
+                order.estimatedDurationMinutes === null
+                  ? null
+                  : String(order.estimatedDurationMinutes),
+            },
+          });
         if (v.suggestedCleanerIds.length) {
           await lockCrew(tx, v.suggestedCleanerIds);
           if (
@@ -504,6 +533,8 @@ export async function runCrmCommand(
                 : null,
             },
           });
+          if (input.status === "COMPLETED")
+            await completeEconomics(tx, order.id, userId);
           await audit(
             input.status === "COMPLETED"
               ? "ORDER_COMPLETED"
@@ -579,6 +610,19 @@ export async function runCrmCommand(
                 serviceId: order.serviceId,
               }
             : (await orderData(tx, input, Number(order.discountPercent))).data;
+          const sameDurationScope =
+            sameScope &&
+            order.soilLevel === input.soilLevel &&
+            order.requiredCleaners === input.requiredCleaners;
+          const nextDuration = sameDurationScope
+            ? null
+            : await durationData(tx, {
+                serviceId: priced.serviceId,
+                area: input.area,
+                soilLevel: input.soilLevel,
+                requiredCleaners: input.requiredCleaners,
+                extras: input.extras,
+              });
           const data = {
             ...priced,
             ...schedule(input),
@@ -588,7 +632,25 @@ export async function runCrmCommand(
             requiredCleaners: input.requiredCleaners,
             clientComment: input.clientComment,
             internalComment: input.internalComment,
+            ...(sameDurationScope
+              ? {
+                  estimatedDurationMinutes: order.estimatedDurationMinutes,
+                  cleaningReserveMinutes: order.cleaningReserveMinutes,
+                  durationRuleId: order.durationRuleId,
+                  durationRuleVersion: order.durationRuleVersion,
+                }
+              : nextDuration!),
           };
+          const reason = overrideReason(
+            data.manualDurationMinutes,
+            data.estimatedDurationMinutes,
+            input.durationOverrideReason,
+            order,
+          );
+          // Clear an obsolete snapshot only after an actual input change. Rule edits alone never rewrite orders.
+          const durationSnapshot = sameDurationScope
+            ? undefined
+            : nextDuration!.durationSnapshot;
           if (
             input.scheduleMode === "FLEXIBLE" &&
             order.scheduleMode === "FLEXIBLE"
@@ -604,6 +666,8 @@ export async function runCrmCommand(
             "manualDurationMinutes",
             "requiredCleaners",
             "addressId",
+            "estimatedDurationMinutes",
+            "cleaningReserveMinutes",
           ].some(
             (key) =>
               String(order[key as keyof typeof order]) !==
@@ -663,7 +727,10 @@ export async function runCrmCommand(
                     : (data[key as keyof typeof data]?.toString() ?? null),
               };
           }
-          await tx.order.update({ where: { id: order.id }, data });
+          await tx.order.update({
+            where: { id: order.id },
+            data: { ...data, durationOverrideReason: reason, durationSnapshot },
+          });
           if (!sameScope) {
             const result = await orderData(
               tx,

@@ -106,6 +106,7 @@ export const planSchema = z
     expectedUpdatedAt: z.string().datetime({ offset: true }),
     scheduledStart: z.string().max(30).nullable(),
     manualDurationMinutes: z.number().int().min(1).max(1440).nullable(),
+    durationOverrideReason: text(1000),
     requiredCleaners: z.number().int().min(1).max(20).optional(),
     cleanerIds: z
       .array(entityId)

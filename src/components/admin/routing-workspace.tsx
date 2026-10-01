@@ -553,6 +553,7 @@ export function SlotSearch({
                         .toString()
                         .slice(0, 16),
                       manualDurationMinutes: String(duration),
+                      durationOverrideReason:"Выбран проверенный свободный слот",
                       requiredCleaners: String(required),
                     };
                     for (const [name, value] of Object.entries(values)) {
