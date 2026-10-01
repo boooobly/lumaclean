@@ -32,6 +32,7 @@ export const durationRuleInput = z
     baseMinutes: z.number().int().min(1).max(1440),
     minutesPerSquare: z.number().finite().min(0).max(1440).multipleOf(0.0001),
     reserveMinutes: z.number().int().min(0).max(240),
+    unknownExtraReserveMinutes: z.number().int().min(0).max(240).default(0),
     soilMultipliers: z
       .object({
         LIGHT: z.number().min(0.1).max(10),
@@ -47,7 +48,7 @@ export const durationRuleInput = z
           ...Array<keyof typeof extrasPrices>,
         ],
       ),
-      z.number().int().min(0).max(1440),
+      z.number().int().min(0).max(1440).nullable(),
     ),
     notes: z.string().trim().max(1000),
   })

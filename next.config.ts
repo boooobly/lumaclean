@@ -1,7 +1,10 @@
 import type {NextConfig} from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import {verifiedRelease} from './src/lib/agent/release-verification.mjs';
+const release=verifiedRelease();
 
 const nextConfig: NextConfig = {
+  env:{AI_VERIFIED_RELEASE:String(release.verified),AI_VERIFIED_TEST_COUNT:String(release.count)},
   images: {
     formats: ["image/avif", "image/webp"],
   },

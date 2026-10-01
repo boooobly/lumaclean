@@ -331,6 +331,7 @@ export async function listCleaners(
         name: true,
         phone: true,
         active: true,
+        homeAddress:true,homeLatitude:true,homeLongitude:true,availability:{select:{kind:true,startMinute:true,endMinute:true}},
         defaultTravelMode: true,
         languages: true,
         payoutPercent: true,

@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import {publishNotifications} from "@/lib/agent/notifications";
+import { after, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 import { ZodError } from "zod";
@@ -104,7 +105,8 @@ export async function POST(
         user.id,
         routingSchemas.apply.parse(payload).proposalId,
       );
-      revalidatePath("/admin", "layout");
+      after(()=>publishNotifications(getDatabase()));
+    revalidatePath("/admin", "layout");
     } else data = await routeDetails(db, payload);
     return NextResponse.json(
       { ok: true, data },

@@ -24,6 +24,7 @@ export function substantiveIntent(text:string){
   return /(?:хочу|нужн[аоы]|заказ|запис|уберите|прибрать|треба|желим|закаж|очисти|treba|želim|zelim|zakaz|I (?:need|want)|please (?:clean|book)|book (?:a|the)).{0,90}(?:уборк|убрать|квартир|дом|чист|чиш|стан|кућ|čiš|cis|stan|clean|apartment)/iu.test(text)||/(?:уборк|чишћење|čišćenje|cleaning).{0,60}\d{1,4}\s*(?:м|m|квад)/iu.test(text);
 }
 export function mandatoryHandoff(text:string):HandoffReason|null{
+  if(/(?:экстремальн|сильн[а-я]*\s+загрязн|крайне\s+грязн|extreme\s+(?:dirt|soil)|jako\s+prljav|веома\s+прљав)/i.test(text))return 'PRICE_REVIEW';
   if(/плесен|плесень|буђ|buđ|budj|mou?ld/i.test(text))return "MOLD";
   if(/после\s+ремонт|строительн\w*\s+(?:мусор|пыл)|posle\s+renovir|после\s+ренов|post.?renovation|construction\s+(?:waste|dust)/i.test(text))return "RENOVATION";
   if(/скидк|(?:дайте|можно|хочу).{0,20}дешев|popust|попуст|discount/i.test(text))return "DISCOUNT";
@@ -32,6 +33,7 @@ export function mandatoryHandoff(text:string):HandoffReason|null{
   return null;
 }
 export function explicitConfirmation(text:string){
+  if(/^(?:подходит|записывайте)[.!\s]*$/iu.test(text.trim()))return true;
   // Full-string intent; additional qualifications/questions/negations never count as acceptance.
   return /^(?:да(?:,?\s+(?:подтверждаю(?:\s+(?:бронирование|запись|всё))?|всё верно|согласен|согласна))?|подтверждаю(?:\s+(?:бронирование|запись|всё))?|yes(?:,?\s+(?:I confirm(?: the booking)?|confirmed|book it))?|confirm(?: the booking)?|da(?:,?\s+(?:potvrđujem|potvrdjujem|sve je tačno))?|potvrđujem|potvrdjujem|да,?\s+потврђујем|потврђујем)[.!\s]*$/iu.test(text.trim());
 }

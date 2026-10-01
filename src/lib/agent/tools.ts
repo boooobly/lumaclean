@@ -9,6 +9,8 @@ import { placesRequest, verifyLocation, normalizeAddress } from "@/lib/services/
 import { findSlots, routingSnapshot } from "@/lib/services/routing-planning";
 import { assessScheduling, lockCrew, schedulingLock } from "@/lib/services/scheduling-commands";
 import { writeAudit } from "@/lib/services/audit";
+import { effectiveMode } from './readiness';
+import { orderNotifications, handoffNotification } from './notifications';
 import { AgentError, toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
 type Tx=Prisma.TransactionClient;
@@ -22,7 +24,7 @@ export async function assertToolAccess(tx:Tx,ctx:ToolContext){
   await schedulingLock(tx,"conversation",ctx.conversationId);
   const c=await tx.conversation.findUniqueOrThrow({where:{id:ctx.conversationId}});
   const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:"default"}});
-  if(process.env.AI_AGENT_ENABLED!=="true"||c.control!=="AI_CONTROL"||c.revision!==ctx.revision||settings.aiAgentMode!==ctx.mode||ctx.mode==="OFF")throw new AgentError("AGENT_CONTROL_CHANGED");
+  if(c.control!=="AI_CONTROL"||c.revision!==ctx.revision||effectiveMode(settings,c.channel)!==ctx.mode||ctx.mode==="OFF")throw new AgentError("AGENT_CONTROL_CHANGED");
   const job=await tx.agentJob.findUnique({where:{id:ctx.jobId}});
   if(!job||job.conversationId!==c.id||job.leaseKey!==ctx.leaseKey||job.status!=="RUNNING"||!job.leaseUntil||job.leaseUntil.getTime()<Date.now())throw new AgentError("JOB_LEASE_LOST");
   return c;
@@ -30,6 +32,8 @@ export async function assertToolAccess(tx:Tx,ctx:ToolContext){
 async function aiAudit(tx:Tx,ctx:ToolContext,action:string,entityType:string,entityId:string){return writeAudit(tx,{type:"AI",key:`agent:${ctx.jobId}`},{action,entityType,entityId});}
 async function activePrice(tx:Tx,state:AgentState,c:Conversation,input:ReturnType<typeof toolSchemas.calculatePrice.parse>){
   const service=await tx.service.findUnique({where:{code:input.service}});
+  const scope=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+  if(!scope.aiAllowedServices.includes(input.service))throw new AgentError('UNSUPPORTED_SERVICE');
   if(!service?.active)throw new AgentError("SERVICE_UNAVAILABLE");
   const selected=input.extras.filter(e=>e.quantity>0);
   if(await tx.serviceExtra.count({where:{code:{in:selected.map(e=>e.code)},active:true}})!==selected.length)throw new AgentError("EXTRA_UNAVAILABLE");
@@ -135,6 +139,7 @@ export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,resched
   const result={booked:true,reference:booking.reference,recap:pending.recap};
   await tx.agentSlot.update({where:{id:slot.id},data:{usedAt:new Date(),result:json(result)}});
   await aiAudit(tx,ctx,reschedule?"AI_ORDER_RESCHEDULED":"AI_ORDER_CREATED","Order",order.id);
+  await orderNotifications(tx,order.id,reschedule?'CHANGED':'BOOKED',`agent:${slot.id}`,c.id,true);
   return result;
 }
 async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,payload:unknown):Promise<ToolResult>{
@@ -168,9 +173,9 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     for(const count of [...new Set(rules.map(r=>r.cleanerCount))]){
       result=estimateDuration({...state.quote.input,serviceId:state.quote.serviceId,requiredCleaners:count},rules.map(durationConfig));if(result){crew=count;break;}
     }
-    if(!result)return{error:"NO_DURATION_RULE",requiresHumanReview:true};
+    if(!result)return{error:"NO_DURATION_RULE",confidence:'UNCONFIGURED',requiresHumanReview:true};
     state.duration={minutes:result.estimatedDurationMinutes,reserve:result.cleaningReserveMinutes,requiredCleaners:crew,ruleId:result.ruleId,version:result.version};
-    return{minutes:result.estimatedDurationMinutes,requiredCleaners:crew,estimate:true};
+    return{minutes:result.estimatedDurationMinutes,requiredCleaners:crew,estimate:true,confidence:result.confidence,unknownExtras:result.unknownExtras,schedulingReserveMinutes:result.cleaningReserveMinutes};
   }
   if(name==="resolveAddress"){
     const input=toolSchemas[name].parse(payload),sessionToken=randomUUID();
@@ -227,6 +232,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   const handoff=existing??await tx.humanHandoff.create({data:{conversationId:c.id,reason:input.reason}});
   await tx.conversation.update({where:{id:c.id},data:{control:"HUMAN_CONTROL",stage:"HANDOFF",needsAttention:true,shadowProposal:Prisma.DbNull}});
   if(!existing)await aiAudit(tx,ctx,"AI_HANDOFF_REQUESTED","HumanHandoff",handoff.id);
+  await handoffNotification(tx,c.id,handoff.id,input.reason);
   return{handoff:true,reason:input.reason};
 }
 export async function executeAgentTool(db:PrismaClient,ctx:ToolContext,name:string,args:unknown):Promise<ToolResult>{

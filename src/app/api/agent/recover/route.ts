@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import { getDatabase } from "@/lib/database/client";
 import { drainAgentJobs } from "@/lib/agent/runner";
 import { enqueueAgent } from "@/lib/agent/queue";
+import {recoverNotifications} from '@/lib/agent/notifications';
 export const runtime="nodejs";
 export const maxDuration=180;
 export async function GET(request:Request){
@@ -11,5 +12,5 @@ export async function GET(request:Request){
   const db=getDatabase();
   const jobs=await db.agentJob.findMany({where:{OR:[{status:'PENDING'},{status:'RUNNING',leaseUntil:{lt:new Date()}}]},select:{conversationId:true},distinct:['conversationId'],take:50});
   for(const job of jobs)await enqueueAgent(db,job.conversationId);
-  await drainAgentJobs(db);return NextResponse.json({ok:true},{headers:{"Cache-Control":"no-store"}});
+  await drainAgentJobs(db);await recoverNotifications(db);return NextResponse.json({ok:true},{headers:{"Cache-Control":"no-store"}});
 }

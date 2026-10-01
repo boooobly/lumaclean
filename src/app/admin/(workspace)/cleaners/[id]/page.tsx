@@ -1,3 +1,4 @@
+import {cleanerReadiness} from "@/lib/agent/readiness";
 import Link from "next/link";
 import { getCleaner } from "@/lib/services/scheduling-queries";
 import {
@@ -22,6 +23,7 @@ export default async function CleanerDetail({
 }) {
   const { id } = await params,
     c = await getCleaner(id);
+  const readiness=cleanerReadiness(c);
   const finance = await getCleanerFinance(id);
   return (
     <>
@@ -32,7 +34,7 @@ export default async function CleanerDetail({
       />
       <div className="crm-detail-grid">
         <section className="crm-section">
-          <h2>Контакты и условия</h2>
+          <h2>Контакты и условия</h2><p>Готовность AI: {readiness.ready?"Готов":"Требует настройки"}. Часы: {readiness.hours?"✓":"нет"}; старт: {readiness.address?"✓":"нет"}; координаты: {readiness.coordinates?"✓":"нет"}; active: {readiness.active?"✓":"нет"}; языки: {readiness.languages?"✓":"не заданы"}; payout: {readiness.payout?"✓":"не задан (не блокирует запись)"}.</p>
           <Facts
             items={[
               ["Телефон", c.phone],

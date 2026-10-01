@@ -1,5 +1,9 @@
 {
+  "installCommand": "npm ci",
   "functions": {
+    "src/app/api/queues/notifications/route.ts": {
+      "experimentalTriggers": [{"type":"queue/v2beta","topic":"lumaclean-notifications","retryAfterSeconds":200}]
+    },
     "src/app/api/queues/agent/route.ts": {
       "experimentalTriggers": [{"type":"queue/v2beta","topic":"lumaclean-agent","retryAfterSeconds":200}]
     }

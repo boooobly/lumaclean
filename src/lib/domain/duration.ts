@@ -18,8 +18,9 @@ export type DurationConfig = {
   baseMinutes: number;
   minutesPerSquare: number;
   soilMultipliers: Record<string, number>;
-  extraMinutes: Record<string, number>;
+  extraMinutes: Record<string, number | null>;
   reserveMinutes: number;
+  unknownExtraReserveMinutes?: number;
 };
 export function estimateDuration(
   input: DurationInput,
@@ -44,11 +45,14 @@ export function estimateDuration(
   if (!Number.isFinite(multiplier) || multiplier <= 0)
     throw new CrmError("VALIDATION", "Для загрязнения не задан коэффициент.");
   const selected = input.extras.filter((e) => e.quantity > 0);
-  if (selected.some((e) => r.extraMinutes[e.code] === undefined)) return null;
+  const unknown = selected.filter(e=>r.extraMinutes[e.code]==null);
+  if(unknown.length && !(r.unknownExtraReserveMinutes && r.unknownExtraReserveMinutes>0)) return null;
+  const uncertaintyReserve = unknown.reduce((sum,e)=>sum+e.quantity*(r.unknownExtraReserveMinutes??0),0);
+  if(uncertaintyReserve>1440) return null;
   const areaMinutes =
     Math.max(0, input.area - r.referenceArea) * r.minutesPerSquare;
   const extraMinutes = selected.reduce(
-    (sum, e) => sum + r.extraMinutes[e.code] * e.quantity,
+    (sum, e) => sum + (r.extraMinutes[e.code]??0) * e.quantity,
     0,
   );
   const raw = (r.baseMinutes + areaMinutes) * multiplier + extraMinutes;
@@ -60,7 +64,9 @@ export function estimateDuration(
     );
   return {
     estimatedDurationMinutes,
-    cleaningReserveMinutes: r.reserveMinutes,
+    confidence: unknown.length?'PARTIALLY_CONFIGURED' as const:'CONFIGURED' as const,
+    unknownExtras: unknown.map(e=>e.code),
+    cleaningReserveMinutes: r.reserveMinutes + uncertaintyReserve,
     ruleId: r.id,
     version: r.version,
     input,
@@ -69,6 +75,7 @@ export function estimateDuration(
       areaMinutes,
       soilMultiplier: multiplier,
       extraMinutes,
+      uncertaintyReserve,
       roundingMinutes: 5,
     },
     explanation: `База ${r.baseMinutes} мин + площадь ${areaMinutes.toFixed(1)} мин; загрязнение ×${multiplier}; дополнения ${extraMinutes} мин. Округление вверх до 5 мин. Команда: ${r.cleanerCount}.`,

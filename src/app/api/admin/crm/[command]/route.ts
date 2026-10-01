@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import {publishNotifications} from "@/lib/agent/notifications";
+import { after, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -60,6 +61,7 @@ export async function POST(
       command as CommandName,
       payload,
     );
+    after(()=>publishNotifications(getDatabase()));
     revalidatePath("/admin", "layout");
     return NextResponse.json(
       { ok: true, ...result },

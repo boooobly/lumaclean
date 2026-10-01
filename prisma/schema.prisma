@@ -500,6 +500,7 @@ model DurationRule {
   soilMultipliers  Json     @default("{\"LIGHT\":1,\"NORMAL\":1,\"HEAVY\":1,\"EXTREME\":1}")
   extraMinutes     Json     @default("{}")
   reserveMinutes   Int      @default(0)
+  unknownExtraReserveMinutes Int @default(0)
   baseMinutes      Int?
   minutesPerSquare Decimal? @db.Decimal(10, 4)
   notes            String?
@@ -677,8 +678,21 @@ model Notification {
   attempts      Int                @default(0)
   lastErrorCode String?
   createdAt     DateTime           @default(now()) @db.Timestamptz(3)
+  eventKey String? @unique
+  orderId String?
+  conversationId String?
+  audience String?
+  kind String?
+  payload Json?
+  deliveryState String @default("LEGACY")
+  nextAttemptAt DateTime? @db.Timestamptz(3)
+  leaseUntil DateTime? @db.Timestamptz(3)
+  leaseKey String?
+  publishedAt DateTime? @db.Timestamptz(3)
 
   @@index([status, scheduledAt])
+  @@index([deliveryState, scheduledAt])
+  @@index([orderId])
 }
 
 model AuditLog {
@@ -707,7 +721,31 @@ model BusinessSettings {
   workdayStartMinute          Int?
   workdayEndMinute            Int?
   aiAgentMode                 AgentMode @default(SHADOW)
+  aiChannelModes Json @default("{\"WEBSITE\":\"AUTO\",\"TELEGRAM\":\"OFF\",\"WHATSAPP\":\"OFF\",\"VIBER\":\"OFF\"}")
+  aiAllowedServices String[] @default(["regular", "deep"])
+  aiCanary Boolean @default(true)
+  aiMaxAnonymousMessages Int @default(200)
+  aiMaxModelCalls Int @default(8)
+  aiMaxToolSteps Int @default(6)
+  aiMaxConversationCostUsd Decimal @default(0.1) @db.Decimal(10, 5)
+  aiDailyCostWarningUsd Decimal @default(5) @db.Decimal(10, 2)
+  aiDiagnostics Json?
+  aiDiagnosticsAt DateTime? @db.Timestamptz(3)
   updatedAt                   DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model ShadowSuggestion {
+  id String @id @default(cuid())
+  conversationId String
+  jobId String @unique
+  snapshot Json
+  verdict String?
+  reason String?
+  reviewedById String?
+  reviewedAt DateTime? @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([conversationId, createdAt])
+  @@index([reviewedAt, verdict])
 }
 
 enum AgentMode {

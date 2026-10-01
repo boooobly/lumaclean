@@ -13,5 +13,15 @@ test('additive AI migration preserves finance-era CRM and conversation history',
     await db.query(`INSERT INTO "BusinessSettings" (id,"updatedAt") VALUES ('default',now()) ON CONFLICT (id) DO NOTHING; INSERT INTO "Conversation" (id,channel,"updatedAt") VALUES ('legacy-dialog','WEBSITE',now()); INSERT INTO "Message" (id,"conversationId",author,text) VALUES ('legacy-message','legacy-dialog','CLIENT','Preserve history'); INSERT INTO "Client" (id,name,phone,"updatedAt") VALUES ('legacy-client','Synthetic','0641234567',now()); INSERT INTO "ClientAddress" (id,"clientId","fullAddress","updatedAt") VALUES ('legacy-address','legacy-client','Synthetic',now()); INSERT INTO "Service" (id,code,name,"updatedAt") VALUES ('legacy-service','regular','Synthetic',now()); INSERT INTO "Order" (id,"clientId","addressId","serviceId",area,"basePrice","finalPrice","travelBufferMinutes","updatedAt") VALUES ('legacy-order','legacy-client','legacy-address','legacy-service',60,5700,5700,30,now());`);
     const before=(await db.query('SELECT * FROM "Order"')).rows;await db.query(readFileSync(`prisma/migrations/${target}/migration.sql`,'utf8'));assert.deepEqual((await db.query('SELECT * FROM "Order"')).rows,before);
     assert.equal((await db.query('SELECT text FROM "Message" WHERE id=\'legacy-message\'')).rows[0].text,'Preserve history');assert.equal((await db.query('SELECT "aiAgentMode" FROM "BusinessSettings"')).rows[0].aiAgentMode,'SHADOW');assert.equal((await db.query('SELECT control FROM "Conversation"')).rows[0].control,'AI_CONTROL');assert.equal((await db.query('SELECT count(*)::int AS n FROM "AgentSlot"')).rows[0].n,0);
+    await db.query(`UPDATE "Conversation" SET "shadowProposal"='{"text":"Legacy suggestion","plan":[]}' WHERE id='legacy-dialog'; INSERT INTO "Notification" (id,"clientId",channel,text,"scheduledAt") VALUES ('legacy-notification','legacy-client','WEBSITE','Preserve notification',now());`);
+    const oldNotification=(await db.query('SELECT * FROM "Notification"')).rows[0];
+    await db.query(readFileSync('prisma/migrations/20261001220000_ai_go_live/migration.sql','utf8'));
+    assert.deepEqual((await db.query('SELECT * FROM "Order"')).rows,before);
+    const newNotification=(await db.query('SELECT * FROM "Notification"')).rows[0];
+    for(const key of Object.keys(oldNotification))assert.deepEqual(newNotification[key],oldNotification[key]);
+    assert.equal(newNotification.deliveryState,'LEGACY');
+    assert.equal((await db.query('SELECT "aiChannelModes" FROM "BusinessSettings"')).rows[0].aiChannelModes.TELEGRAM,'OFF');
+    assert.equal((await db.query('SELECT snapshot FROM "ShadowSuggestion"')).rows[0].snapshot.text,'Legacy suggestion');
+    assert.equal((await db.query('SELECT "aiAgentMode" FROM "BusinessSettings"')).rows[0].aiAgentMode,'SHADOW');
   }finally{await db.end();}
 });

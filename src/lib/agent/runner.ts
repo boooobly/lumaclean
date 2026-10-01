@@ -7,6 +7,8 @@ import { configuredProviders, type AIProvider, type AgentMessage, type Completio
 import { conversationPolicy, substantiveIntent, mandatoryHandoff, handoffText, outputAllowed } from "./policy";
 import { executeAgentTool, json, stateOf, type ToolContext } from "./tools";
 import { deliverOutbox } from "./inbox";
+import { effectiveMode } from './readiness';
+import { handoffNotification, publishNotifications } from './notifications';
 
 export function modelState(state:AgentState){
   return{...state,address:state.address?{fullAddress:state.address.fullAddress,apartment:state.address.apartment}:undefined,pending:state.pending?{recap:state.pending.recap,slotToken:state.pending.slotToken,reschedule:state.pending.reschedule,confirmed:!!state.pending.confirmedByMessageId,confirmedByMessageId:state.pending.confirmedByMessageId?"server-confirmed":undefined}:undefined,booking:state.booking?{...state.booking,orderId:undefined}:undefined};
@@ -15,7 +17,7 @@ export async function completeWithFallback(providers:[AIProvider,AIProvider],mes
   for(let index=0;index<2;index++){
     const provider=providers[index],started=Date.now();
     try{const result=await provider.complete(messages,signal);await observe(provider,result,null,Date.now()-started);return result;}
-    catch(e){const code=e instanceof AgentError?e.code:"PROVIDER_FAILED";await observe(provider,null,code,Date.now()-started);if(signal?.aborted)throw new AgentError("AGENT_DEADLINE");}
+    catch(e){const code=e instanceof AgentError?e.code:"PROVIDER_FAILED";await observe(provider,null,code,Date.now()-started);if(['AGENT_CONTROL_CHANGED','MODEL_CALL_LIMIT','CONVERSATION_COST_LIMIT','DAILY_BUDGET_LIMIT'].includes(code))throw e;if(signal?.aborted)throw new AgentError("AGENT_DEADLINE");}
   }
   throw new AgentError("PROVIDERS_UNAVAILABLE");
 }
@@ -42,7 +44,7 @@ export async function claimJob(db:PrismaClient,conversationId?:string){
       if(!latest)return null;
       await tx.agentJob.updateMany({where:{conversationId:latest.conversationId,id:{not:latest.id},status:{in:["PENDING","RUNNING"]}},data:{status:"SUPERSEDED",completedAt:now,leaseUntil:null,leaseKey:null}});
       const c=await tx.conversation.findUniqueOrThrow({where:{id:latest.conversationId}}),settings=await tx.businessSettings.findUniqueOrThrow({where:{id:"default"}});
-      const mode:AgentMode=process.env.AI_AGENT_ENABLED==="true"?settings.aiAgentMode:"OFF";
+      const mode:AgentMode=effectiveMode(settings,c.channel);
       if(mode==="OFF"||c.control!=="AI_CONTROL"){
         await tx.agentJob.update({where:{id:latest.id},data:{status:"DONE",completedAt:now,leaseUntil:null}});return null;
       }
@@ -59,8 +61,12 @@ async function persistAnswer(db:PrismaClient,ctx:ToolContext,text:string,plan:un
     await schedulingLock(tx,"conversation",ctx.conversationId);
     const c=await tx.conversation.findUniqueOrThrow({where:{id:ctx.conversationId}}),settings=await tx.businessSettings.findUniqueOrThrow({where:{id:"default"}});
     const job=await tx.agentJob.findUniqueOrThrow({where:{id:ctx.jobId}});
-    if(c.revision!==ctx.revision||settings.aiAgentMode!==ctx.mode||process.env.AI_AGENT_ENABLED!=="true"||job.leaseKey!==leaseKey||job.status!=="RUNNING"||(c.control!=="AI_CONTROL"&&!(ctx.handoff&&c.stage==="HANDOFF"&&!c.ownerId)))throw new AgentError("AGENT_CONTROL_CHANGED");
-    if(ctx.mode==="SHADOW")await tx.conversation.update({where:{id:c.id},data:{shadowState:json(ctx.state),shadowProposal:json({text,plan,stage:ctx.handoff?"HANDOFF":ctx.state.pending?"AWAITING_CONFIRMATION":ctx.state.quote?"QUOTING":"DISCOVERY",proposedState:modelState(ctx.state),at:new Date().toISOString()}),needsAttention:true}});
+    if(c.revision!==ctx.revision||effectiveMode(settings,c.channel)!==ctx.mode||job.leaseKey!==leaseKey||job.status!=="RUNNING"||(c.control!=="AI_CONTROL"&&!(ctx.handoff&&c.stage==="HANDOFF"&&!c.ownerId)))throw new AgentError("AGENT_CONTROL_CHANGED");
+    if(ctx.mode==="SHADOW"){
+      const snapshot=json({text,plan,stage:ctx.handoff?'HANDOFF':ctx.state.pending?'AWAITING_CONFIRMATION':ctx.state.quote?'QUOTING':'DISCOVERY',proposedState:modelState(ctx.state),at:new Date().toISOString()});
+      await tx.shadowSuggestion.upsert({where:{jobId:ctx.jobId},create:{conversationId:c.id,jobId:ctx.jobId,snapshot},update:{}});
+      await tx.conversation.update({where:{id:c.id},data:{shadowState:json(ctx.state),shadowProposal:snapshot,needsAttention:true}});
+    }
     else{
       const bookingRecap=ctx.state.booking?(({orderId,reference,...recap})=>{void orderId;void reference;return recap;})(ctx.state.booking):null;
       const structured=ctx.state.booking?{type:"booking",reference:ctx.state.booking.reference,recap:bookingRecap}:ctx.state.pending?{type:"confirmation",recap:ctx.state.pending.recap}:null;
@@ -75,6 +81,8 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
   const ctx:ToolContext={conversationId:c.id,jobId:job.id,leaseKey,revision:c.revision,mode,state:mode==="SHADOW"?structuredClone(c.shadowState) as AgentState:stateOf(c)};
   const plan:{tool:string;outcome:string}[]=[];
   let toolFailures=0,text="",formatRepaired=false;
+  const limits=await db.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+  let modelCalls=0;
   const signal=AbortSignal.timeout(85000);
   const tool=async(name:string,args:unknown)=>{
     const result=await executeAgentTool(db,ctx,name,args);
@@ -93,11 +101,18 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       const compact=c.summary??null;
       const messages:AgentMessage[]=[{role:"system",content:conversationPolicy(c.locale,modelState(ctx.state) as AgentState,compact)},...recent.reverse().filter(m=>m.author!=="SYSTEM").map(m=>({role:(m.author==="CLIENT"?"user":"assistant") as "user"|"assistant",content:m.text.slice(0,1500)}))];
       const selected=providers??configuredProviders();
-      for(let step=0;step<6&&!signal.aborted;step++){
+      for(let step=0;step<Math.min(8,Math.max(1,limits.aiMaxToolSteps))&&!signal.aborted;step++){
         // Reconcile critical state before every provider retry/fallback; providers never execute tools.
         if(mode==="AUTO")ctx.state=stateOf(await db.conversation.findUniqueOrThrow({where:{id:c.id}}));
         messages[0]={role:"system",content:conversationPolicy(c.locale,modelState(ctx.state) as AgentState,compact)};
-        const metered=selected.map(p=>({name:p.name,model:p.model,complete:async(m:AgentMessage[],s?:AbortSignal)=>{await callBudget(db,m,p);return p.complete(m,s);}})) as [AIProvider,AIProvider];
+        const metered=selected.map(p=>({name:p.name,model:p.model,complete:async(m:AgentMessage[],s?:AbortSignal)=>{
+          const live=await db.conversation.findUniqueOrThrow({where:{id:c.id}}),settings=await db.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+          if(live.revision!==ctx.revision||effectiveMode(settings,live.channel)!==mode)throw new AgentError('AGENT_CONTROL_CHANGED');
+          if(++modelCalls>Math.min(16,Math.max(1,limits.aiMaxModelCalls)))throw new AgentError('MODEL_CALL_LIMIT');
+          const spent=await db.aIInvocation.aggregate({where:{conversationId:c.id,success:true},_sum:{estimatedCostUsd:true},_count:{estimatedCostUsd:true,_all:true}});
+          if(Number(spent._sum.estimatedCostUsd??0)+0.005>Number(limits.aiMaxConversationCostUsd)||spent._count._all>spent._count.estimatedCostUsd)throw new AgentError('CONVERSATION_COST_LIMIT');
+          await callBudget(db,m,p);return p.complete(m,s);
+        }})) as [AIProvider,AIProvider];
         const answer=await completeWithFallback(metered,messages,async(provider,result,errorCode,latency)=>{
           await db.aIInvocation.create({data:{conversationId:c.id,jobId:job.id,provider:provider.name,model:provider.model,inputTokens:result?.inputTokens??0,cachedInputTokens:result?.cachedInputTokens??0,outputTokens:result?.outputTokens??0,latencyMs:latency,estimatedCostUsd:result?.estimatedCostUsd,toolCallCount:result?.toolCalls.length??0,success:!errorCode,errorCode,mode}});
         },signal);
@@ -116,7 +131,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
           try{args=JSON.parse(call.arguments);}catch{args=null;}
           const result=await tool(call.name,args);
           messages.push({role:"tool",toolCallId:call.id,content:JSON.stringify(result).slice(0,8000)});
-          if(['NO_DURATION_RULE','ROUTING_UNRELIABLE','PRICE_REVIEW','NO_SLOTS','PRICE_CHANGED','SERVICE_UNAVAILABLE','EXTRA_UNAVAILABLE','RESCHEDULE_REVIEW_REQUIRED'].includes(String(result.error))||result.requiresHumanReview){
+          if(['NO_DURATION_RULE','ROUTING_UNRELIABLE','PRICE_REVIEW','NO_SLOTS','PRICE_CHANGED','SERVICE_UNAVAILABLE','EXTRA_UNAVAILABLE','RESCHEDULE_REVIEW_REQUIRED','UNSUPPORTED_SERVICE'].includes(String(result.error))||result.requiresHumanReview){
             const reason=result.error==='NO_DURATION_RULE'?"NO_DURATION_RULE":result.error==='ROUTING_UNRELIABLE'?"ROUTING_UNRELIABLE":result.error==='NO_SLOTS'?"NO_SLOTS":"PRICE_REVIEW";
             await tool("requestHumanHandoff",{reason});break;
           }
@@ -126,7 +141,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
         if(ctx.handoff){text=handoffText[c.locale as keyof typeof handoffText]??handoffText.ru;break;}
       }
       if(!text||!outputAllowed(text,ctx.state,ctx.factAmounts)){
-        await tool("requestHumanHandoff",{reason:"UNCERTAINTY"});text=handoffText[c.locale as keyof typeof handoffText]??handoffText.ru;
+        await tool("requestHumanHandoff",{reason:!text?'TOOL_ERRORS':'UNCERTAINTY'});text=handoffText[c.locale as keyof typeof handoffText]??handoffText.ru;
       }
     }
     await persistAnswer(db,ctx,text,plan,leaseKey);
@@ -146,10 +161,12 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       if(mode==="AUTO")await db.$transaction(async tx=>{
         await schedulingLock(tx,"conversation",c.id);
         const current=await tx.conversation.findUniqueOrThrow({where:{id:c.id}});
-        if(current.revision!==ctx.revision||current.control!=="AI_CONTROL")return;
+        const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+        if(current.revision!==ctx.revision||current.control!=="AI_CONTROL"||effectiveMode(settings,current.channel)!=='AUTO')return;
         if(!await tx.humanHandoff.count({where:{conversationId:c.id,resolvedAt:null}})){
           const handoff=await tx.humanHandoff.create({data:{conversationId:c.id,reason:code}});
           await writeAudit(tx,{type:"AI",key:`agent:${job.id}`},{action:"AI_HANDOFF_REQUESTED",entityType:"HumanHandoff",entityId:handoff.id});
+          await handoffNotification(tx,c.id,handoff.id,code);
         }
         await tx.conversation.update({where:{id:c.id},data:{control:"HUMAN_CONTROL",stage:"HANDOFF"}});
         await tx.message.upsert({where:{conversationId_externalMessageId:{conversationId:c.id,externalMessageId:`agent:${job.id}:${ctx.revision}`}},create:{conversationId:c.id,author:"AI",text:handoffText[current.locale as keyof typeof handoffText]??handoffText.ru,externalMessageId:`agent:${job.id}:${ctx.revision}`,deliveryStatus:current.channel==="WEBSITE"?"DELIVERED":"PENDING"},update:{}});
@@ -162,4 +179,5 @@ export async function drainAgentJobs(db:PrismaClient,conversationId?:string,prov
   const deadline=Date.now()+85000;
   for(let i=0;i<2&&Date.now()<deadline;i++){const job=await claimJob(db,conversationId);if(!job)break;await runClaimedJob(db,job,providers);}
   await deliverOutbox(db,conversationId);
+  await publishNotifications(db);
 }

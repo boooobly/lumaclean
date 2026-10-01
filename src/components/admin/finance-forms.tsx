@@ -224,7 +224,7 @@ export function DurationRulesEditor({
   const r = old ?? {
     ...blankRule,
     ...(service === "deep"
-      ? { maxArea: 50, referenceArea: 50, baseMinutes: 480 }
+      ? { minArea: 40, maxArea: 60, referenceArea: 50, baseMinutes: 480 }
       : service === "regular"
         ? {}
         : { baseMinutes: undefined }),
@@ -246,6 +246,7 @@ export function DurationRulesEditor({
           "baseMinutes",
           "minutesPerSquare",
           "reserveMinutes",
+          "unknownExtraReserveMinutes",
         ].map((k) => [k, num(f, k)]),
       ),
       soilMultipliers: Object.fromEntries(
@@ -253,8 +254,7 @@ export function DurationRulesEditor({
       ),
       extraMinutes: Object.fromEntries(
         Object.keys(extraLabels)
-          .filter((k) => str(f, "extra-" + k) !== "")
-          .map((k) => [k, num(f, "extra-" + k)]),
+          .map((k) => [k, str(f,"extra-"+k)===""?null:num(f, "extra-" + k)]),
       ),
       notes: str(f, "notes"),
     };
@@ -280,7 +280,7 @@ export function DurationRulesEditor({
   return (
     <FormContext.Provider value={{ id: formId, errors: [] }}>
       <section className="crm-section">
-        <h2>Правила длительности</h2>
+        <h2>Начальные правила требуют подтверждения</h2>
         <p className="crm-hint">
           Расчёт воспроизводим: (база + дополнительные м² × минут/м²) ×
           загрязнение + extras; округление вверх до 5 минут. Количество клинеров
@@ -333,6 +333,7 @@ export function DurationRulesEditor({
                     0.0001,
                   ],
                   ["reserveMinutes", "Резерв, минут", 0, 240, 1],
+                  ["unknownExtraReserveMinutes", "Безопасный резерв на единицу неизвестного extra (0 = ручная запись)", 0, 240, 1],
                 ] as const
               ).map(([k, label, min, max, step]) => (
                 <Field
@@ -343,7 +344,7 @@ export function DurationRulesEditor({
                   min={min}
                   max={max}
                   step={step}
-                  value={r[k]}
+                  value={r[k as keyof typeof r] as number | undefined ?? 0}
                   required
                 />
               ))}
@@ -367,7 +368,7 @@ export function DurationRulesEditor({
             <h3>Дополнения · минут на единицу</h3>
             <p className="crm-hint">
               Пустое поле означает, что дополнение ещё не калибровано. Заказ с
-              таким дополнением потребует ручной длительности. Ноль означает
+              таким дополнением получает PARTIALLY_CONFIGURED при заданном безопасном резерве; без резерва — UNCONFIGURED и ручная запись. Ноль означает
               явно настроенное отсутствие дополнительного времени.
             </p>
             <div className="crm-fields-grid">
@@ -391,7 +392,7 @@ export function DurationRulesEditor({
             />
             <label className="crm-check">
               <input name="active" type="checkbox" />
-              Активировать эту версию. Предыдущее выбранное правило станет
+              Я проверил минуты, диапазон, команду и резерв; подтверждаю и активирую эту версию. Предыдущее выбранное правило станет
               неактивным.
             </label>
           </fieldset>

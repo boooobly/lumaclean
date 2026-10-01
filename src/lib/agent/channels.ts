@@ -16,6 +16,7 @@ export class TelegramCustomerAdapter implements ChannelAdapter {
     try{
       const response=await this.sendRequest(`https://api.telegram.org/bot${this.token}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:event.externalThreadId,text:event.text.slice(0,3900),protect_content:true}),signal:AbortSignal.timeout(10000),cache:"no-store"});
       if(response.status>=500)return{status:"UNKNOWN",errorCode:"DELIVERY_OUTCOME_UNKNOWN"};
+      if(response.status===429)return{status:'FAILED',errorCode:'TELEGRAM_RATE_LIMIT'};
       const result=z.object({ok:z.boolean(),result:z.object({message_id:z.number().int()}).optional()}).safeParse(await response.json());
       if(response.ok&&result.success&&result.data.ok&&result.data.result)return{status:"DELIVERED",externalMessageId:String(result.data.result.message_id)};
       return{status:"FAILED",errorCode:"TELEGRAM_REJECTED"};

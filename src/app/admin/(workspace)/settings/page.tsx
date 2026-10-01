@@ -7,18 +7,21 @@ import {
 } from "@/components/admin/finance-forms";
 import { getDurationSettings } from "@/lib/services/finance-queries";
 import { AgentModeControl } from "@/components/admin/inbox-controls";
+import {AILaunch} from "@/components/admin/ai-launch";
+import {readiness} from "@/lib/agent/readiness";
 import { getDatabase } from "@/lib/database/client";
 export const metadata = { title: "Настройки бизнеса" };
 export default async function Settings() {
   const data = await getDurationSettings();
-  const ai = await getDatabase().businessSettings.findUniqueOrThrow({where:{id:"default"},select:{aiAgentMode:true}});
+  const ai = await getDatabase().businessSettings.findUniqueOrThrow({where:{id:"default"},});
+  const report=await readiness(getDatabase(),ai);
   return (
     <>
       <CrmHeader
         title="Настройки"
         subtitle="Правила длительности и условий выплат."
       />
-      <AgentModeControl mode={ai.aiAgentMode} enabled={process.env.AI_AGENT_ENABLED === "true"} />
+      <AILaunch checks={report.checks} checkedAt={report.checkedAt} sample={report.shadow} settings={{mode:ai.aiAgentMode,channels:ai.aiChannelModes as Record<string,string>,services:ai.aiAllowedServices,maxMessages:ai.aiMaxAnonymousMessages,maxModelCalls:ai.aiMaxModelCalls,maxToolSteps:ai.aiMaxToolSteps,maxConversationCost:Number(ai.aiMaxConversationCostUsd),dailyWarning:Number(ai.aiDailyCostWarningUsd)}}/><AgentModeControl mode={ai.aiAgentMode} enabled={process.env.AI_AGENT_ENABLED === "true"} canActivate={report.canActivate} blockers={report.blockers.map(c=>`${c.label}: ${c.detail}`)} />
       <section className="crm-section">
         <h2>Основные правила</h2>
         <dl className="crm-facts">

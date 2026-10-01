@@ -14,7 +14,7 @@ export function durationConfig(r: DurationRule): DurationConfig {
     baseMinutes: r.baseMinutes ?? 0,
     minutesPerSquare: Number(r.minutesPerSquare ?? 0),
     soilMultipliers: r.soilMultipliers as Record<string, number>,
-    extraMinutes: r.extraMinutes as Record<string, number>,
+    extraMinutes: r.extraMinutes as Record<string, number | null>,
   };
 }
 export async function durationEstimate(

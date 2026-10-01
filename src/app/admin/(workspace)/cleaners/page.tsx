@@ -1,3 +1,4 @@
+import {cleanerReadiness} from "@/lib/agent/readiness";
 import Link from "next/link";
 import { listCleaners } from "@/lib/services/scheduling-queries";
 import { CrmHeader, Ledger, Pager } from "@/components/admin/crm-view";
@@ -52,6 +53,7 @@ export default async function CleanersPage({
           "Языки",
           "Процент",
           "Активность",
+          "Готовность AI",
         ]}
         empty={!data.rows.length ? "Клинеров пока нет" : undefined}
       >
@@ -70,7 +72,7 @@ export default async function CleanersPage({
                 ? "Не задан"
                 : String(c.payoutPercent) + "%"}
             </td>
-            <td>{c.active ? "Активен" : "Неактивен"}</td>
+            <td>{c.active ? "Активен" : "Неактивен"}</td><td>{cleanerReadiness(c).ready?"Готов":"Нужна настройка"}<small>{!cleanerReadiness(c).hours?" · часы":""}{!cleanerReadiness(c).address?" · стартовый адрес":""}{!cleanerReadiness(c).coordinates?" · координаты":""}</small></td>
           </tr>
         ))}
       </Ledger>

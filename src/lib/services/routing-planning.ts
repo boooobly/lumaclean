@@ -1,3 +1,4 @@
+import {orderNotifications} from "@/lib/agent/notifications";
 import { createHash } from "node:crypto";
 import type { Prisma } from "@/generated/prisma/client";
 import { CrmError, localInstant } from "@/lib/domain/crm";
@@ -481,6 +482,7 @@ export async function applyProposal(
           },
         );
       }
+      for(const change of changes)await orderNotifications(tx,change.id,"CHANGED",`optimizer:${proposalId}:${change.id}`);
       await tx.schedulingProposal.update({
         where: { id: proposalId },
         data: { appliedAt: new Date() },

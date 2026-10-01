@@ -11,7 +11,7 @@ export const runtime="nodejs";
 export const maxDuration=180;
 export async function POST(request:Request){
   const origin=request.headers.get("origin");
-  if(![process.env.BETTER_AUTH_URL,process.env.VERCEL_URL?`https://${process.env.VERCEL_URL}`:null].includes(origin)||!request.headers.get("content-type")?.startsWith("application/json"))return NextResponse.json({ok:false},{status:403});
+  if(!origin||![process.env.BETTER_AUTH_URL,process.env.VERCEL_URL?`https://${process.env.VERCEL_URL}`:null].includes(origin)||!request.headers.get("content-type")?.startsWith("application/json"))return NextResponse.json({ok:false},{status:403});
   try{
     const user=await getCurrentUser();if(!user)return NextResponse.json({ok:false},{status:401});if(user.role!=="ADMIN")return NextResponse.json({ok:false},{status:403});
     await adminRateLimit(user.id,"inbox",40);

@@ -1,6 +1,7 @@
 // Transport-independent commands. HTTP callers supply a session-derived actor;
 // every transaction checks that actor against the current database role again.
 import { randomUUID } from "node:crypto";
+import { orderNotifications } from '@/lib/agent/notifications';
 import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 import { commandSchemas, type CommandName } from "@/lib/validation/crm";
 import {
@@ -494,6 +495,7 @@ export async function runCrmCommand(
             orderId: { before: null, after: order.id },
           });
         }
+        await orderNotifications(tx,order.id,'BOOKED',`crm:${order.id}:created`);
         return { id: order.id };
       }
       if (command === "order-update" || command === "order-status") {
@@ -762,6 +764,8 @@ export async function runCrmCommand(
               priceAdjustment: changes.priceAdjustment,
             });
         }
+        const notified=await tx.order.findUniqueOrThrow({where:{id:order.id}});
+        await orderNotifications(tx,order.id,notified.status==='CANCELLED'?'CANCELLED':'CHANGED',`crm:${order.id}:${notified.updatedAt.toISOString()}`);
         return { id: order.id };
       }
       throw new CrmError("VALIDATION", "Команда не найдена");

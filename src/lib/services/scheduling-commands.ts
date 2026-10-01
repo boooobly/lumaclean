@@ -1,4 +1,5 @@
 import type { PrismaClient, Prisma } from "@/generated/prisma/client";
+import { orderNotifications } from '@/lib/agent/notifications';
 import {
   schedulingSchemas,
   type SchedulingCommand,
@@ -435,6 +436,8 @@ export async function runSchedulingCommand(
             stored.id,
             { status: changes.status },
           );
+        const notified=await tx.order.findUniqueOrThrow({where:{id:stored.id}});
+        await orderNotifications(tx,stored.id,notified.status==='CANCELLED'?'CANCELLED':'CHANGED',`schedule:${stored.id}:${notified.updatedAt.toISOString()}`);
         return { id: stored.id };
       }
       const parsed = schedulingSchemas[command].parse(payload) as {

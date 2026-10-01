@@ -7,6 +7,7 @@ import { AgentError, type AgentState, type AgentLocale } from "./contracts";
 import { detectLocale, confirmsRecap, rescheduleIntent } from "./policy";
 import { json, stateOf } from "./tools";
 import { channelAdapter, type InboundEvent } from "./channels";
+import { assertAutoReady, effectiveMode } from './readiness';
 
 export const anonymousHash=(token:string)=>createHash("sha256").update(token).digest("hex");
 export async function rateLimit(db:PrismaClient,scope:string,max:number,periodMs=60000){
@@ -36,7 +37,8 @@ export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:str
     if(duplicate)return{messageId:duplicate.id,created:false};
     if(current.control==="CLOSED")throw new AgentError("CONVERSATION_CLOSED");
     const count=await tx.message.count({where:{conversationId:c.id,author:"CLIENT"}});
-    if(count>=200)throw new AgentError("CONVERSATION_LIMIT");
+    const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    if(count>=Math.min(1000,Math.max(1,settings.aiMaxAnonymousMessages)))throw new AgentError("CONVERSATION_LIMIT");
     const state=stateOf(current);
     const confirmation=!!state.pending&&(input.confirmationNonce===state.pending.nonce||confirmsRecap(input.text,state.pending.recap));
   if(input.confirmationNonce&&input.confirmationNonce!==state.pending?.nonce)throw new AgentError("INVALID_CONFIRMATION");
@@ -57,13 +59,15 @@ export async function publicConversation(db:PrismaClient,c:Conversation){
   const latest=await db.conversation.findUniqueOrThrow({where:{id:c.id}}),state=stateOf(latest);
   const messages=await db.message.findMany({where:{conversationId:c.id,deliveryStatus:"DELIVERED",author:{in:["CLIENT","AI","ADMIN","SYSTEM"]}},orderBy:{sentAt:"desc"},take:50,select:{id:true,author:true,text:true,sentAt:true,structured:true}});
   const pending=await db.agentJob.count({where:{conversationId:c.id,status:{in:["PENDING","RUNNING"]}}});
-  return{messages:messages.reverse(),control:latest.control,locale:latest.locale,pending:pending>0,confirmation:state.pending?{nonce:state.pending.nonce,recap:state.pending.recap}:null,booking:state.booking?{reference:state.booking.reference,recap:(({orderId,reference,...r})=>{void orderId;void reference;return r;})(state.booking)}:null};
+  const notifications=await db.notification.findMany({where:{conversationId:c.id,audience:"CLIENT",clientId:latest.clientId,deliveryState:"INTERNAL",scheduledAt:{lte:new Date()}},orderBy:{scheduledAt:"desc"},take:10,select:{id:true,text:true,kind:true,scheduledAt:true}});
+  return{notifications,messages:messages.reverse(),control:latest.control,locale:latest.locale,pending:pending>0,confirmation:state.pending?{nonce:state.pending.nonce,recap:state.pending.recap}:null,booking:state.booking?{reference:state.booking.reference,recap:(({orderId,reference,...r})=>{void orderId;void reference;return r;})(state.booking)}:null};
 }
 export const inboxCommandSchema=z.discriminatedUnion("action",[
   z.object({action:z.enum(["takeover","resume","close","read","retry"]),id:z.string().min(1).max(80)}).strict(),
   z.object({action:z.literal("reply"),id:z.string().min(1).max(80),requestId:z.uuid(),text:z.string().trim().min(1).max(3000)}).strict(),
   z.object({action:z.literal("mode"),mode:z.enum(["OFF","SHADOW","AUTO"]),confirmAuto:z.literal(true).optional()}).strict(),
   z.object({action:z.literal("verifyIdentity"),id:z.string().min(1).max(80),clientId:z.string().min(1).max(80),verificationConfirmed:z.literal(true)}).strict(),
+  z.object({action:z.literal('evaluate'),id:z.string().min(1).max(80),suggestionId:z.string().min(1).max(80),verdict:z.enum(['ACCEPTED','REJECTED']),reason:z.enum(['MISUNDERSTOOD','TONE','EXTRA_QUESTION','TOOL','PRICE','SCHEDULING','OTHER']).optional()}).strict(),
 ]);
 export async function runInboxCommand(db:PrismaClient,userId:string,payload:unknown){
   const input=inboxCommandSchema.parse(payload);
@@ -71,7 +75,9 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
     const user=await tx.user.findUnique({where:{id:userId},select:{active:true,role:true}});
     if(!user?.active||user.role!=="ADMIN")throw new AgentError("FORBIDDEN");
     if(input.action==="mode"){
+      await schedulingLock(tx,'settings','ai');
       if(input.mode==="AUTO"&&(!input.confirmAuto||process.env.AI_AGENT_ENABLED!=="true"||!process.env.PRIMARY_AGENT_MODEL||!process.env.FALLBACK_AGENT_MODEL))throw new AgentError("AUTO_CONFIRMATION_REQUIRED");
+      if(input.mode==='AUTO')await assertAutoReady(tx);
       await tx.businessSettings.update({where:{id:"default"},data:{aiAgentMode:input.mode}});
       await tx.conversation.updateMany({where:{control:"AI_CONTROL"},data:{revision:{increment:1}}});
       await writeAudit(tx,{type:"USER",userId},{action:"AI_AGENT_MODE_CHANGED",entityType:"BusinessSettings",entityId:"default",changes:{status:{before:null,after:input.mode}}});
@@ -79,7 +85,12 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
     }
     await schedulingLock(tx,"conversation",input.id);
     const c=await tx.conversation.findUniqueOrThrow({where:{id:input.id}});
-    if(input.action==="reply"){
+    if(input.action==='evaluate'){
+      if(input.verdict==='REJECTED'&&!input.reason)throw new AgentError('REJECTION_REASON_REQUIRED');
+      const suggestion=await tx.shadowSuggestion.findFirst({where:{id:input.suggestionId,conversationId:c.id}});
+      if(!suggestion)throw new AgentError('SUGGESTION_NOT_FOUND');
+      await tx.shadowSuggestion.update({where:{id:suggestion.id},data:{verdict:input.verdict,reason:input.verdict==='REJECTED'?input.reason:null,reviewedById:userId,reviewedAt:new Date()}});
+    }else if(input.action==="reply"){
       if(c.control!=="HUMAN_CONTROL")throw new AgentError("TAKEOVER_REQUIRED");
       await tx.message.upsert({where:{conversationId_externalMessageId:{conversationId:c.id,externalMessageId:`admin:${input.requestId}`}},create:{conversationId:c.id,userId,author:"ADMIN",text:input.text,externalMessageId:`admin:${input.requestId}`,deliveryStatus:c.channel==="WEBSITE"?"DELIVERED":"PENDING"},update:{}});
       await tx.conversation.update({where:{id:c.id},data:{ownerId:userId,lastMessageAt:new Date(),needsAttention:false,unreadCount:0,revision:{increment:1}}});
@@ -117,8 +128,8 @@ export async function deliverOutbox(db:PrismaClient,conversationId?:string){
     if(!claimed.count)continue;
     // Re-read control after claiming; owner takeover cancels AI outbox before any new send.
     const current=await db.conversation.findUniqueOrThrow({where:{id:row.conversationId}});
-    const settings=await db.businessSettings.findUniqueOrThrow({where:{id:"default"},select:{aiAgentMode:true}});
-    if(row.author==="AI"&&(process.env.AI_AGENT_ENABLED!=="true"||settings.aiAgentMode!=="AUTO"||current.control!=="AI_CONTROL"&&current.ownerId)){await db.message.update({where:{id:row.id},data:{deliveryStatus:"CANCELLED"}});continue;}
+    const settings=await db.businessSettings.findUniqueOrThrow({where:{id:"default"}});
+    if(row.author==="AI"&&(effectiveMode(settings,current.channel)!=='AUTO'||current.control!=="AI_CONTROL"&&current.ownerId)){await db.message.update({where:{id:row.id},data:{deliveryStatus:"CANCELLED"}});continue;}
     const result=await channelAdapter(current.channel).send({id:row.id,externalThreadId:current.externalThreadId??"",text:row.text});
     await db.message.update({where:{id:row.id},data:{deliveryStatus:result.status,deliveryError:result.errorCode??null,channelMessageId:result.externalMessageId??null}});
     if(result.status!=="DELIVERED")await db.conversation.update({where:{id:current.id},data:{needsAttention:true}});
