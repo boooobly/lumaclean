@@ -48,6 +48,17 @@ export type CalendarOrder = {
   cleaners: CrewOption[];
   updatedAt: string;
   issues: SchedulingIssue[];
+  logistics?: {
+    cleaner: string;
+    origin: string;
+    destination: string;
+    minutes: number | null;
+    buffer: number;
+    status: import("./routing").RouteResult["status"];
+    arrival: string | null;
+    calculatedAt: string;
+    conflict: boolean;
+  }[];
 };
 export type CalendarData = {
   mode: "day" | "week" | "month";

@@ -19,6 +19,7 @@ import {
   type CalendarOrder,
 } from "@/lib/domain/scheduling-types";
 import { orderLabels } from "@/lib/domain/crm-types";
+import { routeLabels } from "@/lib/domain/routing";
 import { PlanEditor, type PlanDraft } from "./order-planning";
 import { scheduleMutation } from "./scheduling-forms";
 const PIXELS_PER_MINUTE = 1.2;
@@ -26,12 +27,12 @@ const today = () => Temporal.Now.plainDateISO("Europe/Belgrade").toString();
 function belongs(order: CalendarOrder, day: string) {
   return Boolean(
     order.start &&
-      businessDate(order.start) <= day &&
-      businessDate(
-        order.end
-          ? new Date(new Date(order.end).getTime() - 1).toISOString()
-          : order.start,
-      ) >= day,
+    businessDate(order.start) <= day &&
+    businessDate(
+      order.end
+        ? new Date(new Date(order.end).getTime() - 1).toISOString()
+        : order.start,
+    ) >= day,
   );
 }
 function newOrder(day: string, minute = 540) {
@@ -105,6 +106,15 @@ function EventCard({
               ? "Конфликт"
               : "Внимание")}
       </small>
+      {order.logistics?.map((l) => (
+        <small key={l.cleaner}>
+          {l.cleaner}:{" "}
+          {l.minutes === null
+            ? routeLabels[l.status]
+            : `${l.minutes} мин + ${l.buffer} мин`}
+          {l.conflict && ` · не успевает, минимум ${wallLabel(l.arrival)}`}
+        </small>
+      ))}
     </button>
   );
 }
@@ -336,8 +346,9 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
         </button>
       </form>
       <p className="schedule-travel">
-        Europe/Belgrade · дорога не проверена · операционный буфер по умолчанию{" "}
-        {data.travelBuffer} мин. Время можно изменить в панели заказа.
+        Europe/Belgrade · маршруты и их актуальность — в панели логистики ·
+        операционный буфер по умолчанию {data.travelBuffer} мин. Время можно
+        изменить в панели заказа.
       </p>
       {pending && <p role="status">Проверяем и сохраняем перенос…</p>}
       {error && (

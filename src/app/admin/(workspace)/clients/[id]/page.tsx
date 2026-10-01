@@ -110,7 +110,7 @@ export default async function ClientPage({
               <details>
                 <summary>Редактировать адрес</summary>
                 <CrmForm command="address-update" id={a.id} clientId={id}>
-                  <AddressFields value={a} />
+                  <AddressFields value={{label:a.label,fullAddress:a.fullAddress,apartment:a.apartment,floor:a.floor,intercom:a.intercom,comment:a.comment,latitude:a.latitude===null?null:Number(a.latitude),longitude:a.longitude===null?null:Number(a.longitude)}} />
                 </CrmForm>
               </details>
               <CrmForm

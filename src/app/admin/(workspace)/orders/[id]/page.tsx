@@ -214,6 +214,8 @@ export default async function OrderPage({
         }))}
       />
       <History type="Order" id={id} />
+      <RoutingWorkspace date={(planning.order.localStart||planning.order.windowFrom||new Date().toISOString()).slice(0,10)} order={planning.order} cleaners={planning.cleaners} />
     </>
   );
 }
+import { RoutingWorkspace } from "@/components/admin/routing-workspace";

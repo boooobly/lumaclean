@@ -87,6 +87,7 @@ export const addressSchema = z
     floor: text(60),
     intercom: text(100),
     comment: text(),
+    locationProof: text(2000),
   })
   .strict();
 export const scheduleSchema = z
@@ -139,6 +140,7 @@ export const orderCreateSchema = z
     leadId: optionalId,
     allowDuplicate: z.boolean().default(false),
     requestId: z.uuid(),
+    suggestedCleanerIds: z.array(entityId).max(20).refine(ids=>new Set(ids).size===ids.length).default([]),
     order: orderSchema,
   })
   .strict()

@@ -7,6 +7,7 @@ import {
 export const BUSINESS_ZONE = "Europe/Belgrade";
 export type PlanningOrder = {
   id: string;
+  addressId?: string;
   status: string;
   scheduleMode: "FIXED" | "FLEXIBLE";
   scheduledStart: Date | null;
@@ -77,6 +78,7 @@ export class SchedulingConflictService {
     order: PlanningOrder,
     cleaners: PlanningCleaner[],
     others: PlanningOrder[],
+    defaultBuffer = 30,
   ): SchedulingIssue[] {
     if (releasedStatuses.includes(order.status) || order.status === "COMPLETED")
       return [];
@@ -256,7 +258,7 @@ export class SchedulingConflictService {
           const gap =
             start >= otherBusyEnd ? start - otherBusyEnd : otherStart - busyEnd;
           const buffer =
-            Math.max(30, order.travelBufferMinutes, other.travelBufferMinutes) *
+            Math.max(defaultBuffer, order.travelBufferMinutes, other.travelBufferMinutes) *
             60000;
           if (gap < buffer)
             issue(

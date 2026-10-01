@@ -8,6 +8,7 @@ import {
   minuteLabel,
 } from "@/lib/domain/scheduling-types";
 import type { SchedulingCommand } from "@/lib/validation/scheduling";
+import { AddressAutocomplete } from "./address-autocomplete";
 type FormErrors = { field: string; message: string }[];
 export type MutationResult = {
   ok: boolean;
@@ -120,6 +121,7 @@ type CleanerValues = {
   phone?: string;
   additionalContact?: string | null;
   homeAddress?: string | null;
+  homeConfirmed?: boolean;
   languages?: string[];
   skills?: string[];
   internalRating?: number | null;
@@ -146,6 +148,7 @@ export function CleanerForm({
           phone: text(f, "phone"),
           additionalContact: optional(f, "additionalContact"),
           homeAddress: optional(f, "homeAddress"),
+          homeLocationProof: optional(f, "homeLocationProof"),
           languages: [
             ...new Set(
               text(f, "languages")
@@ -183,10 +186,12 @@ export function CleanerForm({
           label="Дополнительный контакт"
           value={value.additionalContact}
         />
-        <Field
+        <AddressAutocomplete
           name="homeAddress"
+          proofName="homeLocationProof"
           label="Домашний / стартовый адрес"
           value={value.homeAddress}
+          confirmed={value.homeConfirmed}
         />
         <Field
           name="defaultTravelMode"

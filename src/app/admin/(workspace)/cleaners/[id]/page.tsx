@@ -51,6 +51,7 @@ export default async function CleanerDetail({
                 phone: c.phone,
                 additionalContact: c.additionalContact,
                 homeAddress: c.homeAddress,
+                homeConfirmed: c.homeLatitude!==null&&c.homeLongitude!==null,
                 languages: c.languages,
                 skills: c.skills,
                 notes: c.notes,
@@ -74,7 +75,7 @@ export default async function CleanerDetail({
           </Link>
           <CleanerActivity id={id} active={c.active} />
           <p className="crm-hint">
-            Проверка дороги недоступна. Транспорт сохранён для следующего этапа.
+            Основная логистика — общественный транспорт с пешими участками. Подробности маршрутов доступны в календаре.
           </p>
         </section>
       </div>

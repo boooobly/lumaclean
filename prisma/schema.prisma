@@ -120,6 +120,7 @@ model User {
   notifications    Notification[]
   resolvedHandoffs HumanHandoff[]
   schedulingOverrides SchedulingOverride[]
+  schedulingProposals SchedulingProposal[]
 }
 
 model Session {
@@ -513,6 +514,21 @@ model RouteCalculation {
   expiresAt            DateTime   @db.Timestamptz(3)
 
   @@index([expiresAt])
+}
+
+// Server-generated, owner-bound proposal; never trust a client-supplied plan.
+model SchedulingProposal {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  date       String   @db.VarChar(10)
+  version    String
+  plan       Json
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt  DateTime @db.Timestamptz(3)
+  appliedAt  DateTime? @db.Timestamptz(3)
+
+  @@index([userId, expiresAt])
 }
 
 model Conversation {

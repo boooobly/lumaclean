@@ -14,6 +14,8 @@ import {
   type ServiceId,
 } from "@/lib/pricing";
 import { quantityExtras } from "@/lib/domain/crm-pricing";
+import { AddressAutocomplete } from "./address-autocomplete";
+import { SlotSearch } from "./routing-workspace";
 export function Options({
   labels,
   empty,
@@ -95,15 +97,16 @@ export type AddressValues = {
   floor?: string | null;
   intercom?: string | null;
   comment?: string | null;
+  latitude?: unknown;
+  longitude?: unknown;
 };
 export function AddressFields({ value = {} }: { value?: AddressValues }) {
   return (
     <div className="crm-fields-grid">
       <Field name="label" label="Название адреса" value={value.label} />
-      <Field
-        name="fullAddress"
-        label="Полный адрес"
+      <AddressAutocomplete
         value={value.fullAddress}
+        confirmed={value.latitude != null && value.longitude != null}
         required
       />
       <Field name="apartment" label="Квартира" value={value.apartment} />
@@ -465,6 +468,9 @@ export function OrderForm({
             />
           ) : (
             <>
+              {!id && (
+                <input type="hidden" name="scheduledStart" defaultValue="" />
+              )}
               <Field
                 name="windowFrom"
                 label="Начало окна"
@@ -485,6 +491,12 @@ export function OrderForm({
       </section>
       <section className="crm-form-section">
         <h2>Цена и договорённости</h2>
+        {!id && (
+          <>
+            <input type="hidden" name="suggestedCleanerIds" defaultValue="[]" />
+            <SlotSearch />
+          </>
+        )}
         <dl className="crm-price-preview">
           <div>
             <dt>

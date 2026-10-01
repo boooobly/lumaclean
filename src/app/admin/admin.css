@@ -1535,3 +1535,32 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Logistics follows the existing Paper / Ink / Teal workspace. */
+.routing-workspace { margin-top: 24px; }
+.routing-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin: 12px 0; }
+.routing-actions label, .routing-fields label { display: grid; gap: 7px; font-size: 13px; }
+.routing-actions input, .routing-fields input, .routing-address input { min-height: 42px; width: 100%; min-width: 0; padding: 9px 12px; border: 1px solid var(--lc-line); border-radius: 4px; background: var(--lc-paper-bright); color: var(--lc-ink); }
+.routing-address { gap: 8px; }
+.routing-address .crm-button { width: fit-content; }
+.routing-legs, .routing-predictions { list-style: none; padding: 0; margin: 16px 0; }
+.routing-legs > li { padding: 16px 0; border-top: 1px solid var(--lc-line); overflow-wrap: anywhere; }
+.routing-legs p { margin: 8px 0; }
+.routing-legs small { opacity: .65; }
+.routing-predictions { border: 1px solid var(--lc-line); border-radius: 4px; }
+.routing-predictions button { width: 100%; padding: 12px; text-align: left; background: transparent; border: 0; color: inherit; cursor: pointer; }
+.routing-predictions button:hover, .routing-predictions button:focus-visible { background: rgba(38,121,120,.1); }
+.routing-attribution { display: block; font: normal 400 12px sans-serif; color: #5e5e5e; letter-spacing: normal; white-space: nowrap; }
+.routing-fields { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; margin: 18px 0; }
+.routing-slot-search { margin: 18px 0; }
+.routing-slot-search summary { cursor: pointer; font-weight: 500; }
+.routing-proposal, .routing-details, .routing-map-panel { padding: 20px; border: 1px solid var(--lc-line); margin-top: 18px; overflow-wrap: anywhere; }
+.routing-map { min-height: 360px; width: 100%; }
+.routing-map-pin { display:grid; place-items:center; width:30px; height:30px; border:1px solid var(--lc-paper); border-radius:50%; background:var(--lc-teal); color:var(--lc-paper); font:13px var(--lc-font-display); }
+@media (max-width: 700px) {
+  .routing-fields { grid-template-columns: 1fr; }
+  .routing-actions { flex-direction: column; align-items: stretch; }
+  .routing-actions > *, .routing-actions .crm-button { width: 100%; }
+  .routing-proposal, .routing-details, .routing-map-panel { padding: 14px; }
+  .routing-workspace .admin-section-heading { flex-wrap: wrap; gap: 8px; }
+}

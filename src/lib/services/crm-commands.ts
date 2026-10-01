@@ -12,6 +12,7 @@ import {
 import { quote, priceSnapshot } from "@/lib/domain/crm-pricing";
 import { writeAudit, type AuditChanges } from "./audit";
 import { lockCrew, enforceScheduling } from "./scheduling-commands";
+import { normalizeAddress } from "./google-places";
 
 type Tx = Prisma.TransactionClient;
 export class DuplicateClientError extends CrmError {
@@ -299,7 +300,7 @@ export async function runCrmCommand(
         const v = commandSchemas[command].parse(payload);
         await clientExists(tx, v.clientId);
         const address = await tx.clientAddress.create({
-          data: { ...v.address, clientId: v.clientId },
+          data: { ...normalizeAddress(v.address), clientId: v.clientId },
         });
         await audit("ADDRESS_CREATED", "Client", v.clientId, {
           changedFields: { before: null, after: ["addresses"] },
@@ -315,7 +316,22 @@ export async function runCrmCommand(
         if (!address)
           throw new CrmError("NOT_FOUND", "Адрес клиента не найден");
         if (command === "address-update") {
-          const data = commandSchemas[command].parse(payload).address;
+          const inputAddress = commandSchemas[command].parse(payload).address;
+          const data = normalizeAddress(inputAddress, address);
+          const affected = await tx.orderCleaner.findMany({
+            where: { removedAt: null, order: { addressId: v.id } },
+            select: { cleanerId: true },
+            take: 1001,
+          });
+          if (affected.length > 1000)
+            throw new CrmError(
+              "VALIDATION",
+              "Слишком много назначений для изменения адреса.",
+            );
+          await lockCrew(
+            tx,
+            affected.map((a) => a.cleanerId),
+          );
           await tx.clientAddress.update({ where: { id: v.id }, data });
           await audit("ADDRESS_UPDATED", "Client", v.clientId, {
             changedFields: {
@@ -369,7 +385,7 @@ export async function runCrmCommand(
             );
         } else {
           const address = await tx.clientAddress.create({
-            data: { ...v.newAddress!, clientId: client.id },
+            data: { ...normalizeAddress(v.newAddress!), clientId: client.id },
           });
           addressId = address.id;
           await audit("ADDRESS_CREATED", "Client", client.id, {
@@ -384,6 +400,12 @@ export async function runCrmCommand(
           v.order,
           Number(client.discountPercent ?? 0),
         );
+        if (
+          v.order.scheduleMode === "FLEXIBLE" &&
+          v.suggestedCleanerIds.length &&
+          v.order.scheduledStart
+        )
+          result.data.scheduledStart = localInstant(v.order.scheduledStart);
         const order = await tx.order.create({
           data: {
             ...result.data,
@@ -399,6 +421,32 @@ export async function runCrmCommand(
           },
         });
         await audit("ORDER_CREATED", "Order", order.id);
+        if (v.suggestedCleanerIds.length) {
+          await lockCrew(tx, v.suggestedCleanerIds);
+          if (
+            (await tx.cleaner.count({
+              where: { id: { in: v.suggestedCleanerIds }, active: true },
+            })) !== v.suggestedCleanerIds.length
+          )
+            throw new CrmError(
+              "VALIDATION",
+              "Выберите активных клинеров заново.",
+            );
+          await enforceScheduling(
+            tx,
+            { ...order, cleanerIds: v.suggestedCleanerIds },
+            userId,
+          );
+          await tx.orderCleaner.createMany({
+            data: v.suggestedCleanerIds.map((cleanerId) => ({
+              orderId: order.id,
+              cleanerId,
+            })),
+          });
+          await audit("CLEANER_ASSIGNED", "Order", order.id, {
+            cleanerIds: { before: [], after: v.suggestedCleanerIds },
+          });
+        }
         await audit("CLIENT_ORDER_CREATED", "Client", client.id, {
           orderId: { before: null, after: order.id },
         });
@@ -555,6 +603,7 @@ export async function runCrmCommand(
             "windowTo",
             "manualDurationMinutes",
             "requiredCleaners",
+            "addressId",
           ].some(
             (key) =>
               String(order[key as keyof typeof order]) !==

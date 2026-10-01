@@ -36,4 +36,4 @@ for(const name of ['lumaclean_admin_test','lumaclean_admin_bootstrap_test','luma
 command(process.execPath,[require.resolve('tsx/cli'),'prisma/seed.ts'],environment('lumaclean_admin_test'));
 const preserved=command('docker',['exec',container,'psql','-U','postgres','-d','lumaclean_migration_test','-t','-A','-c',`SELECT "soilLevel"::text || '|' || "reference" FROM "Order" WHERE "id"='legacy-order';`]);
 if(preserved.trim()!=='HEAVY|ORD-LEGACY-legacy-order')throw Error('Legacy order was not preserved');
-console.log('PASS: all five migrations, empty schema diff on three local databases, legacy soil/order/client/lead preserved. No remote databases accessed.');
+console.log('PASS: all six migrations, empty schema diff on three local databases, legacy soil/order/client/lead preserved. No remote databases accessed.');

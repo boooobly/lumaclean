@@ -19,6 +19,7 @@ type AuditedField =
   | "discountPercent"
   | "discountAmount"
   | "priceAdjustment"
+  | "requiredCleaners"
   | "manualDurationMinutes"
   | "overrideCodes"
   | "date";
@@ -48,6 +49,7 @@ const allowedFields = new Set<AuditedField>([
   "discountPercent",
   "discountAmount",
   "priceAdjustment",
+  "requiredCleaners",
   "manualDurationMinutes",
   "overrideCodes",
   "date",

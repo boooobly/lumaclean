@@ -144,11 +144,31 @@ Admin foundation опубликован: `https://lumacleanrs.com/admin`. Сна
 2. CRM core готов: Leads/Clients/Orders, website intake, конвертация и транзакционный audit. Проверки и ограничения: [admin-crm.md](admin-crm.md).
 3. Клинеры, графики, назначения и календарь реализованы: [admin-scheduling.md](admin-scheduling.md). Ручная длительность без новой формулы, выплаты остаются будущим этапом.
 4. Scheduling engine проверяет пересечения, часы/исключения, flexible window, численность и операционные буферы с корректным DST.
-5. Транспортный provider и route cache; затем оптимизация маршрутов.
+5. Логистика и оптимизатор реализованы; подключить Google API keys для реальных расчётов (см. ниже).
 6. Finance workflow, payments/expenses/payouts и ограниченный кабинет клинера.
 7. Каналы сообщений, notifications, human handoff и только затем AI command layer с отдельными permissions.
 
-### Проверенная документация
+### Логистика и оптимизация — 1 октября 2026
+
+Ветка `codex/admin-routing-optimizer`. `RoutingProvider` изолирует Google HTTP от чистых `AvailabilityService` и `ScheduleOptimizer`. Places API (New) использует серверный autocomplete с debounce 400 мс, session token, ограничением Сербии и приоритетом Белграда. Координаты клиента и домашней точки клинера сохраняются только после выбора результата; подписанное сервером подтверждение запрещает подмену координат. Изменение ручного адреса очищает старые координаты. Результаты Google имеют атрибуцию; неоднозначные адреса автоматически не определяются.
+
+Routes API v2: `computeRouteMatrix`, TRANSIT, максимум 100 элементов в запросе, минимальные masks со status/condition. Пары подготавливаются до поиска; нет HTTP внутри оптимизатора и лишнего Cartesian product. На расчёт ограничены 32 запроса, 1200 элементов и 18 секунд подготовки. `computeRoutes` с пешими участками/пересадками вызывается только для выбранной поездки. DRIVE отображается как приблизительное такси без времени подачи; назначения автоматически не переключаются. Maps JavaScript API загружается при открытии карты, Advanced Markers показывают стартовые точки и уборки; полилиния только выбранного маршрута.
+
+`RouteCalculation`: provider + координаты + mode + arrival/departure + дата и 15-минутный bucket. Отправление округляется вверх, прибытие на первую уборку вниз; ожидание округления учитывается в проверке. TTL по умолчанию 600 секунд, `GOOGLE_ROUTE_CACHE_TTL_SECONDS` ограничен 30–1800. Просроченные значения явно STALE и не подтверждают выполнимость. Свежий кэш повторно не расходует Google; календарь/dashboard и чтение карточки используют кэш без Google запросов. Метрики содержат только тип запроса/число элементов/cache hits/errors, без адресов и ключей.
+
+Между уборками: `конец + cleaningReserveMinutes + TRANSIT + max(defaultTravelBufferMinutes, snapshots соседних заказов) ≤ следующее начало`. Настройка по умолчанию 30 минут. Первая поездка: дом → первая уборка, без дополнительного запаса, с рекомендуемым временем выхода. Каждый участник команды проверяется отдельно, также исходящий маршрут после вставки. Непроверенная дорога/сбой provider — WARNING с явным подтверждением и причиной; физическое опоздание — ERROR. Dashboard показывает требующие внимания назначения.
+
+Поиск использует границы заказов/рабочих часов и максимум 12 временных кандидатов, до 64 комбинаций команды. Все участники, исключения, длительность, окно и обе соседние поездки обязательны. Оптимизатор сохраняет FIXED времена и активные уборки, размещает FLEXIBLE целиком внутри обещанного окна. Детерминированный beam до 32 состояний и 3000 проверок; после 12 заказов — ограниченная эвристика. Это лучший найденный допустимый план, без гарантии глобального оптимума. Веса централизованы: дорога 100, простой 1, нормированная квадратичная загрузка 2, движение FLEXIBLE 300, смена команды 100; сначала минимизируется число неразмещённых заказов.
+
+Предложение хранится в `SchedulingProposal` на 10 минут и принадлежит создавшему ADMIN. Только «Применить» меняет календарь: свежая версия включает заказы, адреса, команды, часы и settings; повторная проверка под advisory locks, единая транзакция назначений/времени/audit. Устаревшее предложение и повторное применение отклоняются. API доступен только активному ADMIN, exact-origin, строгие схемы и rate limits. Миграция `20261001180000_admin_routing` только добавляет таблицу предложений.
+
+Проверено 97 тестов без пропусков (5 foundation, 17 CRM, 28 scheduling, 47 routing), lint/typecheck/build/schema validation, шесть миграций и отсутствие schema drift на трёх локальных БД. Chrome: применение предложения, обновление календаря, выбор/сохранение слота, ручной адрес, disabled карта, desktop/390 px; console без ошибок. Google в автоматических проверках заменён моками только в изолированной loopback БД; production тестовых данных не создаётся.
+
+Google env в Vercel пока отсутствуют: добавить серверный `GOOGLE_MAPS_SERVER_API_KEY` для Places API (New) и Routes API; для карты — отдельный `NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_API_KEY` с Maps JavaScript API и HTTP referrer restrictions. При желании `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` для production Advanced Markers. API restrictions и billing/quota задаются в Google Cloud. После добавления browser env нужен rebuild. Без ключей ручное планирование доступно, неизвестная дорога не получает выдуманную длительность.
+
+Источники: [Routes matrix](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRouteMatrix), [TRANSIT](https://developers.google.com/maps/documentation/routes/transit-route), [Places autocomplete](https://developers.google.com/maps/documentation/places/web-service/place-autocomplete), [атрибуция Places](https://developers.google.com/maps/documentation/places/web-service/policies).
+
+### Документация foundation
 
 - [Better Auth + Next.js](https://better-auth.com/docs/integrations/next)
 - [Better Auth Prisma adapter](https://better-auth.com/docs/adapters/prisma)

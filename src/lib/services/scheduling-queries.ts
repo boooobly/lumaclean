@@ -20,9 +20,24 @@ import { entityId } from "@/lib/validation/crm";
 import { notFound } from "next/navigation";
 import type { Prisma } from "@/generated/prisma/client";
 import { assessScheduling } from "./scheduling-commands";
+import {
+  assessTravel,
+  routeIssues,
+  travelRequests,
+  type RoutingSnapshot,
+} from "@/lib/domain/logistics";
+import { RoutingService } from "./route-cache";
+import { geo } from "@/lib/domain/routing";
 const calendarSelect = {
   client: { select: { name: true } },
-  address: { select: { fullAddress: true } },
+  address: {
+    select: {
+      fullAddress: true,
+      latitude: true,
+      longitude: true,
+      placeId: true,
+    },
+  },
   service: { select: { name: true } },
   assignments: {
     where: { removedAt: null },
@@ -138,9 +153,9 @@ export async function getCalendarData(
           : r.scheduledStart >= range.from)
       : Boolean(
           r.windowFrom &&
-            r.windowTo &&
-            r.windowFrom < range.to &&
-            r.windowTo > range.from,
+          r.windowTo &&
+          r.windowFrom < range.to &&
+          r.windowTo > range.from,
         );
     return (
       inRange &&
@@ -149,6 +164,32 @@ export async function getCalendarData(
         r.assignments.some((a) => a.cleaner.id === input.cleanerId))
     );
   });
+  const snapshots: RoutingSnapshot[] = range.days.map((date) => ({
+    date,
+    version: "",
+    defaultBuffer: settings.defaultTravelBufferMinutes,
+    orders: cleanRows.map((r) => ({
+      ...planning(r),
+      addressId: r.addressId,
+      updatedAt: r.updatedAt.toISOString(),
+      reference: r.reference ?? r.id,
+      label: r.address.fullAddress,
+      point: geo(r.address.latitude, r.address.longitude, r.address.placeId),
+    })),
+    cleaners: cleaners.map((c) => ({
+      ...c,
+      updatedAt: c.updatedAt.toISOString(),
+      home: geo(c.homeLatitude, c.homeLongitude, c.homePlaceId),
+    })),
+  }));
+  const cached = await new RoutingService(db).prepare(
+    snapshots
+      .flatMap((s) => travelRequests(s).map((l) => l.request))
+      .slice(0, 5000),
+    true,
+  );
+  const legs = snapshots.flatMap((s) => assessTravel(s, cached));
+  const logisticsIssues = routeIssues(legs);
   return {
     mode: input.mode,
     date: input.date,
@@ -168,10 +209,43 @@ export async function getCalendarData(
                 candidate.scheduledStart!.getTime() - 86400000,
           )
         : [];
-      return dto(
-        r,
-        SchedulingConflictService.check(candidate, cleaners, related),
-      );
+      const result = dto(r, [
+        ...SchedulingConflictService.check(
+          candidate,
+          cleaners,
+          related,
+          settings.defaultTravelBufferMinutes,
+        ),
+        ...logisticsIssues.filter((i) => i.orderId === r.id),
+        ...(!["COMPLETED", "CANCELLED", "NO_SHOW"].includes(r.status) &&
+        r.address.latitude === null
+          ? [
+              {
+                code: "ADDRESS_UNVERIFIED",
+                key: "ADDRESS_UNVERIFIED:" + r.addressId,
+                severity: "WARNING" as const,
+                message: "Адрес уборки не определён — маршрут не подтверждён.",
+              },
+            ]
+          : []),
+      ]);
+      result.logistics = legs
+        .filter((l) => l.orderId === r.id)
+        .map((l) => ({
+          cleaner: l.cleaner,
+          origin: l.origin,
+          destination: l.destination,
+          minutes:
+            l.route.status === "VERIFIED"
+              ? Math.ceil(l.route.durationSeconds! / 60)
+              : null,
+          buffer: l.bufferMinutes,
+          status: l.route.status,
+          arrival: l.earliestArrival,
+          calculatedAt: l.route.calculatedAt,
+          conflict: l.conflict,
+        }));
+      return result;
     }),
     cleaners: cleaners.map((c) => ({
       id: c.id,
@@ -215,7 +289,7 @@ export async function getOrderPlanning(id: string) {
     },
   });
   return {
-    order: dto(order, await assessScheduling(db, planning(order))),
+    order: dto(order, await assessScheduling(db, planning(order), true)),
     cleaners,
     overrides,
   };

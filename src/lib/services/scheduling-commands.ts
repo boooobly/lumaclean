@@ -11,6 +11,17 @@ import {
   type PlanningOrder,
 } from "@/lib/domain/scheduling-conflicts";
 import { writeAudit, type AuditChanges } from "./audit";
+import { normalizeHome } from "./google-places";
+import { RoutingService } from "./route-cache";
+import {
+  assessTravel,
+  routeIssues,
+  travelRequests,
+  type RoutingSnapshot,
+  type RoutingOrder,
+} from "@/lib/domain/logistics";
+import { plainDate } from "@/lib/domain/scheduling-conflicts";
+import { geo } from "@/lib/domain/routing";
 type Tx = Prisma.TransactionClient;
 export async function schedulingLock(tx: Tx, kind: string, id: string) {
   await tx.$queryRawUnsafe(
@@ -22,7 +33,11 @@ export async function lockCrew(tx: Tx, ids: string[]) {
   for (const id of [...new Set(ids)].sort())
     await schedulingLock(tx, "cleaner", id);
 }
-export async function assessScheduling(tx: Tx, order: PlanningOrder) {
+export async function assessScheduling(
+  tx: Tx,
+  order: PlanningOrder,
+  cacheOnly = false,
+) {
   const start = order.scheduledStart ?? order.windowFrom ?? new Date(),
     end = plannedEnd(order) ?? start;
   const cleaners = await tx.cleaner.findMany({
@@ -43,7 +58,7 @@ export async function assessScheduling(tx: Tx, order: PlanningOrder) {
       },
     },
   });
-  let others: PlanningOrder[] = [];
+  let others: RoutingOrder[] = [];
   if (order.scheduledStart && order.cleanerIds.length) {
     const from = new Date(order.scheduledStart.getTime() - 86400000),
       to = new Date(
@@ -63,6 +78,7 @@ export async function assessScheduling(tx: Tx, order: PlanningOrder) {
         },
       },
       include: {
+        address: true,
         assignments: {
           where: { removedAt: null },
           select: { cleanerId: true },
@@ -77,10 +93,75 @@ export async function assessScheduling(tx: Tx, order: PlanningOrder) {
       );
     others = rows.map((r) => ({
       ...r,
+      updatedAt: r.updatedAt.toISOString(),
+      point: geo(r.address.latitude, r.address.longitude, r.address.placeId),
+      label: r.address.fullAddress,
+      reference: r.reference ?? r.id,
       cleanerIds: r.assignments.map((a) => a.cleanerId),
     }));
   }
-  return SchedulingConflictService.check(order, cleaners, others);
+  const settings = await tx.businessSettings.findUniqueOrThrow({
+    where: { id: "default" },
+  });
+  const issues = SchedulingConflictService.check(
+    order,
+    cleaners,
+    others,
+    settings.defaultTravelBufferMinutes,
+  );
+  if (
+    !order.scheduledStart ||
+    !order.cleanerIds.length ||
+    closedStatuses.includes(order.status)
+  )
+    return issues;
+  const address = order.addressId
+    ? await tx.clientAddress.findUnique({ where: { id: order.addressId } })
+    : null;
+  const candidate: RoutingOrder = {
+    ...order,
+    addressId: order.addressId ?? "",
+    updatedAt: "",
+    reference: order.id,
+    label: address?.fullAddress ?? "Адрес не определён",
+    point: address
+      ? geo(address.latitude, address.longitude, address.placeId)
+      : null,
+  };
+  const snapshot: RoutingSnapshot = {
+    date: plainDate(order.scheduledStart).toString(),
+    version: "",
+    defaultBuffer: settings.defaultTravelBufferMinutes,
+    orders: [...others, candidate],
+    cleaners: cleaners.map((c) => ({
+      ...c,
+      name: c.name,
+      updatedAt: c.updatedAt.toISOString(),
+      home: geo(c.homeLatitude, c.homeLongitude, c.homePlaceId),
+    })),
+  };
+  const requests = travelRequests(snapshot);
+  const table = await new RoutingService(tx).prepare(
+    requests.map((r) => r.request),
+    cacheOnly,
+  );
+  // Validate both incoming and outgoing journeys of every participant.
+  const legs = assessTravel(snapshot, table).filter(
+    (l) => l.orderId === order.id || l.previousId === order.id,
+  );
+  return [
+    ...issues.filter(
+      (i) =>
+        i.code !== "OPERATING_GAP" ||
+        !legs.some(
+          (l) =>
+            l.cleanerId === i.cleanerId &&
+            l.route.status === "VERIFIED" &&
+            (l.previousId === i.orderId || l.orderId === i.orderId),
+        ),
+    ),
+    ...routeIssues(legs),
+  ];
 }
 export async function enforceScheduling(
   tx: Tx,
@@ -155,7 +236,9 @@ export async function runSchedulingCommand(
         );
       if (command === "cleaner-create") {
         const { cleaner } = schedulingSchemas[command].parse(payload);
-        const created = await tx.cleaner.create({ data: cleaner });
+        const created = await tx.cleaner.create({
+          data: normalizeHome(cleaner),
+        });
         await audit("CLEANER_CREATED", "Cleaner", created.id);
         return { id: created.id };
       }
@@ -222,10 +305,16 @@ export async function runSchedulingCommand(
             ? localInstant(input.scheduledStart)
             : null,
           manualDurationMinutes: input.manualDurationMinutes,
+          requiredCleaners: input.requiredCleaners ?? stored.requiredCleaners,
           cleanerIds: input.cleanerIds,
           status: input.status ?? stored.status,
         };
         const changes: AuditChanges = {};
+        if (stored.requiredCleaners !== proposed.requiredCleaners)
+          changes.requiredCleaners = {
+            before: String(stored.requiredCleaners),
+            after: String(proposed.requiredCleaners),
+          };
         if (
           stored.scheduledStart?.toISOString() !==
           proposed.scheduledStart?.toISOString()
@@ -255,6 +344,7 @@ export async function runSchedulingCommand(
           data: {
             scheduledStart: proposed.scheduledStart,
             manualDurationMinutes: proposed.manualDurationMinutes,
+            requiredCleaners: proposed.requiredCleaners,
             status: input.status,
             ...(input.status === "COMPLETED"
               ? { completedAt: new Date() }
@@ -300,6 +390,10 @@ export async function runSchedulingCommand(
           await audit("ORDER_DURATION_CHANGED", "Order", stored.id, {
             manualDurationMinutes: changes.manualDurationMinutes,
           });
+        if (changes.requiredCleaners)
+          await audit("ORDER_UPDATED", "Order", stored.id, {
+            requiredCleaners: changes.requiredCleaners,
+          });
         if (changes.status)
           await audit(
             input.status === "COMPLETED"
@@ -318,14 +412,19 @@ export async function runSchedulingCommand(
       if (!(await tx.cleaner.count({ where: { id: parsed.id } })))
         throw new CrmError("NOT_FOUND", "Клинер не найден");
       if (command === "cleaner-update") {
-        const { cleaner } = schedulingSchemas[command].parse(payload);
+        const { cleaner: inputCleaner } =
+          schedulingSchemas[command].parse(payload);
         const current = await tx.cleaner.findUniqueOrThrow({
           where: { id: parsed.id },
         });
+        const cleaner = normalizeHome(inputCleaner, current);
         const fields = Object.keys(cleaner).filter(
           (key) =>
             JSON.stringify(
-              key === "internalRating" || key === "payoutPercent"
+              key === "internalRating" ||
+                key === "payoutPercent" ||
+                key === "homeLatitude" ||
+                key === "homeLongitude"
                 ? current[key] === null
                   ? null
                   : Number(current[key])

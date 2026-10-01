@@ -35,6 +35,7 @@ export const cleanerSchema = z
     phone: z.string().trim().min(6).max(40),
     additionalContact: text(200),
     homeAddress: text(500),
+    homeLocationProof: text(2000),
     notes: text(2000),
     languages: z.array(z.string().trim().min(1).max(40)).max(15),
     skills: z.array(z.string().trim().min(1).max(60)).max(20),
@@ -105,6 +106,7 @@ export const planSchema = z
     expectedUpdatedAt: z.string().datetime({ offset: true }),
     scheduledStart: z.string().max(30).nullable(),
     manualDurationMinutes: z.number().int().min(1).max(1440).nullable(),
+    requiredCleaners: z.number().int().min(1).max(20).optional(),
     cleanerIds: z
       .array(entityId)
       .max(30)

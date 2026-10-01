@@ -40,6 +40,9 @@ export function ConflictList({
 }
 export type PlanDraft = {
   start?: string;
+  cleanerIds?: string[];
+  duration?: number;
+  requiredCleaners?: number;
   source?: "EDITOR" | "CALENDAR_DRAG" | "UNPLACE";
   issues?: SchedulingIssue[];
 };
@@ -61,10 +64,16 @@ export function PlanEditor({
     id = useId();
   const [start, setStart] = useState(draft.start ?? order.localStart),
     [duration, setDuration] = useState(
-      order.manualDuration === null ? "" : String(order.manualDuration),
+      draft.duration !== undefined
+        ? String(draft.duration)
+        : order.manualDuration === null
+          ? ""
+          : String(order.manualDuration),
     );
   const [source, setSource] = useState(draft.source ?? "EDITOR");
-  const [ids, setIds] = useState(order.cleaners.map((c) => c.id)),
+  const [ids, setIds] = useState(
+      draft.cleanerIds ?? order.cleaners.map((c) => c.id),
+    ),
     [status, setStatus] = useState(order.status);
   const [issues, setIssues] = useState(draft.issues ?? []),
     [ack, setAck] = useState(false),
@@ -93,6 +102,9 @@ export function PlanEditor({
         expectedUpdatedAt: order.updatedAt,
         scheduledStart: clear ? null : start || null,
         manualDurationMinutes: duration ? Number(duration) : null,
+        ...(draft.requiredCleaners === undefined
+          ? {}
+          : { requiredCleaners: draft.requiredCleaners }),
         cleanerIds: ids,
         status,
         source: intent,
@@ -143,6 +155,20 @@ export function PlanEditor({
         }}
         aria-busy={pending}
       >
+        {order.logistics?.map((l) => (
+          <details key={l.cleaner} className="routing-details">
+            <summary>{l.cleaner} · логистика</summary>
+            <p>
+              {l.origin} → {l.destination}
+            </p>
+            <p>
+              {l.minutes === null
+                ? "Маршрут не подтверждён"
+                : `Дорога ${l.minutes} мин · запас ${l.buffer} мин · прибытие ~${wallLabel(l.arrival)}`}
+            </p>
+            <small>Google · расчёт {wallLabel(l.calculatedAt)}</small>
+          </details>
+        ))}
         <fieldset disabled={pending} className="crm-form-fields">
           {order.scheduleMode === "FLEXIBLE" && (
             <p className="schedule-window">
@@ -235,7 +261,8 @@ export function PlanEditor({
             расчётная длительность; новая формула не применяется.
           </p>
           <h3>
-            Назначено {ids.length} / требуется {order.requiredCleaners}
+            Назначено {ids.length} / требуется{" "}
+            {draft.requiredCleaners ?? order.requiredCleaners}
           </h3>
           <div className="schedule-crew-picker">
             {cleaners.map((c) => (
@@ -289,8 +316,8 @@ export function PlanEditor({
             Отмена и неявка с причиной доступны в карточке заказа.
           </p>
           <p className="schedule-travel">
-            Проверка дороги недоступна. Операционный буфер не гарантирует время
-            поездки.
+            При сохранении проверяются маршруты каждого участника команды.
+            Непроверенная дорога требует подтверждения с причиной.
           </p>
           <ConflictList issues={issues} cleaners={cleaners} />
           {issues.length > 0 && !issues.some((i) => i.severity === "ERROR") && (
@@ -376,7 +403,9 @@ export function OrderPlanningPanel({
         {order.end && " — " + wallLabel(order.end)}
       </p>
       <ConflictList issues={order.issues} cleaners={cleaners} />
-      <p className="schedule-travel">Проверка дороги недоступна</p>
+      <p className="schedule-travel">
+        Время дороги и актуальность расчёта — в логистике заказа.
+      </p>
       {overrides.length > 0 && (
         <details>
           <summary>Подтверждения предупреждений</summary>

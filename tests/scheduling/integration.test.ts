@@ -106,14 +106,19 @@ test(
         crew = await db.orderCleaner.findMany({
           where: { orderId: id, removedAt: null },
         });
-      return execute("order-plan", {
+      const payload = {
         id,
         expectedUpdatedAt: o.updatedAt.toISOString(),
         scheduledStart: localInput(o.scheduledStart) || null,
         manualDurationMinutes: o.manualDurationMinutes,
         cleanerIds: crew.map((a) => a.cleanerId),
         ...changes,
-      });
+      };
+      try {return await execute("order-plan",payload);} catch(error) {
+        // Old scheduling scenarios explicitly acknowledge the newly introduced missing-route warning.
+        if(error instanceof SchedulingError&&error.issues.every(i=>i.code==="ROUTE_UNVERIFIED")&&!changes.acknowledged) return execute("order-plan",{...payload,acknowledged:error.issues.map(i=>i.key),overrideReason:"Local fixture has no Google coordinates"});
+        throw error;
+      }
     }
     const isConflict = (error: unknown, code: string) =>
       error instanceof SchedulingError &&
@@ -249,6 +254,7 @@ test(
           const before = await db.auditLog.count({
             where: { entityId: adjacent },
           });
+          const beforeOverrides=await db.schedulingOverride.count({where:{orderId:adjacent}});
           await assert.rejects(
             () =>
               plan(adjacent, {
@@ -271,13 +277,14 @@ test(
           );
           assert.equal(
             await db.schedulingOverride.count({ where: { orderId: adjacent } }),
-            0,
+            beforeOverrides,
           );
         },
       );
       await t.test(
         "operational gap warning needs exact acknowledgements/reason and is recorded",
         async () => {
+          const beforeOverrides=await db.schedulingOverride.count({where:{orderId:adjacent}});
           const changes = { scheduledStart: "2026-10-10T16:45" },
             issues = await warning(adjacent, changes, "OPERATING_GAP");
           await assert.rejects(() =>
@@ -294,7 +301,7 @@ test(
           });
           assert.equal(
             await db.schedulingOverride.count({ where: { orderId: adjacent } }),
-            1,
+            beforeOverrides+1,
           );
           await plan(adjacent, { scheduledStart: "2026-10-10T17:00" });
         },

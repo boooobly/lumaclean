@@ -103,6 +103,7 @@ const address = (f: FormData) => ({
   floor: optional(f, "floor"),
   intercom: optional(f, "intercom"),
   comment: optional(f, "addressComment"),
+  locationProof: optional(f, "locationProof"),
 });
 function order(f: FormData) {
   return {
@@ -222,6 +223,7 @@ export function CrmForm({
           newAddress: optional(f, "addressId") ? null : address(f),
           allowDuplicate,
           order: order(f),
+          suggestedCleanerIds: JSON.parse(str(f,"suggestedCleanerIds")||"[]"),
         };
         break;
       case "order-update":
