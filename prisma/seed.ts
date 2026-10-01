@@ -2,11 +2,12 @@ import { loadEnvConfig } from "@next/env";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { extrasPrices, priceMatrix, serviceIds } from "../src/lib/pricing";
+import { pgConnectionString } from "../src/lib/database/connection";
 
 loadEnvConfig(process.cwd());
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required");
 const db = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL, max: 1 }),
+  adapter: new PrismaPg({ connectionString: pgConnectionString(process.env.DATABASE_URL), max: 1 }),
 });
 const names = {
   regular: "Поддерживающая уборка",

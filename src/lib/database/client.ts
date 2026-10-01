@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { attachDatabasePool } from "@vercel/functions";
 import { PrismaClient } from "@/generated/prisma/client";
+import { pgConnectionString } from "./connection";
 
 const globalDatabase = globalThis as unknown as { lumaDatabase?: PrismaClient };
 
@@ -12,7 +13,7 @@ export function getDatabase() {
   if (!connectionString) throw new Error("Admin database is not configured");
   // Use Neon pooled URL (-pooler). Small per-instance pool for Vercel concurrency.
   const pool = new Pool({
-    connectionString,
+    connectionString: pgConnectionString(connectionString),
     max: 3,
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 5_000,

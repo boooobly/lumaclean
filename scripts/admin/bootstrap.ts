@@ -4,6 +4,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../../src/generated/prisma/client";
 import { bootstrapAdminSchema } from "../../src/lib/validation/admin";
 import { provisionFirstAdmin } from "./provision";
+import { pgConnectionString } from "../../src/lib/database/connection";
 
 loadEnvConfig(process.cwd());
 
@@ -25,7 +26,7 @@ async function bootstrap() {
     throw new Error("Passwords do not match");
   const db = new PrismaClient({
     adapter: new PrismaPg({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: pgConnectionString(process.env.DATABASE_URL),
       max: 1,
     }),
   });
