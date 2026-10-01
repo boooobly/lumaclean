@@ -14,11 +14,11 @@ export async function getDashboard() {
     now,
     settings.timezone,
   );
-  const [today, leads, clients, cleaners, revenue, expenses] =
+  const [today, leads, clients, cleaners, revenue, expenses, latestLeads] =
     await db.$transaction([
       db.order.count({
         where: {
-          status: { in: ["CONFIRMED", "IN_PROGRESS", "COMPLETED"] },
+          status: { in: ["CONFIRMED", "SCHEDULED", "EN_ROUTE", "IN_PROGRESS", "COMPLETED"] },
           OR: [
             { scheduledStart: { gte: dayFrom, lt: dayTo } },
             {
@@ -48,6 +48,7 @@ export async function getDashboard() {
         },
         _sum: { amount: true },
       }),
+      db.lead.findMany({take:5,orderBy:{createdAt:"desc"},select:{id:true,name:true,createdAt:true,status:true,service:{select:{name:true}}}}),
     ]);
   return {
     today,
@@ -59,5 +60,6 @@ export async function getDashboard() {
     timezone: settings.timezone,
     currency: settings.currency,
     now,
+    latestLeads,
   };
 }

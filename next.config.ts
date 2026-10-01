@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     return [
       {source: "/admin/:path*", headers: [{key: "X-Robots-Tag", value: "noindex, nofollow, noarchive"}, {key: "Cache-Control", value: "private, no-store"}, {key: "X-Frame-Options", value: "DENY"}, {key: "Referrer-Policy", value: "same-origin"}]},
       {source: "/api/auth/:path*", headers: [{key: "X-Robots-Tag", value: "noindex, nofollow"}, {key: "Cache-Control", value: "private, no-store"}]},
+      {source: "/api/admin/:path*", headers: [{key:"X-Robots-Tag",value:"noindex, nofollow, noarchive"},{key:"Cache-Control",value:"private, no-store"},{key:"X-Frame-Options",value:"DENY"}]},
       ...(process.env.VERCEL_ENV === "preview" || (process.env.VERCEL_ENV !== "production" && !process.env.VERCEL && process.env.ARTICLES_PREVIEW === "1") ? [{source: "/:path*", headers: [{key: "X-Robots-Tag", value: "noindex, nofollow"}]}] : []),
       {
         source: "/media/journey-v5/:path*",

@@ -1,6 +1,6 @@
 # LumaClean Admin: архитектура и запуск
 
-Этап 1, 1 октября 2026. Закрытое рабочее пространство внутри существующего приложения: фундамент CRM, диспетчерской и ERP. Полные рабочие модули вводятся отдельно. Production в рамках этого этапа не изменялся.
+Обновлено для этапа 2, CRM core, 1 октября 2026. Работающие Leads, Clients и Orders поверх фундамента диспетчерской и ERP. Подробные workflow, ограничения и результаты выпуска: [admin-crm.md](admin-crm.md).
 
 ## 1. Границы и стек
 
@@ -16,19 +16,19 @@ Next.js 16.3.8, React 19.2.4, TypeScript, Zod 4, PostgreSQL, Prisma 7.10.0, Bett
 | --- | --- |
 | Database | `prisma/schema.prisma`, SQL migrations, `prisma.config.ts`, `src/lib/database/client.ts` |
 | Auth | `src/lib/auth/config.ts`, `session.ts`, `/api/auth/[...all]` |
-| Domain | `src/lib/domain/time.ts`, `scheduling.ts`, `admin-navigation.ts` |
-| Services | `src/lib/services/admin-dashboard.ts`, `audit.ts` |
-| Validation | `src/lib/validation/admin.ts`; будущие command schemas размещаются рядом |
+| Domain | `src/lib/domain/time.ts`, `scheduling.ts`, `admin-navigation.ts`, `crm*.ts`; общий расчёт `src/lib/pricing.ts` |
+| Services | `src/lib/services/admin-dashboard.ts`, `audit.ts`, `crm-commands.ts`, `crm-queries.ts`, `website-leads.ts`, `crm-backfill.ts` |
+| Validation | `src/lib/validation/admin.ts`, `crm.ts`; строгие схемы команд и website intake |
 | UI | `src/app/admin`, `src/components/admin` |
 | Provisioning | CLI `scripts/admin/bootstrap.ts`, `provision.ts`; не импортировать в HTTP-код |
 
 Основные экраны — Server Components. Клиентские компоненты отвечают за вход, выход и навигацию. Dashboard service сам вызывает `requireAdmin`, а каждый защищённый экран проверяет доступ независимо от layout. DB/auth/services закрыты `server-only`. В браузер не передаётся весь объект сессии, профиль клиента или финансовая выборка. Sidebar получает только имя владельца как серверный HTML.
 
-Для следующих mutations: Server Action → `requireAdmin()` → строгий Zod parse → domain service → одна DB transaction с записью audit → `revalidatePath`. Для JSON/webhook API: отдельный Route Handler с настоящей сессией и ролью либо проверенной подписью провайдера. Нельзя считать layout или cookie достаточным разрешением. Client Components не выполняют прямых DB-запросов.
+CRM mutations: Route Handler → текущая ADMIN session + точный Origin + JSON Content-Type → строгий Zod parse → domain service → одна DB transaction с повторной проверкой роли и audit → `revalidatePath`. Формы сохраняют значения при ошибке и обновляют серверные экраны после успеха. Нельзя считать layout или cookie достаточным разрешением. Client Components не выполняют прямых DB-запросов.
 
 ## 3. Сущности и связи
 
-Схема содержит 26 моделей. JSON предусмотрен только для ограниченного структурированного audit diff; контакты, услуги, расписание и финансы имеют самостоятельные поля и связи.
+Схема содержит 27 моделей. JSON предусмотрен только для ограниченного структурированного audit diff; контакты, услуги, расписание и финансы имеют самостоятельные поля и связи.
 
 | Модели | Назначение |
 | --- | --- |
@@ -36,7 +36,7 @@ Next.js 16.3.8, React 19.2.4, TypeScript, Zod 4, PostgreSQL, Prisma 7.10.0, Bett
 | Cleaner | Контакты, активность, домашняя точка, place ID, языки/навыки, рейтинг 0–5, индивидуальный процент, предпочтительный транспорт |
 | CleanerAvailability | ISO weekday 1–7 и локальные минуты 0–1440 либо дата исключения; доступность/недоступность, включая весь день |
 | Client, ClientAddress | Контакты и условия клиента; несколько объектов, координаты, домофон, этаж, комментарии |
-| Lead | Обращение, канал, статусы NEW → IN_PROGRESS / WAITING_CLIENT / READY_TO_BOOK → CONVERTED или LOST с причиной |
+| Lead, LeadExtra | Обращение, уникальный submissionId/hash, структурированные параметры и снимки extras, доставка Telegram; CONVERTED только атомарной конвертацией, LOST с причиной |
 | Order, OrderCleaner, OrderExtra | Заказ; несколько назначенных исполнителей; количественные extras со снимком цены |
 | Service, ServiceExtra, ServicePriceBand | Стабильные коды услуг и extras, диапазоны площади, версия прайса по сроку действия |
 | DurationRule | Неактивные по умолчанию версионированные правила длительности; параметры без выдуманной формулы |
@@ -67,7 +67,7 @@ Advisory transaction lock сериализует параллельные поп
 
 ## 6. Маршруты и метрики
 
-`/admin/login` — вход; `/admin` — реальные агрегаты. Защищённые разделы: `/admin/calendar`, `/admin/leads`, `/admin/clients`, `/admin/orders`, `/admin/cleaners`, `/admin/messages`, `/admin/finances`, `/admin/analytics`, `/admin/settings`. Сейчас разделы объясняют будущий процесс и показывают пустые реестры; это не полноценные списки существующих записей. Настройки показывают реальные основные значения read-only. Неизвестный раздел возвращает 404 после проверки доступа.
+`/admin/login` — вход; `/admin` — реальные агрегаты и последние заявки. `/admin/leads`, `/admin/clients`, `/admin/orders` — серверные реестры с поиском, фильтрами, пагинацией, созданием и карточками; Orders имеют отдельный edit/reschedule. Остальные защищённые разделы (`calendar`, `cleaners`, `messages`, `finances`, `analytics`) пока объясняют будущий процесс. Настройки показывают основные значения read-only. Неизвестный раздел возвращает 404 после проверки доступа.
 
 На главной: подтверждённые/текущие/завершённые уборки дня (draft/cancelled исключены), новые лиды, число клиентов и активных клинеров. Flexible window без выбранного старта учитывается, если пересекает бизнес-день. Выручка — finalPrice завершённых заказов по completedAt текущего месяца; это стоимость выполненной работы, не банковские поступления. Расходы — Expense по occurredAt. Обе суммы ограничены валютой BusinessSettings. Нулевые значения вычисляются из БД. Операционные fake records не создаются.
 
@@ -81,7 +81,7 @@ Quiet Architecture: тёмный Ink sidebar, Paper и Bright Paper, Roomline lo
 
 `DurationInput`, `DurationEstimate`, `SchedulingEngine` задают контракт будущего расчёта. Площадь, услуга, extras, загрязнение и число сотрудников — вход; результат либо UNCONFIGURED, либо minutes + rule ID/version. Никаких коэффициентов из приблизительных наблюдений не назначено, DurationRule не seed-ится.
 
-Order хранит fixed start либо flexible window, рассчитанную/фактическую длительность, cleaning reserve, отдельный transport buffer и ссылку на правило. При создании будущий service копирует business travel buffer в заказ; последующее изменение default не должно переписывать старые договорённости. Время хранится как PostgreSQL timestamptz/UTC instant; рабочие минуты и исключения — в business timezone. Temporal корректно строит полуоткрытые границы дня/месяца, включая дни перехода DST на 23 и 25 часов.
+Order хранит fixed start либо flexible window, nullable расчётную и отдельную ручную длительность, cleaning reserve, transport buffer и ссылку на правило. CRM service копирует business travel buffer при создании заказа; изменение default не переписывает старые договорённости. Время хранится как PostgreSQL timestamptz/UTC instant; рабочие минуты и исключения — в business timezone. Temporal строит полуоткрытые границы дня/месяца, включая дни DST на 23 и 25 часов. Несуществующее или неоднозначное локальное время отклоняется.
 
 ## 9. Маршрутизация
 
@@ -91,7 +91,7 @@ PUBLIC_TRANSIT — основной транспорт; WALKING, CAR, TAXI до�
 
 Будущий AI agent не получает прямой unrestricted DB access. Он использует проверенные command services с отдельными permissions, типизированными inputs и транзакционным audit. Conversation связывает Client/Lead/Order, Message указывает автора, HumanHandoff хранит причину вмешательства и закрытие оператором. Внешние IDs позволяют дедупликацию сообщений. Сервис передачи человеку должен приостанавливать автоматические действия до явного разрешения оператора.
 
-Telegram `/api/lead` на этом этапе продолжает только существующую доставку в Telegram. Website leads ещё не записываются в CRM, поэтому счётчик Lead не является счётчиком исторических Telegram заявок. Следующий этап должен добавить надёжное сохранение/повтор доставки и идемпотентность, не меняя успешно работающую форму. Переписка Telegram/WhatsApp/Viber, AI и notifications пока не подключены.
+`/api/lead` сначала атомарно сохраняет Lead, LeadExtra и SYSTEM audit, затем отправляет уведомление Telegram. Успех сохранения возвращается и при сбое Telegram; карточка показывает SENT/FAILED/PENDING. Уникальный submissionId и hash защищают от повторов, изменённый payload с прежним ID возвращает conflict. Исторические Telegram заявки не импортируются. Фонового повторения доставки пока нет; следующий коммуникационный этап — durable outbox. Переписка Telegram/WhatsApp/Viber и AI пока не подключены.
 
 ## 11. Финансы и audit
 
@@ -120,11 +120,11 @@ Audit записывается в той же транзакции, что и и
 4. Локально установить Node 24 LTS, выполнить `npm ci`, заполнить `.env.local` подходящими URL и auth env, не стирая существующие Telegram переменные.
 5. Выполнить `npm run db:validate`, `npm run db:migrate`, `npm run db:status`, `npm run db:seed` на выбранной branch. Seed идемпотентно добавляет default settings, 5 услуг, 25 диапазонов прайса и 10 extras; настройки и существующие цены не перезаписываются.
 6. Выполнить интерактивный `npm run admin:bootstrap` с URL production только из доверенного терминала. Credentials задаёт владелец; никаких demo credentials на production.
-7. Проверить preview login/logout, protected routes, public site; затем развернуть подготовленную ветку обычным Vercel процессом. В рамках этого этапа deployment не выполнялся.
+7. Проверить preview login/logout, protected routes, public site; затем развернуть подготовленную ветку в существующий Vercel project. Результаты реальных выпусков приведены ниже и в документации CRM.
 
-Миграции: `20261001090000_admin_foundation` — schema, indexes, FK, CHECK и default BusinessSettings; `20261001100000_audit_immutable` — append-only guard. В production использовать только `migrate deploy`, не `migrate dev/reset` и не `db push`. `npm run build` генерирует client, но намеренно не выполняет migrations: DB outage не должен ломать сборку публичного сайта. Применение migrations должно быть отдельным контролируемым release step перед rollout admin.
+Миграции: `20261001090000_admin_foundation` — schema, indexes, FK, CHECK и default BusinessSettings; `20261001100000_audit_immutable` — append-only guard; `20261001120000_crm_core` — структурированные leads, телефоны, order snapshots/reference и SoilLevel; `20261001121000_crm_search_indexes` — pg_trgm GIN. В production использовать только `migrate deploy`, не `migrate dev/reset` и не `db push`. Build генерирует client без migrations. Применение migrations — отдельный release step перед rollout admin.
 
-ServicePriceBand сейчас зеркалит тарифные диапазоны из `pricing.ts`; это подготовка каталога. Он ещё не является источником публичных расчётов. Перед переключением нужно перенести минимальную стоимость, округление до 100 RSD, срочность и правила extras в явные поля/правила, добавить regression comparison и только затем переключить общий pricing service.
+ServicePriceBand зеркалит диапазоны `pricing.ts`; это подготовка каталога. Публичный калькулятор и CRM используют одну функцию `calculatePrice` в `pricing.ts`, сохраняя текущие минимальные цены, округление и срочность. Заказ фиксирует полный расчёт до скидки, скидку, ручную разницу с причиной, финальную цену и unitPrice каждого extra. Изменение только времени сохраняет согласованный прайс. Редактируемый источник расчёта в DB bands относится к будущему этапу.
 
 1 октября 2026 подключён отдельный Vercel-managed Neon project `lumaclean-admin` (`patient-butterfly-42300600`), Free, AWS US East 1, PostgreSQL 18. Production использует `main` (`br-noisy-bar-b8vmyqyi`); preview — `preview` (`br-muddy-fire-b8q2d6uo`); development — `development` (`br-sweet-flower-b8e9l9ut`). Ветки созданы до owner provisioning и не содержат production клиентов, заказов или сессий. Runtime использует pooled URL, migrations — DIRECT_URL. Реальное TLS-соединение и проверка сертификата подтверждены Node pg; обе миграции применены, schema diff пуст, справочник заполнен (5 services, 25 price bands, 10 extras). Seed transaction timeout 60 секунд учитывает задержку удалённой БД.
 
@@ -141,8 +141,8 @@ Admin foundation опубликован: `https://lumacleanrs.com/admin`. Сна
 Следующие этапы:
 
 1. Neon, migrations, реальный владелец и production release уже готовы. Перед следующим этапом сверить [admin-verification.md](admin-verification.md).
-2. Реальный реестр заявок и клиентов, запись website Lead с сохранением действующей Telegram доставки, конвертация вручную в Order, audit всех изменений.
-3. Карточки клинеров/расписания, заказы и назначения; согласовать формулы длительности и выплаты.
+2. CRM core готов: Leads/Clients/Orders, website intake, конвертация и транзакционный audit. Проверки и ограничения: [admin-crm.md](admin-crm.md).
+3. Карточки клинеров/расписания и назначения; согласовать формулы длительности и выплаты.
 4. Календарь и scheduling engine с конфликтами/буферами и корректным DST.
 5. Транспортный provider и route cache; затем оптимизация маршрутов.
 6. Finance workflow, payments/expenses/payouts и ограниченный кабинет клинера.

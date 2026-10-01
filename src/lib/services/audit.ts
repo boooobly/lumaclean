@@ -1,4 +1,3 @@
-import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 
 type Actor =
@@ -10,7 +9,15 @@ type AuditedField =
   | "windowTo"
   | "finalPrice"
   | "cleanerIds"
-  | "active";
+  | "active"
+  | "changedFields"
+  | "clientId"
+  | "orderId"
+  | "scheduleMode"
+  | "basePrice"
+  | "discountPercent"
+  | "discountAmount"
+  | "priceAdjustment";
 export type AuditChanges = Partial<
   Record<
     AuditedField,
@@ -21,7 +28,8 @@ export type AuditChanges = Partial<
   >
 >;
 
-// Future commands pass the same transaction used for their business mutation.
+const allowedFields = new Set<AuditedField>(["status","scheduledStart","windowFrom","windowTo","finalPrice","cleanerIds","active","changedFields","clientId","orderId","scheduleMode","basePrice","discountPercent","discountAmount","priceAdjustment"]);
+// Commands pass the same transaction used for their business mutation.
 export async function writeAudit(
   tx: Prisma.TransactionClient,
   actor: Actor,
@@ -32,6 +40,7 @@ export async function writeAudit(
     changes?: AuditChanges;
   },
 ) {
+  const safeChanges=event.changes ? Object.fromEntries(Object.entries(event.changes).filter(([key,value])=>allowedFields.has(key as AuditedField) && value!==undefined)) : undefined;
   return tx.auditLog.create({
     data: {
       actorType: actor.type,
@@ -40,7 +49,7 @@ export async function writeAudit(
       action: event.action,
       entityType: event.entityType,
       entityId: event.entityId,
-      changes: event.changes as Prisma.InputJsonValue | undefined,
+      changes: safeChanges as Prisma.InputJsonValue | undefined,
     },
   });
 }

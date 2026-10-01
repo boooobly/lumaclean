@@ -33,9 +33,19 @@ enum Channel {
 enum OrderStatus {
   DRAFT
   CONFIRMED
+  SCHEDULED
+  EN_ROUTE
   IN_PROGRESS
   COMPLETED
   CANCELLED
+  NO_SHOW
+}
+
+enum SoilLevel {
+  LIGHT
+  NORMAL
+  HEAVY
+  EXTREME
 }
 
 enum ScheduleMode {
@@ -214,6 +224,7 @@ model Client {
   id               String          @id @default(cuid())
   name             String
   phone            String
+  normalizedPhone  String?
   telegram         String?
   whatsapp         String?
   viber            String?
@@ -230,6 +241,13 @@ model Client {
   updatedAt        DateTime        @updatedAt @db.Timestamptz(3)
 
   @@index([phone])
+  @@index([normalizedPhone])
+  @@index([createdAt])
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([phone(ops: raw("gin_trgm_ops"))], type: Gin, map: "Client_phone_search_idx")
+  @@index([telegram(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([whatsapp(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([viber(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 model ClientAddress {
@@ -255,27 +273,57 @@ model ClientAddress {
 }
 
 model Lead {
-  id            String         @id @default(cuid())
-  reference     String?        @unique
-  clientId      String?
-  client        Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  name          String
-  phone         String
-  locale        String?
-  status        LeadStatus     @default(NEW)
-  channel       Channel        @default(WEBSITE)
-  lostReason    String?
-  serviceId     String?
-  service       Service?       @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  comment       String?
-  estimateText  String?
-  orders        Order[]
-  conversations Conversation[]
-  createdAt     DateTime       @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime       @updatedAt @db.Timestamptz(3)
+  id              String             @id @default(cuid())
+  reference       String?            @unique
+  submissionId    String?            @unique
+  submissionHash  String?
+  normalizedPhone String?
+  area            Decimal?           @db.Decimal(10, 2)
+  estimatedPrice  Decimal?           @db.Decimal(12, 2)
+  urgent          Boolean            @default(false)
+  entrySource     String?
+  landingPage     String?
+  internalNote    String?
+  telegramStatus  NotificationStatus @default(PENDING)
+  extras          LeadExtra[]
+  clientId        String?
+  client          Client?            @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  name            String
+  phone           String
+  locale          String?
+  status          LeadStatus         @default(NEW)
+  channel         Channel            @default(WEBSITE)
+  lostReason      String?
+  serviceId       String?
+  service         Service?           @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  comment         String?
+  estimateText    String?
+  orders          Order[]
+  conversations   Conversation[]
+  createdAt       DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime           @updatedAt @db.Timestamptz(3)
 
   @@index([status, createdAt])
   @@index([clientId])
+  @@index([createdAt])
+  @@index([channel, createdAt])
+  @@index([serviceId, createdAt])
+  @@index([normalizedPhone])
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([phone(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([reference(ops: raw("gin_trgm_ops"))], type: Gin)
+}
+
+model LeadExtra {
+  id        String       @id @default(cuid())
+  leadId    String
+  lead      Lead         @relation(fields: [leadId], references: [id], onDelete: Restrict)
+  extraId   String
+  extra     ServiceExtra @relation(fields: [extraId], references: [id], onDelete: Restrict)
+  quantity  Decimal      @db.Decimal(10, 2)
+  unitPrice Decimal      @db.Decimal(12, 2)
+
+  @@unique([leadId, extraId])
 }
 
 model Service {
@@ -314,12 +362,15 @@ model ServiceExtra {
   unitPrice   Decimal      @db.Decimal(12, 2)
   active      Boolean      @default(true)
   orderExtras OrderExtra[]
+  leadExtras  LeadExtra[]
   createdAt   DateTime     @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime     @updatedAt @db.Timestamptz(3)
 }
 
 model Order {
   id                       String          @id @default(cuid())
+  reference                String?         @unique
+  requestId                String?         @unique
   clientId                 String
   client                   Client          @relation(fields: [clientId], references: [id], onDelete: Restrict)
   addressId                String
@@ -330,7 +381,11 @@ model Order {
   serviceId                String
   service                  Service         @relation(fields: [serviceId], references: [id], onDelete: Restrict)
   area                     Decimal         @db.Decimal(10, 2)
-  soilLevel                String?
+  soilLevel                SoilLevel?      @default(NORMAL)
+  urgent                   Boolean         @default(false)
+  manualDurationMinutes    Int?
+  cancellationReason       String?
+  discountPercent          Decimal         @default(0) @db.Decimal(5, 2)
   scheduleMode             ScheduleMode    @default(FIXED)
   scheduledStart           DateTime?       @db.Timestamptz(3)
   windowFrom               DateTime?       @db.Timestamptz(3)
@@ -367,6 +422,8 @@ model Order {
   @@index([addressId, clientId])
   @@index([leadId])
   @@index([serviceId])
+  @@index([createdAt])
+  @@index([reference(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 model OrderCleaner {

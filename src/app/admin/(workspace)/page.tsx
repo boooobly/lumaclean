@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getDashboard } from "@/lib/services/admin-dashboard";
+import {Chip,date} from "@/components/admin/crm-view";
 
 export const metadata = { title: "Главная" };
 
@@ -134,6 +135,10 @@ export default async function DashboardPage() {
           </Link>
         </section>
       </div>
+      <section className="crm-section crm-latest">
+        <div className="admin-section-heading"><h2>Последние заявки</h2><Link href="/admin/leads">Все заявки →</Link></div>
+        {data.latestLeads.length ? <ul className="crm-linked-list">{data.latestLeads.map(lead=><li key={lead.id}><Link href={`/admin/leads/${lead.id}`}>{lead.name}<small>{date(lead.createdAt)} · {lead.service?.name ?? "Услуга не указана"}</small></Link><Chip status={lead.status}/></li>)}</ul> : <p className="crm-hint">Новые обращения появятся здесь после отправки формы на сайте.</p>}
+      </section>
       <section className="admin-next">
         <span className="admin-eyebrow">Рабочий порядок</span>
         <h2>

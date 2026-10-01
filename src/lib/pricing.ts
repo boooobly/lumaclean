@@ -41,3 +41,12 @@ export function basePrice(service: ServiceId, area: number) {
 export function formatRsd(value: number, locale = "sr") {
   return `${new Intl.NumberFormat(locale === "en" ? "en-US" : locale === "ru" ? "ru-RU" : "sr-Latn-RS").format(value)} RSD`;
 }
+
+// One source for public calculation and CRM snapshots.
+export function calculatePrice(service: ServiceId, area: number, extras: {code: keyof typeof extrasPrices; quantity: number}[], urgent: boolean) {
+  const base = basePrice(service, area);
+  const lines = extras.filter(e => e.quantity > 0).map(e => ({...e, unitPrice: extrasPrices[e.code]}));
+  const subtotal = base + lines.reduce((sum,e) => sum + e.quantity * e.unitPrice, 0);
+  const surcharge = urgent ? Math.round(subtotal * 0.2 / 100) * 100 : 0;
+  return {base, extras:lines, surcharge, total:subtotal+surcharge};
+}
