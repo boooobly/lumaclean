@@ -13,7 +13,7 @@ Production-сайт клинингового сервиса LumaClean в Бел�
 
 ## Локальный запуск
 
-Требуется Node.js 20.9 или новее.
+Рекомендован Node.js 24 LTS; минимум — Node.js 22.13.
 
 ```bash
 npm ci
@@ -36,6 +36,10 @@ npm run dev
 | `YANDEX_SITE_VERIFICATION` | Код подтверждения Яндекс Вебмастера для метатега. Не нужен при DNS-подтверждении. |
 | `TELEGRAM_BOT_TOKEN` | Секретный токен Telegram-бота. Добавляется только на сервере. |
 | `TELEGRAM_CHAT_ID` | Числовой ID чата или канала, куда бот отправляет заявки. |
+| `DATABASE_URL` | Серверный PostgreSQL URL админки; для Neon использовать pooled endpoint. |
+| `DIRECT_URL` | Прямой URL той же БД/branch для Prisma migrations. |
+| `BETTER_AUTH_SECRET` | Серверный auth secret, минимум 32 случайных символа. |
+| `BETTER_AUTH_URL` | Точный origin админки: локальный origin или production домен. |
 
 Токен бота нельзя добавлять в переменные с префиксом `NEXT_PUBLIC_` или коммитить в Git. Для отправки в канал бот должен быть добавлен туда с правом публикации сообщений.
 
@@ -43,6 +47,7 @@ npm run dev
 
 ```bash
 npm run lint   # ESLint
+npm run typecheck # Route types + TypeScript
 npm run build  # production-сборка
 npm run start  # запуск собранного приложения
 ```
@@ -53,6 +58,8 @@ npm run start  # запуск собранного приложения
 - `/{locale}/services/{service}` — 15 локализованных SEO-страниц для пяти видов уборки;
 - `/api/lead` — серверная отправка заявки в Telegram;
 - `/sitemap.xml` и `/robots.txt` — SEO-файлы.
+- `/admin/login` — закрытый вход владельца;
+- `/admin` — рабочее пространство с реальными агрегатами PostgreSQL.
 
 Старые адреса вида `/{locale}/v2` постоянно перенаправляются на основной локализованный адрес.
 
@@ -80,3 +87,33 @@ node docs/seo-audit/check-seo.mjs http://localhost:3100 docs/seo-audit/local-aft
 ## Articles
 
 Multilingual articles, draft previews and publication: [editor guide](docs/articles/README.md). Search Console and Yandex setup: [indexing](docs/articles/indexing.md).
+
+## LumaClean Admin — фундамент
+
+Prisma 7.10.0, Better Auth 1.7.7 и PostgreSQL добавлены в существующее приложение. Публичные локализации, калькулятор и `/api/lead` работают независимо от подключения админки. Основные разделы подготовлены как empty states; полноценная CRM вводится поэтапно. Website заявки пока продолжают поступать только в Telegram.
+
+Подключите отдельную Neon БД через Vercel Marketplace к проекту `lumaclean`. Добавьте серверные env из таблицы выше. Production, preview и development должны использовать отдельные branches/credentials. Публичной регистрации нет.
+
+```bash
+npm ci                    # postinstall генерирует Prisma client, БД не требуется
+npm run db:validate       # Проверка schema
+npm run db:migrate        # migrate deploy; только аддитивные подготовленные migrations
+npm run db:status
+npm run db:seed           # Идемпотентный каталог услуг и настройки; без fake customers
+npm run admin:bootstrap   # Интерактивное создание первого ADMIN; скрытый пароль
+npm run dev
+```
+
+`admin:bootstrap` требует интерактивный терминал и рабочий `DATABASE_URL`. Имя/email/пароль вводятся во время запуска; пароль не передаётся через аргументы или Git. Повторное создание ADMIN отклоняется. `BETTER_AUTH_URL` локально должен соответствовать порту сервера.
+
+`npm run build` генерирует Prisma client, но не применяет migrations. Миграции production — отдельный release step перед rollout; не использовать `migrate reset`, `migrate dev` или `db push` на production. Без admin env сборка и публичный сайт остаются доступны, а вход закрыт.
+
+```bash
+npm run test:admin        # DST/валидация; DB/auth интеграция требует test env
+npm run lint
+npm run typecheck
+npm run build
+npm audit
+```
+
+Подробные сущности, связи, роли, pooling, Neon env, migration workflow и следующие этапы: [admin-architecture.md](docs/admin-architecture.md). Реальные результаты проверок: [admin-verification.md](docs/admin-verification.md).

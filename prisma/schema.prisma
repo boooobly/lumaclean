@@ -1,0 +1,575 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  CLEANER
+}
+
+enum LeadStatus {
+  NEW
+  IN_PROGRESS
+  WAITING_CLIENT
+  READY_TO_BOOK
+  CONVERTED
+  LOST
+}
+
+enum Channel {
+  WEBSITE
+  TELEGRAM
+  WHATSAPP
+  VIBER
+  MANUAL
+  OTHER
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ScheduleMode {
+  FIXED
+  FLEXIBLE
+}
+
+enum AvailabilityKind {
+  WEEKLY
+  AVAILABLE
+  UNAVAILABLE
+}
+
+enum TravelMode {
+  PUBLIC_TRANSIT
+  WALKING
+  CAR
+  TAXI
+}
+
+enum MessageAuthor {
+  CLIENT
+  ADMIN
+  AI
+  SYSTEM
+}
+
+enum ActorType {
+  USER
+  AI
+  SYSTEM
+}
+
+enum ExpenseCategory {
+  TRANSPORT
+  TAXI
+  CHEMICALS
+  EQUIPMENT
+  PAYOUT
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+// Better Auth core models; role and active are never accepted from auth input.
+model User {
+  id               String         @id @default(cuid())
+  name             String
+  email            String         @unique
+  emailVerified    Boolean        @default(false)
+  image            String?
+  role             Role           @default(CLEANER)
+  active           Boolean        @default(true)
+  createdAt        DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(3)
+  sessions         Session[]
+  accounts         Account[]
+  cleaner          Cleaner?
+  auditLogs        AuditLog[]
+  messages         Message[]
+  notifications    Notification[]
+  resolvedHandoffs HumanHandoff[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime @db.Timestamptz(3)
+  token     String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime? @db.Timestamptz(3)
+  refreshTokenExpiresAt DateTime? @db.Timestamptz(3)
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([identifier])
+}
+
+model RateLimit {
+  id          String @id @default(cuid())
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+}
+
+model Cleaner {
+  id                String                @id @default(cuid())
+  userId            String?               @unique
+  user              User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name              String
+  phone             String
+  additionalContact String?
+  active            Boolean               @default(true)
+  homeAddress       String?
+  homeLatitude      Decimal?              @db.Decimal(10, 7)
+  homeLongitude     Decimal?              @db.Decimal(10, 7)
+  homePlaceId       String?
+  languages         String[]
+  skills            String[]
+  internalRating    Decimal?              @db.Decimal(3, 2)
+  notes             String?
+  payoutPercent     Decimal?              @db.Decimal(5, 2)
+  defaultTravelMode TravelMode            @default(PUBLIC_TRANSIT)
+  availability      CleanerAvailability[]
+  assignments       OrderCleaner[]
+  payouts           CleanerPayout[]
+  notifications     Notification[]
+  createdAt         DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime              @updatedAt @db.Timestamptz(3)
+
+  @@index([active])
+}
+
+// Weekly local wall-clock minutes, or a dated override in business timezone.
+model CleanerAvailability {
+  id          String           @id @default(cuid())
+  cleanerId   String
+  cleaner     Cleaner          @relation(fields: [cleanerId], references: [id], onDelete: Cascade)
+  kind        AvailabilityKind
+  weekday     Int?
+  date        DateTime?        @db.Date
+  startMinute Int?
+  endMinute   Int?
+  reason      String?
+  createdAt   DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime         @updatedAt @db.Timestamptz(3)
+
+  @@index([cleanerId, weekday])
+  @@index([cleanerId, date])
+}
+
+model Client {
+  id               String          @id @default(cuid())
+  name             String
+  phone            String
+  telegram         String?
+  whatsapp         String?
+  viber            String?
+  preferredChannel Channel?
+  notes            String?
+  discountPercent  Decimal?        @db.Decimal(5, 2)
+  individualTerms  String?
+  addresses        ClientAddress[]
+  leads            Lead[]
+  orders           Order[]
+  conversations    Conversation[]
+  notifications    Notification[]
+  createdAt        DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@index([phone])
+}
+
+model ClientAddress {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  label       String?
+  fullAddress String
+  comment     String?
+  apartment   String?
+  floor       String?
+  intercom    String?
+  latitude    Decimal? @db.Decimal(10, 7)
+  longitude   Decimal? @db.Decimal(10, 7)
+  placeId     String?
+  active      Boolean  @default(true)
+  orders      Order[]
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  @@unique([id, clientId])
+  @@index([clientId, active])
+}
+
+model Lead {
+  id            String         @id @default(cuid())
+  reference     String?        @unique
+  clientId      String?
+  client        Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  name          String
+  phone         String
+  locale        String?
+  status        LeadStatus     @default(NEW)
+  channel       Channel        @default(WEBSITE)
+  lostReason    String?
+  serviceId     String?
+  service       Service?       @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  comment       String?
+  estimateText  String?
+  orders        Order[]
+  conversations Conversation[]
+  createdAt     DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime       @updatedAt @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+  @@index([clientId])
+}
+
+model Service {
+  id            String             @id @default(cuid())
+  code          String             @unique
+  name          String
+  active        Boolean            @default(true)
+  orders        Order[]
+  leads         Lead[]
+  priceBands    ServicePriceBand[]
+  durationRules DurationRule[]
+  createdAt     DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime           @updatedAt @db.Timestamptz(3)
+}
+
+// Versioned price catalogue; public pricing.ts remains the source until cutover.
+model ServicePriceBand {
+  id             String    @id @default(cuid())
+  serviceId      String
+  service        Service   @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  minArea        Decimal   @db.Decimal(10, 2)
+  maxArea        Decimal?  @db.Decimal(10, 2)
+  fixedPrice     Decimal?  @db.Decimal(12, 2)
+  pricePerSquare Decimal?  @db.Decimal(12, 2)
+  validFrom      DateTime  @db.Timestamptz(3)
+  validUntil     DateTime? @db.Timestamptz(3)
+
+  @@index([serviceId, validFrom])
+}
+
+model ServiceExtra {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  name        String
+  unit        String
+  unitPrice   Decimal      @db.Decimal(12, 2)
+  active      Boolean      @default(true)
+  orderExtras OrderExtra[]
+  createdAt   DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime     @updatedAt @db.Timestamptz(3)
+}
+
+model Order {
+  id                       String          @id @default(cuid())
+  clientId                 String
+  client                   Client          @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  addressId                String
+  address                  ClientAddress   @relation(fields: [addressId, clientId], references: [id, clientId], onDelete: Restrict)
+  leadId                   String?
+  lead                     Lead?           @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  status                   OrderStatus     @default(DRAFT)
+  serviceId                String
+  service                  Service         @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  area                     Decimal         @db.Decimal(10, 2)
+  soilLevel                String?
+  scheduleMode             ScheduleMode    @default(FIXED)
+  scheduledStart           DateTime?       @db.Timestamptz(3)
+  windowFrom               DateTime?       @db.Timestamptz(3)
+  windowTo                 DateTime?       @db.Timestamptz(3)
+  estimatedDurationMinutes Int?
+  actualDurationMinutes    Int?
+  cleaningReserveMinutes   Int             @default(0)
+  travelBufferMinutes      Int
+  durationRuleId           String?
+  durationRule             DurationRule?   @relation(fields: [durationRuleId], references: [id], onDelete: SetNull)
+  basePrice                Decimal?        @db.Decimal(12, 2)
+  finalPrice               Decimal?        @db.Decimal(12, 2)
+  priceAdjustment          Decimal?        @db.Decimal(12, 2)
+  priceChangeReason        String?
+  discountAmount           Decimal         @default(0) @db.Decimal(12, 2)
+  currency                 String          @default("RSD") @db.VarChar(3)
+  clientComment            String?
+  internalComment          String?
+  requiredCleaners         Int             @default(1)
+  source                   Channel         @default(MANUAL)
+  completedAt              DateTime?       @db.Timestamptz(3)
+  assignments              OrderCleaner[]
+  extras                   OrderExtra[]
+  conversations            Conversation[]
+  expenses                 Expense[]
+  payouts                  CleanerPayout[]
+  createdAt                DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@index([status, scheduledStart])
+  @@index([windowFrom, windowTo])
+  @@index([status, completedAt])
+  @@index([clientId])
+  @@index([addressId, clientId])
+  @@index([leadId])
+  @@index([serviceId])
+}
+
+model OrderCleaner {
+  id         String    @id @default(cuid())
+  orderId    String
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  cleanerId  String
+  cleaner    Cleaner   @relation(fields: [cleanerId], references: [id], onDelete: Restrict)
+  assignedAt DateTime  @default(now()) @db.Timestamptz(3)
+  acceptedAt DateTime? @db.Timestamptz(3)
+  startedAt  DateTime? @db.Timestamptz(3)
+  finishedAt DateTime? @db.Timestamptz(3)
+  notes      String?
+
+  @@unique([orderId, cleanerId])
+  @@index([cleanerId])
+}
+
+model OrderExtra {
+  id              String       @id @default(cuid())
+  orderId         String
+  order           Order        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  extraId         String
+  extra           ServiceExtra @relation(fields: [extraId], references: [id], onDelete: Restrict)
+  quantity        Decimal      @db.Decimal(10, 2)
+  unitPrice       Decimal      @db.Decimal(12, 2)
+  durationMinutes Int?
+
+  @@unique([orderId, extraId])
+}
+
+// No formula seeded. Future rules are typed, versioned and explicitly approved.
+model DurationRule {
+  id               String   @id @default(cuid())
+  serviceId        String
+  service          Service  @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  version          Int
+  active           Boolean  @default(false)
+  minArea          Decimal? @db.Decimal(10, 2)
+  maxArea          Decimal? @db.Decimal(10, 2)
+  cleanerCount     Int
+  soilLevel        String?
+  baseMinutes      Int?
+  minutesPerSquare Decimal? @db.Decimal(10, 4)
+  notes            String?
+  orders           Order[]
+  createdAt        DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([serviceId, version])
+}
+
+model RouteCalculation {
+  id                   String     @id @default(cuid())
+  cacheKey             String     @unique
+  origin               String
+  originLatitude       Decimal?   @db.Decimal(10, 7)
+  originLongitude      Decimal?   @db.Decimal(10, 7)
+  destination          String
+  destinationLatitude  Decimal?   @db.Decimal(10, 7)
+  destinationLongitude Decimal?   @db.Decimal(10, 7)
+  travelMode           TravelMode @default(PUBLIC_TRANSIT)
+  departureAt          DateTime?  @db.Timestamptz(3)
+  durationSeconds      Int
+  distanceMeters       Int
+  provider             String
+  calculatedAt         DateTime   @default(now()) @db.Timestamptz(3)
+  expiresAt            DateTime   @db.Timestamptz(3)
+
+  @@index([expiresAt])
+}
+
+model Conversation {
+  id               String         @id @default(cuid())
+  channel          Channel
+  externalThreadId String?
+  clientId         String?
+  client           Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  leadId           String?
+  lead             Lead?          @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  orderId          String?
+  order            Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  messages         Message[]
+  handoffs         HumanHandoff[]
+  createdAt        DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(3)
+
+  @@unique([channel, externalThreadId])
+  @@index([clientId])
+  @@index([leadId])
+  @@index([orderId])
+}
+
+model Message {
+  id                String        @id @default(cuid())
+  conversationId    String
+  conversation      Conversation  @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  author            MessageAuthor
+  userId            String?
+  user              User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  text              String
+  sentAt            DateTime      @default(now()) @db.Timestamptz(3)
+  externalMessageId String?
+
+  @@unique([conversationId, externalMessageId])
+  @@index([conversationId, sentAt])
+}
+
+model HumanHandoff {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  reason         String
+  requestedAt    DateTime     @default(now()) @db.Timestamptz(3)
+  resolvedAt     DateTime?    @db.Timestamptz(3)
+  resolvedById   String?
+  resolvedBy     User?        @relation(fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolution     String?
+
+  @@index([resolvedAt, requestedAt])
+}
+
+model Expense {
+  id          String          @id @default(cuid())
+  category    ExpenseCategory
+  amount      Decimal         @db.Decimal(12, 2)
+  currency    String          @default("RSD") @db.VarChar(3)
+  occurredAt  DateTime        @db.Timestamptz(3)
+  orderId     String?
+  order       Order?          @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  payoutId    String?         @unique
+  payout      CleanerPayout?  @relation(fields: [payoutId], references: [id], onDelete: Restrict)
+  description String
+  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@index([occurredAt, currency])
+  @@index([orderId])
+}
+
+model CleanerPayout {
+  id             String        @id @default(cuid())
+  cleanerId      String
+  cleaner        Cleaner       @relation(fields: [cleanerId], references: [id], onDelete: Restrict)
+  orderId        String
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  appliedPercent Decimal       @db.Decimal(5, 2)
+  basisAmount    Decimal       @db.Decimal(12, 2)
+  amount         Decimal       @db.Decimal(12, 2)
+  currency       String        @default("RSD") @db.VarChar(3)
+  status         PaymentStatus @default(PENDING)
+  paidAt         DateTime?     @db.Timestamptz(3)
+  expense        Expense?
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
+
+  @@unique([orderId, cleanerId])
+  @@index([cleanerId, status])
+}
+
+model Notification {
+  id            String             @id @default(cuid())
+  clientId      String?
+  client        Client?            @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  cleanerId     String?
+  cleaner       Cleaner?           @relation(fields: [cleanerId], references: [id], onDelete: SetNull)
+  userId        String?
+  user          User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  channel       Channel
+  text          String
+  status        NotificationStatus @default(PENDING)
+  scheduledAt   DateTime           @db.Timestamptz(3)
+  sentAt        DateTime?          @db.Timestamptz(3)
+  attempts      Int                @default(0)
+  lastErrorCode String?
+  createdAt     DateTime           @default(now()) @db.Timestamptz(3)
+
+  @@index([status, scheduledAt])
+}
+
+model AuditLog {
+  id         String    @id @default(cuid())
+  actorType  ActorType
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  actorKey   String?
+  action     String
+  entityType String
+  entityId   String
+  // Allowlisted field changes only: no password, tokens, full contacts or messages.
+  changes    Json?
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([userId, createdAt])
+}
+
+model BusinessSettings {
+  id                          String   @id @default("default")
+  timezone                    String   @default("Europe/Belgrade")
+  currency                    String   @default("RSD") @db.VarChar(3)
+  defaultTravelBufferMinutes  Int      @default(30)
+  defaultCleanerPayoutPercent Decimal? @db.Decimal(5, 2)
+  workdayStartMinute          Int?
+  workdayEndMinute            Int?
+  updatedAt                   DateTime @updatedAt @db.Timestamptz(3)
+}
