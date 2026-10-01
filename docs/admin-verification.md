@@ -57,8 +57,33 @@ Temporal tests проверили 23-часовой день весеннего 
 
 Визуально открыт public `/ru` на телефоне, проверена консоль. Исходники public pages/components/styles, `pricing.ts`, `src/i18n` и `/api/lead` не менялись. Из общей конфигурации изменены только исключение `/admin` из locale proxy, заголовки новых admin/auth paths, tooling/scripts и security patch Next.js.
 
-Реальные заявки не отправлялись: существующий runner проверяет Telegram upstream через mock, а live `/api/lead` получил только невалидный payload (400, до Telegram fetch). Production website/deployment и его env не изменялись.
+В первоначальной локальной проверке реальные заявки не отправлялись: существующий runner проверяет Telegram upstream через mock, а live `/api/lead` получил только невалидный payload (400, до Telegram fetch). После подключения Neon опубликован новый admin release; существующие public/Telegram variables сохранены.
 
 ## Подключение Neon — 1 октября 2026
 
-Создан отдельный Vercel-managed Neon project `lumaclean-admin`, Free, PostgreSQL 18, AWS US East 1. Production, preview и development используют разные branches. TLS encrypted/authorized подтверждены для direct и pooled connection. Сначала применены две миграции на preview, затем на production; migrate status up-to-date, schema diff пуст. Seed: 5 services, 25 price bands, 10 extras, без клиентов/заказов. Для удалённой БД увеличен seed transaction timeout до 60 секунд. Production ADMIN создан с случайным паролем; credentials вне Git, в БД hash и immutable audit. Vercel environment variables настроены; deployment/runtime проверяются следующим шагом.
+Создан отдельный Vercel-managed Neon project `lumaclean-admin`, Free, PostgreSQL 18, AWS US East 1. Production, preview и development используют разные branches. TLS encrypted/authorized подтверждены для direct и pooled connection. Сначала применены две миграции на preview, затем на production; migrate status up-to-date, schema diff пуст. Seed: 5 services, 25 price bands, 10 extras, без клиентов/заказов. Для удалённой БД увеличен seed transaction timeout до 60 секунд. Production ADMIN создан со случайным паролем; credentials вне Git, Windows ACL ограничен текущим владельцем и SYSTEM, в БД hash и immutable audit. Vercel environment variables настроены раздельно, auth secrets разные. Локальный development env сохранён без перезаписи Telegram/public variables.
+
+## Проверка Vercel release
+
+| Проверка | Результат |
+| --- | --- |
+| Preview production build | PASS, `dpl_2A8PiLNbsDmXCKMskFJrHpN2orwN`, Node 24, Next 16.3.8 |
+| Chrome preview login → 10 sections → logout | PASS; настоящая серверная сессия в Neon, dashboard и настройки из БД |
+| Preview TLS logs после fix | Нет error logs; Neon pg connection явно `sslmode=verify-full` |
+| Staged production build | PASS, `dpl_AUCSFu3rPo4mZBXsFVYHkMGn6jWT`, production env, сначала `--skip-domain` |
+| Production auth/API до переключения домена | Вход ADMIN 200, dashboard 200, logout 200; authenticated dashboard из production Neon |
+| Публикация | `vercel promote` успешно; основной адрес `https://lumacleanrs.com/admin` |
+| Chrome production login | PASS; владелец вошёл, реальные нулевые метрики; console errors/warnings: [] |
+| Anonymous /admin и sign-up | 307 → /admin/login; sign-up endpoint 404; private/no-store и noindex headers |
+| Production data | 1 ADMIN, 1 immutable bootstrap audit, 0 Clients, Orders, Leads; demo business data отсутствуют |
+| Mobile/tablet | 390px / 820px, document width не превышает viewport; мобильное меню закрывается при переходе |
+| Server runtime logs | Нет error logs при проверке production deployment |
+| Public SEO после публикации | 63 pages, 19 checks, issues: [] |
+| Pricing regression на основном домене | PASS: 800 cases, 3 languages, 18 public price pages, 63 sitemap URLs |
+| Articles и lead regression | PASS: draft isolation, 45 translations, metadata; validation/server/network/duplicate-submit/mock Telegram paths. Реальные заявки не отправлялись |
+| Lint / TypeScript / Prisma validate | PASS после final source fixes |
+| npm audit | 0 vulnerabilities в Vercel builds |
+
+Код production release: `546ef12`, branch `codex/admin-foundation`. Первоначальный preview выявил исключение `scripts/admin/provision` старым `.vercelignore`; исправлено исключением local-only scripts/tests из CLI deployment. Ошибка seed из-за default transaction timeout исправлена лимитом 60 секунд. Обе проблемы проверены повторным успешным build/seed. Временный preview verification account и локальные request/cookie files после проверки удалены.
+
+Production screenshots в ignored `artifacts/admin`: `production-dashboard-desktop.png`, `production-dashboard-mobile.png`, `production-dashboard-tablet.png`; Neon branches — `neon-branches.png`. Read-only SEO отчёты: `public-before-neon-release.json`, `public-after-neon-release.json`.

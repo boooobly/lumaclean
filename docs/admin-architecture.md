@@ -8,7 +8,7 @@
 
 Next.js 16.3.8, React 19.2.4, TypeScript, Zod 4, PostgreSQL, Prisma 7.10.0, Better Auth 1.7.7. Node.js 24 LTS рекомендован; минимальный заявленный runtime — 22.13. Prisma 8 на дату проверки имеет RC dist-tag, поэтому установлен стабильный 7.10.0. Better Auth заявляет совместимость с Prisma 7, Next.js 16 и React 19. Next.js обновлён с 16.3.5 патчем для устранения уязвимости.
 
-Используется `@prisma/adapter-pg`: обычный PostgreSQL для локальной проверки и Neon pooled endpoint для Vercel. Никакого отдельного backend. Клиент создаётся лениво и переиспользуется в процессе; максимум 3 соединения на экземпляр, idle timeout 10 секунд, connect timeout 5 секунд. `attachDatabasePool` из `@vercel/functions` освобождает idle connections перед приостановкой Vercel Fluid. TLS-параметры берутся из выданного Neon URL; проверка сертификатов не отключается. Регион Neon стоит выбрать рядом с функциями Vercel (текущий проект использует `iad1`).
+Используется `@prisma/adapter-pg`: обычный PostgreSQL для локальной проверки и Neon pooled endpoint для Vercel. Никакого отдельного backend. Клиент создаётся лениво и переиспользуется в процессе; максимум 3 соединения на экземпляр, idle timeout 10 секунд, connect timeout 5 секунд. `attachDatabasePool` из `@vercel/functions` освобождает idle connections перед приостановкой Vercel Fluid. Для Neon pg clients явно применяется `sslmode=verify-full`: сертификат и hostname проверяются, прочие URL параметры сохраняются. Это сохраняет текущую безопасность pg 8 и убирает предупреждение об изменении aliases в pg 9. Prisma migration engine получает отдельный direct URL из провайдера. Neon и Vercel functions используют `iad1`.
 
 ## 2. Разделение кода
 
@@ -130,6 +130,8 @@ ServicePriceBand сейчас зеркалит тарифные диапазон
 
 DATABASE_URL, DIRECT_URL, BETTER_AUTH_SECRET и BETTER_AUTH_URL настроены отдельно для трёх Vercel environments; auth secrets различаются. Production URL — `https://lumacleanrs.com`, preview URL — `https://lumaclean-admin-preview.vercel.app`, development — `http://localhost:3000`. Локальный `.env.local` использует development, существующие Telegram/public variables сохранены. Реальный владелец создан через CLI-only provisioning helper; credentials сохранены в приватном локальном файле вне репозитория, в БД только password hash. Публичной регистрации нет.
 
+Admin foundation опубликован: `https://lumacleanrs.com/admin`. Сначала проверен preview deployment `dpl_2A8PiLNbsDmXCKMskFJrHpN2orwN`, затем production build `dpl_AUCSFu3rPo4mZBXsFVYHkMGn6jWT` с `--skip-domain`: настоящий вход владельца, dashboard, logout, sitemap. После успешных проверок production deployment promoted на основной домен. Код релиза — `546ef12` в `codex/admin-foundation`; отчёт сохранён отдельным последующим commit. Local-only `scripts`, `tests`, artifacts и env files исключены из CLI deployment, остаются доступны в Git для проверки/CLI provisioning. Временный preview administrator после проверки удалён; production owner не копируется в development/preview.
+
 ## 13. Проверки и следующие этапы
 
 Команды: `npm run lint`, `npm run typecheck`, `npm run build`, `npm run db:validate`, `npm run test:admin`. Без test env интеграционные тесты явно пропускаются; timezone/validation tests продолжают работать. Для полного прогона нужны local application `http://localhost:3100`, DATABASE_URL на `postgresql://postgres@127.0.0.1:55439/lumaclean_admin_test` и новая пустая БД `lumaclean_admin_bootstrap_test` с применёнными миграциями. Seed нужен основной БД. Установить ADMIN_TEST_BASE_URL и ADMIN_TEST_DATABASE_URL в тестовом терминале. Тесты специально проверяют эти loopback адреса и имя БД; production URL не принимается. Bootstrap test рассчитан на новую тестовую БД на каждый прогон. Test fixture credentials появляются только в ignored `artifacts/admin`; уничтожить тестовый контейнер и файлы после проверки.
@@ -138,7 +140,7 @@ DATABASE_URL, DIRECT_URL, BETTER_AUTH_SECRET и BETTER_AUTH_URL настроен
 
 Следующие этапы:
 
-1. Подключить Neon, применить migrations, создать реального владельца, проверить preview и выпустить admin foundation.
+1. Neon, migrations, реальный владелец и production release уже готовы. Перед следующим этапом сверить [admin-verification.md](admin-verification.md).
 2. Реальный реестр заявок и клиентов, запись website Lead с сохранением действующей Telegram доставки, конвертация вручную в Order, audit всех изменений.
 3. Карточки клинеров/расписания, заказы и назначения; согласовать формулы длительности и выплаты.
 4. Календарь и scheduling engine с конфликтами/буферами и корректным DST.
