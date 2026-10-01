@@ -136,7 +136,7 @@ Admin foundation опубликован: `https://lumacleanrs.com/admin`. Сна
 
 Команды: `npm run lint`, `npm run typecheck`, `npm run build`, `npm run db:validate`, `npm run test:admin`. Без test env интеграционные тесты явно пропускаются; timezone/validation tests продолжают работать. Для полного прогона нужны local application `http://localhost:3100`, DATABASE_URL на `postgresql://postgres@127.0.0.1:55439/lumaclean_admin_test` и новая пустая БД `lumaclean_admin_bootstrap_test` с применёнными миграциями. Seed нужен основной БД. Установить ADMIN_TEST_BASE_URL и ADMIN_TEST_DATABASE_URL в тестовом терминале. Тесты специально проверяют эти loopback адреса и имя БД; production URL не принимается. Bootstrap test рассчитан на новую тестовую БД на каждый прогон. Test fixture credentials появляются только в ignored `artifacts/admin`; уничтожить тестовый контейнер и файлы после проверки.
 
-Полный отчёт проверки и результаты регрессий: [admin-verification.md](admin-verification.md).
+Отчёт foundation: [admin-verification.md](admin-verification.md). CRM core и финальный production release: [admin-crm.md](admin-crm.md), [admin-crm-verification.md](admin-crm-verification.md). На 1 октября 2026 все четыре миграции применены в production Neon; финальный deployment `dpl_GxwVkNagcY1uoxcU3L48WYKYdjxk` опубликован на основном домене. Credentials и test fixtures в Git/deployment не включены.
 
 Следующие этапы:
 

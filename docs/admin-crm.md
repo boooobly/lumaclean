@@ -93,3 +93,11 @@ CANCELLED/NO_SHOW требуют cancellationReason. COMPLETED требует fi
 Нет merge клиентов, удаления Lead/Client/Order, пересоздания закрытого заказа, истории платежей, календаря, назначения клинеров, карт/маршрутов, формулы длительности, оптимизации, inbox/AI, выплат/finance UI и Excel import. Контакт клиента в существующем заказе берётся из текущей CRM-карточки; адрес можно редактировать в профиле, отдельный исторический адресный snapshot пока не введён. Финансовый snapshot заказов сохраняется независимо от будущего прайса.
 
 Документация библиотеки телефона: [libphonenumber-js](https://github.com/catamphetamine/libphonenumber-js). Next.js 16 server/routing APIs проверены по локальным `node_modules/next/dist/docs`.
+
+## Выпуск 1 октября 2026
+
+Реализация сохранена и отправлена в `codex/admin-crm-core` (`81cfb05`, PostgreSQL correction `881349c`). Финальный production deployment: `dpl_GxwVkNagcY1uoxcU3L48WYKYdjxk`, `https://lumaclean-lxotpn7hs-vladislavs-projects-0eae0ea3.vercel.app`; promoted на [lumacleanrs.com/admin](https://lumacleanrs.com/admin). Vercel build успешен, 70 static pages; private scripts/tests/artifacts/env не загружаются.
+
+Обе новые миграции применены сначала в preview Neon, затем в production `main`; все четыре migrations applied, schema diff пуст, counts сохранены: 0 Clients, 0 Leads, 0 Orders, 1 реальный ADMIN. Тестовых записей и Telegram-заявок в production не создавали. Preview verifier, его accounts/sessions и локальные disposable fixtures после проверки удалены.
+
+После исправления повторно прошли 5 foundation и 17 CRM tests без пропусков, lint, TypeScript и local production build. Final staged deployment проверен owner sign-in/sign-out и тремя защищёнными реестрами HTTP 200 с noindex/private/no-store; после promotion — Chrome desktop/mobile 390 px, 63 public SEO pages без issues, 18 price pages и 800 pricing cases. Browser console и error-level runtime logs финального deployment пусты в период проверки. Полный отчёт: [admin-crm-verification.md](admin-crm-verification.md).
