@@ -58,7 +58,7 @@ export function DurationEstimate({
   const estimate = unchanged
     ? stored
     : resultKey === body
-      ? (result?.estimatedDurationMinutes ?? null)
+      ? (result?.schedulingAllowed===false?null:result?.estimatedDurationMinutes??null)
       : null;
   return (
     <div className="finance-duration">
@@ -70,7 +70,7 @@ export function DurationEstimate({
       <strong>
         Расчёт системы:{" "}
         {estimate === null
-          ? "правило не настроено"
+          ? result?.confidence==="PARTIALLY_CONFIGURED"?"PARTIALLY_CONFIGURED · время extras ещё не настроено":"правило не настроено"
           : `${Math.floor(estimate / 60)} ч ${estimate % 60} мин`}
       </strong>
       {!unchanged && resultKey === body && result && (

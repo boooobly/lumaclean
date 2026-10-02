@@ -12,13 +12,16 @@ type GoogleMap = {
   };
 };
 let loaded: Promise<GoogleMap> | null = null;
+let authFailed=false;
 function loadMap(key: string): Promise<GoogleMap> {
   if (loaded) return loaded;
   loaded = new Promise((resolve, reject) => {
     const context = window as unknown as {
       google: GoogleMap;
       lumaRoutingMapReady?: () => void;
+      gm_authFailure?:()=>void;
     };
+    context.gm_authFailure=()=>{authFailed=true;window.dispatchEvent(new Event('luma-map-auth-error'));};
     const timer = setTimeout(() => {
       loaded = null;
       delete context.lumaRoutingMapReady;
@@ -63,6 +66,9 @@ export function DayMap({
   useEffect(() => {
     if (!key || !ref.current) return;
     let cancelled = false;
+    const authError=()=>setError('Google Maps отклонил доступ. Проверьте Maps JavaScript API, ключ, billing и ограничения текущего домена.');
+    window.addEventListener('luma-map-auth-error',authError);
+    if(authFailed)authError();
     const markers: { setMap: (map: null) => void }[] = [];
     const advanced: { map: unknown }[] = [];
     void loadMap(key)
@@ -107,6 +113,7 @@ export function DayMap({
       });
     return () => {
       cancelled = true;
+      window.removeEventListener('luma-map-auth-error',authError);
       markers.forEach((m) => m.setMap(null));
       advanced.forEach((m) => {
         m.map = null;

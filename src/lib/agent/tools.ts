@@ -9,12 +9,13 @@ import { placesRequest, verifyLocation, normalizeAddress } from "@/lib/services/
 import { findSlots, routingSnapshot } from "@/lib/services/routing-planning";
 import { assessScheduling, lockCrew, schedulingLock } from "@/lib/services/scheduling-commands";
 import { writeAudit } from "@/lib/services/audit";
-import { effectiveMode } from './readiness';
+import { effectiveMode,assertAutoReady } from './readiness';
+import {assertPreviewBatch} from './live-proof';
 import { orderNotifications, handoffNotification } from './notifications';
 import { AgentError, toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
 type Tx=Prisma.TransactionClient;
-export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[]};
+export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[];previewTestId?:string};
 export const json=(value:unknown)=>JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 export const stateOf=(c:Pick<Conversation,"state">)=>structuredClone(c.state) as AgentState;
 // PostgreSQL jsonb reorders object keys. Hash and compare facts, never their insertion order.
@@ -24,7 +25,9 @@ export async function assertToolAccess(tx:Tx,ctx:ToolContext){
   await schedulingLock(tx,"conversation",ctx.conversationId);
   const c=await tx.conversation.findUniqueOrThrow({where:{id:ctx.conversationId}});
   const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:"default"}});
-  if(c.control!=="AI_CONTROL"||c.revision!==ctx.revision||effectiveMode(settings,c.channel)!==ctx.mode||ctx.mode==="OFF")throw new AgentError("AGENT_CONTROL_CHANGED");
+  if(ctx.previewTestId)await assertPreviewBatch(tx,ctx.previewTestId,c.id);
+  const mode=ctx.previewTestId&&settings.aiAgentMode!=='OFF'?'AUTO':effectiveMode(settings,c.channel);
+  if(c.control!=="AI_CONTROL"||c.revision!==ctx.revision||mode!==ctx.mode||ctx.mode==="OFF")throw new AgentError("AGENT_CONTROL_CHANGED");
   const job=await tx.agentJob.findUnique({where:{id:ctx.jobId}});
   if(!job||job.conversationId!==c.id||job.leaseKey!==ctx.leaseKey||job.status!=="RUNNING"||!job.leaseUntil||job.leaseUntil.getTime()<Date.now())throw new AgentError("JOB_LEASE_LOST");
   return c;
@@ -96,6 +99,10 @@ export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,resched
   if(pricing.requiresHumanReview||pricing.snapshot.finalPrice!==state.quote.total)throw new AgentError("PRICE_CHANGED");
   const duration=await durationData(tx,{...state.quote.input,serviceId:pricing.service.id,requiredCleaners:state.duration.requiredCleaners});
   if(duration.estimatedDurationMinutes!==state.duration.minutes||duration.durationRuleVersion!==state.duration.version)throw new AgentError("SLOT_NO_LONGER_AVAILABLE");
+  // Serialize the side-effect boundary with emergency OFF/SHADOW and re-read control after all checks.
+  await schedulingLock(tx,'settings','ai');
+  await assertToolAccess(tx,ctx);
+  if(!ctx.previewTestId)await assertAutoReady(tx);
   let client=c.identityVerified&&c.clientId?await tx.client.findUniqueOrThrow({where:{id:c.clientId}}):null;
   if(!client){
     const phone=normalizedPhone(state.phone)!;
@@ -139,7 +146,7 @@ export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,resched
   const result={booked:true,reference:booking.reference,recap:pending.recap};
   await tx.agentSlot.update({where:{id:slot.id},data:{usedAt:new Date(),result:json(result)}});
   await aiAudit(tx,ctx,reschedule?"AI_ORDER_RESCHEDULED":"AI_ORDER_CREATED","Order",order.id);
-  await orderNotifications(tx,order.id,reschedule?'CHANGED':'BOOKED',`agent:${slot.id}`,c.id,true);
+  if(!ctx.previewTestId)await orderNotifications(tx,order.id,reschedule?'CHANGED':'BOOKED',`agent:${slot.id}`,c.id,true);
   return result;
 }
 async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,payload:unknown):Promise<ToolResult>{
@@ -171,9 +178,10 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const rules=await tx.durationRule.findMany({where:{serviceId:state.quote.serviceId,active:true},orderBy:{cleanerCount:"asc"}});
     let result:ReturnType<typeof estimateDuration>=null,crew=0;
     for(const count of [...new Set(rules.map(r=>r.cleanerCount))]){
-      result=estimateDuration({...state.quote.input,serviceId:state.quote.serviceId,requiredCleaners:count},rules.map(durationConfig));if(result){crew=count;break;}
+      result=estimateDuration({...state.quote.input,serviceId:state.quote.serviceId,requiredCleaners:count},rules.map(durationConfig),{showPartial:true});if(result){crew=count;break;}
     }
     if(!result)return{error:"NO_DURATION_RULE",confidence:'UNCONFIGURED',requiresHumanReview:true};
+    if(!result.schedulingAllowed)return{error:'NO_DURATION_RULE',confidence:'PARTIALLY_CONFIGURED',unknownExtras:result.unknownExtras,requiresHumanReview:true};
     state.duration={minutes:result.estimatedDurationMinutes,reserve:result.cleaningReserveMinutes,requiredCleaners:crew,ruleId:result.ruleId,version:result.version};
     return{minutes:result.estimatedDurationMinutes,requiredCleaners:crew,estimate:true,confidence:result.confidence,unknownExtras:result.unknownExtras,schedulingReserveMinutes:result.cleaningReserveMinutes};
   }

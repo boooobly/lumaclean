@@ -122,7 +122,7 @@ export function AddressAutocomplete({
           token.current ??= crypto.randomUUID();
         }}
       >
-        Определить адрес
+        Подтвердить адрес
       </button>
       <p className="crm-hint" role="status">
         {status}

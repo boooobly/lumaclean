@@ -72,7 +72,7 @@ export default async function CleanersPage({
                 ? "Не задан"
                 : String(c.payoutPercent) + "%"}
             </td>
-            <td>{c.active ? "Активен" : "Неактивен"}</td><td>{cleanerReadiness(c).ready?"Готов":"Нужна настройка"}<small>{!cleanerReadiness(c).hours?" · часы":""}{!cleanerReadiness(c).address?" · стартовый адрес":""}{!cleanerReadiness(c).coordinates?" · координаты":""}</small></td>
+            <td>{c.active ? "Активен" : "Неактивен"}</td><td><CleanerChecklist cleaner={c}/><Link href={"/admin/cleaners/"+c.id}>Настроить →</Link></td>
           </tr>
         ))}
       </Ledger>
@@ -80,3 +80,5 @@ export default async function CleanersPage({
     </>
   );
 }
+
+function CleanerChecklist({cleaner}:{cleaner:Parameters<typeof cleanerReadiness>[0]}){const r=cleanerReadiness(cleaner);return <div><b>{r.ready?"Готов":"Нужна настройка"}</b><ul>{[["Контакты",r.contact],["Активен",r.active],["График",r.hours],["Адрес",r.address],["Координаты",r.coordinates]].map(([label,ok])=><li key={String(label)}>{label} {ok?"✓":"✕"}</li>)}</ul></div>;}

@@ -279,7 +279,7 @@ export function DurationRulesEditor({
   }
   return (
     <FormContext.Provider value={{ id: formId, errors: [] }}>
-      <section className="crm-section">
+      <section className="crm-section" id="duration-rules">
         <h2>Начальные правила требуют подтверждения</h2>
         <p className="crm-hint">
           Расчёт воспроизводим: (база + дополнительные м² × минут/м²) ×
@@ -332,7 +332,7 @@ export function DurationRulesEditor({
                     1440,
                     0.0001,
                   ],
-                  ["reserveMinutes", "Резерв, минут", 0, 240, 1],
+                  ["reserveMinutes", "Резерв уборки, минут · отдельно от дороги", 0, 240, 1],
                   ["unknownExtraReserveMinutes", "Безопасный резерв на единицу неизвестного extra (0 = ручная запись)", 0, 240, 1],
                 ] as const
               ).map(([k, label, min, max, step]) => (
@@ -368,7 +368,7 @@ export function DurationRulesEditor({
             <h3>Дополнения · минут на единицу</h3>
             <p className="crm-hint">
               Пустое поле означает, что дополнение ещё не калибровано. Заказ с
-              таким дополнением получает PARTIALLY_CONFIGURED при заданном безопасном резерве; без резерва — UNCONFIGURED и ручная запись. Ноль означает
+              таким дополнением получает PARTIALLY_CONFIGURED. Без явно заданного безопасного резерва запись передаётся человеку. Обычные заказы без extras продолжают рассчитываться. Ноль означает
               явно настроенное отсутствие дополнительного времени.
             </p>
             <div className="crm-fields-grid">

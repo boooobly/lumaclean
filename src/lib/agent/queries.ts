@@ -1,9 +1,11 @@
 import type {PrismaClient,Prisma} from "@/generated/prisma/client";
 import {stateOf} from "./tools";
 import {customerTelegramConfigured} from "./channels";
-export const inboxFilters=["ALL","AI","HANDOFF","CLOSED","WEBSITE","TELEGRAM"] as const;
+export const inboxFilters=["ALL","UNREVIEWED","AI","HANDOFF","CLOSED","WEBSITE","TELEGRAM"] as const;
 export async function inboxData(db:PrismaClient,filter:string="ALL",before?:string){
   const where:Prisma.ConversationWhereInput=filter==="AI"?{control:"AI_CONTROL"}:filter==="HANDOFF"?{needsAttention:true,control:{not:"CLOSED"}}:filter==="CLOSED"?{control:"CLOSED"}:filter==="WEBSITE"||filter==="TELEGRAM"?{channel:filter}:{};
+  if(filter==='UNREVIEWED'){const suggestions=await db.shadowSuggestion.findMany({where:{verdict:null},select:{conversationId:true},orderBy:{createdAt:'desc'},take:500});where.id={in:[...new Set(suggestions.map(s=>s.conversationId))]};}
+  where.AND=[{OR:[{externalThreadId:null},{NOT:{externalThreadId:{startsWith:'live-test:'}}}]}];
   if(before&&Number.isFinite(Date.parse(before)))where.lastMessageAt={lt:new Date(before)};
   const [rows,settings,attention]=await Promise.all([
     db.conversation.findMany({where,orderBy:[{lastMessageAt:"desc"},{id:"desc"}],take:101,include:{client:{select:{name:true}},lead:{select:{name:true,status:true}},order:{select:{reference:true,status:true}},messages:{take:1,orderBy:{sentAt:"desc"},select:{text:true,author:true,sentAt:true}}}}),

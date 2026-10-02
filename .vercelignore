@@ -13,3 +13,4 @@ tests/
 .env*
 docs/seo-audit/
 .agents/
+.serena/

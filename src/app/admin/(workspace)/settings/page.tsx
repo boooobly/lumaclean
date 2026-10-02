@@ -10,18 +10,26 @@ import { AgentModeControl } from "@/components/admin/inbox-controls";
 import {AILaunch} from "@/components/admin/ai-launch";
 import {readiness} from "@/lib/agent/readiness";
 import { getDatabase } from "@/lib/database/client";
+import {StarterDuration,BrowserMapsDiagnostic,LiveBookingControl} from '@/components/admin/live-readiness-controls';
+import type {LiveTestReport} from '@/lib/agent/live-test';
 export const metadata = { title: "Настройки бизнеса" };
 export default async function Settings() {
   const data = await getDurationSettings();
   const ai = await getDatabase().businessSettings.findUniqueOrThrow({where:{id:"default"},});
   const report=await readiness(getDatabase(),ai);
+  const latestTest=process.env.VERCEL_ENV==='preview'?await getDatabase().agentLiveTest.findFirst({orderBy:{startedAt:'desc'}}):null;
   return (
     <>
       <CrmHeader
         title="Настройки"
         subtitle="Правила длительности и условий выплат."
       />
-      <AILaunch checks={report.checks} checkedAt={report.checkedAt} sample={report.shadow} settings={{mode:ai.aiAgentMode,channels:ai.aiChannelModes as Record<string,string>,services:ai.aiAllowedServices,maxMessages:ai.aiMaxAnonymousMessages,maxModelCalls:ai.aiMaxModelCalls,maxToolSteps:ai.aiMaxToolSteps,maxConversationCost:Number(ai.aiMaxConversationCostUsd),dailyWarning:Number(ai.aiDailyCostWarningUsd)}}/><AgentModeControl mode={ai.aiAgentMode} enabled={process.env.AI_AGENT_ENABLED === "true"} canActivate={report.canActivate} blockers={report.blockers.map(c=>`${c.label}: ${c.detail}`)} />
+      <AILaunch checks={report.checks} summary={report.summary} checkedAt={report.checkedAt} sample={report.shadow} settings={{mode:ai.aiAgentMode,channels:ai.aiChannelModes as Record<string,string>,services:ai.aiAllowedServices,maxMessages:ai.aiMaxAnonymousMessages,maxModelCalls:ai.aiMaxModelCalls,maxToolSteps:ai.aiMaxToolSteps,maxConversationCost:Number(ai.aiMaxConversationCostUsd),dailyWarning:Number(ai.aiDailyCostWarningUsd)}}/><AgentModeControl mode={ai.aiAgentMode} enabled={process.env.AI_AGENT_ENABLED === "true"} canActivate={report.canActivate} blockers={report.blockers.map(c=>`${c.label}: ${c.detail}`)} />
+      <section className="crm-section">
+        <div id="google-readiness"><h2>Google readiness</h2><p>Для Places API (New) и Routes TRANSIT нужен серверный ключ с включёнными API и billing. Demo key не поддерживает Compute Route Matrix и предназначен только для тестирования.</p><a href="https://developers.google.com/maps/documentation/routes/get-api-key" target="_blank" rel="noopener noreferrer">Инструкция Google: ключ, API и биллинг →</a><BrowserMapsDiagnostic/></div>
+      </section>
+      <StarterDuration activeServices={data.services.filter(s=>data.rules.some(r=>r.serviceId===s.id&&r.active)).map(s=>s.code)}/>
+      <LiveBookingControl today={new Date().toISOString().slice(0,10)} testDate={new Date(new Date().getTime()+7*86400000).toISOString().slice(0,10)} preview={process.env.VERCEL_ENV==='preview'} canRun={report.canRunLiveTest} report={latestTest?.report as LiveTestReport|null} previewUrl={process.env.AI_LIVE_TEST_PREVIEW_URL??null}/>
       <section className="crm-section">
         <h2>Основные правила</h2>
         <dl className="crm-facts">

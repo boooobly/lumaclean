@@ -78,7 +78,7 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
       await schedulingLock(tx,'settings','ai');
       if(input.mode==="AUTO"&&(!input.confirmAuto||process.env.AI_AGENT_ENABLED!=="true"||!process.env.PRIMARY_AGENT_MODEL||!process.env.FALLBACK_AGENT_MODEL))throw new AgentError("AUTO_CONFIRMATION_REQUIRED");
       if(input.mode==='AUTO')await assertAutoReady(tx);
-      await tx.businessSettings.update({where:{id:"default"},data:{aiAgentMode:input.mode}});
+      await tx.businessSettings.update({where:{id:"default"},data:{aiAgentMode:input.mode,...(input.mode==='AUTO'?{aiChannelModes:{WEBSITE:'AUTO',TELEGRAM:'OFF',WHATSAPP:'OFF',VIBER:'OFF'}}:{})}});
       await tx.conversation.updateMany({where:{control:"AI_CONTROL"},data:{revision:{increment:1}}});
       await writeAudit(tx,{type:"USER",userId},{action:"AI_AGENT_MODE_CHANGED",entityType:"BusinessSettings",entityId:"default",changes:{status:{before:null,after:input.mode}}});
       return{ok:true};

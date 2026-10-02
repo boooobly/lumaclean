@@ -28,6 +28,7 @@ export async function durationEstimate(
         where: { serviceId: input.serviceId, active: true },
       })
     ).map(durationConfig),
+    {showPartial:true},
   );
 }
 export async function durationData(
@@ -36,7 +37,7 @@ export async function durationData(
 ) {
   const result = await durationEstimate(tx, input);
   return {
-    estimatedDurationMinutes: result?.estimatedDurationMinutes ?? null,
+    estimatedDurationMinutes: result?.schedulingAllowed ? result.estimatedDurationMinutes : null,
     cleaningReserveMinutes: result?.cleaningReserveMinutes ?? 0,
     durationRuleId: result?.ruleId ?? null,
     durationRuleVersion: result?.version ?? null,

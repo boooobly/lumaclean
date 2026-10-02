@@ -25,6 +25,7 @@ export type DurationConfig = {
 export function estimateDuration(
   input: DurationInput,
   rules: DurationConfig[],
+  options: {showPartial?:boolean} = {},
 ) {
   const matches = rules.filter(
     (r) =>
@@ -46,7 +47,8 @@ export function estimateDuration(
     throw new CrmError("VALIDATION", "Для загрязнения не задан коэффициент.");
   const selected = input.extras.filter((e) => e.quantity > 0);
   const unknown = selected.filter(e=>r.extraMinutes[e.code]==null);
-  if(unknown.length && !(r.unknownExtraReserveMinutes && r.unknownExtraReserveMinutes>0)) return null;
+  const schedulingAllowed=!unknown.length||!!(r.unknownExtraReserveMinutes&&r.unknownExtraReserveMinutes>0);
+  if(!schedulingAllowed&&!options.showPartial) return null;
   const uncertaintyReserve = unknown.reduce((sum,e)=>sum+e.quantity*(r.unknownExtraReserveMinutes??0),0);
   if(uncertaintyReserve>1440) return null;
   const areaMinutes =
@@ -65,6 +67,7 @@ export function estimateDuration(
   return {
     estimatedDurationMinutes,
     confidence: unknown.length?'PARTIALLY_CONFIGURED' as const:'CONFIGURED' as const,
+    schedulingAllowed,
     unknownExtras: unknown.map(e=>e.code),
     cleaningReserveMinutes: r.reserveMinutes + uncertaintyReserve,
     ruleId: r.id,

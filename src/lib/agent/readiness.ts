@@ -6,10 +6,10 @@ import { quote } from '@/lib/domain/crm-pricing';
 import { placesRequest } from '@/lib/services/google-places';
 import { GoogleRoutesProvider } from '@/lib/infrastructure/google-routing';
 import { configuredProviders } from './providers';
-import { customerTelegramConfigured } from './channels';
 import { AgentError } from './contracts';
+import {liveConfigFingerprint,validLiveProof} from './live-proof';
 
-export type Check = { id:string; label:string; status:'READY'|'WARNING'|'BLOCKS_AUTO'; detail:string };
+export type Check = { id:string; label:string; status:'READY'|'WARNING'|'BLOCKS_AUTO'; detail:string;href?:string;action?:string };
 type DB=Prisma.TransactionClient;
 type Probe={ok:boolean;code:string};
 type Diagnostics={fingerprint:string;primary:Probe;fallback:Probe;places:Probe;transit:Probe};
@@ -20,12 +20,17 @@ export function effectiveMode(s:Pick<BusinessSettings,'aiAgentMode'|'aiChannelMo
   return s.aiAgentMode==='AUTO'&&scope==='AUTO'?'AUTO':'SHADOW';
 }
 function fingerprint(){
-  return createHash('sha256').update(JSON.stringify(['POYO_API_KEY','OPENROUTER_API_KEY','PRIMARY_AGENT_MODEL','FALLBACK_AGENT_MODEL','PRIMARY_AGENT_PROVIDER','FALLBACK_AGENT_PROVIDER','GOOGLE_MAPS_SERVER_API_KEY','TELEGRAM_CUSTOMER_BOT_TOKEN'].map(k=>process.env[k]??''))).digest('hex');
+  return createHash('sha256').update(JSON.stringify(['POYO_API_KEY','OPENROUTER_API_KEY','PRIMARY_AGENT_MODEL','FALLBACK_AGENT_MODEL','PRIMARY_AGENT_PROVIDER','FALLBACK_AGENT_PROVIDER','GOOGLE_MAPS_SERVER_API_KEY','NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_API_KEY','TELEGRAM_CUSTOMER_BOT_TOKEN'].map(k=>process.env[k]??''))).digest('hex');
 }
-export function cleanerReadiness(c:{active:boolean;homeAddress:string|null;homeLatitude:unknown;homeLongitude:unknown;languages:string[];payoutPercent:unknown;availability:{startMinute:number|null;endMinute:number|null;kind:string}[]}){
-  const hours=c.availability.some(a=>['WEEKLY','AVAILABLE'].includes(a.kind)&&a.startMinute!==null&&a.endMinute!==null&&a.endMinute>a.startMinute);
-  const address=!!c.homeAddress,coordinates=c.homeLatitude!==null&&c.homeLongitude!==null;
-  return {ready:c.active&&hours&&address&&coordinates,active:c.active,hours,address,coordinates,languages:!!c.languages.length,payout:c.payoutPercent!==null};
+export function cleanerReadiness(c:{active:boolean;name?:string;phone?:string;homeAddress:string|null;homeLatitude:unknown;homeLongitude:unknown;languages:string[];payoutPercent:unknown;availability:{startMinute:number|null;endMinute:number|null;kind:string}[]}){
+  const hours=c.availability.some(a=>a.kind==='WEEKLY'&&a.startMinute!==null&&a.endMinute!==null&&a.endMinute>a.startMinute);
+  const address=!!c.homeAddress?.trim(),coordinates=c.homeLatitude!=null&&c.homeLongitude!=null&&Number.isFinite(Number(c.homeLatitude))&&Number.isFinite(Number(c.homeLongitude))&&Math.abs(Number(c.homeLatitude))<=90&&Math.abs(Number(c.homeLongitude))<=180;
+  const contact=!!c.name?.trim()&&!!c.phone?.trim();
+  return {ready:c.active&&contact&&hours&&address&&coordinates,contact,active:c.active,hours,address,coordinates,languages:!!c.languages.length,payout:c.payoutPercent!==null};
+}
+export function websiteSummary(checks:Check[]){
+  const groups=[['master','credentials','primary','fallback'],['places','transit'],['duration','pricing'],['cleaners','settings'],['tests','scope','channels','liveBooking']];
+  return{ready:groups.filter(ids=>ids.every(id=>checks.some(c=>c.id===id&&c.status!=='BLOCKS_AUTO'))).length,total:groups.length};
 }
 export async function readiness(db:DB,provided?:BusinessSettings){
   const settings=provided??await db.businessSettings.findUnique({where:{id:'default'}});
@@ -43,7 +48,6 @@ export async function readiness(db:DB,provided?:BusinessSettings){
   add('browserMap','Google Map JS',!!process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_API_KEY,'NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_API_KEY: Maps JavaScript API и ограничения по доменам. Наличие ключа; загрузку карты проверяйте в Routing.',true);
   const cleaners=await db.cleaner.findMany({where:{active:true},include:{availability:true}});
   const readyCleaners=cleaners.filter(c=>cleanerReadiness(c).ready).length;
-  add('cleaners','Клинеры',readyCleaners>=1&&readyCleaners===cleaners.length,`Активных: ${cleaners.length}; готовы (часы + старт + координаты): ${readyCleaners}`);
   const services=await db.service.findMany({where:{code:{in:settings?.aiAllowedServices??[]}},include:{durationRules:{where:{active:true}},priceBands:true}});
   const supported=settings?.aiAllowedServices??[];
   let configured=!!supported.length&&services.length===supported.length,pricing=configured;
@@ -52,26 +56,32 @@ export async function readiness(db:DB,provided?:BusinessSettings){
     let good=false;
     for(const rule of service.durationRules){
       try{const cfg=durationConfig(rule);const result=estimateDuration({serviceId:service.id,area:Math.max(1,cfg.minArea),soilLevel:'NORMAL',requiredCleaners:cfg.cleanerCount,extras:[]},service.durationRules.map(durationConfig));
-        if(result&&rule.cleanerCount<=readyCleaners){good=true;bands.push(`${service.code}: ${cfg.minArea}–${cfg.maxArea} м², ${cfg.cleanerCount} клинера`);}
+        if(result){good=true;bands.push(`${service.code}: ${cfg.minArea}–${cfg.maxArea} м², ${cfg.cleanerCount} клинера`);}
       }catch{/* Invalid or overlapping rules block this service. */}
     }
     configured&&=service.active&&good;
     try{pricing&&=service.active&&service.priceBands.length>0&&quote(service.code as Parameters<typeof quote>[0],50,[],false).total>0;}catch{pricing=false;}
   }
   add('duration','Duration Rules',configured,bands.length?bands.join('; '):'Нет активных подтверждённых правил для услуг AUTO. За пределами диапазонов запись передаётся человеку.');
+  const requiredCrew=Math.max(1,...services.map(s=>Math.min(...s.durationRules.map(r=>r.cleanerCount))).filter(Number.isFinite));
+  add('cleaners','Готовность клинеров',readyCleaners>=requiredCrew&&readyCleaners===cleaners.length,`Активных: ${cleaners.length}; готовы: ${readyCleaners}; нужно для утверждённых правил: ${requiredCrew}. Имя, телефон, недельный график, стартовый адрес и координаты обязательны. Процент выплаты не требуется.`);
   add('pricing','Pricing engine',pricing,'Все услуги AUTO должны иметь активный каталог и цены; нестандартная цена передаётся человеку.');
   const release=process.env.AI_VERIFIED_RELEASE==='true';
-  add('tests','Website Chat / targeted tests',release,release?`Проверена текущая сборка: ${process.env.AI_VERIFIED_TEST_COUNT??'?'} targeted tests (session, limits, persistence, confirmation, fallback, outbox).`:'Нет подтверждения targeted tests для текущего кода сборки.');
+  add('tests','Website Chat / targeted tests',release,release?`Проверена текущая сборка: ${process.env.AI_VERIFIED_TEST_COUNT??'?'} targeted tests readiness/live-test. Базовая проверка предыдущего этапа сохранена.`:'Нет подтверждения targeted tests для текущего кода сборки.');
   const suggestions=await db.shadowSuggestion.count({where:{createdAt:{gte:new Date(Date.now()-30*86400000)}}});
   const verdicts=await db.shadowSuggestion.groupBy({by:['verdict'],where:{reviewedAt:{gte:new Date(Date.now()-30*86400000)}},_count:true});
   const accepted=verdicts.find(v=>v.verdict==='ACCEPTED')?._count??0,rejected=verdicts.find(v=>v.verdict==='REJECTED')?._count??0,n=accepted+rejected;
-  add('shadow','Оценка SHADOW',n>0&&rejected===0,`Suggestions ${suggestions}; проверено n=${n}; принято ${accepted}; исправлено ${rejected}. ${n?'Оцените причины исправлений; малая выборка не доказывает качество.':'Оцените реальные предложения в Inbox перед AUTO.'}`,true);
+  add('shadow','Оценка SHADOW',n>=5&&rejected===0,`Проверено: ${n}; accepted: ${accepted}; rejected: ${rejected}. ${n<5?'Недостаточно данных для оценки качества.':'Оцените причины исправлений.'}`,true);
   add('scope','AUTO — ограниченный запуск',!!settings?.aiCanary,'Стандартные сценарии; исключения всегда передаются человеку.');
   const modes=settings?.aiChannelModes as Record<string,string>|undefined;
-  add('channels','Каналы',modes?.WHATSAPP==='OFF'&&modes?.VIBER==='OFF'&&(modes?.TELEGRAM==='OFF'||customerTelegramConfigured()),'WhatsApp/Viber должны быть OFF. Telegram требует отдельный customer bot и webhook secret.');
+  add('channels','Каналы',modes?.WHATSAPP==='OFF'&&modes?.VIBER==='OFF'&&modes?.TELEGRAM==='OFF','Ограниченный AUTO работает только на Website. Telegram/WhatsApp/Viber остаются OFF.');
   const spent=await db.aIInvocation.aggregate({where:{createdAt:{gte:new Date(new Date().toISOString().slice(0,10))}},_sum:{estimatedCostUsd:true}});
   add('cost','Расход за сутки',Number(spent._sum.estimatedCostUsd??0)<=Number(settings?.aiDailyCostWarningUsd??5),`≈ $${Number(spent._sum.estimatedCostUsd??0).toFixed(4)}; warning $${settings?.aiDailyCostWarningUsd??5}. Это предупреждение, лимиты каждого диалога обязательны.`,true);
-  return {checks,blockers:checks.filter(c=>c.status==='BLOCKS_AUTO'),shadow:{suggestions,accepted,rejected,n},canActivate:checks.every(c=>c.status!=='BLOCKS_AUTO'),checkedAt:settings?.aiDiagnosticsAt?.toISOString()??null};
+  const config=await liveConfigFingerprint(db);
+  add('liveBooking','Live Preview booking',validLiveProof(settings?.aiLiveTestProof,config),'Нужен успешный тест записи в Preview с очисткой batch. Отчёт действует 7 дней и только для той же конфигурации.');
+  const links:Record<string,[string,string]>={cleaners:['/admin/cleaners','Настроить'],duration:['#starter-duration','Подтвердить'],places:['#google-readiness','Инструкция'],transit:['#google-readiness','Инструкция'],browserMap:['#google-readiness','Проверить карту'],shadow:['/admin/messages?filter=UNREVIEWED','Оценить ответы'],liveBooking:['#live-booking','Тест записи'],pricing:['#duration-rules','Настроить'],primary:['#google-readiness','Диагностика'],fallback:['#google-readiness','Диагностика']};
+  for(const check of checks){if(links[check.id])[check.href,check.action]=links[check.id];}
+  return {checks,summary:websiteSummary(checks),blockers:checks.filter(c=>c.status==='BLOCKS_AUTO'),canRunLiveTest:checks.every(c=>c.id==='liveBooking'||c.status!=='BLOCKS_AUTO'),shadow:{suggestions,accepted,rejected,n},canActivate:checks.every(c=>c.status!=='BLOCKS_AUTO'),checkedAt:settings?.aiDiagnosticsAt?.toISOString()??null};
 }
 export async function assertAutoReady(db:DB,settings?:BusinessSettings){
   const report=await readiness(db,settings);
@@ -82,7 +92,9 @@ export async function runDiagnostics(db:DB){
   let primary:Probe={ok:false,code:'PROVIDER_UNCONFIGURED'},fallback={...primary};
   try{const providers=configuredProviders();[primary,fallback]=await Promise.all(providers.map(p=>probe(async()=>{const r=await p.complete([{role:'system',content:'Synthetic connectivity check. No customer data or CRM actions. Call getBusinessInfo with {} using native tool calling.'},{role:'user',content:'Call getBusinessInfo now.'}]);return r.toolCalls.some(t=>t.name==='getBusinessInfo'&&t.arguments.trim()==='{}');})));}catch{/* Configuration failure. */}
   const places=process.env.GOOGLE_MAPS_SERVER_API_KEY?await probe(async()=>{const r=await placesRequest('autocomplete',{query:'Terazije 1, Beograd',sessionToken:crypto.randomUUID()});return r.available&&'suggestions' in r&&r.suggestions.length>0;}):{ok:false,code:'Нужен GOOGLE_MAPS_SERVER_API_KEY'};
-  const transit=process.env.GOOGLE_MAPS_SERVER_API_KEY?await probe(async()=>{const r=await new GoogleRoutesProvider().getRouteMatrix([{latitude:44.8125,longitude:20.4612}],[{latitude:44.8168,longitude:20.4156}],'TRANSIT',new Date(Date.now()+86400000).toISOString());return r[0]?.[0]?.status==='VERIFIED';}):{ok:false,code:'Нужен GOOGLE_MAPS_SERVER_API_KEY'};
+  let googleCode='';
+  const transit=process.env.GOOGLE_MAPS_SERVER_API_KEY?await probe(async()=>{const http:typeof fetch=async(...args)=>{const response=await fetch(...args);if(!response.ok){try{const body=await response.clone().json();const error=Array.isArray(body)?body[0]?.error:body.error;const reason=error?.details?.find((d:{reason?:string})=>d.reason)?.reason;googleCode=['BILLING_DISABLED','API_KEY_INVALID','SERVICE_DISABLED','RATE_LIMIT_EXCEEDED'].includes(reason)?reason:'GOOGLE_ROUTES_UNAVAILABLE';}catch{googleCode='GOOGLE_ROUTES_UNAVAILABLE';}}return response;};const r=await new GoogleRoutesProvider(process.env.GOOGLE_MAPS_SERVER_API_KEY,http).getRouteMatrix([{latitude:44.8125,longitude:20.4612}],[{latitude:44.8168,longitude:20.4156}],'TRANSIT',new Date(Date.now()+86400000).toISOString());return r[0]?.[0]?.status==='VERIFIED';}):{ok:false,code:'Нужен GOOGLE_MAPS_SERVER_API_KEY'};
+  if(!transit.ok&&googleCode)transit.code=googleCode;
   const diagnostics:Diagnostics={fingerprint:fingerprint(),primary,fallback,places,transit};
   await db.businessSettings.update({where:{id:'default'},data:{aiDiagnostics:diagnostics,aiDiagnosticsAt:new Date()}});
   return {primary,fallback,places,transit};

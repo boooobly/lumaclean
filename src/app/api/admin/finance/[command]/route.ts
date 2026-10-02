@@ -15,8 +15,10 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ command: string }> },
 ) {
+  const expectedOrigin = process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}` : process.env.BETTER_AUTH_URL;
   if (
-    request.headers.get("origin") !== process.env.BETTER_AUTH_URL ||
+    !expectedOrigin || request.headers.get("origin") !== expectedOrigin ||
     !request.headers.get("content-type")?.startsWith("application/json")
   )
     return NextResponse.json(

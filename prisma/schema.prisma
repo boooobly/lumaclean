@@ -731,7 +731,18 @@ model BusinessSettings {
   aiDailyCostWarningUsd Decimal @default(5) @db.Decimal(10, 2)
   aiDiagnostics Json?
   aiDiagnosticsAt DateTime? @db.Timestamptz(3)
+  aiLiveTestProof Json?
   updatedAt                   DateTime @updatedAt @db.Timestamptz(3)
+}
+
+// Preview-only synthetic batch. No customer contacts or raw model messages in reports.
+model AgentLiveTest {
+  id String @id @default(uuid())
+  conversationId String? @unique
+  status String @default("RUNNING")
+  report Json @default("{}")
+  startedAt DateTime @default(now()) @db.Timestamptz(3)
+  finishedAt DateTime? @db.Timestamptz(3)
 }
 
 model ShadowSuggestion {
