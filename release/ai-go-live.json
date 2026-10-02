@@ -1,15 +1,14 @@
 {
-  "fingerprint": "a726e6a9820b78d73a32298e7d5c294b06f00d21b8de839c3424d32daafc421b",
-  "tests": 118,
+  "fingerprint": "a28b356ef72564128f961de8636e3d9e725c80e067bb0dc493b64d2fac5ab000",
+  "tests": 83,
   "lint": true,
   "typecheck": true,
   "migration": true,
-  "checkedAt": "2026-10-01T21:24:47.518Z",
+  "checkedAt": "2026-10-02T10:32:08.448Z",
   "suites": [
-    "agent policy/providers/integration/go-live",
-    "legacy migration",
-    "duration domain",
-    "HTTP security"
+    "agent policy/providers/go-live/release",
+    "routing domain and Google provider",
+    "finance/duration domain"
   ],
   "liveFallback": "Preview native OpenRouter; SHADOW; counts preserved",
   "files": {
@@ -53,7 +52,7 @@
     "src/app/api/admin/finance/[command]/route.ts": "2949e54dfd41647ba6981371a401e1844b35a77b136171890a7f05cff1f5d83e",
     "src/app/api/admin/import/[command]/route.ts": "9e7109189316f7fa3d67376953a9203a1bdac3a6bfff234677ab05a98c64191f",
     "src/app/api/admin/inbox/route.ts": "cf782eabf5d485b6d4969f757be38a00a02bd12e486d997e210bf5463f6ebe6d",
-    "src/app/api/admin/routing/[command]/route.ts": "cec61ecab9238bd6d611b420238e453687a22f2dc78d8e238e3e2cdfb2736fb8",
+    "src/app/api/admin/routing/[command]/route.ts": "4fea96d170dad0591091224910347f1015976b5990f6034a195ec9ebcb19e939",
     "src/app/api/admin/scheduling/[command]/route.ts": "6251c7ceb39ddab50192e875e4a068f8fdde684dcacb040fa6d2f317ad92e577",
     "src/app/api/agent/recover/route.ts": "818124e4632e131e14e6a4a6e84a0e8e02a9d023f016fdc89e1e0f1d342c7273",
     "src/app/api/auth/[...all]/route.ts": "ec656fe6ca65cc8670f619a8169e199628fbfa00da10af85e3f96ded88e0c485",
@@ -214,5 +213,17 @@
     "next.config.ts": "eff5bc19650d76a5af1d2ade263c248a8d53288faa946534038e53e42d3cb551",
     "package.json": "7c0238a28dfac88c37f35aa78ce5e46b9541f0545257d46b704021f239e985b2",
     "package-lock.json": "f3ae099eef2b94b02531defd2693663c2d4968f9ecae5962d96256d959088ca2"
-  }
+  },
+  "previousVerification": {
+    "fingerprint": "a726e6a9820b78d73a32298e7d5c294b06f00d21b8de839c3424d32daafc421b",
+    "tests": 118,
+    "checkedAt": "2026-10-01T21:24:47.518Z",
+    "suites": [
+      "agent policy/providers/integration/go-live",
+      "legacy migration",
+      "duration domain",
+      "HTTP security"
+    ]
+  },
+  "verificationScope": "83 passed, 1 database migration test skipped; no schema or migration changes; previous database/integration/HTTP certification retained in previousVerification. Preview routing Origin checks run after deployment."
 }
