@@ -108,7 +108,7 @@ test("cache key is departure dependent and directional", () => {
   );
 });
 test("cache key separates provider version, mode and arrival timing", () => {
-  assert.match(routeKey(request), /^google-v2/);
+  assert.match(routeKey(request), /^motis-v1/);
   assert.notEqual(routeKey(request), routeKey({ ...request, mode: "DRIVE" }));
   assert.notEqual(
     routeKey(request),

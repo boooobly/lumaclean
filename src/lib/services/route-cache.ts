@@ -1,3 +1,8 @@
+import { routingProvider } from "@/lib/infrastructure/routing-provider";
+import {
+  MotisRoutingProvider,
+  conservativeRoute,
+} from "@/lib/infrastructure/motis-routing";
 import { randomUUID } from "node:crypto";
 import type { Prisma } from "@/generated/prisma/client";
 import {
@@ -18,7 +23,7 @@ import {
 export class RoutingService {
   constructor(
     private db: Prisma.TransactionClient,
-    private provider: RoutingProvider = new GoogleRoutesProvider(),
+    private provider: RoutingProvider = routingProvider(),
   ) {}
   async getTravelTime(request: RouteRequest) {
     return (await this.prepare([request])).get(routeKey(request))!;
@@ -31,28 +36,80 @@ export class RoutingService {
     const table = new Map<string, RouteResult>(),
       now = new Date(),
       deadline = Date.now() + ROUTING_CONFIG.deadlineMs;
-    for (const r of unique) table.set(routeKey(r), unavailable(r));
+    const context = await this.provider.cacheContext?.();
+    const keys = (r: RouteRequest) =>
+      context
+        ? [
+            "WALKING",
+            "FALLBACK_80",
+            ...(context.liveReady ? ["LIVE"] : []),
+          ].map((q) => `${routeKey(r)}|${context.dataVersion}|${q}`)
+        : [routeKey(r)];
+    const logical = new Map(
+      unique.flatMap((r) => keys(r).map((k) => [k, routeKey(r)] as const)),
+    );
+    for (const r of unique)
+      table.set(
+        routeKey(r),
+        this.provider instanceof MotisRoutingProvider
+          ? conservativeRoute(r)
+          : unavailable(r),
+      );
     const rows = await this.db.routeCalculation.findMany({
-      where: { cacheKey: { in: unique.map(routeKey) } },
+      where: { cacheKey: { in: unique.flatMap(keys) } },
       take: 5000,
     });
-    for (const row of rows)
-      table.set(row.cacheKey, {
+    const cacheHits = new Set<string>();
+    for (const row of rows) {
+      let metadata: {
+        name?: string;
+        quality?: RouteResult["quality"];
+        dataVersion?: string;
+      } = {};
+      try {
+        const parsed: unknown = JSON.parse(row.provider);
+        if (parsed && typeof parsed === "object") metadata = parsed;
+      } catch {
+        /* Legacy Google cache. */
+      }
+      if (
+        context &&
+        (!metadata.quality ||
+          !["LIVE", "WALKING", "FALLBACK_80"].includes(metadata.quality) ||
+          metadata.name !== "MOTIS" ||
+          metadata.dataVersion !== context.dataVersion ||
+          (metadata.quality === "LIVE" && !context.liveReady))
+      )
+        continue;
+      const key = logical.get(row.cacheKey);
+      if (!key) continue;
+      const previous = table.get(key);
+      if (previous && routeUsable(previous) && row.expiresAt <= now) continue;
+      if (row.expiresAt > now) cacheHits.add(key);
+      table.set(key, {
         status: row.expiresAt > now ? "VERIFIED" : "STALE",
         durationSeconds: row.durationSeconds,
         distanceMeters: row.distanceMeters,
-        source: "Google",
+        source: metadata.name === "MOTIS" ? "MOTIS" : "Google",
+        quality: metadata.quality,
+        dataVersion: metadata.dataVersion,
         sampledAt: row.departureAt!.toISOString(),
         calculatedAt: row.calculatedAt.toISOString(),
         expiresAt: row.expiresAt.toISOString(),
       });
+    }
     routingTelemetry(
       "cache_hits",
       rows.filter((r) => r.expiresAt > now).length,
     );
     if (cacheOnly) return table;
     const missing = unique.filter(
-      (r) => r.origin && r.destination && !routeUsable(table.get(routeKey(r))),
+      (r) =>
+        r.origin &&
+        r.destination &&
+        (!routeUsable(table.get(routeKey(r))) ||
+          (this.provider instanceof MotisRoutingProvider &&
+            !cacheHits.has(routeKey(r)))),
     );
     if (
       !process.env.GOOGLE_MAPS_SERVER_API_KEY &&
@@ -66,7 +123,7 @@ export class RoutingService {
         pointKey(r.origin),
         r.mode,
         r.timing ?? "departure",
-        routeSample(r),
+        context ? r.at : routeSample(r),
       ].join("|");
       groups.set(key, [...(groups.get(key) ?? []), r]);
     }
@@ -105,7 +162,9 @@ export class RoutingService {
           if (!routeUsable(value)) continue;
           persisted.push({
             id: randomUUID(),
-            cacheKey: routeKey(r),
+            cacheKey: context
+              ? `${routeKey(r)}|${context.dataVersion}|${value.quality}`
+              : routeKey(r),
             origin: pointKey(r.origin),
             destination: pointKey(r.destination),
             originLatitude: r.origin!.latitude,
@@ -116,7 +175,13 @@ export class RoutingService {
             departureAt: value.sampledAt,
             durationSeconds: value.durationSeconds!,
             distanceMeters: value.distanceMeters ?? 0,
-            provider: "Google Routes v2",
+            provider: context
+              ? JSON.stringify({
+                  name: value.source,
+                  quality: value.quality,
+                  dataVersion: context.dataVersion,
+                })
+              : "Google Routes v2",
             calculatedAt: value.calculatedAt,
             expiresAt: value.expiresAt,
           });
@@ -126,7 +191,7 @@ export class RoutingService {
           INSERT INTO "RouteCalculation" ("id","cacheKey","origin","destination","originLatitude","originLongitude","destinationLatitude","destinationLongitude","travelMode","departureAt","durationSeconds","distanceMeters","provider","calculatedAt","expiresAt")
           SELECT x."id",x."cacheKey",x."origin",x."destination",x."originLatitude",x."originLongitude",x."destinationLatitude",x."destinationLongitude",x."travelMode"::"TravelMode",x."departureAt",x."durationSeconds",x."distanceMeters",x."provider",x."calculatedAt",x."expiresAt"
           FROM jsonb_to_recordset(${JSON.stringify(persisted)}::jsonb) AS x("id" text,"cacheKey" text,"origin" text,"destination" text,"originLatitude" numeric,"originLongitude" numeric,"destinationLatitude" numeric,"destinationLongitude" numeric,"travelMode" text,"departureAt" timestamptz,"durationSeconds" integer,"distanceMeters" integer,"provider" text,"calculatedAt" timestamptz,"expiresAt" timestamptz)
-          ON CONFLICT ("cacheKey") DO UPDATE SET "durationSeconds"=EXCLUDED."durationSeconds", "distanceMeters"=EXCLUDED."distanceMeters", "calculatedAt"=EXCLUDED."calculatedAt", "expiresAt"=EXCLUDED."expiresAt"`;
+          ON CONFLICT ("cacheKey") DO UPDATE SET "durationSeconds"=EXCLUDED."durationSeconds", "distanceMeters"=EXCLUDED."distanceMeters", "calculatedAt"=EXCLUDED."calculatedAt", "expiresAt"=EXCLUDED."expiresAt", "provider"=EXCLUDED."provider", "departureAt"=EXCLUDED."departureAt"`;
       }
     }
     return table;

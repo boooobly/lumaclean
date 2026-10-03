@@ -3,7 +3,14 @@ export type GeoPoint = {
   longitude: number;
   placeId?: string | null;
 };
-export type RouteMode = "TRANSIT" | "DRIVE";
+export type RouteMode = "TRANSIT" | "DRIVE" | "WALK";
+export type RouteQuality = "LIVE" | "WALKING" | "FALLBACK_80" | "UNRESOLVED";
+export type AddressMatch = {
+  id: string;
+  displayAddress: string;
+  latitude: number;
+  longitude: number;
+};
 export type RouteRequest = {
   origin: GeoPoint | null;
   destination: GeoPoint | null;
@@ -18,7 +25,10 @@ export type RouteResult = {
   calculatedAt: string;
   expiresAt: string;
   sampledAt: string;
-  source: "Google";
+  source: "Google" | "MOTIS";
+  quality?: RouteQuality;
+  dataVersion?: string;
+  reason?: string | null;
 };
 export type RouteStep = {
   mode: string;
@@ -34,8 +44,13 @@ export type RouteDetails = {
   result: RouteResult;
   steps: RouteStep[];
   polyline?: string;
+  polylines?: string[];
+  geometries?: { points: string; precision: number }[];
 };
 export interface RoutingProvider {
+  searchAddress?(query: string): Promise<AddressMatch[]>;
+  reverseGeocode?(point: GeoPoint): Promise<AddressMatch[]>;
+  cacheContext?(): Promise<{ dataVersion: string; liveReady: boolean }>;
   getTravelTime(request: RouteRequest): Promise<RouteResult>;
   getRouteMatrix(
     origins: GeoPoint[],
@@ -88,12 +103,15 @@ export function routeSample(request: RouteRequest) {
 }
 export function routeKey(r: RouteRequest) {
   return [
-    "google-v2",
+    process.env.LUMACLEAN_ROUTING_PROVIDER === "GOOGLE"
+      ? "google-v2"
+      : "motis-v1",
     pointKey(r.origin),
     pointKey(r.destination),
     r.mode,
     r.timing ?? "departure",
     routeSample(r),
+    ...(process.env.LUMACLEAN_ROUTING_PROVIDER === "GOOGLE" ? [] : [r.at]),
   ].join("|");
 }
 export function unavailable(
@@ -114,15 +132,21 @@ export function unavailable(
 export const routeUsable = (r: RouteResult | undefined, now = Date.now()) =>
   Boolean(
     r?.status === "VERIFIED" &&
-    r.durationSeconds !== null &&
-    new Date(r.expiresAt).getTime() > now,
+      r.durationSeconds !== null &&
+      new Date(r.expiresAt).getTime() > now,
   );
 export const routeLabels = {
   VERIFIED: "Маршрут проверен",
   STALE: "Маршрут устарел",
   UNVERIFIED: "Маршрут не проверен",
-  PROVIDER_ERROR: "Google недоступен",
-  NO_ROUTE: "Google не нашёл маршрут",
+  PROVIDER_ERROR: "Расчёт дороги недоступен",
+  NO_ROUTE: "Маршрут не найден",
+} as const;
+export const qualityLabels = {
+  LIVE: "Транспорт · LIVE",
+  WALKING: "Пешком",
+  FALLBACK_80: "Дорога · резерв 80 мин",
+  UNRESOLVED: "Подтвердите координаты",
 } as const;
 
 export const geo = (

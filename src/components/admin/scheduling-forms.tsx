@@ -122,6 +122,7 @@ type CleanerValues = {
   additionalContact?: string | null;
   homeAddress?: string | null;
   homeConfirmed?: boolean;
+  homePoint?: { latitude: number; longitude: number } | null;
   languages?: string[];
   skills?: string[];
   internalRating?: number | null;
@@ -192,6 +193,7 @@ export function CleanerForm({
           label="Домашний / стартовый адрес"
           value={value.homeAddress}
           confirmed={value.homeConfirmed}
+          initialPoint={value.homePoint}
         />
         <Field
           name="defaultTravelMode"
@@ -240,8 +242,8 @@ export function CleanerForm({
         />
       </div>
       <p className="crm-hint">
-        Координаты не нужны. Процент можно оставить пустым; выплаты на этом
-        этапе не рассчитываются.
+        Для автоматической записи подтвердите стартовые координаты. Процент
+        можно оставить пустым; выплаты на этом этапе не рассчитываются.
       </p>
     </ScheduleForm>
   );

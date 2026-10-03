@@ -1,6 +1,9 @@
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import type { GeoPoint } from "@/lib/domain/routing";
 import { routingRequest } from "./routing-workspace";
+import { RoutingMap } from "./routing-map";
+type Suggestion = { placeId: string; text: string };
 export function AddressAutocomplete({
   name = "fullAddress",
   proofName = "locationProof",
@@ -8,6 +11,7 @@ export function AddressAutocomplete({
   value = "",
   confirmed = false,
   required = false,
+  initialPoint,
 }: {
   name?: string;
   proofName?: string;
@@ -15,31 +19,41 @@ export function AddressAutocomplete({
   value?: string | null;
   confirmed?: boolean;
   required?: boolean;
+  initialPoint?: GeoPoint | null;
 }) {
   const id = useId(),
     [text, setText] = useState(value ?? ""),
     [proof, setProof] = useState(""),
     [status, setStatus] = useState(
       confirmed
-        ? "Адрес определён · маршрут рассчитывается отдельно"
-        : "Маршрут не подтверждён",
+        ? "Координаты подтверждены; дорога рассчитывается отдельно"
+        : "Подтвердите координаты адреса",
     ),
-    [rows, setRows] = useState<{ placeId: string; text: string }[]>([]),
+    [rows, setRows] = useState<Suggestion[]>([]),
     [search, setSearch] = useState(false),
     [revision, setRevision] = useState(0),
     [pending, setPending] = useState(false),
-    [attributions, setAttributions] = useState<
-      { provider: string; providerUri: string }[]
-    >([]),
-    token = useRef<string | null>(null),
+    [pin, setPin] = useState<GeoPoint | null>(initialPoint ?? null),
+    [reviewed, setReviewed] = useState(false),
+    [latitude, setLatitude] = useState(String(initialPoint?.latitude ?? "")),
+    [longitude, setLongitude] = useState(String(initialPoint?.longitude ?? ""));
+  const token = useRef<string | null>(null),
     sequence = useRef(0);
+  const move = useCallback((p: GeoPoint) => {
+    setPin(p);
+    setLatitude(String(p.latitude));
+    setLongitude(String(p.longitude));
+    setProof("");
+    setReviewed(false);
+    setStatus("Проверьте новый маркер и подтвердите координаты");
+  }, []);
   useEffect(() => {
-    if (!search || text.trim().length < 3) return;
+    if (!search || text.trim().length < 3 || text.length > 200) return;
     const current = ++sequence.current;
     let cancelled = false;
     const timer = setTimeout(() => {
       token.current ??= crypto.randomUUID();
-      void routingRequest<{ suggestions?: typeof rows; error?: string }>(
+      void routingRequest<{ suggestions?: Suggestion[]; error?: string }>(
         "autocomplete",
         { query: text, sessionToken: token.current },
       )
@@ -49,47 +63,83 @@ export function AddressAutocomplete({
           setStatus(
             data.error ??
               (data.suggestions?.length
-                ? "Выберите правильный результат"
-                : "Результатов нет. Уточните адрес."),
+                ? "Выберите правильный адрес"
+                : "Результатов нет. Уточните адрес или укажите координаты вручную."),
           );
         })
         .catch(() => {
           if (!cancelled && sequence.current === current)
             setStatus(
-              "Поиск временно недоступен. Ручной адрес можно сохранить.",
+              "Поиск недоступен. Укажите и подтвердите координаты вручную.",
             );
         });
     }, 400);
     return () => {
-      clearTimeout(timer);
       cancelled = true;
+      clearTimeout(timer);
     };
   }, [text, search, revision]);
-  async function select(placeId: string) {
+  async function select(row: Suggestion) {
     setPending(true);
+    setSearch(false);
+    sequence.current++;
     try {
       const result = await routingRequest<{
         address?: string;
-        proof?: string;
+        latitude?: number;
+        longitude?: number;
         error?: string;
-        attributions?: typeof attributions;
-      }>("place", { placeId, sessionToken: token.current });
-      if (!result.proof || !result.address) throw new Error(result.error);
+      }>("place", {
+        placeId: row.placeId,
+        query: text,
+        sessionToken: token.current,
+      });
+      if (
+        !result.address ||
+        result.latitude === undefined ||
+        result.longitude === undefined
+      )
+        throw Error(result.error ?? "Выберите адрес заново");
       setText(result.address);
-      setProof(result.proof);
       setRows([]);
-      setSearch(false);
-      setStatus("Адрес определён · маршрут рассчитывается отдельно");
-      setAttributions(result.attributions ?? []);
+      move({ latitude: result.latitude, longitude: result.longitude });
       token.current = null;
-    } catch (error) {
-      setStatus(
-        error instanceof Error ? error.message : "Выбор адреса недоступен",
-      );
+    } catch (e) {
+      setStatus(e instanceof Error ? e.message : "Адрес недоступен");
     } finally {
       setPending(false);
     }
   }
+  async function confirm() {
+    setPending(true);
+    try {
+      const result = await routingRequest<{ address: string; proof: string }>(
+        "confirm-location",
+        {
+          address: text.trim(),
+          latitude: Number(latitude),
+          longitude: Number(longitude),
+          userConfirmed: true,
+        },
+      );
+      setText(result.address);
+      setProof(result.proof);
+      setStatus(
+        "Координаты подтверждены пользователем; дорога рассчитывается отдельно",
+      );
+    } catch (e) {
+      setStatus(e instanceof Error ? e.message : "Не удалось подтвердить");
+    } finally {
+      setPending(false);
+    }
+  }
+  const valid =
+    latitude.trim() !== "" &&
+    longitude.trim() !== "" &&
+    Number(latitude) >= 44.2 &&
+    Number(latitude) <= 45.2 &&
+    Number(longitude) >= 19.9 &&
+    Number(longitude) <= 21;
   return (
     <div className="crm-field routing-address">
       <label htmlFor={id}>
@@ -100,70 +150,134 @@ export function AddressAutocomplete({
         id={id}
         name={name}
         value={text}
+        maxLength={500}
+        disabled={pending}
         required={required}
         autoComplete="off"
         onChange={(e) => {
           setText(e.target.value);
           setProof("");
           setRows([]);
-          setAttributions([]);
-          setStatus("Маршрут не подтверждён");
+          setReviewed(false);
+          setStatus("Адрес изменён: подтвердите координаты заново");
         }}
       />
       <input type="hidden" name={proofName} value={proof} />
-      <button
-        type="button"
-        className="crm-button crm-button-secondary"
-        disabled={pending || text.trim().length < 3}
-        onClick={() => {
-          setSearch(true);
-          setRevision((v) => v + 1);
-          setText((t) => t.trim());
-          token.current ??= crypto.randomUUID();
-        }}
-      >
-        Подтвердить адрес
-      </button>
+      <div className="inbox-action-row">
+        <button
+          type="button"
+          className="crm-button crm-button-secondary"
+          disabled={pending || text.trim().length < 3 || text.length > 200}
+          onClick={() => {
+            setSearch(true);
+            setRevision((v) => v + 1);
+            token.current ??= crypto.randomUUID();
+          }}
+        >
+          Найти адрес
+        </button>
+        <button
+          type="button"
+          className="crm-button crm-button-secondary"
+          disabled={pending}
+          onClick={() => move(pin ?? { latitude: 44.8125, longitude: 20.4612 })}
+        >
+          Указать на карте / вручную
+        </button>
+      </div>
       <p className="crm-hint" role="status">
         {status}
       </p>
-      {search && text.trim().length >= 3 && (
-        <p className="crm-hint">
-          Поиск Google · Сербия, приоритет Белграда. Ручной адрес можно
-          сохранить.
-        </p>
-      )}
       {rows.length > 0 && (
+        <ul className="routing-predictions">
+          {rows.map((r) => (
+            <li key={r.placeId}>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => void select(r)}
+              >
+                {r.text}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {pin && (
         <>
-          <ul className="routing-predictions">
-            {rows.map((r) => (
-              <li key={r.placeId}>
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => void select(r.placeId)}
-                >
-                  {r.text}
-                </button>
-              </li>
-            ))}
-          </ul>
-          <span className="routing-attribution" translate="no">
-            Google Maps
-          </span>
+          <RoutingMap
+            points={[
+              { id: "address", label: "Адрес", point: pin, kind: "address" },
+            ]}
+            draggable={!pending}
+            onMove={move}
+          />
+          <div className="crm-form-grid">
+            <label>
+              Широта
+              <input
+                type="number"
+                step="any"
+                disabled={pending}
+                value={latitude}
+                onChange={(e) => {
+                  setLatitude(e.target.value);
+                  setReviewed(false);
+                  setProof("");
+                }}
+              />
+            </label>
+            <label>
+              Долгота
+              <input
+                type="number"
+                step="any"
+                disabled={pending}
+                value={longitude}
+                onChange={(e) => {
+                  setLongitude(e.target.value);
+                  setReviewed(false);
+                  setProof("");
+                }}
+              />
+            </label>
+          </div>
+          <button
+            type="button"
+            className="crm-button secondary"
+            disabled={pending || !valid}
+            onClick={() =>
+              move({ latitude: Number(latitude), longitude: Number(longitude) })
+            }
+          >
+            Показать эти координаты
+          </button>
+          <label className="crm-checkbox">
+            <input
+              type="checkbox"
+              disabled={pending}
+              checked={reviewed}
+              onChange={(e) => {
+                setReviewed(e.target.checked);
+                if (!e.target.checked) setProof("");
+              }}
+            />
+            Я проверил адрес и координаты и подтверждаю точку.
+          </label>
+          <button
+            type="button"
+            className="crm-button"
+            disabled={pending || !reviewed || !valid || text.trim().length < 5}
+            onClick={() => void confirm()}
+          >
+            Подтвердить координаты
+          </button>
         </>
       )}
-      {attributions.map((a) => (
-        <span key={a.provider} className="routing-attribution">
-          {/^https:\/\//.test(a.providerUri) ? (
-            <a href={a.providerUri} target="_blank" rel="noopener noreferrer">
-              {a.provider}
-            </a>
-          ) : (
-            a.provider
-          )}
-        </span>
-      ))}
+      <p className="crm-hint">
+        Ручной адрес можно сохранить. Автоматическая запись требует
+        подтверждённых координат; отказ карты её не блокирует.
+      </p>
     </div>
   );
 }

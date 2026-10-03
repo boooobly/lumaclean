@@ -4,7 +4,8 @@ import { durationConfig } from '@/lib/services/duration-engine';
 import { estimateDuration } from '@/lib/domain/duration';
 import { quote } from '@/lib/domain/crm-pricing';
 import { placesRequest } from '@/lib/services/google-places';
-import { GoogleRoutesProvider } from '@/lib/infrastructure/google-routing';
+import { routingProvider,motisSelected } from '@/lib/infrastructure/routing-provider';
+import {MotisRoutingProvider} from '@/lib/infrastructure/motis-routing';
 import { configuredProviders } from './providers';
 import { AgentError } from './contracts';
 import {liveConfigFingerprint,validLiveProof} from './live-proof';
@@ -20,11 +21,11 @@ export function effectiveMode(s:Pick<BusinessSettings,'aiAgentMode'|'aiChannelMo
   return s.aiAgentMode==='AUTO'&&scope==='AUTO'?'AUTO':'SHADOW';
 }
 function fingerprint(){
-  return createHash('sha256').update(JSON.stringify(['POYO_API_KEY','OPENROUTER_API_KEY','PRIMARY_AGENT_MODEL','FALLBACK_AGENT_MODEL','PRIMARY_AGENT_PROVIDER','FALLBACK_AGENT_PROVIDER','GOOGLE_MAPS_SERVER_API_KEY','NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_API_KEY','TELEGRAM_CUSTOMER_BOT_TOKEN'].map(k=>process.env[k]??''))).digest('hex');
+  return createHash('sha256').update(JSON.stringify(['POYO_API_KEY','OPENROUTER_API_KEY','PRIMARY_AGENT_MODEL','FALLBACK_AGENT_MODEL','PRIMARY_AGENT_PROVIDER','FALLBACK_AGENT_PROVIDER','LUMACLEAN_ROUTING_PROVIDER','LUMACLEAN_ROUTING_URL','LUMACLEAN_ROUTING_TOKEN','TELEGRAM_CUSTOMER_BOT_TOKEN'].map(k=>process.env[k]??''))).digest('hex');
 }
-export function cleanerReadiness(c:{active:boolean;name?:string;phone?:string;homeAddress:string|null;homeLatitude:unknown;homeLongitude:unknown;languages:string[];payoutPercent:unknown;availability:{startMinute:number|null;endMinute:number|null;kind:string}[]}){
+export function cleanerReadiness(c:{active:boolean;name?:string;phone?:string;homeAddress:string|null;homeCoordinatesConfirmed?:boolean;homeLatitude:unknown;homeLongitude:unknown;languages:string[];payoutPercent:unknown;availability:{startMinute:number|null;endMinute:number|null;kind:string}[]}){
   const hours=c.availability.some(a=>a.kind==='WEEKLY'&&a.startMinute!==null&&a.endMinute!==null&&a.endMinute>a.startMinute);
-  const address=!!c.homeAddress?.trim(),coordinates=c.homeLatitude!=null&&c.homeLongitude!=null&&Number.isFinite(Number(c.homeLatitude))&&Number.isFinite(Number(c.homeLongitude))&&Math.abs(Number(c.homeLatitude))<=90&&Math.abs(Number(c.homeLongitude))<=180;
+  const address=!!c.homeAddress?.trim(),coordinates=c.homeCoordinatesConfirmed!==false&&c.homeLatitude!=null&&c.homeLongitude!=null&&Number.isFinite(Number(c.homeLatitude))&&Number.isFinite(Number(c.homeLongitude))&&Math.abs(Number(c.homeLatitude))<=90&&Math.abs(Number(c.homeLongitude))<=180;
   const contact=!!c.name?.trim()&&!!c.phone?.trim();
   return {ready:c.active&&contact&&hours&&address&&coordinates,contact,active:c.active,hours,address,coordinates,languages:!!c.languages.length,payout:c.payoutPercent!==null};
 }
@@ -41,11 +42,11 @@ export async function readiness(db:DB,provided?:BusinessSettings){
   add('credentials','AI credentials',!!process.env.POYO_API_KEY&&!!process.env.OPENROUTER_API_KEY&&!!process.env.PRIMARY_AGENT_MODEL&&!!process.env.FALLBACK_AGENT_MODEL,'Ключи остаются только на сервере. Модели задаются через env.');
   const diag=settings?.aiDiagnostics as Diagnostics|null;
   const fresh=!!diag&&diag.fingerprint===fingerprint()&&!!settings?.aiDiagnosticsAt&&Date.now()-settings.aiDiagnosticsAt.getTime()<3600000;
-  for(const [id,label] of [['primary','Primary model'],['fallback','Fallback model'],['places','Google Places'],['transit','Google Routes Transit']] as const){
+  for(const [id,label] of [['primary','Primary model'],['fallback','Fallback model'],['places','Поиск адреса'],['transit','Дорога и транспорт']] as const){
     const probe=fresh?diag?.[id]:null;
-    add(id,label,!!probe?.ok,probe?.code??(((id==='places'||id==='transit')&&!process.env.GOOGLE_MAPS_SERVER_API_KEY)?'Нужен GOOGLE_MAPS_SERVER_API_KEY (Places API New + Routes API, billing)':'Запустите диагностику: проверка отсутствует или старше 1 часа'));
+    add(id,label,!!probe?.ok,probe?.code??'Запустите диагностику: проверка отсутствует или старше 1 часа');
   }
-  add('browserMap','Google Map JS',!!process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_API_KEY,'NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_API_KEY: Maps JavaScript API и ограничения по доменам. Наличие ключа; загрузку карты проверяйте в Routing.',true);
+  add('browserMap','MapLibre / OpenFreeMap',true,'Карта необязательна. Проверьте отображение отдельно; отказ карты не блокирует запись.',true);
   const cleaners=await db.cleaner.findMany({where:{active:true},include:{availability:true}});
   const readyCleaners=cleaners.filter(c=>cleanerReadiness(c).ready).length;
   const services=await db.service.findMany({where:{code:{in:settings?.aiAllowedServices??[]}},include:{durationRules:{where:{active:true}},priceBands:true}});
@@ -79,7 +80,7 @@ export async function readiness(db:DB,provided?:BusinessSettings){
   add('cost','Расход за сутки',Number(spent._sum.estimatedCostUsd??0)<=Number(settings?.aiDailyCostWarningUsd??5),`≈ $${Number(spent._sum.estimatedCostUsd??0).toFixed(4)}; warning $${settings?.aiDailyCostWarningUsd??5}. Это предупреждение, лимиты каждого диалога обязательны.`,true);
   const config=await liveConfigFingerprint(db);
   add('liveBooking','Live Preview booking',validLiveProof(settings?.aiLiveTestProof,config),'Нужен успешный тест записи в Preview с очисткой batch. Отчёт действует 7 дней и только для той же конфигурации.');
-  const links:Record<string,[string,string]>={cleaners:['/admin/cleaners','Настроить'],duration:['#starter-duration','Подтвердить'],places:['#google-readiness','Инструкция'],transit:['#google-readiness','Инструкция'],browserMap:['#google-readiness','Проверить карту'],shadow:['/admin/messages?filter=UNREVIEWED','Оценить ответы'],liveBooking:['#live-booking','Тест записи'],pricing:['#duration-rules','Настроить'],primary:['#google-readiness','Диагностика'],fallback:['#google-readiness','Диагностика']};
+  const links:Record<string,[string,string]>={cleaners:['/admin/cleaners','Настроить'],duration:['#starter-duration','Подтвердить'],places:['#logistics','Инструкция'],transit:['#logistics','Инструкция'],browserMap:['#logistics','Проверить карту'],shadow:['/admin/messages?filter=UNREVIEWED','Оценить ответы'],liveBooking:['#live-booking','Тест записи'],pricing:['#duration-rules','Настроить'],primary:['#logistics','Диагностика'],fallback:['#logistics','Диагностика']};
   for(const check of checks){if(links[check.id])[check.href,check.action]=links[check.id];}
   return {checks,summary:websiteSummary(checks),blockers:checks.filter(c=>c.status==='BLOCKS_AUTO'),canRunLiveTest:checks.every(c=>c.id==='liveBooking'||c.status!=='BLOCKS_AUTO'),shadow:{suggestions,accepted,rejected,n},canActivate:checks.every(c=>c.status!=='BLOCKS_AUTO'),checkedAt:settings?.aiDiagnosticsAt?.toISOString()??null};
 }
@@ -91,10 +92,9 @@ export async function runDiagnostics(db:DB){
   const probe=async(fn:()=>Promise<boolean>):Promise<Probe>=>{try{return await fn()?{ok:true,code:'Работает'}:{ok:false,code:'Нет подтверждённого ответа'};}catch(e){return {ok:false,code:e instanceof AgentError?e.code:'PROVIDER_UNAVAILABLE'};}};
   let primary:Probe={ok:false,code:'PROVIDER_UNCONFIGURED'},fallback={...primary};
   try{const providers=configuredProviders();[primary,fallback]=await Promise.all(providers.map(p=>probe(async()=>{const r=await p.complete([{role:'system',content:'Synthetic connectivity check. No customer data or CRM actions. Call getBusinessInfo with {} using native tool calling.'},{role:'user',content:'Call getBusinessInfo now.'}]);return r.toolCalls.some(t=>t.name==='getBusinessInfo'&&t.arguments.trim()==='{}');})));}catch{/* Configuration failure. */}
-  const places=process.env.GOOGLE_MAPS_SERVER_API_KEY?await probe(async()=>{const r=await placesRequest('autocomplete',{query:'Terazije 1, Beograd',sessionToken:crypto.randomUUID()});return r.available&&'suggestions' in r&&r.suggestions.length>0;}):{ok:false,code:'Нужен GOOGLE_MAPS_SERVER_API_KEY'};
-  let googleCode='';
-  const transit=process.env.GOOGLE_MAPS_SERVER_API_KEY?await probe(async()=>{const http:typeof fetch=async(...args)=>{const response=await fetch(...args);if(!response.ok){try{const body=await response.clone().json();const error=Array.isArray(body)?body[0]?.error:body.error;const reason=error?.details?.find((d:{reason?:string})=>d.reason)?.reason;googleCode=['BILLING_DISABLED','API_KEY_INVALID','SERVICE_DISABLED','RATE_LIMIT_EXCEEDED'].includes(reason)?reason:'GOOGLE_ROUTES_UNAVAILABLE';}catch{googleCode='GOOGLE_ROUTES_UNAVAILABLE';}}return response;};const r=await new GoogleRoutesProvider(process.env.GOOGLE_MAPS_SERVER_API_KEY,http).getRouteMatrix([{latitude:44.8125,longitude:20.4612}],[{latitude:44.8168,longitude:20.4156}],'TRANSIT',new Date(Date.now()+86400000).toISOString());return r[0]?.[0]?.status==='VERIFIED';}):{ok:false,code:'Нужен GOOGLE_MAPS_SERVER_API_KEY'};
-  if(!transit.ok&&googleCode)transit.code=googleCode;
+  const places=await probe(async()=>{const r=await placesRequest('autocomplete',{query:'Terazije 1, Beograd',sessionToken:crypto.randomUUID()});return r.available&&'suggestions' in r&&r.suggestions.length>0;});
+  const transit=await probe(async()=>{const provider=routingProvider();if(motisSelected()&&provider instanceof MotisRoutingProvider){const h=await provider.datasetsStatus();if(!h.engine.healthy)return false;}const r=await provider.getTravelTime({origin:{latitude:44.8125,longitude:20.4612},destination:{latitude:44.8168,longitude:20.4156},mode:'TRANSIT',at:new Date(Date.now()+86400000).toISOString()});return r.status==='VERIFIED'&&r.durationSeconds!==null;});
+  if(transit.ok&&motisSelected())transit.code='Работает: LIVE / пешком / резерв 80 мин согласно состоянию данных';
   const diagnostics:Diagnostics={fingerprint:fingerprint(),primary,fallback,places,transit};
   await db.businessSettings.update({where:{id:'default'},data:{aiDiagnostics:diagnostics,aiDiagnosticsAt:new Date()}});
   return {primary,fallback,places,transit};

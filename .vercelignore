@@ -6,7 +6,8 @@ node_modules/
 public/media/journey-v3/
 public/media/lumaclean-living-room-3d-poster.png
 public/models/
-scripts/
+scripts/*
+!scripts/copy-maplibre-worker.mjs
 tests/
 *.tsbuildinfo
 *.log
@@ -14,3 +15,5 @@ tests/
 docs/seo-audit/
 .agents/
 .serena/
+
+/infrastructure/

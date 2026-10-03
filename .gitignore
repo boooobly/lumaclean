@@ -55,3 +55,8 @@ next-env.d.ts
 
 /src/generated/prisma/
 /artifacts/admin/
+
+# Isolated routing service dependencies
+/infrastructure/**/node_modules/
+
+/public/maplibre/

@@ -190,6 +190,7 @@ model Cleaner {
   homeAddress       String?
   homeLatitude      Decimal?              @db.Decimal(10, 7)
   homeLongitude     Decimal?              @db.Decimal(10, 7)
+  homeCoordinatesConfirmed Boolean @default(false)
   homePlaceId       String?
   languages         String[]
   skills            String[]
@@ -267,6 +268,7 @@ model ClientAddress {
   intercom    String?
   latitude    Decimal? @db.Decimal(10, 7)
   longitude   Decimal? @db.Decimal(10, 7)
+  coordinatesConfirmed Boolean @default(false)
   placeId     String?
   active      Boolean  @default(true)
   orders      Order[]

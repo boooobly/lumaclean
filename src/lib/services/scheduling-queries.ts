@@ -36,6 +36,7 @@ const calendarSelect = {
       latitude: true,
       longitude: true,
       placeId: true,
+      coordinatesConfirmed:true,
     },
   },
   service: { select: { name: true } },
@@ -174,12 +175,12 @@ export async function getCalendarData(
       updatedAt: r.updatedAt.toISOString(),
       reference: r.reference ?? r.id,
       label: r.address.fullAddress,
-      point: geo(r.address.latitude, r.address.longitude, r.address.placeId),
+      point: r.address.coordinatesConfirmed?geo(r.address.latitude, r.address.longitude, r.address.placeId):null,
     })),
     cleaners: cleaners.map((c) => ({
       ...c,
       updatedAt: c.updatedAt.toISOString(),
-      home: geo(c.homeLatitude, c.homeLongitude, c.homePlaceId),
+      home: c.homeCoordinatesConfirmed?geo(c.homeLatitude, c.homeLongitude, c.homePlaceId):null,
     })),
   }));
   const cached = await new RoutingService(db).prepare(

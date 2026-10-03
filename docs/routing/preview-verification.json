@@ -1,0 +1,69 @@
+{
+  "checkedAt": "2026-10-03T13:16:23Z",
+  "applicationPreview": "https://lumaclean-jf0w7v5pj-vladislavs-projects-0eae0ea3.vercel.app",
+  "deployment": "dpl_udVK75uQsFjFdx5sF24Q9HV7W39G",
+  "vercelState": "READY",
+  "chromeSmoke": {
+    "map": "OpenFreeMap tiles loaded with visible attribution",
+    "publicAddressSearch": "passed",
+    "pinDrag": "coordinate fields changed after drag",
+    "explicitCoordinateConfirmation": "passed; no cleaner created",
+    "calendar": "empty assigned day calculated successfully",
+    "primaryModel": "passed",
+    "fallbackModel": "passed",
+    "addressDiagnostics": "passed",
+    "roadDiagnostics": "passed using normalized provider",
+    "globalAiMode": "SHADOW"
+  },
+  "gatewaySmoke": {
+    "checkedAt": "2026-10-03T13:15:59.585Z",
+    "health": 200,
+    "anonymous": 401,
+    "engine": {
+      "healthy": true,
+      "version": "2.11.3"
+    },
+    "staticValidForLive": false,
+    "rt": "UNAVAILABLE",
+    "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+    "walking": {
+      "status": "VERIFIED",
+      "quality": "WALKING",
+      "durationSeconds": 685,
+      "distanceMeters": 382,
+      "source": "MOTIS",
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "sampledAt": "2026-10-03T13:15:59.585Z",
+      "calculatedAt": "2026-10-03T13:15:59.771Z",
+      "expiresAt": "2026-10-03T13:45:59.771Z",
+      "reason": "REALTIME_NOT_VERIFIABLE"
+    },
+    "fallback": {
+      "status": "VERIFIED",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "distanceMeters": null,
+      "source": "MOTIS",
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "sampledAt": "2026-10-03T13:15:59.585Z",
+      "calculatedAt": "2026-10-03T13:15:59.955Z",
+      "expiresAt": "2026-10-03T13:20:59.955Z",
+      "reason": "REALTIME_NOT_VERIFIABLE"
+    }
+  },
+  "productionReadOnly": {
+    "checkedAt": "2026-10-03T13:12:43.694Z",
+    "readOnly": true,
+    "settings": {
+      "aiAgentMode": "SHADOW",
+      "defaultTravelBufferMinutes": 30
+    },
+    "counts": {
+      "clients": 0,
+      "orders": 0,
+      "cleaners": 2
+    },
+    "coordinateMigrationApplied": false
+  },
+  "accuracyApproval": "BLOCKED; see benchmark-preview.json"
+}

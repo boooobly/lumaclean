@@ -25,7 +25,9 @@
     "test:routing": "tsx --test tests/routing/*.test.ts",
     "test:finance": "tsx --test tests/finance/*.test.ts",
     "test:agent": "tsx --test tests/agent/*.test.ts",
-    "benchmark:agent": "tsx scripts/admin/ai-benchmark.ts --live"
+    "benchmark:agent": "tsx scripts/admin/ai-benchmark.ts --live",
+    "prebuild": "node scripts/copy-maplibre-worker.mjs",
+    "predev": "node scripts/copy-maplibre-worker.mjs"
   },
   "dependencies": {
     "@js-temporal/polyfill": "0.5.1",
@@ -39,6 +41,7 @@
     "gsap": "^3.15.0",
     "libphonenumber-js": "1.13.14",
     "lucide-react": "^1.24.0",
+    "maplibre-gl": "6.11.2",
     "next": "16.3.8",
     "next-intl": "^4.13.2",
     "pg": "8.23.1",

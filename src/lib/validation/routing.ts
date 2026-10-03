@@ -10,12 +10,23 @@ export const routingSchemas = {
     .strict(),
   place: z
     .object({
-      placeId: z
-        .string()
-        .min(1)
-        .max(300)
-        .regex(/^[A-Za-z0-9_-]+$/),
+      placeId: z.string().min(1).max(300),
       sessionToken: z.uuid(),
+      query: z.string().trim().min(3).max(200).optional(),
+    })
+    .strict(),
+  "reverse-geocode": z
+    .object({
+      latitude: z.number().min(44.2).max(45.2),
+      longitude: z.number().min(19.9).max(21),
+    })
+    .strict(),
+  "confirm-location": z
+    .object({
+      address: z.string().trim().min(5).max(500),
+      latitude: z.number().min(44.2).max(45.2),
+      longitude: z.number().min(19.9).max(21),
+      userConfirmed: z.literal(true),
     })
     .strict(),
   day: z.object({ date: dateOnly, cleanerId: entityId.optional() }).strict(),

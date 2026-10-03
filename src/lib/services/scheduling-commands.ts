@@ -97,7 +97,7 @@ export async function assessScheduling(
     others = rows.map((r) => ({
       ...r,
       updatedAt: r.updatedAt.toISOString(),
-      point: geo(r.address.latitude, r.address.longitude, r.address.placeId),
+      point: r.address.coordinatesConfirmed?geo(r.address.latitude, r.address.longitude, r.address.placeId):null,
       label: r.address.fullAddress,
       reference: r.reference ?? r.id,
       cleanerIds: r.assignments.map((a) => a.cleanerId),
@@ -128,7 +128,7 @@ export async function assessScheduling(
     reference: order.id,
     label: address?.fullAddress ?? "Адрес не определён",
     point: address
-      ? geo(address.latitude, address.longitude, address.placeId)
+      ? address.coordinatesConfirmed?geo(address.latitude, address.longitude, address.placeId):null
       : null,
   };
   const snapshot: RoutingSnapshot = {
@@ -140,7 +140,7 @@ export async function assessScheduling(
       ...c,
       name: c.name,
       updatedAt: c.updatedAt.toISOString(),
-      home: geo(c.homeLatitude, c.homeLongitude, c.homePlaceId),
+      home: c.homeCoordinatesConfirmed?geo(c.homeLatitude, c.homeLongitude, c.homePlaceId):null,
     })),
   };
   const requests = travelRequests(snapshot);

@@ -32,7 +32,7 @@ export const toolDescriptions:Record<ToolName,string> = {
   createOrUpdateLead:"Create/update substantive cleaning inquiry immediately. ONLY intent is required; name/phone are OPTIONAL. Never wait for contact to record intent. Contact may be gathered later, do not invent it. No lead for a greeting or isolated FAQ.",
   calculatePrice:"Authoritative production price. Needs explicit service, area, soil, extras (empty means customer wants no extras), urgent. Contact is NOT required. Save current quote; invalidates old duration and slot. If requiresHumanReview, handoff.",
   estimateDuration:"Calculate current quote's duration from active owner rules and choose crew size from applicable rules. Missing rule means handoff, no guessed duration.",
-  resolveAddress:"Official Places autocomplete. First call query only; ask customer to choose candidate. Then pass ONLY a returned placeId to verify. Missing Google or ambiguous address: ask or handoff. Apartment may be supplied separately.",
+  resolveAddress:"Address search. First call query only; ask customer to choose candidate. Then pass ONLY a returned placeId to confirm coordinates. Unavailable search or ambiguous address: ask or handoff. Apartment may be supplied separately.",
   getClientAddresses:"Read bound verified client's own active addresses, no notes/intercom/internal info. Optional returned addressId selects an address for current request.",
   findAvailableSlots:"Check real calendar, crew and routes using current quote, duration and verified address. date/from/to use Belgrade wall times YYYY-MM-DDTHH:mm. Maximum three slots, never invent a time. For rescheduling requires verified current order.",
   validateSlot:"Select a returned scoped opaque slot, revalidate calendar/routing and produce recap. This is selection, not booking confirmation. Send recap and request explicit customer confirmation. Get name and valid phone before calling.",
@@ -49,7 +49,7 @@ export type AgentState = {
   quote?:{id:string;serviceId:string;input:Qualification;total:number;base:number;discountPercent:number;requiresHumanReview:boolean;at:string};
   duration?:{minutes:number;reserve:number;requiredCleaners:number;ruleId:string;version:number};
   address?:{fullAddress:string;proof?:string;addressId?:string;apartment?:string};
-  addressCandidates?:{placeId:string;text:string}[];
+  addressCandidates?:{placeId:string;text:string;query?:string}[];
   requestedWindow?:{date:string;from:string;to:string};
   slots?:{token:string;start:string;duration:number}[];
   pending?:{slotToken:string;nonce:string;confirmedByMessageId?:string;recap:BookingRecap;reschedule:boolean};

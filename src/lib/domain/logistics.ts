@@ -144,7 +144,7 @@ export function assessTravel(
         ? { ...route, status: "STALE" as const }
         : route;
     const order = orders.find((o) => o.id === leg.orderId)!;
-    const sample = new Date(routeSample(leg.request)).getTime(),
+    const sample = new Date(route.source==="MOTIS"?leg.request.at:routeSample(leg.request)).getTime(),
       verified = routeUsable(actual);
     const earliest = verified
       ? leg.previousId
@@ -184,7 +184,7 @@ export function routeIssues(legs: TravelLeg[]): SchedulingIssue[] {
     if (!code) return [];
     const message = leg.conflict
       ? `${leg.cleaner}: не успевает — безопасное прибытие ${leg.earliestArrival}.`
-      : `${leg.cleaner}: ${leg.route.status === "STALE" ? "маршрут устарел" : code === "ROUTE_PROVIDER_ERROR" ? "Google недоступен / маршрут не найден" : "маршрут не проверен — нужны координаты и Google Routes"}.`;
+      : `${leg.cleaner}: ${leg.route.status === "STALE" ? "маршрут устарел" : code === "ROUTE_PROVIDER_ERROR" ? "Расчёт дороги недоступен / маршрут не найден" : "маршрут не проверен — подтвердите координаты адреса"}.`;
     return [
       {
         key: [

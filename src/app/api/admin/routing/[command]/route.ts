@@ -8,7 +8,8 @@ import { getDatabase } from "@/lib/database/client";
 import { CrmError } from "@/lib/domain/crm";
 import { SchedulingError } from "@/lib/domain/scheduling-types";
 import { routingSchemas, type RoutingCommand } from "@/lib/validation/routing";
-import { placesRequest } from "@/lib/services/google-places";
+import {routingProvider} from "@/lib/infrastructure/routing-provider";
+import { placesRequest,signLocation } from "@/lib/services/google-places";
 import {
   dayLogistics,
   findSlots,
@@ -94,6 +95,12 @@ export async function POST(
         command,
         routingSchemas[command].parse(payload),
       );
+    else if(command==="confirm-location"){
+      const input=routingSchemas["confirm-location"].parse(payload);
+      data={address:input.address,proof:signLocation({address:input.address,latitude:input.latitude,longitude:input.longitude,placeId:"user-confirmed:"+randomUUID(),expires:Date.now()+86400000})};
+    }else if(command==="reverse-geocode"){
+      const p=routingSchemas["reverse-geocode"].parse(payload);data={results:await routingProvider().reverseGeocode?.(p)??[]};
+    }
     else if (command === "day") {
       const v = routingSchemas.day.parse(payload);
       data = await dayLogistics(db, v.date, v.cleanerId);
