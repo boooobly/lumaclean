@@ -7,7 +7,7 @@ import {
   type CalendarOrder,
   type CrewOption,
 } from "@/lib/domain/scheduling-types";
-import { routeLabels, type RouteDetails } from "@/lib/domain/routing";
+import { routeLabels, qualityLabels, type RouteDetails } from "@/lib/domain/routing";
 import type { TravelLeg, Slot } from "@/lib/domain/logistics";
 import { PlanEditor } from "./order-planning";
 import { DayMap } from "./routing-map";
@@ -100,7 +100,7 @@ export function RoutingWorkspace({
     <section className="crm-section routing-workspace" aria-busy={pending}>
       <div className="admin-section-heading">
         <h2>Логистика{order ? " заказа" : " дня"}</h2>
-        <span>Google · общественный транспорт</span>
+        <span>Дорога · транспорт / пешком / резерв 80 мин</span>
       </div>
       <div className="routing-actions">
         <label>
@@ -178,7 +178,7 @@ export function RoutingWorkspace({
       )}
       {day && !day.available && (
         <p role="status">
-          Google Routes не настроен. Новые поездки требуют ручной проверки;
+          Расчёт дороги недоступен. Новые поездки требуют ручной проверки;
           ручное планирование доступно.
         </p>
       )}
@@ -191,7 +191,7 @@ export function RoutingWorkspace({
             <li key={l.cleanerId + ":" + l.orderId}>
               <strong>
                 {l.cleaner} ·{" "}
-                {l.conflict ? "Не успевает" : routeLabels[l.route.status]}
+                {l.conflict ? "Не успевает" : l.route.quality?qualityLabels[l.route.quality]:routeLabels[l.route.status]}
               </strong>
               <p>
                 {l.origin} → {l.destination}
@@ -207,7 +207,7 @@ export function RoutingWorkspace({
                         wallLabel(l.recommendedDeparture)}
                   </p>
                 )}
-              <small>Расчёт: {wallLabel(l.route.calculatedAt)} · Google</small>
+              <small>Расчёт: {wallLabel(l.route.calculatedAt)} · {l.route.source}</small>
               <div className="routing-actions">
                 <button
                   className="crm-button crm-button-secondary"
@@ -258,7 +258,7 @@ export function RoutingWorkspace({
           </h3>
           <p>{details.notice}</p>
           <p>
-            {routeLabels[details.result.status]}
+            {details.result.quality?qualityLabels[details.result.quality]:routeLabels[details.result.status]}
             {details.result.durationSeconds !== null &&
               " · " + Math.ceil(details.result.durationSeconds / 60) + " мин"}
           </p>
@@ -287,7 +287,7 @@ export function RoutingWorkspace({
         </div>
       )}
       {map && day && (
-        <DayMap points={day.points} polyline={details?.polyline} />
+        <DayMap points={day.points} polyline={details?.polyline} polylines={details?.polylines} geometries={details?.geometries} />
       )}{" "}
       {proposal && (
         <div className="routing-proposal">

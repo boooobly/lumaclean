@@ -98,6 +98,7 @@ export type AddressValues = {
   floor?: string | null;
   intercom?: string | null;
   comment?: string | null;
+  coordinatesConfirmed?:boolean;
   latitude?: unknown;
   longitude?: unknown;
 };
@@ -107,7 +108,8 @@ export function AddressFields({ value = {} }: { value?: AddressValues }) {
       <Field name="label" label="Название адреса" value={value.label} />
       <AddressAutocomplete
         value={value.fullAddress}
-        confirmed={value.latitude != null && value.longitude != null}
+        confirmed={value.coordinatesConfirmed===true && value.latitude != null && value.longitude != null}
+        initialPoint={value.latitude!=null&&value.longitude!=null?{latitude:Number(value.latitude),longitude:Number(value.longitude)}:null}
         required
       />
       <Field name="apartment" label="Квартира" value={value.apartment} />

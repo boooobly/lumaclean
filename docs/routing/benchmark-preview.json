@@ -1,0 +1,1164 @@
+{
+  "checkedAt": "2026-10-03T12:42:07.104Z",
+  "service": "https://routing-gateway-preview.up.railway.app",
+  "source": "https://data.gov.rs/sr/datasets/r/729be9a1-7ed9-453d-9a3d-68fa30f07529",
+  "datasetStatus": {
+    "engine": {
+      "healthy": true,
+      "version": "2.11.3"
+    },
+    "osm": {
+      "sha256": "bbed5026e4823c32ad92a5865d58957f47acba261b3b4e429d6322237a132e4e",
+      "version": "Sat, 03 Oct 2026 02:04:45 GMT",
+      "downloadedAt": "2026-10-03T11:56:47.693Z",
+      "source": "https://download.geofabrik.de/europe/serbia-latest.osm.pbf",
+      "license": "ODbL-1.0"
+    },
+    "static": {
+      "valid": false,
+      "datasets": [
+        {
+          "id": "bgu",
+          "name": "Belgrade city",
+          "url": "https://data.gov.rs/sr/datasets/r/729be9a1-7ed9-453d-9a3d-68fa30f07529",
+          "publishedAt": "2025-10-31T11:17:21.000Z",
+          "license": "SODL",
+          "licenseUrl": "https://data.gov.rs/sr/terms/",
+          "downloadedAt": "2026-10-03T12:22:56.934Z",
+          "version": "24",
+          "sha256": "b3acb17c56380de8d9b0d7fa1ef8e19146339cae5959951264c2db2969afea9b",
+          "validUntil": "2026-12-31",
+          "stops": 3266,
+          "routes": 241,
+          "trips": 87474,
+          "stopTimes": 2300609,
+          "quotingRepairs": 2,
+          "modifications": "CSV quoting normalized; schedules/IDs/calendar unchanged",
+          "valid": true,
+          "ageDays": 337
+        },
+        {
+          "id": "bgs",
+          "name": "Belgrade suburban",
+          "url": "https://data.gov.rs/sr/datasets/r/60f82229-16c7-4939-961b-2c24873d3e06",
+          "publishedAt": "2025-07-01T15:54:03.000Z",
+          "license": "SODL",
+          "licenseUrl": "https://data.gov.rs/sr/terms/",
+          "downloadedAt": "2026-10-03T12:23:11.457Z",
+          "version": "7",
+          "sha256": "7af61daa0dd4799a7a9988160c85f2849961d1326499b60b30825e9a6cbda924",
+          "validUntil": "2026-12-31",
+          "stops": 2811,
+          "routes": 304,
+          "trips": 9852,
+          "stopTimes": 266414,
+          "quotingRepairs": 2,
+          "modifications": "CSV quoting normalized; schedules/IDs/calendar unchanged",
+          "valid": true,
+          "ageDays": 458
+        }
+      ]
+    },
+    "realtime": {
+      "status": "UNAVAILABLE",
+      "usable": false,
+      "licenseConfirmed": false,
+      "error": "SOURCE_HTTP_500",
+      "freshnessSeconds": null
+    },
+    "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+    "activeAt": "2026-10-03T12:24:53.475Z",
+    "update": {
+      "busy": false,
+      "lastError": null
+    },
+    "thresholds": {
+      "maxAgeSeconds": 120,
+      "minMatchRatio": 0.8,
+      "licenseConfirmed": false,
+      "maxStaticAgeDays": 365
+    },
+    "attributions": [
+      {
+        "name": "OpenStreetMap contributors",
+        "url": "https://www.openstreetmap.org/copyright"
+      },
+      {
+        "name": "City of Belgrade Secretariat for Public Transport",
+        "url": "https://data.gov.rs/sr/terms/"
+      }
+    ],
+    "routingReadiness": "FALLBACK_80",
+    "map": {
+      "provider": "MapLibre/OpenFreeMap",
+      "required": false
+    }
+  },
+  "summary": {
+    "status": "BLOCKED",
+    "measurements": 105,
+    "independentReferences": 0,
+    "medianAbsoluteErrorMinutes": null,
+    "within15Ratio": null,
+    "qualityCounts": {
+      "WALKING": 48,
+      "FALLBACK_80": 57
+    },
+    "blockers": [
+      "DATA_NOT_PRODUCTION_SAFE",
+      "INDEPENDENT_REFERENCE_COVERAGE_INCOMPLETE"
+    ]
+  },
+  "rows": [
+    {
+      "pair": "p01",
+      "origin": "Terazije",
+      "destination": "Trg Republike",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 471,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p02",
+      "origin": "Trg Republike",
+      "destination": "Kalemegdan (Donji grad)",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1219,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p03",
+      "origin": "Trg Slavija /Nemanjina/",
+      "destination": "Vukov spomenik",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1227,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p04",
+      "origin": "Terazije",
+      "destination": "Trg Slavija /Nemanjina/",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 955,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p05",
+      "origin": "Kalemegdan (Donji grad)",
+      "destination": "Vukov spomenik",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 2939,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p06",
+      "origin": "Terazije",
+      "destination": "Studentski grad",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p07",
+      "origin": "Trg Republike",
+      "destination": "Blok 45",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p08",
+      "origin": "Kalemegdan (Donji grad)",
+      "destination": "KBC Zemun",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p09",
+      "origin": "Trg Slavija /Nemanjina/",
+      "destination": "Banovo brdo",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p10",
+      "origin": "Vukov spomenik",
+      "destination": "Banjica",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p11",
+      "origin": "Terazije",
+      "destination": "Konjarnik",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p12",
+      "origin": "Trg Republike",
+      "destination": "Autokomanda",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 2783,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p13",
+      "origin": "Kalemegdan (Donji grad)",
+      "destination": "Sava centar",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 3158,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p14",
+      "origin": "Trg Slavija /Nemanjina/",
+      "destination": "Muzej Jugoslavije",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1780,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p15",
+      "origin": "Vukov spomenik",
+      "destination": "GO Rakovica",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p16",
+      "origin": "Terazije",
+      "destination": "Mirijevo 3",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p17",
+      "origin": "Studentski grad",
+      "destination": "KBC Zemun",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1828,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p18",
+      "origin": "Studentski grad",
+      "destination": "Blok 45",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4164,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p19",
+      "origin": "Blok 45",
+      "destination": "Banovo brdo",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p20",
+      "origin": "KBC Zemun",
+      "destination": "Banjica",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p21",
+      "origin": "Banovo brdo",
+      "destination": "Konjarnik",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p22",
+      "origin": "Banjica",
+      "destination": "Autokomanda",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 3662,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p23",
+      "origin": "Konjarnik",
+      "destination": "Sava centar",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p24",
+      "origin": "Autokomanda",
+      "destination": "Muzej Jugoslavije",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1174,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p25",
+      "origin": "Sava centar",
+      "destination": "GO Rakovica",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p26",
+      "origin": "Muzej Jugoslavije",
+      "destination": "Mirijevo 3",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p27",
+      "origin": "Mirijevo 3",
+      "destination": "Studentski grad",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p28",
+      "origin": "Blok 45",
+      "destination": "KBC Zemun",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p29",
+      "origin": "KBC Zemun",
+      "destination": "Banovo brdo",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p30",
+      "origin": "Banovo brdo",
+      "destination": "Banjica",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p31",
+      "origin": "Banjica",
+      "destination": "Konjarnik",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4443,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p32",
+      "origin": "Konjarnik",
+      "destination": "Autokomanda",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 3416,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p33",
+      "origin": "Autokomanda",
+      "destination": "Sava centar",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4669,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p34",
+      "origin": "Sava centar",
+      "destination": "Muzej Jugoslavije",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4507,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p35",
+      "origin": "GO Rakovica",
+      "destination": "Mirijevo 3",
+      "at": "2026-10-05T07:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p01",
+      "origin": "Terazije",
+      "destination": "Trg Republike",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 471,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p02",
+      "origin": "Trg Republike",
+      "destination": "Kalemegdan (Donji grad)",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1219,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p03",
+      "origin": "Trg Slavija /Nemanjina/",
+      "destination": "Vukov spomenik",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1227,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p04",
+      "origin": "Terazije",
+      "destination": "Trg Slavija /Nemanjina/",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 955,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p05",
+      "origin": "Kalemegdan (Donji grad)",
+      "destination": "Vukov spomenik",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 2939,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p06",
+      "origin": "Terazije",
+      "destination": "Studentski grad",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p07",
+      "origin": "Trg Republike",
+      "destination": "Blok 45",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p08",
+      "origin": "Kalemegdan (Donji grad)",
+      "destination": "KBC Zemun",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p09",
+      "origin": "Trg Slavija /Nemanjina/",
+      "destination": "Banovo brdo",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p10",
+      "origin": "Vukov spomenik",
+      "destination": "Banjica",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p11",
+      "origin": "Terazije",
+      "destination": "Konjarnik",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p12",
+      "origin": "Trg Republike",
+      "destination": "Autokomanda",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 2783,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p13",
+      "origin": "Kalemegdan (Donji grad)",
+      "destination": "Sava centar",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 3158,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p14",
+      "origin": "Trg Slavija /Nemanjina/",
+      "destination": "Muzej Jugoslavije",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1780,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p15",
+      "origin": "Vukov spomenik",
+      "destination": "GO Rakovica",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p16",
+      "origin": "Terazije",
+      "destination": "Mirijevo 3",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p17",
+      "origin": "Studentski grad",
+      "destination": "KBC Zemun",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1828,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p18",
+      "origin": "Studentski grad",
+      "destination": "Blok 45",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4164,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p19",
+      "origin": "Blok 45",
+      "destination": "Banovo brdo",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p20",
+      "origin": "KBC Zemun",
+      "destination": "Banjica",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p21",
+      "origin": "Banovo brdo",
+      "destination": "Konjarnik",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p22",
+      "origin": "Banjica",
+      "destination": "Autokomanda",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 3662,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p23",
+      "origin": "Konjarnik",
+      "destination": "Sava centar",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p24",
+      "origin": "Autokomanda",
+      "destination": "Muzej Jugoslavije",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1174,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p25",
+      "origin": "Sava centar",
+      "destination": "GO Rakovica",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p26",
+      "origin": "Muzej Jugoslavije",
+      "destination": "Mirijevo 3",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p27",
+      "origin": "Mirijevo 3",
+      "destination": "Studentski grad",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p28",
+      "origin": "Blok 45",
+      "destination": "KBC Zemun",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p29",
+      "origin": "KBC Zemun",
+      "destination": "Banovo brdo",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p30",
+      "origin": "Banovo brdo",
+      "destination": "Banjica",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p31",
+      "origin": "Banjica",
+      "destination": "Konjarnik",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4443,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p32",
+      "origin": "Konjarnik",
+      "destination": "Autokomanda",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 3416,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p33",
+      "origin": "Autokomanda",
+      "destination": "Sava centar",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4669,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p34",
+      "origin": "Sava centar",
+      "destination": "Muzej Jugoslavije",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4507,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p35",
+      "origin": "GO Rakovica",
+      "destination": "Mirijevo 3",
+      "at": "2026-10-05T13:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p01",
+      "origin": "Terazije",
+      "destination": "Trg Republike",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 471,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p02",
+      "origin": "Trg Republike",
+      "destination": "Kalemegdan (Donji grad)",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1219,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p03",
+      "origin": "Trg Slavija /Nemanjina/",
+      "destination": "Vukov spomenik",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1227,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p04",
+      "origin": "Terazije",
+      "destination": "Trg Slavija /Nemanjina/",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 955,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p05",
+      "origin": "Kalemegdan (Donji grad)",
+      "destination": "Vukov spomenik",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 2939,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p06",
+      "origin": "Terazije",
+      "destination": "Studentski grad",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p07",
+      "origin": "Trg Republike",
+      "destination": "Blok 45",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p08",
+      "origin": "Kalemegdan (Donji grad)",
+      "destination": "KBC Zemun",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p09",
+      "origin": "Trg Slavija /Nemanjina/",
+      "destination": "Banovo brdo",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p10",
+      "origin": "Vukov spomenik",
+      "destination": "Banjica",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p11",
+      "origin": "Terazije",
+      "destination": "Konjarnik",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p12",
+      "origin": "Trg Republike",
+      "destination": "Autokomanda",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 2783,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p13",
+      "origin": "Kalemegdan (Donji grad)",
+      "destination": "Sava centar",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 3158,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p14",
+      "origin": "Trg Slavija /Nemanjina/",
+      "destination": "Muzej Jugoslavije",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1780,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p15",
+      "origin": "Vukov spomenik",
+      "destination": "GO Rakovica",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p16",
+      "origin": "Terazije",
+      "destination": "Mirijevo 3",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p17",
+      "origin": "Studentski grad",
+      "destination": "KBC Zemun",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1828,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p18",
+      "origin": "Studentski grad",
+      "destination": "Blok 45",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4164,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p19",
+      "origin": "Blok 45",
+      "destination": "Banovo brdo",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p20",
+      "origin": "KBC Zemun",
+      "destination": "Banjica",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p21",
+      "origin": "Banovo brdo",
+      "destination": "Konjarnik",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p22",
+      "origin": "Banjica",
+      "destination": "Autokomanda",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 3662,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p23",
+      "origin": "Konjarnik",
+      "destination": "Sava centar",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p24",
+      "origin": "Autokomanda",
+      "destination": "Muzej Jugoslavije",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 1174,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p25",
+      "origin": "Sava centar",
+      "destination": "GO Rakovica",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p26",
+      "origin": "Muzej Jugoslavije",
+      "destination": "Mirijevo 3",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p27",
+      "origin": "Mirijevo 3",
+      "destination": "Studentski grad",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p28",
+      "origin": "Blok 45",
+      "destination": "KBC Zemun",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p29",
+      "origin": "KBC Zemun",
+      "destination": "Banovo brdo",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p30",
+      "origin": "Banovo brdo",
+      "destination": "Banjica",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p31",
+      "origin": "Banjica",
+      "destination": "Konjarnik",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4443,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p32",
+      "origin": "Konjarnik",
+      "destination": "Autokomanda",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 3416,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p33",
+      "origin": "Autokomanda",
+      "destination": "Sava centar",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4669,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p34",
+      "origin": "Sava centar",
+      "destination": "Muzej Jugoslavije",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "WALKING",
+      "durationSeconds": 4507,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    },
+    {
+      "pair": "p35",
+      "origin": "GO Rakovica",
+      "destination": "Mirijevo 3",
+      "at": "2026-10-05T18:00:00+02:00",
+      "quality": "FALLBACK_80",
+      "durationSeconds": 4800,
+      "dataVersion": "daa197abd0b02dd4ebda887df68abfb648ba04d3435f09071f3120fa4990c3bf",
+      "reference": null
+    }
+  ]
+}

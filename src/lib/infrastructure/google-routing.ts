@@ -19,7 +19,7 @@ export const seconds = (v: unknown): number | null =>
     ? Math.ceil(Number(v.slice(0, -1)))
     : null;
 export function routingTelemetry(metric: string, count = 1) {
-  console.info(JSON.stringify({ msg: "google_usage", metric, count }));
+  console.info(JSON.stringify({ msg: "routing_usage", metric, count }));
 }
 const waypoint = (p: GeoPoint) => ({
   location: { latLng: { latitude: p.latitude, longitude: p.longitude } },

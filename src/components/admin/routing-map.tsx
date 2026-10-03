@@ -1,143 +1,186 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-type GoogleMap = {
-  maps: {
-    Map: new (node: HTMLElement, options: unknown) => unknown;
-    marker: {
-      AdvancedMarkerElement: new (options: unknown) => { map: unknown };
-    };
-    LatLngBounds: new () => { extend: (p: unknown) => void };
-    Polyline: new (options: unknown) => { setMap: (map: null) => void };
-    geometry: { encoding: { decodePath: (value: string) => unknown } };
-  };
-};
-let loaded: Promise<GoogleMap> | null = null;
-let authFailed=false;
-function loadMap(key: string): Promise<GoogleMap> {
-  if (loaded) return loaded;
-  loaded = new Promise((resolve, reject) => {
-    const context = window as unknown as {
-      google: GoogleMap;
-      lumaRoutingMapReady?: () => void;
-      gm_authFailure?:()=>void;
-    };
-    context.gm_authFailure=()=>{authFailed=true;window.dispatchEvent(new Event('luma-map-auth-error'));};
-    const timer = setTimeout(() => {
-      loaded = null;
-      delete context.lumaRoutingMapReady;
-      reject(new Error("����� �������� ����������"));
-    }, 10000);
-    context.lumaRoutingMapReady = () => {
-      clearTimeout(timer);
-      resolve(context.google);
-      delete context.lumaRoutingMapReady;
-    };
-    const script = document.createElement("script");
-    script.src =
-      "https://maps.googleapis.com/maps/api/js?key=" +
-      encodeURIComponent(key) +
-      "&libraries=geometry,marker&loading=async&callback=lumaRoutingMapReady";
-    script.async = true;
-    script.onerror = () => {
-      clearTimeout(timer);
-      delete context.lumaRoutingMapReady;
-      loaded = null;
-      reject(new Error("Карта временно недоступна"));
-    };
-    document.head.appendChild(script);
-  });
-  return loaded;
-}
-export function DayMap({
+import type { Map as LibreMap } from "maplibre-gl";
+import { decodeRouteGeometry } from "@/lib/domain/route-geometry";
+import type { GeoPoint } from "@/lib/domain/routing";
+type MapPoint = { id: string; label: string; point: GeoPoint; kind: string };
+export function RoutingMap({
   points,
   polyline,
+  polylines,
+  geometries,
+  draggable = false,
+  onMove,
 }: {
-  points: {
-    id: string;
-    label: string;
-    point: { latitude: number; longitude: number };
-    kind: string;
-  }[];
+  points: MapPoint[];
   polyline?: string;
+  polylines?: string[];
+  geometries?: { points: string; precision: number }[];
+  draggable?: boolean;
+  onMove?: (p: GeoPoint) => void;
 }) {
-  const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_API_KEY,
-    ref = useRef<HTMLDivElement>(null),
+  const node = useRef<HTMLDivElement>(null),
     [error, setError] = useState("");
+  const serialized = JSON.stringify(points),
+    geometry = JSON.stringify(
+      geometries ??
+        (polylines ?? (polyline ? [polyline] : [])).map((points) => ({
+          points,
+          precision: 5,
+        })),
+    );
   useEffect(() => {
-    if (!key || !ref.current) return;
-    let cancelled = false;
-    const authError=()=>setError('Google Maps отклонил доступ. Проверьте Maps JavaScript API, ключ, billing и ограничения текущего домена.');
-    window.addEventListener('luma-map-auth-error',authError);
-    if(authFailed)authError();
-    const markers: { setMap: (map: null) => void }[] = [];
-    const advanced: { map: unknown }[] = [];
-    void loadMap(key)
-      .then((g) => {
-        if (cancelled || !ref.current) return;
-        const map = new g.maps.Map(ref.current, {
-          center: { lat: 44.8125, lng: 20.4612 },
-          zoom: 12,
-          mapTypeControl: false,
-          streetViewControl: false,
-          mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || "DEMO_MAP_ID",
-        }) as { fitBounds: (b: unknown) => void };
-        const bounds = new g.maps.LatLngBounds();
-        points.forEach((p) => {
-          const position = { lat: p.point.latitude, lng: p.point.longitude };
-          bounds.extend(position);
-          const content = document.createElement("span");
-          content.className = "routing-map-pin";
-          content.textContent = p.kind === "home" ? "С" : p.label.split(" · ")[0];
-          advanced.push(
-            new g.maps.marker.AdvancedMarkerElement({
-              map,
-              position,
-              title: p.label,
-              content,
-            }),
+    let cancelled = false,
+      map: LibreMap | undefined;
+    const timer = setTimeout(() => {
+      if (!cancelled)
+        setError(
+          "Карта загружается медленно. Координаты можно подтвердить в полях ниже; расчёт дороги работает отдельно.",
+        );
+    }, 15000);
+    void import("maplibre-gl")
+      .then(
+        ({ Map, Marker, LngLatBounds, NavigationControl, setWorkerUrl }) => {
+          if (cancelled || !node.current) return;
+          const locations: MapPoint[] = JSON.parse(serialized),
+            lines: { points: string; precision: number }[] =
+              JSON.parse(geometry);
+          setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
+          map = new Map({
+            container: node.current,
+            style: "https://tiles.openfreemap.org/styles/liberty",
+            center: locations[0]
+              ? [locations[0].point.longitude, locations[0].point.latitude]
+              : [20.4612, 44.8125],
+            zoom: locations.length === 1 ? 16 : 12,
+            attributionControl: { compact: false },
+          });
+          map.addControl(new NavigationControl(), "top-right");
+          map.on("error", () => {
+            if (!cancelled)
+              setError(
+                "Карта временно недоступна. Адрес, координаты и расчёт дороги работают отдельно.",
+              );
+          });
+          const bounds = new LngLatBounds();
+          for (const p of locations) {
+            const position: [number, number] = [
+              p.point.longitude,
+              p.point.latitude,
+            ];
+            bounds.extend(position);
+            const element = document.createElement("span");
+            element.className = "routing-map-pin";
+            element.textContent =
+              p.kind === "home" ? "С" : p.label.split(" · ")[0];
+            element.title = p.label;
+            const marker = new Marker({ element, draggable })
+              .setLngLat(position)
+              .addTo(map);
+            if (draggable)
+              marker.on("dragend", () => {
+                const v = marker.getLngLat();
+                onMove?.({ latitude: v.lat, longitude: v.lng });
+              });
+          }
+          if (locations.length > 1)
+            map.fitBounds(bounds, { padding: 40, maxZoom: 16, duration: 0 });
+          map.on("load", () => {
+            clearTimeout(timer);
+            if (cancelled || !map) return;
+            for (let i = 0; i < lines.length; i++) {
+              try {
+                map.addSource("route-" + i, {
+                  type: "geojson",
+                  data: {
+                    type: "Feature",
+                    properties: {},
+                    geometry: {
+                      type: "LineString",
+                      coordinates: decodeRouteGeometry(
+                        lines[i].points,
+                        lines[i].precision,
+                      ),
+                    },
+                  },
+                });
+                map.addLayer({
+                  id: "route-" + i,
+                  type: "line",
+                  source: "route-" + i,
+                  paint: { "line-color": "#267978", "line-width": 4 },
+                });
+              } catch {
+                /* Geometry cannot block scheduling. */
+              }
+            }
+          });
+        },
+      )
+      .catch(() => {
+        if (!cancelled)
+          setError(
+            "Карта временно недоступна. Используйте координаты в полях ниже.",
           );
-        });
-        if (points.length > 1) map.fitBounds(bounds);
-        if (polyline)
-          markers.push(
-            new g.maps.Polyline({
-              map,
-              path: g.maps.geometry.encoding.decodePath(polyline),
-              strokeColor: "#267978",
-              strokeWeight: 3,
-            }),
-          );
-      })
-      .catch((e) => {
-        if (!cancelled) setError(e.message);
       });
     return () => {
       cancelled = true;
-      window.removeEventListener('luma-map-auth-error',authError);
-      markers.forEach((m) => m.setMap(null));
-      advanced.forEach((m) => {
-        m.map = null;
-      });
+      clearTimeout(timer);
+      map?.remove();
     };
-  }, [key, points, polyline]);
+  }, [serialized, geometry, draggable, onMove]);
+  return (
+    <>
+      <div
+        ref={node}
+        className="routing-map"
+        aria-label={
+          draggable
+            ? "Карта адреса: перетащите маркер или измените координаты в полях"
+            : "Карта рабочего дня"
+        }
+      />
+      {error && <p role="status">{error}</p>}
+      <small>
+        <a
+          href="https://openfreemap.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          OpenFreeMap
+        </a>{" "}
+        ·{" "}
+        <a
+          href="https://openmaptiles.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          OpenMapTiles
+        </a>{" "}
+        · ©{" "}
+        <a
+          href="https://www.openstreetmap.org/copyright"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          OpenStreetMap contributors
+        </a>
+      </small>
+    </>
+  );
+}
+export function DayMap(props: {
+  points: MapPoint[];
+  polyline?: string;
+  polylines?: string[];
+  geometries?: { points: string; precision: number }[];
+}) {
   return (
     <div className="routing-map-panel">
       <h3>География рабочего дня</h3>
-      {!key ? (
-        <p role="status">
-          Карта недоступна: browser key Google Maps не настроен. Серверные
-          маршруты работают независимо от карты.
-        </p>
-      ) : (
-        <div
-          ref={ref}
-          className="routing-map"
-          aria-label="Карта рабочего дня"
-        />
-      )}
-      {error && <p role="alert">{error}</p>}
+      <RoutingMap {...props} />
       <ol>
-        {points.map((p) => (
+        {props.points.map((p) => (
           <li key={p.id}>{p.label}</li>
         ))}
       </ol>

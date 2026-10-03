@@ -1,3 +1,7 @@
+import {
+  routingProvider,
+  motisSelected,
+} from "@/lib/infrastructure/routing-provider";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { CrmError } from "@/lib/domain/crm";
@@ -38,10 +42,7 @@ export function verifyLocation(proof: string) {
     if (parsed.expires < Date.now()) throw new Error();
     return parsed;
   } catch {
-    throw new CrmError(
-      "VALIDATION",
-      "Повторно выберите адрес из результатов Google.",
-    );
+    throw new CrmError("VALIDATION", "Повторно подтвердите координаты адреса.");
   }
 }
 export function normalizeAddress<
@@ -57,6 +58,7 @@ export function normalizeAddress<
       );
     return {
       ...data,
+      coordinatesConfirmed: true,
       latitude: place.latitude,
       longitude: place.longitude,
       placeId: place.placeId,
@@ -64,7 +66,13 @@ export function normalizeAddress<
   }
   return previous?.fullAddress === input.fullAddress
     ? data
-    : { ...data, latitude: null, longitude: null, placeId: null };
+    : {
+        ...data,
+        latitude: null,
+        longitude: null,
+        placeId: null,
+        coordinatesConfirmed: false,
+      };
 }
 export function normalizeHome<
   T extends { homeAddress?: string | null; homeLocationProof?: string | null },
@@ -79,6 +87,7 @@ export function normalizeHome<
       );
     return {
       ...data,
+      homeCoordinatesConfirmed: true,
       homeLatitude: place.latitude,
       homeLongitude: place.longitude,
       homePlaceId: place.placeId,
@@ -86,12 +95,78 @@ export function normalizeHome<
   }
   return previous?.homeAddress === input.homeAddress
     ? data
-    : { ...data, homeLatitude: null, homeLongitude: null, homePlaceId: null };
+    : {
+        ...data,
+        homeLatitude: null,
+        homeLongitude: null,
+        homePlaceId: null,
+        homeCoordinatesConfirmed: false,
+      };
 }
 export async function placesRequest(
   kind: "autocomplete" | "place",
   input: { query?: string; placeId?: string; sessionToken: string },
 ) {
+  if (motisSelected()) {
+    try {
+      const provider = routingProvider();
+      const matches = (await provider.searchAddress?.(input.query ?? "")) ?? [];
+      if (kind === "autocomplete")
+        return {
+          available: true,
+          suggestions: matches.map((m) => ({
+            placeId: m.id,
+            text: m.displayAddress,
+          })),
+        };
+      const chosen = matches.find((m) => m.id === input.placeId);
+      if (!chosen)
+        return {
+          available: false,
+          error: "Уточните адрес и выберите результат заново.",
+          suggestions: [],
+        };
+      const selected = location.parse({
+        address: chosen.displayAddress,
+        placeId: chosen.id,
+        latitude: chosen.latitude,
+        longitude: chosen.longitude,
+        expires: Date.now() + 86400000,
+      });
+      return {
+        available: true,
+        address: selected.address,
+        latitude: selected.latitude,
+        longitude: selected.longitude,
+        proof: signLocation(selected),
+        attributions: [
+          {
+            provider: "OpenStreetMap contributors",
+            providerUri: "https://www.openstreetmap.org/copyright",
+          },
+        ],
+      };
+    } catch {
+      return {
+        available: false,
+        error:
+          "Поиск временно недоступен. Можно указать и подтвердить координаты вручную.",
+        suggestions: [],
+      };
+    }
+  }
+  if (process.env.LUMACLEAN_GOOGLE_ROUTING_ENABLED !== "true")
+    return {
+      available: false,
+      error: "Поиск адресов не настроен.",
+      suggestions: [],
+    };
+  if (kind === "place" && !/^[A-Za-z0-9_-]+$/.test(input.placeId ?? ""))
+    return {
+      available: false,
+      error: "Некорректный идентификатор адреса.",
+      suggestions: [],
+    };
   const key = process.env.GOOGLE_MAPS_SERVER_API_KEY;
   if (!key)
     return {
@@ -167,6 +242,8 @@ export async function placesRequest(
     return {
       available: true,
       address: selected.address,
+      latitude: selected.latitude,
+      longitude: selected.longitude,
       proof: signLocation(selected),
       attributions: data.attributions ?? [],
     };

@@ -1,4 +1,16 @@
-# Website live readiness
+# Website limited AUTO readiness - 2026-10-03
+
+Current branch: `codex/admin-motis-routing`. Production is technically ready for limited Website AUTO: server readiness **5/5**, final Deep Preview booking **PASSED**, signed proof imported and validated against current source/rules/crew/routing configuration. Master remains **SHADOW**. Only the owner enables AUTO using Settings and explicit confirmation; Telegram, WhatsApp and Viber stay OFF. No production synthetic Order was created and no PR was merged.
+
+Owner-confirmed rules: Regular v2 retains 150 minutes / two cleaners, Deep v1 activates 480 minutes / two cleaners / 40-60 m² (reference 50). Both use cleaning reserve 30 minutes, separate from travel buffer 30 and fallback travel 80. Finance commands versioned the rules and recorded AuditLog; historical Orders retain snapshots.
+
+Settings' Preview test now offers Regular or Deep and reports the actual created Order's duration, reserve, crew, travel buffer and price. The final Deep run passed all eight steps with native PoYo, price 10,700 RSD, duration 480+30, real MOTIS address/coordinates, 12 FALLBACK_80 route observations, slot revalidation, explicit confirmation, two assignments and safe batch cleanup. Evidence and deployment URLs are in [hybrid live verification](routing/hybrid-live-verification.json).
+
+26 targeted tests, typecheck, affected-file lint and Preview/production builds passed. Isolated Postgres verifies owner rule creation/audit, server readiness admission, both AUTO-to-SHADOW and AUTO-to-OFF races before side effects, and namespace cleanup. Existing routing engine, conservative policy and booking architecture are preserved.
+
+The sections below describe earlier stages and their then-current blockers. They are historical; Google credentials, missing cleaner coordinates and unconfirmed Deep do not describe the current hybrid deployment.
+
+# Historical Website live readiness implementation
 
 Branch: `codex/admin-live-readiness`, from `codex/admin-ai-go-live`.
 

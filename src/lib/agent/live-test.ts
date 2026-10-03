@@ -2,6 +2,7 @@ import {randomUUID,randomInt} from 'node:crypto';
 import type {PrismaClient} from '@/generated/prisma/client';
 import {AgentError,qualificationSchema,type ToolResult} from './contracts';
 import {configuredProviders} from './providers';
+import {completeWithFallback} from './runner';
 import {readiness} from './readiness';
 import {canonicalJson,executeAgentTool,json,stateOf,type ToolContext} from './tools';
 import {acceptMessage} from './inbox';
@@ -10,7 +11,7 @@ import {normalizedPhone} from '@/lib/domain/crm';
 import {writeAudit} from '@/lib/services/audit';
 
 export const liveTestSteps=['AI понял запрос','Цена рассчитана','Duration рассчитан','Адрес найден','Маршрут рассчитан','Свободный слот найден','Повторная проверка слота','Order создан'] as const;
-export type LiveTestReport={status:'PASSED'|'FAILED';steps:{label:string;ok:boolean}[];blocker:string|null;cleaned:boolean;proof?:ReturnType<typeof signLiveProof>};
+export type LiveTestReport={status:'PASSED'|'FAILED';steps:{label:string;ok:boolean}[];blocker:string|null;cleaned:boolean;service?:'regular'|'deep';booking?:{estimatedDurationMinutes:number|null;cleaningReserveMinutes:number;travelBufferMinutes:number;requiredCleaners:number;assignedCleaners:number;price:number};aiAttempts?:{provider:string;model:string;ok:boolean;errorCode:string|null;latencyMs:number}[];proof?:ReturnType<typeof signLiveProof>};
 export async function cleanupLiveTest(db:PrismaClient,batchId:string){
   if(!previewTestAllowed())throw new AgentError('PREVIEW_TEST_ONLY');
   await db.$transaction(async tx=>{
@@ -35,12 +36,13 @@ export async function cleanupLiveTest(db:PrismaClient,batchId:string){
   },{timeout:30000});
 }
 
-export async function runLiveBookingTest(db:PrismaClient,userId:string,date:string):Promise<LiveTestReport>{
+export async function runLiveBookingTest(db:PrismaClient,userId:string,date:string,selectedService?:'regular'|'deep'):Promise<LiveTestReport>{
   // This check precedes every write, including reports, and cannot be bypassed by request parameters.
   if(!previewTestAllowed())throw new AgentError('PREVIEW_TEST_ONLY');
   if(!await db.user.count({where:{id:userId,active:true,role:'ADMIN'}}))throw new AgentError('FORBIDDEN');
   const settings=await db.businessSettings.findUniqueOrThrow({where:{id:'default'}});
   if(settings.aiAgentMode==='OFF')throw new AgentError('AI_OFF');
+  if(selectedService&&!settings.aiAllowedServices.includes(selectedService))throw new AgentError('SERVICE_UNAVAILABLE');
   const ready=await readiness(db,settings);
   if(!ready.canRunLiveTest)throw new AgentError('LIVE_TEST_BLOCKED: '+ready.blockers.filter(c=>c.id!=='liveBooking').map(c=>c.label).join(', '));
   const config=await liveConfigFingerprint(db),batchId=randomUUID();
@@ -65,22 +67,25 @@ export async function runLiveBookingTest(db:PrismaClient,userId:string,date:stri
   }
   try{
     const conversation=await db.$transaction(async tx=>{const c=await tx.conversation.create({data:{channel:'WEBSITE',externalThreadId:`live-test:${batchId}`,locale:'ru'}});await tx.agentLiveTest.update({where:{id:batchId},data:{conversationId:c.id}});return c;});
-    const service=settings.aiAllowedServices.includes('regular')?'regular':settings.aiAllowedServices[0];
+    const service=selectedService??(settings.aiAllowedServices.includes('regular')?'regular':settings.aiAllowedServices[0]);
+    if(service==='regular'||service==='deep')report.service=service;
     const input=qualificationSchema.parse({service,area:50,soilLevel:'NORMAL',extras:[],urgent:false});
     const request=`Синтетический тест: нужна ${service==='regular'?'поддерживающая':'генеральная'} уборка квартиры 50 м², обычное загрязнение, без дополнений, не срочно.`;
     const message=await db.message.create({data:{conversationId:conversation.id,author:'CLIENT',text:request}});
     ctx=await context(message.id);
-    const primary=configuredProviders()[0],answer=await primary.complete([{role:'system',content:'You are qualifying this synthetic Website cleaning request. Call calculatePrice exactly once with the explicit facts. No CRM actions yet.'},{role:'user',content:request}],AbortSignal.timeout(60000));
+    const answer=await completeWithFallback(configuredProviders(),[{role:'system',content:'You are qualifying this synthetic Website cleaning request. Call calculatePrice exactly once with the explicit facts. No CRM actions yet.'},{role:'user',content:request}],async(provider,result,errorCode,latencyMs)=>{
+      (report.aiAttempts??=[]).push({provider:provider.name,model:provider.model,ok:result!==null,errorCode,latencyMs});
+    },AbortSignal.timeout(60000));
     if(answer.toolCalls.length!==1||answer.toolCalls[0].name!=='calculatePrice')throw new AgentError('PRIMARY_DID_NOT_QUALIFY');
     const qualification=qualificationSchema.parse(JSON.parse(answer.toolCalls[0].arguments));
     if(canonicalJson(qualification)!==canonicalJson(input))throw new AgentError('PRIMARY_MISUNDERSTOOD_REQUEST');
     completeStep(0);
     await tool('calculatePrice',qualification);completeStep(1);
     await tool('estimateDuration',{});completeStep(2);
-    const candidates=await tool('resolveAddress',{query:'Terazije 1, Beograd'});
+    const candidates=await tool('resolveAddress',{query:'Теразије 1'});
     const rows=candidates.candidates as {placeId:string;text:string}[]|undefined;
     // Explicit synthetic customer's preselected public destination, never an existing customer's address.
-    const selected=rows?.find(r=>/Terazije\s*1(?:\D|$)/i.test(r.text));
+    const selected=rows?.find(r=>/^(?:Terazije|Теразије)\s*1(?:[,\s]|$)/i.test(r.text)&&/(?:Beograd|Београд)/i.test(r.text));
     if(!selected)throw new AgentError('TEST_ADDRESS_AMBIGUOUS');
     await tool('resolveAddress',{query:selected.text,placeId:selected.placeId});completeStep(3);
     const slots=await tool('findAvailableSlots',{date,from:`${date}T08:00`,to:`${date}T22:00`});
@@ -93,6 +98,10 @@ export async function runLiveBookingTest(db:PrismaClient,userId:string,date:stri
     const confirmed=await acceptMessage(db,c,{id:randomUUID(),text:'Подтверждаю все условия тестовой записи',locale:'ru',confirmationNonce:pending.nonce});
     ctx=await context(confirmed.messageId);
     const booked=await tool('createOrder',{});if(!booked.booked)throw new AgentError('BOOKING_NOT_CREATED');completeStep(7);
+    const created=await db.conversation.findUniqueOrThrow({where:{id:conversation.id},select:{orderId:true}});
+    const order=await db.order.findUniqueOrThrow({where:{id:created.orderId!},select:{estimatedDurationMinutes:true,cleaningReserveMinutes:true,travelBufferMinutes:true,requiredCleaners:true,finalPrice:true,_count:{select:{assignments:true}}}});
+    report.booking={estimatedDurationMinutes:order.estimatedDurationMinutes,cleaningReserveMinutes:order.cleaningReserveMinutes,travelBufferMinutes:order.travelBufferMinutes,requiredCleaners:order.requiredCleaners,assignedCleaners:order._count.assignments,price:Number(order.finalPrice)};
+    if(order.estimatedDurationMinutes!==ctx.state.duration?.minutes||order.cleaningReserveMinutes!==ctx.state.duration.reserve||order.requiredCleaners!==ctx.state.duration.requiredCleaners||order._count.assignments!==order.requiredCleaners||order.travelBufferMinutes!==settings.defaultTravelBufferMinutes||Number(order.finalPrice)!==ctx.state.quote?.total)throw new AgentError('BOOKING_SNAPSHOT_MISMATCH');
     report.status='PASSED';
   }catch(e){report.blocker=e instanceof AgentError?e.code:'LIVE_TEST_FAILED';}
   try{await cleanupLiveTest(db,batchId);report.cleaned=true;}catch{report.status='FAILED';report.blocker='LIVE_TEST_CLEANUP_REQUIRED';}

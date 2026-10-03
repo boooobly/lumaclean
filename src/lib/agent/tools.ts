@@ -79,7 +79,7 @@ async function checkedSlot(tx:Tx,c:Conversation,ctx:ToolContext,token:string){
   if(!rules?.active||rules.version!==ctx.state.duration!.version)throw new AgentError("SLOT_NO_LONGER_AVAILABLE");
   const address=ctx.state.address!;
   if(address.proof)verifyLocation(address.proof);
-  const available=await findSlots(tx,{date:window.date,from:window.from,to:window.to,duration:ctx.state.duration!.minutes,requiredCleaners:ctx.state.duration!.requiredCleaners,...(address.addressId?{addressId:address.addressId}:{locationProof:address.proof}),...(ctx.state.rescheduleRequested?{orderId:c.orderId}: {})},{reserveMinutes:ctx.state.duration!.reserve,cacheOnly:true,allowReschedule:!!ctx.state.rescheduleRequested});
+  const available=await findSlots(tx,{date:window.date,from:window.from,to:window.to,duration:ctx.state.duration!.minutes,requiredCleaners:ctx.state.duration!.requiredCleaners,...(address.addressId?{addressId:address.addressId}:{locationProof:address.proof}),...(ctx.state.rescheduleRequested?{orderId:c.orderId}: {})},{reserveMinutes:ctx.state.duration!.reserve,forceFresh:true,selectedStart:slot.start.toISOString(),selectedCleanerIds:slot.cleanerIds,allowReschedule:!!ctx.state.rescheduleRequested});
   if(!available.slots.some(s=>s.start===slot.start.toISOString()&&s.cleanerIds.join()===slot.cleanerIds.join()))throw new AgentError("SLOT_NO_LONGER_AVAILABLE");
   return slot;
 }
@@ -188,17 +188,17 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   if(name==="resolveAddress"){
     const input=toolSchemas[name].parse(payload),sessionToken=randomUUID();
     if(input.placeId&&!state.addressCandidates?.some(a=>a.placeId===input.placeId))return{error:"ADDRESS_SELECTION_REQUIRED"};
-    const result=await placesRequest(input.placeId?"place":"autocomplete",{query:input.query,placeId:input.placeId,sessionToken});
+    const result=await placesRequest(input.placeId?"place":"autocomplete",{query:state.addressCandidates?.find(a=>a.placeId===input.placeId)?.query??input.query,placeId:input.placeId,sessionToken});
     if(!result.available)return{error:"ROUTING_UNRELIABLE"};
     if("proof" in result&&result.proof&&result.address){state.address={fullAddress:result.address,proof:result.proof,apartment:input.apartment};delete state.pending;delete state.slots;return{verified:true,address:result.address};}
-    if("suggestions" in result){state.addressCandidates=result.suggestions as {placeId:string;text:string}[];return{candidates:state.addressCandidates,needsSelection:true};}
+    if("suggestions" in result){state.addressCandidates=(result.suggestions as {placeId:string;text:string}[]).map(a=>({...a,query:input.query}));return{candidates:state.addressCandidates,needsSelection:true};}
     return{error:"AMBIGUOUS"};
   }
   if(name==="getClientAddresses"){
     if(!c.identityVerified||!c.clientId)return{error:"IDENTITY_REQUIRED"};
     const input=toolSchemas[name].parse(payload);
-    const addresses=await tx.clientAddress.findMany({where:{clientId:c.clientId,active:true},select:{id:true,fullAddress:true,latitude:true,longitude:true,placeId:true},take:10});
-    if(input.addressId){const selected=addresses.find(a=>a.id===input.addressId);if(!selected)return{error:"IDENTITY_REQUIRED"};if(!selected.latitude||!selected.longitude||!selected.placeId)return{error:"ROUTING_UNRELIABLE"};state.address={fullAddress:selected.fullAddress,addressId:selected.id};delete state.pending;delete state.slots;}
+    const addresses=await tx.clientAddress.findMany({where:{clientId:c.clientId,active:true},select:{id:true,fullAddress:true,latitude:true,longitude:true,placeId:true,coordinatesConfirmed:true},take:10});
+    if(input.addressId){const selected=addresses.find(a=>a.id===input.addressId);if(!selected)return{error:"IDENTITY_REQUIRED"};if(selected.latitude===null||selected.longitude===null||!selected.coordinatesConfirmed)return{error:"ROUTING_UNRELIABLE"};state.address={fullAddress:selected.fullAddress,addressId:selected.id};delete state.pending;delete state.slots;}
     return{addresses:addresses.map(a=>({addressId:a.id,address:a.fullAddress}))};
   }
   if(name==="findAvailableSlots"){

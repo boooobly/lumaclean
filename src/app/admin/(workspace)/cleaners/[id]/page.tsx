@@ -61,8 +61,9 @@ export default async function CleanerDetail({
                 phone: c.phone,
                 additionalContact: c.additionalContact,
                 homeAddress: c.homeAddress,
+                homePoint:c.homeLatitude!==null&&c.homeLongitude!==null?{latitude:Number(c.homeLatitude),longitude:Number(c.homeLongitude)}:null,
                 homeConfirmed:
-                  c.homeLatitude !== null && c.homeLongitude !== null,
+                  c.homeCoordinatesConfirmed && c.homeLatitude !== null && c.homeLongitude !== null,
                 languages: c.languages,
                 skills: c.skills,
                 notes: c.notes,

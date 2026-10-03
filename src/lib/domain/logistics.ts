@@ -1,4 +1,5 @@
 import { Temporal } from "@js-temporal/polyfill";
+import {DEFAULT_FALLBACK_TRAVEL_MINUTES} from "./routing-policy";
 import {
   SchedulingConflictService,
   plannedEnd,
@@ -138,13 +139,16 @@ export function assessTravel(
   onlyCrew?: string[],
 ): TravelLeg[] {
   return travelRequests(snapshot, orders, onlyCrew).map((leg) => {
-    const route = table.get(routeKey(leg.request)) ?? unavailable(leg.request);
+    const raw = table.get(routeKey(leg.request));
+    const route = raw?.quality === "STATIC_CANDIDATE"
+      ? {...raw,quality:"FALLBACK_80" as const,durationSeconds:DEFAULT_FALLBACK_TRAVEL_MINUTES*60,reason:"STATIC_NOT_HARD_PROOF"}
+      : raw ?? unavailable(leg.request);
     const actual =
       route.status === "VERIFIED" && !routeUsable(route)
         ? { ...route, status: "STALE" as const }
         : route;
     const order = orders.find((o) => o.id === leg.orderId)!;
-    const sample = new Date(routeSample(leg.request)).getTime(),
+    const sample = new Date(route.source!=="Google"?leg.request.at:routeSample(leg.request)).getTime(),
       verified = routeUsable(actual);
     const earliest = verified
       ? leg.previousId
@@ -184,7 +188,7 @@ export function routeIssues(legs: TravelLeg[]): SchedulingIssue[] {
     if (!code) return [];
     const message = leg.conflict
       ? `${leg.cleaner}: не успевает — безопасное прибытие ${leg.earliestArrival}.`
-      : `${leg.cleaner}: ${leg.route.status === "STALE" ? "маршрут устарел" : code === "ROUTE_PROVIDER_ERROR" ? "Google недоступен / маршрут не найден" : "маршрут не проверен — нужны координаты и Google Routes"}.`;
+      : `${leg.cleaner}: ${leg.route.status === "STALE" ? "маршрут устарел" : code === "ROUTE_PROVIDER_ERROR" ? "Расчёт дороги недоступен / маршрут не найден" : "маршрут не проверен — подтвердите координаты адреса"}.`;
     return [
       {
         key: [

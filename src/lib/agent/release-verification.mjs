@@ -12,7 +12,7 @@ export function sourceFingerprint(root=process.cwd()){
   const hash=createHash('sha256'),paths=[];
   function walk(dir){for(const item of readdirSync(join(root,dir),{withFileTypes:true})){const path=`${dir}/${item.name}`;if(path.startsWith('src/generated'))continue;if(item.isDirectory())walk(path);else paths.push(path);}}
   // Vercel rewrites vercel.json during build; only immutable application inputs certify tested code.
-  walk('src');walk('prisma/migrations');paths.push('prisma/schema.prisma','next.config.ts','package.json','package-lock.json');
+  walk('src');walk('prisma/migrations');paths.push('prisma/schema.prisma','next.config.ts','package.json','package-lock.json','scripts/copy-maplibre-worker.mjs','.vercelignore','infrastructure/routing-gateway/routing-policy.json');
   for(const path of paths.sort())hash.update(path).update('\0').update(normalizedSource(path,readFileSync(join(root,path),'utf8'))).update('\0');
   return hash.digest('hex');
 }
@@ -20,7 +20,7 @@ export function sourceInventory(root=process.cwd()){
   const files={};
   function walk(dir){for(const item of readdirSync(join(root,dir),{withFileTypes:true})){const path=`${dir}/${item.name}`;if(path.startsWith('src/generated'))continue;if(item.isDirectory())walk(path);else files[path]=createHash('sha256').update(readFileSync(join(root,path),'utf8').replace(/\r\n/g,'\n')).digest('hex');}}
   walk('src');walk('prisma/migrations');
-  for(const path of ['prisma/schema.prisma','next.config.ts','package.json','package-lock.json'])files[path]=createHash('sha256').update(normalizedSource(path,readFileSync(join(root,path),'utf8'))).digest('hex');
+  for(const path of ['prisma/schema.prisma','next.config.ts','package.json','package-lock.json','scripts/copy-maplibre-worker.mjs','.vercelignore','infrastructure/routing-gateway/routing-policy.json'])files[path]=createHash('sha256').update(normalizedSource(path,readFileSync(join(root,path),'utf8'))).digest('hex');
   return files;
 }
 export function verifiedRelease(root=process.cwd()){
