@@ -4,7 +4,7 @@ export type GeoPoint = {
   placeId?: string | null;
 };
 export type RouteMode = "TRANSIT" | "DRIVE" | "WALK";
-export type RouteQuality = "LIVE" | "WALKING" | "FALLBACK_80" | "UNRESOLVED";
+export type RouteQuality = "LIVE" | "LIVE_EXTERNAL" | "STATIC_CANDIDATE" | "WALKING" | "FALLBACK_80" | "UNRESOLVED";
 export type AddressMatch = {
   id: string;
   displayAddress: string;
@@ -25,7 +25,7 @@ export type RouteResult = {
   calculatedAt: string;
   expiresAt: string;
   sampledAt: string;
-  source: "Google" | "MOTIS";
+  source: "Google" | "MOTIS" | "BusMaps";
   quality?: RouteQuality;
   dataVersion?: string;
   reason?: string | null;
@@ -50,7 +50,10 @@ export type RouteDetails = {
 export interface RoutingProvider {
   searchAddress?(query: string): Promise<AddressMatch[]>;
   reverseGeocode?(point: GeoPoint): Promise<AddressMatch[]>;
-  cacheContext?(): Promise<{ dataVersion: string; liveReady: boolean }>;
+  cacheContext?(): Promise<{ dataVersion: string; liveReady: boolean; externalReady?: boolean }>;
+  conservative?(request:RouteRequest): RouteResult;
+  getCandidateMatrix?(origins:GeoPoint[],destinations:GeoPoint[],mode:RouteMode,at:string,timing?:"departure"|"arrival"):Promise<RouteResult[][]>;
+  verifyCritical?(request:RouteRequest,options?:{forceFresh?:boolean;base?:RouteResult}):Promise<RouteResult>;
   getTravelTime(request: RouteRequest): Promise<RouteResult>;
   getRouteMatrix(
     origins: GeoPoint[],
@@ -144,6 +147,8 @@ export const routeLabels = {
 } as const;
 export const qualityLabels = {
   LIVE: "Транспорт · LIVE",
+  LIVE_EXTERNAL: "Транспорт · BusMaps LIVE",
+  STATIC_CANDIDATE: "Расписание · только кандидат",
   WALKING: "Пешком",
   FALLBACK_80: "Дорога · резерв 80 мин",
   UNRESOLVED: "Подтвердите координаты",

@@ -719,6 +719,7 @@ model BusinessSettings {
   timezone                    String   @default("Europe/Belgrade")
   currency                    String   @default("RSD") @db.VarChar(3)
   defaultTravelBufferMinutes  Int      @default(30)
+  fallbackTravelMinutes Int @default(80)
   defaultCleanerPayoutPercent Decimal? @db.Decimal(5, 2)
   workdayStartMinute          Int?
   workdayEndMinute            Int?
@@ -888,4 +889,30 @@ model Investment {
   returnedAmount Decimal @default(0) @db.Decimal(12, 2)
   currency String @default("RSD") @db.VarChar(3)
   createdAt DateTime @default(now()) @db.Timestamptz(3)
+}
+
+// Atomic server-side quota; kept outside booking transactions so rollbacks do not refund API calls.
+model RoutingUsageMonth {
+  period String @id
+  requests Int @default(0)
+  cacheHits Int @default(0)
+  errors Int @default(0)
+  liveLegs Int @default(0)
+  fallbackLegs Int @default(0)
+}
+model RoutingRequestLease {
+  key String @id
+  owner String
+  expiresAt DateTime @db.Timestamptz(3)
+}
+model RoutingBenchmark {
+  id String @id
+  request Json
+  motis Json?
+  busmaps Json?
+  checkedAt DateTime? @db.Timestamptz(3)
+  googleMinutes Int?
+  referenceAt DateTime? @db.Timestamptz(3)
+  referenceDate DateTime? @db.Timestamptz(3)
+  updatedBy String?
 }

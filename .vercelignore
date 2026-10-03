@@ -16,4 +16,7 @@ docs/seo-audit/
 .agents/
 .serena/
 
-/infrastructure/
+/infrastructure/*
+!/infrastructure/routing-gateway/
+/infrastructure/routing-gateway/*
+!/infrastructure/routing-gateway/routing-policy.json

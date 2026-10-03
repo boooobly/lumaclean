@@ -3,6 +3,7 @@ WORKDIR /app
 COPY routing-gateway/package*.json ./
 RUN npm ci --omit=dev
 COPY routing-gateway/*.mjs ./
+COPY routing-gateway/routing-policy.json ./
 ENV PORT=8080
 EXPOSE 8080
 CMD ["node","server.mjs"]

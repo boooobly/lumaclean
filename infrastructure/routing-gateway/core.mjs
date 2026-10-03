@@ -1,3 +1,5 @@
+import policy from "./routing-policy.json" with {type:"json"};
+const fallbackSeconds=policy.fallbackTravelMinutes*60;
 import { createHash, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 export const pointSchema = z
@@ -102,7 +104,7 @@ export function result(
   return {
     status: quality === "UNRESOLVED" ? "UNVERIFIED" : "VERIFIED",
     quality,
-    durationSeconds: quality === "FALLBACK_80" ? 4800 : durationSeconds,
+    durationSeconds: quality === "FALLBACK_80" ? fallbackSeconds : durationSeconds,
     distanceMeters: null,
     source: "MOTIS",
     dataVersion,
@@ -202,7 +204,7 @@ export function selectJourney(request, s, data, now = Date.now()) {
       selected = live;
       quality = "LIVE";
       seconds = live.effective;
-    } else if (walking && s?.engine?.healthy && walking.duration <= 4800) {
+    } else if (walking && s?.engine?.healthy && walking.duration <= fallbackSeconds) {
       selected = walking;
       quality = "WALKING";
       seconds = walking.duration;

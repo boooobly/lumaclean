@@ -1,3 +1,4 @@
+import {DEFAULT_FALLBACK_TRAVEL_MINUTES} from "@/lib/domain/routing-policy";
 import { z } from "zod";
 import type {
   AddressMatch,
@@ -88,7 +89,7 @@ export function conservativeRoute(
     source: "MOTIS",
     quality: valid && r.mode !== "WALK" ? "FALLBACK_80" : "UNRESOLVED",
     status: valid && r.mode !== "WALK" ? "VERIFIED" : "UNVERIFIED",
-    durationSeconds: valid && r.mode !== "WALK" ? 4800 : null,
+    durationSeconds: valid && r.mode !== "WALK" ? DEFAULT_FALLBACK_TRAVEL_MINUTES * 60 : null,
     distanceMeters: null,
     dataVersion,
     sampledAt: r.at,
@@ -228,7 +229,7 @@ export class MotisRoutingProvider implements RoutingProvider {
         (parsed.status !== "UNVERIFIED" || parsed.durationSeconds !== null)) ||
       (parsed.quality !== "UNRESOLVED" &&
         (parsed.status !== "VERIFIED" || !parsed.durationSeconds)) ||
-      (parsed.quality === "FALLBACK_80" && parsed.durationSeconds !== 4800)
+      (parsed.quality === "FALLBACK_80" && parsed.durationSeconds !== DEFAULT_FALLBACK_TRAVEL_MINUTES * 60)
     )
       throw Error("INVALID_ROUTE_RESULT");
     if (
