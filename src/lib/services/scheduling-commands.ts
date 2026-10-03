@@ -144,9 +144,9 @@ export async function assessScheduling(
     })),
   };
   const requests = travelRequests(snapshot);
-  const table = await new RoutingService(tx).prepare(
-    requests.map((r) => r.request),
-    cacheOnly,
+  const table = await new RoutingService(tx).prepareCritical(
+    requests.filter(r=>r.orderId===order.id||r.previousId===order.id).map((r) => r.request),
+    {cacheOnly,forceFresh:!cacheOnly},
   );
   // Validate both incoming and outgoing journeys of every participant.
   const legs = assessTravel(snapshot, table).filter(

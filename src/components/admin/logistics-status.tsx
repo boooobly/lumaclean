@@ -1,12 +1,16 @@
 import type { DatasetStatus } from "@/lib/infrastructure/motis-routing";
 import { BrowserMapsDiagnostic } from "./live-readiness-controls";
-export function LogisticsStatus({ status: s }: { status: DatasetStatus }) {
+import type {busMapsUsage} from "@/lib/services/busmaps-store";
+export function LogisticsStatus({ status: s,busmaps,routingStatus }: { status: DatasetStatus;busmaps:Awaited<ReturnType<typeof busMapsUsage>>;routingStatus:string }) {
   const ratio = (v?: number) =>
     v === undefined ? "нет данных" : `${(v * 100).toFixed(1)}%`;
   return (
     <section className="crm-section" id="logistics">
       <h2>Logistics</h2>
+      <p>Routing: <strong>{routingStatus}</strong>. Google, BusLogic RT и одобрение BusMaps не являются обязательными условиями. Непроверенный transit использует резерв 80 минут.</p>
       <dl className="crm-facts">
+        <div><dt>BusMaps</dt><dd>{busmaps.status}{busmaps.status==="PENDING_APPROVAL"?" · ожидает одобрения, API-запросы выключены":""}</dd></div>
+        <div><dt>BusMaps за месяц</dt><dd>{busmaps.requests} / {busmaps.limit} запросов · cache {busmaps.cacheHits} · ошибки {busmaps.errors} · LIVE {busmaps.liveLegs} · fallback {busmaps.fallbackLegs}</dd></div>
         <div>
           <dt>MOTIS</dt>
           <dd>
@@ -29,15 +33,15 @@ export function LogisticsStatus({ status: s }: { status: DatasetStatus }) {
           </div>
         ))}
         <div>
-          <dt>Static для LIVE</dt>
+          <dt>Static информация</dt>
           <dd>
             {s.static.valid
               ? "Готов"
-              : "Не готов: проверьте возраст и календарь"}
+              : "Проверьте календарь и наборы данных; hard feasibility использует резерв"}
           </dd>
         </div>
         <div>
-          <dt>GTFS-RT</dt>
+          <dt>GTFS-RT · необязательный монитор</dt>
           <dd>
             {s.realtime.status} ·{" "}
             {s.realtime.freshnessSeconds == null

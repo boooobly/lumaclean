@@ -16,7 +16,10 @@ docs/seo-audit/
 .agents/
 .serena/
 
-/infrastructure/*
-!/infrastructure/routing-gateway/
-/infrastructure/routing-gateway/*
-!/infrastructure/routing-gateway/routing-policy.json
+infrastructure/motis/
+infrastructure/README.md
+infrastructure/routing-gateway/test/
+infrastructure/routing-gateway/node_modules/
+infrastructure/routing-gateway/*.mjs
+infrastructure/routing-gateway/package*.json
+infrastructure/routing-gateway/Dockerfile

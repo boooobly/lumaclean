@@ -23,26 +23,58 @@ import {
 export class RoutingService {
   constructor(
     private db: Prisma.TransactionClient,
-    private provider: RoutingProvider = routingProvider(),
+    private provider?: RoutingProvider,
   ) {}
+  private async selectedProvider() {
+    if (!this.provider) {
+      const settings = await this.db.businessSettings.findUnique({where:{id:"default"},select:{fallbackTravelMinutes:true}});
+      this.provider = routingProvider(settings?.fallbackTravelMinutes);
+    }
+    return this.provider;
+  }
   async getTravelTime(request: RouteRequest) {
     return (await this.prepare([request])).get(routeKey(request))!;
   }
   async getRouteDetails(request: RouteRequest) {
-    return this.provider.getRouteDetails(request);
+    return (await this.selectedProvider()).getRouteDetails(request);
+  }
+  /** Only explicit booking/admin legs; never the optimizer's Cartesian matrix. */
+  async prepareCritical(requests:RouteRequest[],options:{forceFresh?:boolean;cacheOnly?:boolean;table?:Map<string,RouteResult>}={}) {
+    const provider=await this.selectedProvider(), context=await provider.cacheContext?.();
+    const table=options.table??await this.prepare(requests,options.cacheOnly);
+    if(options.cacheOnly||!provider.verifyCritical)return table;
+    const unique=[...new Map(requests.map(r=>[routeKey(r),r])).values()];
+    const deadline=Date.now()+ROUTING_CONFIG.deadlineMs;
+    for(let offset=0;offset<unique.length;offset+=2) {
+      const batch=unique.slice(offset,offset+2);
+      await Promise.all(batch.map(async r=>{
+        const value=offset>=ROUTING_CONFIG.maxRequests||Date.now()>deadline
+          ? provider.conservative?.(r)??unavailable(r)
+          : await provider.verifyCritical!(r,{forceFresh:options.forceFresh,base:table.get(routeKey(r))});
+        table.set(routeKey(r),value);
+        if(!context||!r.origin||!r.destination||!routeUsable(value))return;
+        const prefix=`${routeKey(r)}|${context.dataVersion}|`;
+        const data={origin:pointKey(r.origin),destination:pointKey(r.destination),originLatitude:r.origin.latitude,originLongitude:r.origin.longitude,destinationLatitude:r.destination.latitude,destinationLongitude:r.destination.longitude,travelMode:r.mode==="DRIVE"?"TAXI" as const:"PUBLIC_TRANSIT" as const,departureAt:new Date(value.sampledAt),durationSeconds:value.durationSeconds!,distanceMeters:value.distanceMeters??0,provider:JSON.stringify({name:value.source,quality:value.quality,dataVersion:context.dataVersion}),calculatedAt:new Date(value.calculatedAt),expiresAt:new Date(value.expiresAt)};
+        await this.db.routeCalculation.upsert({where:{cacheKey:prefix+value.quality},create:{...data,id:randomUUID(),cacheKey:prefix+value.quality},update:data});
+        if(value.quality==="FALLBACK_80")await this.db.routeCalculation.deleteMany({where:{cacheKey:prefix+"LIVE_EXTERNAL"}});
+      }));
+    }
+    return table;
   }
   async prepare(requests: RouteRequest[], cacheOnly = false) {
+    const provider=await this.selectedProvider();
     const unique = [...new Map(requests.map((r) => [routeKey(r), r])).values()];
     const table = new Map<string, RouteResult>(),
       now = new Date(),
       deadline = Date.now() + ROUTING_CONFIG.deadlineMs;
-    const context = await this.provider.cacheContext?.();
+    const context = await provider.cacheContext?.();
     const keys = (r: RouteRequest) =>
       context
         ? [
             "WALKING",
             "FALLBACK_80",
             ...(context.liveReady ? ["LIVE"] : []),
+            ...(context.externalReady ? ["LIVE_EXTERNAL"] : []),
           ].map((q) => `${routeKey(r)}|${context.dataVersion}|${q}`)
         : [routeKey(r)];
     const logical = new Map(
@@ -51,13 +83,14 @@ export class RoutingService {
     for (const r of unique)
       table.set(
         routeKey(r),
-        this.provider instanceof MotisRoutingProvider
+        provider.conservative?provider.conservative(r):provider instanceof MotisRoutingProvider
           ? conservativeRoute(r)
           : unavailable(r),
       );
     const rows = await this.db.routeCalculation.findMany({
       where: { cacheKey: { in: unique.flatMap(keys) } },
       take: 5000,
+      orderBy:{calculatedAt:"asc"},
     });
     const cacheHits = new Set<string>();
     for (const row of rows) {
@@ -75,10 +108,11 @@ export class RoutingService {
       if (
         context &&
         (!metadata.quality ||
-          !["LIVE", "WALKING", "FALLBACK_80"].includes(metadata.quality) ||
-          metadata.name !== "MOTIS" ||
+          !["LIVE", "LIVE_EXTERNAL", "WALKING", "FALLBACK_80"].includes(metadata.quality) ||
+          (metadata.quality==="LIVE_EXTERNAL"?metadata.name!=="BusMaps":metadata.name!=="MOTIS") ||
           metadata.dataVersion !== context.dataVersion ||
-          (metadata.quality === "LIVE" && !context.liveReady))
+          (metadata.quality === "LIVE" && !context.liveReady)||
+          (metadata.quality === "LIVE_EXTERNAL" && !context.externalReady))
       )
         continue;
       const key = logical.get(row.cacheKey);
@@ -90,7 +124,7 @@ export class RoutingService {
         status: row.expiresAt > now ? "VERIFIED" : "STALE",
         durationSeconds: row.durationSeconds,
         distanceMeters: row.distanceMeters,
-        source: metadata.name === "MOTIS" ? "MOTIS" : "Google",
+        source: metadata.name === "BusMaps"?"BusMaps":metadata.name === "MOTIS" ? "MOTIS" : "Google",
         quality: metadata.quality,
         dataVersion: metadata.dataVersion,
         sampledAt: row.departureAt!.toISOString(),
@@ -108,12 +142,12 @@ export class RoutingService {
         r.origin &&
         r.destination &&
         (!routeUsable(table.get(routeKey(r))) ||
-          (this.provider instanceof MotisRoutingProvider &&
+          (!!context &&
             !cacheHits.has(routeKey(r)))),
     );
     if (
       !process.env.GOOGLE_MAPS_SERVER_API_KEY &&
-      this.provider instanceof GoogleRoutesProvider
+      provider instanceof GoogleRoutesProvider
     )
       return table;
     // One origin and only requested destinations avoids a wasteful Cartesian product.
@@ -147,7 +181,7 @@ export class RoutingService {
         calls++;
         elements += batch.length;
         const first = batch[0];
-        const values = await this.provider.getRouteMatrix(
+        const values = await provider.getRouteMatrix(
           [first.origin!],
           batch.map((r) => r.destination!),
           first.mode,

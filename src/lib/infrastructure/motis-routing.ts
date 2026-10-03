@@ -1,5 +1,6 @@
 import {DEFAULT_FALLBACK_TRAVEL_MINUTES} from "@/lib/domain/routing-policy";
 import { z } from "zod";
+import { createHash } from "node:crypto";
 import type {
   AddressMatch,
   GeoPoint,
@@ -15,9 +16,9 @@ const point = z.object({
   longitude: z.number().min(19.9).max(21),
 });
 const match = point.extend({
-  id: z.string().min(1).max(300),
+  id: z.string().max(300),
   displayAddress: z.string().min(1).max(500),
-});
+}).transform(value => ({...value,id:value.id.trim()||"motis-address:"+createHash("sha256").update(JSON.stringify([value.displayAddress,value.latitude,value.longitude])).digest("hex")}));
 const responseResult = z.object({
   status: z.enum(["VERIFIED", "UNVERIFIED"]),
   quality: z.enum(["LIVE", "WALKING", "FALLBACK_80", "UNRESOLVED"]),

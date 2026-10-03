@@ -4,6 +4,7 @@ import {getDatabase} from "@/lib/database/client";
 import {pointKey,type RouteRequest} from "@/lib/domain/routing";
 import type {TransitObservation} from "@/lib/infrastructure/busmaps-contract";
 import {busMapsMonthlyLimit,busMapsPeriod,type BusMapsStore,type UsageCounter} from "@/lib/infrastructure/busmaps-transit";
+import {busMapsAccess} from "@/lib/infrastructure/busmaps-status";
 export class PrismaBusMapsStore implements BusMapsStore {
   // Always a root client: an aborted booking must not refund an external HTTP request.
   constructor(private db:PrismaClient=getDatabase()){}
@@ -33,6 +34,6 @@ export class PrismaBusMapsStore implements BusMapsStore {
 }
 export async function busMapsUsage(db:PrismaClient=getDatabase()){
   const period=busMapsPeriod(),limit=busMapsMonthlyLimit(),row=await db.routingUsageMonth.findUnique({where:{period}}),requests=row?.requests??0;
-  const configured=!!process.env.BUSMAPS_API_KEY?.trim();
-  return {period,limit,requests,remaining:Math.max(0,limit-requests),configured,status:!configured?"UNAVAILABLE":requests>=limit?"QUOTA_REACHED":"CONFIGURED",cacheHits:row?.cacheHits??0,errors:row?.errors??0,liveLegs:row?.liveLegs??0,fallbackLegs:row?.fallbackLegs??0};
+  const access=busMapsAccess(),configured=access==="ACTIVE";
+  return {period,limit,requests,remaining:Math.max(0,limit-requests),configured,status:configured&&requests>=limit?"QUOTA_REACHED":access,cacheHits:row?.cacheHits??0,errors:row?.errors??0,liveLegs:row?.liveLegs??0,fallbackLegs:row?.fallbackLegs??0};
 }

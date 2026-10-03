@@ -22,7 +22,7 @@
     "test:admin": "tsx --test tests/admin/*.test.ts",
     "test:crm": "tsx --test tests/crm/*.test.ts",
     "test:scheduling": "tsx --test tests/scheduling/*.test.ts",
-    "test:routing": "tsx --test tests/routing/*.test.ts",
+    "test:routing": "node --conditions=react-server --import tsx --test tests/routing/*.test.ts",
     "test:finance": "tsx --test tests/finance/*.test.ts",
     "test:agent": "tsx --test tests/agent/*.test.ts",
     "benchmark:agent": "tsx scripts/admin/ai-benchmark.ts --live",

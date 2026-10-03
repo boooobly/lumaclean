@@ -79,7 +79,7 @@ async function checkedSlot(tx:Tx,c:Conversation,ctx:ToolContext,token:string){
   if(!rules?.active||rules.version!==ctx.state.duration!.version)throw new AgentError("SLOT_NO_LONGER_AVAILABLE");
   const address=ctx.state.address!;
   if(address.proof)verifyLocation(address.proof);
-  const available=await findSlots(tx,{date:window.date,from:window.from,to:window.to,duration:ctx.state.duration!.minutes,requiredCleaners:ctx.state.duration!.requiredCleaners,...(address.addressId?{addressId:address.addressId}:{locationProof:address.proof}),...(ctx.state.rescheduleRequested?{orderId:c.orderId}: {})},{reserveMinutes:ctx.state.duration!.reserve,cacheOnly:true,allowReschedule:!!ctx.state.rescheduleRequested});
+  const available=await findSlots(tx,{date:window.date,from:window.from,to:window.to,duration:ctx.state.duration!.minutes,requiredCleaners:ctx.state.duration!.requiredCleaners,...(address.addressId?{addressId:address.addressId}:{locationProof:address.proof}),...(ctx.state.rescheduleRequested?{orderId:c.orderId}: {})},{reserveMinutes:ctx.state.duration!.reserve,forceFresh:true,selectedStart:slot.start.toISOString(),selectedCleanerIds:slot.cleanerIds,allowReschedule:!!ctx.state.rescheduleRequested});
   if(!available.slots.some(s=>s.start===slot.start.toISOString()&&s.cleanerIds.join()===slot.cleanerIds.join()))throw new AgentError("SLOT_NO_LONGER_AVAILABLE");
   return slot;
 }

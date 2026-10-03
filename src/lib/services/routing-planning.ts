@@ -168,7 +168,7 @@ export async function dayLogistics(
     version: snapshot.version,
   };
 }
-export async function findSlots(db: RoutingDb, payload: unknown, options: { reserveMinutes?: number; cacheOnly?: boolean; allowReschedule?: boolean } = {}) {
+export async function findSlots(db: RoutingDb, payload: unknown, options: { reserveMinutes?: number; cacheOnly?: boolean; allowReschedule?: boolean; forceFresh?:boolean; selectedStart?:string; selectedCleanerIds?:string[] } = {}) {
   const input = routingSchemas.slots.parse(payload),
     snapshot = await routingSnapshot(db, input.date),
     stored = input.orderId
@@ -232,7 +232,7 @@ export async function findSlots(db: RoutingDb, payload: unknown, options: { rese
     updatedAt: stored?.updatedAt.toISOString() ?? "",
   };
   // A fixed agreement keeps its time. An unconfirmed draft can search a new fixed time without changing it yet.
-  const searching =
+  let searching =
     options.allowReschedule
       ? {...order,scheduleMode:"FLEXIBLE" as const,windowFrom:from,windowTo:to}
       : stored?.scheduleMode === "FIXED" && stored.status !== "DRAFT"
@@ -249,10 +249,14 @@ export async function findSlots(db: RoutingDb, payload: unknown, options: { rese
               ? new Date(Math.min(to.getTime(), stored.windowTo!.getTime()))
               : to,
         };
-  const table = await new RoutingService(db).prepare(
-      preparationRequests(snapshot, [searching]), options.cacheOnly ?? false,
-    ),
-    slots = AvailabilityService.findAvailableSlots(searching, snapshot, table);
+  if(options.selectedStart)searching={...searching,scheduleMode:"FIXED",scheduledStart:new Date(options.selectedStart),cleanerIds:options.selectedCleanerIds??searching.cleanerIds};
+  const searchSnapshot=options.selectedCleanerIds?{...snapshot,cleaners:snapshot.cleaners.filter(c=>options.selectedCleanerIds!.includes(c.id))}:snapshot;
+  const routing=new RoutingService(db);
+  // Candidate hard feasibility already uses conservative transit, never static ETA.
+  const table=await routing.prepare(preparationRequests(searchSnapshot,[searching]),options.cacheOnly??false);
+  const candidates=AvailabilityService.findAvailableSlots(searching,searchSnapshot,table);
+  await routing.prepareCritical(candidates.slice(0,4).flatMap(s=>s.legs.map(l=>l.request)),{table,cacheOnly:options.cacheOnly,forceFresh:options.forceFresh});
+  const slots=AvailabilityService.findAvailableSlots(searching,searchSnapshot,table);
   return {
     slots,
     orderId: stored?.id,

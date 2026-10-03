@@ -7,6 +7,7 @@ import { HybridRoutingProvider } from "@/lib/infrastructure/hybrid-routing";
 import { conservativeRoute } from "@/lib/infrastructure/motis-routing";
 
 const now = new Date("2026-10-03T08:00:00Z");
+process.env.BUSMAPS_STATUS="ACTIVE";
 const request: RouteRequest = {
   origin: { latitude: 44.8125, longitude: 20.4612 },
   destination: { latitude: 44.83, longitude: 20.4 },
@@ -94,6 +95,16 @@ test("missing key and coordinates cause zero HTTP requests", async () => {
   assert.equal((await new BusMapsTransitProvider(store, "", http, () => now).verify(request)).reason, "BUSMAPS_NOT_CONFIGURED");
   assert.equal((await new BusMapsTransitProvider(store, "test", http, () => now).verify({ ...request, origin: null })).reason, "COORDINATES_REQUIRED");
   assert.equal(store.requests.size, 0);
+});
+test("PENDING_APPROVAL is an optional fallback, never an HTTP error or quota request",async()=>{
+  const store=new MemoryStore();
+  const pending=new BusMapsTransitProvider(store,"inactive-fixture-key",(async()=>assert.fail("Pending account must not receive requests")) as typeof fetch,()=>now,1000,"PENDING_APPROVAL");
+  assert.equal(pending.configured,false);
+  const result=await pending.verify(request);
+  assert.equal(result.reason,"BUSMAPS_PENDING_APPROVAL");
+  assert.equal(store.requests.size,0);
+  assert.equal(store.counts.errors??0,0);
+  assert.equal((await new HybridRoutingProvider(motis(),pending).getTravelTime(request)).durationSeconds,4800);
 });
 test("short cache saves quota; forceFresh spends one new request and replaces cached result", async () => {
   let clock = now, calls = 0;

@@ -383,3 +383,35 @@ test("failed health snapshots are coalesced and cached briefly", async () => {
   await provider.cacheContext();
   assert.equal(calls, 2);
 });
+
+test("MOTIS house-number results without upstream IDs get stable distinct IDs", async () => {
+  const provider = new MotisRoutingProvider("https://routing.example", token, async () => Response.json({results:[{id:"",displayAddress:"House 8, Beograd",...p},{id:"",displayAddress:"House 8a, Beograd",...q}]}));
+  const a=await provider.searchAddress("House 8"), b=await provider.searchAddress("House 8");
+  assert.match(a[0].id,/^motis-address:[a-f0-9]{64}$/); assert.equal(a[0].id,b[0].id); assert.notEqual(a[0].id,a[1].id); assert.deepEqual({latitude:a[0].latitude,longitude:a[0].longitude},p);
+});
+
+test("static ETA 34 or 200 never proves hard feasibility: end 12 + 80 + 30 = 13:50", () => {
+  for(const eta of [34,200])for(const start of ["13:30","14:00"]){
+    const s=snapshot([order("A","09:30"),order("B",start)]);
+    const table=matrix(s,request=>({...conservativeRoute(request),quality:"STATIC_CANDIDATE",durationSeconds:eta*60}));
+    const leg=assessTravel(s,table).find(l=>l.orderId==="B")!;
+    assert.equal(leg.earliestArrival,localInstant(date+"T13:50").toISOString());assert.equal(leg.conflict,start==="13:30");assert.equal(leg.route.durationSeconds,4800);
+    assert.equal(AvailabilityService.findAvailableSlots(s.orders[1],{...s,orders:[s.orders[0]],cleaners:[s.cleaners[0]]},table).length>0,start==="14:00");
+  }
+});
+
+test("two fallback participants arriving 13:40 and 14:10 reject 14:00",()=>{
+  const s=snapshot([order("A","09:20"),order("C","09:50",{cleanerIds:["b"]}),order("B","14:00",{cleanerIds:["a","b"],requiredCleaners:2})]);
+  const table=matrix(s), legs=assessTravel(s,table).filter(l=>l.orderId==="B");
+  assert.equal(legs.find(l=>l.cleanerId==="a")?.earliestArrival,localInstant(date+"T13:40").toISOString());
+  assert.equal(legs.find(l=>l.cleanerId==="b")?.earliestArrival,localInstant(date+"T14:10").toISOString());
+  assert.equal(AvailabilityService.findAvailableSlots(s.orders[2],{...s,orders:s.orders.slice(0,2)},table).length,0);
+});
+
+test("critical slot revalidation forwards forceFresh and replaces a cached short duration", async()=>{
+  let fresh=false;
+  const old={...conservativeRoute(r),quality:"LIVE_EXTERNAL" as const,source:"BusMaps" as const,durationSeconds:60};
+  const provider:import("../../src/lib/domain/routing").RoutingProvider={getTravelTime:async()=>old,getRouteDetails:async()=>({result:old,steps:[]}),getRouteMatrix:async()=>[[old]],verifyCritical:async(request,options)=>{fresh=options?.forceFresh===true;return conservativeRoute(request);}};
+  const result=await new RoutingService({} as Prisma.TransactionClient,provider).prepareCritical([r],{forceFresh:true,table:new Map([[routeKey(r),old]])});
+  assert(fresh);assert.equal(result.get(routeKey(r))?.durationSeconds,4800);
+});

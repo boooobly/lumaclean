@@ -1,6 +1,7 @@
 import {createHash,randomUUID} from "node:crypto";
 import {pointKey,type RouteRequest} from "@/lib/domain/routing";
 import {parseBusMaps,unavailableTransit,type TransitObservation} from "./busmaps-contract";
+import {busMapsAccess,type BusMapsAccess} from "./busmaps-status";
 export type UsageCounter="cacheHits"|"errors"|"liveLegs"|"fallbackLegs";
 export interface BusMapsStore {
   cached(key:string,now:Date):Promise<TransitObservation|null>;
@@ -18,9 +19,9 @@ export function busMapsKey(r:RouteRequest,credential=""){
 }
 export class BusMapsTransitProvider {
   private pending=new Map<string,Promise<TransitObservation>>();
-  constructor(private store:BusMapsStore,private key=process.env.BUSMAPS_API_KEY,private http:typeof fetch=fetch,private clock=()=>new Date(),private limit=busMapsMonthlyLimit()){}
-  get configured(){return !!this.key?.trim();}
-  get cacheIdentity(){return createHash("sha256").update(this.key?.trim()??"absent").digest("hex").slice(0,16);}
+  constructor(private store:BusMapsStore,private key=process.env.BUSMAPS_API_KEY,private http:typeof fetch=fetch,private clock=()=>new Date(),private limit=busMapsMonthlyLimit(),readonly access:BusMapsAccess=busMapsAccess(key)){}
+  get configured(){return this.access==="ACTIVE"&&!!this.key?.trim();}
+  get cacheIdentity(){return this.access+":"+createHash("sha256").update(this.key?.trim()??"absent").digest("hex").slice(0,16);}
   async inspect(request:RouteRequest,forceFresh=false):Promise<TransitObservation>{
     const key=busMapsKey(request,this.key?.trim()),previous=this.pending.get(key);if(previous)return previous;
     const work=this.lookup(request,key,forceFresh).finally(()=>this.pending.delete(key));this.pending.set(key,work);return work;
@@ -32,7 +33,7 @@ export class BusMapsTransitProvider {
   }
   private async lookup(request:RouteRequest,key:string,forceFresh:boolean):Promise<TransitObservation>{
     const now=this.clock(),period=busMapsPeriod(now);
-    if(!this.configured)return unavailableTransit("BUSMAPS_NOT_CONFIGURED",now);
+    if(!this.configured)return unavailableTransit(this.access==="PENDING_APPROVAL"?"BUSMAPS_PENDING_APPROVAL":"BUSMAPS_NOT_CONFIGURED",now);
     if(!request.origin||!request.destination)return unavailableTransit("COORDINATES_REQUIRED",now);
     const owner=randomUUID();let acquired=false;
     try{
