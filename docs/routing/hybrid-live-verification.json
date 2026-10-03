@@ -1,68 +1,57 @@
 {
-  "checkedAt": "2026-10-03T16:59:04.301177+00:00",
+  "checkedAt": "2026-10-03T17:36:34.693377+00:00",
   "branch": "codex/admin-motis-routing",
   "pullRequest": "https://github.com/boooobly/lumaclean/pull/1",
-  "busmaps": {
-    "status": "PENDING_APPROVAL",
-    "httpRequests": 0,
-    "errors": 0,
-    "monthlyCap": 1000,
-    "optional": true
-  },
-  "routingReadiness": "DEGRADED",
-  "cleaners": {
-    "existingRealCleaners": 2,
-    "previewExplicitCoordinateConfirmation": true,
-    "productionConfirmed": 2,
-    "guessedCoordinates": false,
-    "fakeCleanersCreated": false
+  "readiness": {
+    "productionReady": 5,
+    "total": 5,
+    "serverSide": true,
+    "verifiedInChrome": true,
+    "canActivate": true,
+    "blockers": []
   },
   "duration": [
     {
-      "code": "regular",
-      "activeDurationRules": 1,
-      "rules": [
-        {
-          "baseMinutes": 150,
-          "cleanerCount": 2,
-          "reserveMinutes": 0
-        }
-      ]
+      "service": "deep",
+      "version": 1,
+      "baseMinutes": 480,
+      "cleaners": 2,
+      "reserveMinutes": 30,
+      "minArea": "40",
+      "maxArea": "60",
+      "referenceArea": "50",
+      "audit": true
     },
     {
-      "code": "deep",
-      "activeDurationRules": 0,
-      "rules": []
+      "service": "regular",
+      "version": 2,
+      "baseMinutes": 150,
+      "cleaners": 2,
+      "reserveMinutes": 30,
+      "minArea": "1",
+      "maxArea": "100",
+      "referenceArea": "100",
+      "audit": true
     }
   ],
+  "cleaningReserveMinutes": 30,
+  "defaultTravelBufferMinutes": 30,
+  "versioned": true,
+  "auditVerified": true,
+  "historicalOrdersUnchanged": true,
   "preview": {
-    "initialPrimaryNative": [
-      {
-        "ok": true,
-        "model": "gpt-6-luna",
-        "provider": "poyo",
-        "errorCode": null,
-        "latencyMs": 13424
-      }
-    ],
-    "finalAttempts": [
-      {
-        "ok": false,
-        "model": "gpt-6-luna",
-        "provider": "poyo",
-        "errorCode": "PROVIDER_TIMEOUT_OR_NETWORK",
-        "latencyMs": 22006
-      },
-      {
-        "ok": true,
-        "model": "openai/gpt-6-luna",
-        "provider": "openrouter",
-        "errorCode": null,
-        "latencyMs": 1598
-      }
-    ],
+    "url": "https://lumaclean-i4y8n64eh-vladislavs-projects-0eae0ea3.vercel.app",
+    "deploymentId": "dpl_363X95La8eY1cENLFEG6zutqHx1N",
     "status": "PASSED",
-    "cleaned": true,
+    "service": "deep",
+    "booking": {
+      "price": 10700,
+      "assignedCleaners": 2,
+      "requiredCleaners": 2,
+      "travelBufferMinutes": 30,
+      "cleaningReserveMinutes": 30,
+      "estimatedDurationMinutes": 480
+    },
     "steps": [
       {
         "ok": true,
@@ -97,6 +86,18 @@
         "label": "Order создан"
       }
     ],
+    "nativeAiAttempts": [
+      {
+        "ok": true,
+        "model": "gpt-6-luna",
+        "provider": "poyo",
+        "errorCode": null,
+        "latencyMs": 3151
+      }
+    ],
+    "startedAt": "2026-10-03T17:30:20.678Z",
+    "finishedAt": "2026-10-03T17:30:27.381Z",
+    "cleaned": true,
     "sourceDatabase": "Preview",
     "gatewayEnvironment": "production",
     "syntheticClientsRemaining": 0,
@@ -110,71 +111,50 @@
       }
     ]
   },
-  "scheduling": {
-    "single": {
-      "previousEnd": "12:00",
-      "travelMinutes": 80,
-      "bufferMinutes": 30,
-      "earliest": "13:50",
-      "rejected": "13:30",
-      "feasible": "14:00",
-      "crewChecks": 2
-    },
-    "multiple": {
-      "arrivals": [
-        "13:40",
-        "14:10"
-      ],
-      "rejected": "14:00",
-      "feasible": "14:10",
-      "crewChecks": 2
-    },
-    "firstOrderExtraBuffer": 0,
-    "passed": true,
-    "cleaned": true,
-    "cleanup": "Entire synthetic transaction rolled back; existing records and two real cleaners preserved"
+  "routing": {
+    "status": "DEGRADED",
+    "productionPermitted": true,
+    "motisHealthy": true,
+    "busmapsStatus": "PENDING_APPROVAL",
+    "busmapsHttpRequests": 0,
+    "fallbackMinutes": 80,
+    "travelBufferSeparate": true,
+    "firstTripExtraBuffer": 0
+  },
+  "autoSafety": {
+    "off": "PASSED",
+    "shadow": "PASSED",
+    "serverReadinessRequired": "PASSED",
+    "autoToShadowDuringBooking": "PASSED",
+    "autoToOffDuringBooking": "PASSED",
+    "boundary": "mode lock, fresh control and server readiness immediately before first CRM mutation",
+    "isolatedDatabaseTests": true
   },
   "engineering": {
-    "targetedTestsPassed": 59,
-    "unitDatabaseSuiteSkipped": 1,
+    "targetedTestsPassed": 26,
+    "skippedDatabaseTests": 0,
     "typecheck": true,
     "targetedLint": true,
     "previewBuild": "READY",
     "productionBuild": "READY",
-    "productionSchemaDiff": "empty",
-    "additiveMigrations": [
-      "20261003130000_address_coordinate_confirmation",
-      "20261003160000_hybrid_routing"
-    ]
+    "previousHybridBaselineTests": 59,
+    "broadAuditRepeated": false,
+    "newArchitecture": false,
+    "newMigrations": false
   },
   "production": {
+    "url": "https://lumacleanrs.com",
+    "deploymentId": "dpl_5wgKrYNac2754Fmd7juWYY85NeCi",
+    "deploymentUrl": "https://lumaclean-bizl72sa6-vladislavs-projects-0eae0ea3.vercel.app",
     "masterMode": "SHADOW",
     "autoEnabled": false,
-    "website": "https://lumacleanrs.com",
-    "separatePrivateEngine": true,
-    "separateVolume": true,
-    "separateGatewayCredential": true,
-    "anonymousGatewayHttpStatus": 401,
-    "healthHttpStatus": 200,
-    "engineVersion": "2.11.3",
-    "walkingQuality": "WALKING",
-    "fallbackQuality": "FALLBACK_80",
-    "fallbackSeconds": 4800,
-    "mapLibreTilesVerifiedInChrome": true,
+    "otherChannels": "OFF",
     "previewProofImportedAndValidatedInUI": true,
     "syntheticOrdersCreated": 0,
-    "syntheticClientsCreated": 0
+    "ordersRemaining": 0,
+    "clientsRemaining": 0,
+    "ownerButtonAvailable": true
   },
-  "auto": {
-    "ownerDeepConfirmationRequired": true,
-    "ownerCleaningReserveConfirmationRequiredForDeep": true,
-    "explicitOwnerModeChangeRequired": true,
-    "shadowReviewWarning": true,
-    "operationalLimitation": "PoYo intermittent timeout; actual native failover passed. AUTO primary diagnostic gate unchanged."
-  },
-  "historicalTransitAccuracy": {
-    "independentBenchmark": "not completed",
-    "staticTransitIsHardProof": false,
-    "blocksConservativeRouting": false
-  }
+  "websiteLimitedAutoReady": true,
+  "ownerAction": "Use Settings to enable limited AUTO with explicit owner confirmation; no automatic activation or merge."
 }

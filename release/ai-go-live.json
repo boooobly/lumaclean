@@ -1,5 +1,5 @@
 {
-  "fingerprint": "b38cc229cdac2a54e2cdb6cae9ed8c0487e655bc990b16d0ef6ceacc6d201bbb",
+  "fingerprint": "edd2e472421378210c21bd3099b3b4e6b23c38c16909709478d9ed4d89aec864",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -77,9 +77,9 @@
     "src/components/admin/duration-estimate.tsx": "ebb1a54126311efbcdd8ed0375e97ab48e5009e36c4a4b4bab7365ea0097dbce",
     "src/components/admin/finance-forms.tsx": "6401fdc1bd6d28510ab43fd771c430f04ced940b2924fe29b061b34ec2facac1",
     "src/components/admin/import-workspace.tsx": "b19741a863f2d0aa4f39a6a5a5a4dd8207f4d01d3257c5fe87e6ad3e93304498",
-    "src/components/admin/inbox-controls.tsx": "42b616fc1ae33cbcd65b7fa828f0954c25360d8b407b978be479d90756f187a4",
+    "src/components/admin/inbox-controls.tsx": "1edea53cd8781f00adb7448c4848e191d20a8018b50ebfd8f217f5f4de4e63b2",
     "src/components/admin/inbox-list.tsx": "ca8538f11fb69ebaa6bbe1349f6c9d1f0ff0665fa135bdf3b7cf6a8c57820ce7",
-    "src/components/admin/live-readiness-controls.tsx": "f0c04a641609a951ff2fcc4c7e2aca3d5fb6e6bf11edd0e07f53c284288ff1a3",
+    "src/components/admin/live-readiness-controls.tsx": "d402d9400cd5ec6fa4403a421de1c8ce26933fdcbf77806b9f00b6fec71c0eee",
     "src/components/admin/login-form.tsx": "66a2e1b5406317c8d7fac52f35e0f3ebaec184f5e0b4883a729ae8339e3c2e91",
     "src/components/admin/logistics-status.tsx": "1f2484c5ed3d45565d71df169e7056caef27750a6e260af2748db85b94ecc2b5",
     "src/components/admin/navigation.tsx": "e394a654d5893a727a9549518b04a584ceb199d945606464ed15471a901af7ad",
@@ -111,7 +111,7 @@
     "src/lib/agent/contracts.ts": "b52466daab8f88dc83c5f996c6bbcc3a4a23fb21ee3d402c06865d24dd59d18e",
     "src/lib/agent/inbox.ts": "f743de8fce713110961b974a8be3aa5d3820145ea8368e50c1a21b3e1dd3f188",
     "src/lib/agent/live-proof.ts": "65d68495c820b0db707b526524b50b64171882206c51170baa7d4993d113091a",
-    "src/lib/agent/live-test.ts": "dfff778972588488fca284cecd268a716b1d30ea837e112c8beb8fe26354635d",
+    "src/lib/agent/live-test.ts": "22256c8f2bf9877d7cb9c3040ab83472e0bcb24bd731477db4a8201ff749dcbb",
     "src/lib/agent/notifications.ts": "b8a7e9a96e5935bc29b43cdc980a834f1b53df3ca696c6210ced8b4b59ffc47c",
     "src/lib/agent/policy.ts": "83c9935ad4d3ac5f316706f0de96fe28f6fd234181f8bc987452af3274fc1ffd",
     "src/lib/agent/providers.ts": "3fa9fd3d737877a58ac8b2f6b881e94b5d81195de5980554a76103a296eaee72",
@@ -121,7 +121,7 @@
     "src/lib/agent/release-verification.d.mts": "922a8223a92a36f373f1f850962fb8efc441cf9944c7bae83bcda9d0ed631aff",
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
     "src/lib/agent/runner.ts": "8bb72f12b5d9d4c50565213f4fbe42c368e35f8f7ed13c7e7b2229e5c04d94fe",
-    "src/lib/agent/settings.ts": "4ef7cd01c1424a2ebef35e76dde57702f4b14b946fb864795a63e9cfc8a5f8ba",
+    "src/lib/agent/settings.ts": "75dd022523f454c55275f80cdfde1bfd6a5683ad44aa807697d7121d7f0c6634",
     "src/lib/agent/tools.ts": "85c4eb0344968be7e8ee1fe00cd20573dfbfaa4f733f88cdc23e685868bcc641",
     "src/lib/analytics.ts": "ac20e7f318855188db315705788fff372d2375f33cb1114b48612fa30f839498",
     "src/lib/articles/airbnb.ts": "6ac8861e9d41cadf626a26d54c10c2da58dd6bcfa376cb5cf40d35fd19952857",
@@ -222,24 +222,20 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 59,
+  "tests": 26,
   "lint": true,
   "typecheck": true,
   "migration": true,
-  "checkedAt": "2026-10-03T16:48:13.108Z",
+  "checkedAt": "2026-10-03T17:26:07.846Z",
   "suites": [
-    "BusMaps contract, pending approval, quota/error, no key exposure",
-    "MOTIS adapter, house-number IDs, fallback80, static hard feasibility, 80+30, first trip, multiple crew, fresh slot revalidation",
-    "Preview guard, proof authentication, cleaner confirmation, owner duration confirmation",
-    "Native PoYo/OpenRouter contracts, timeout sanitization and existing failover",
-    "App Preview additive migration and empty schema diff",
-    "Real Railway authenticated health, walking and fallback80 smoke"
+    "10 go-live unit tests: Deep 480+30, Regular 150+30, scope and confirmation",
+    "16 live-readiness checks including isolated database: owner rule audit, OFF/SHADOW kill switch during checks, server AUTO blocker, namespace cleanup"
   ],
-  "verificationScope": "59 passed; 1 isolated database suite intentionally skipped in this unit invocation. Real Preview booking and production promotion are not certified by this evidence; separate live reports are required.",
+  "verificationScope": "26 targeted tests passed (10 go-live + 16 live-readiness including isolated database). No broad audit repeated. Existing hybrid routing baseline retained. Actual Deep Preview booking requires separate live evidence.",
   "previousVerification": {
-    "fingerprint": "88a021a664d7aa358aa91f5345068fc6b4aa04651d4c591ecf93df96f7e73f90",
-    "tests": 58,
-    "checkedAt": "2026-10-03T16:17:17.899Z",
-    "verificationScope": "58 passed; 1 isolated database suite intentionally skipped in this unit invocation. Real Preview booking and production promotion are not certified by this evidence; separate live reports are required."
+    "fingerprint": "b38cc229cdac2a54e2cdb6cae9ed8c0487e655bc990b16d0ef6ceacc6d201bbb",
+    "tests": 59,
+    "checkedAt": "2026-10-03T16:48:13.108Z",
+    "verificationScope": "59 passed; 1 isolated database suite intentionally skipped in this unit invocation. Real Preview booking and production promotion are not certified by this evidence; separate live reports are required."
   }
 }

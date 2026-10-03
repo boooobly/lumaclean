@@ -64,7 +64,19 @@ This historical benchmark evaluates transit accuracy; it does not block producti
 
 After BusMaps application `BM-API-2026-000110` becomes active, set `BUSMAPS_STATUS=ACTIVE`, add its server-only API key to Preview and run diagnostics plus 10–15 representative Belgrade comparisons against MOTIS and permitted manual Google spot checks. No architecture change is required. The current account is pending; the key stays outside Git and is absent from deployment variables. Timeout, quota, errors, scheduled-only and missing realtime verification retain the 80-minute reserve.
 
-## Current verification
+## Current limited AUTO readiness - 2026-10-03
+
+Production reports **5/5 systems ready**, verified in Chrome after importing the newly signed and cleaned Deep Preview proof. Production remains **SHADOW**; Telegram, WhatsApp and Viber remain OFF. The enabled **"Включить ограниченный AUTO"** button opens the existing owner confirmation; only the owner's subsequent confirmed submission changes the server mode. Server readiness and emergency OFF/SHADOW are checked again before the first booking mutation.
+
+The owner confirmed Deep 480 minutes / two cleaners around 50 m². Deep v1 is active over the existing starter range 40-60 m², with cleaning reserve 30 minutes. Regular v2 preserves 150 minutes / two cleaners / 1-100 m² and sets cleaning reserve 30 minutes; v1 remains inactive history. Existing finance commands recorded activation/deactivation AuditLog events. Historical Order snapshots were preserved. Cleaning reserve is separate from defaultTravelBufferMinutes=30 and fallbackTravelMinutes=80.
+
+One final real Deep Preview booking passed all eight steps at 17:30 UTC: native PoYo qualification, existing pricing (10,700 RSD), 480 minutes plus 30 reserve, MOTIS coordinates, FALLBACK_80, slots, explicit Website confirmation, fresh revalidation and Order creation with two assignments and separate travel buffer 30. Twelve route observations were FALLBACK_80 / 4,800 seconds. Synthetic clients, leads, conversations and Orders were cleaned. No production test Order was created.
+
+26 targeted checks passed (10 go-live unit checks and 16 live-readiness checks including the isolated Postgres suite); typecheck, affected-file lint and both Vercel builds passed. The isolated test interrupts an ordinary AUTO context during booking checks with both SHADOW and OFF and proves no client or Order creation. Earlier 59-test hybrid routing baseline and conservative feasibility evidence below remain historical; no broad audit was repeated.
+
+Preview: https://lumaclean-i4y8n64eh-vladislavs-projects-0eae0ea3.vercel.app. Production: https://lumaclean-bizl72sa6-vladislavs-projects-0eae0ea3.vercel.app, aliased to https://lumacleanrs.com. The immutable proof Preview uses the production gateway with the separate Preview database; ordinary Preview environment variables have been restored to the separate Preview gateway. BusMaps pending approval is an optional warning. MOTIS with fallback80 remains DEGRADED and production-permitted; independent transit accuracy research remains incomplete. Sanitized evidence: `hybrid-live-verification.json`.
+
+## Historical verification before the owner confirmed Deep and reserve
 
 59 targeted tests passed: BusMaps 15, MOTIS/scheduling 14, live readiness 8 and native provider/policy contracts 22. One isolated database suite was intentionally skipped in that unit invocation. Real Preview booking and rollback-based scheduling checks were performed separately. TypeScript, targeted ESLint and Vercel builds passed. Both additive migrations and an empty schema diff passed in Preview and production. Previous stage's 65-test evidence remains historical rather than being counted as rerun.
 

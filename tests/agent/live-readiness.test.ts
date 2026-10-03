@@ -46,13 +46,13 @@ test('cleaner readiness requires contacts, recurring schedule and coordinates bu
  assert(cleanerReadiness(c).ready);assert(!cleanerReadiness({...c,homeCoordinatesConfirmed:false}).ready);assert(!cleanerReadiness({...c,homeCoordinatesConfirmed:undefined}).ready);assert(!cleanerReadiness({...c,phone:''}).ready);assert(!cleanerReadiness({...c,availability:[{kind:'AVAILABLE',startMinute:480,endMinute:1080}]}).ready);assert(!cleanerReadiness({...c,homeLatitude:null}).coordinates);assert(!cleanerReadiness({...c,homeLatitude:999}).coordinates);assert(!cleanerReadiness({...c,active:false}).ready);
 });
 test('unknown extras are partial and unschedulable while a standard order is configured',()=>{
- const r:DurationConfig={id:'r',serviceId:'regular',version:1,active:true,minArea:1,maxArea:100,referenceArea:100,cleanerCount:2,baseMinutes:150,minutesPerSquare:0,reserveMinutes:10,soilMultipliers:{NORMAL:1},extraMinutes:{oven:null}};
+ const r:DurationConfig={id:'r',serviceId:'regular',version:1,active:true,minArea:1,maxArea:100,referenceArea:100,cleanerCount:2,baseMinutes:150,minutesPerSquare:0,reserveMinutes:30,soilMultipliers:{NORMAL:1},extraMinutes:{oven:null}};
  const input={serviceId:'regular',area:50,requiredCleaners:2,soilLevel:'NORMAL',extras:[]};
  assert.equal(estimateDuration(input,[r],{showPartial:true})?.confidence,'CONFIGURED');
  const partial=estimateDuration({...input,extras:[{code:'oven',quantity:1}]},[r],{showPartial:true});assert.equal(partial?.confidence,'PARTIALLY_CONFIGURED');assert.equal(partial?.schedulingAllowed,false);assert.equal(r.extraMinutes.oven,null);
 });
 test('starter duration cannot activate without explicit confirmation and reserve',()=>{
- assert(!aiSettingsSchema.safeParse({action:'starter-duration',service:'regular',reserveMinutes:10}).success);
+ assert(!aiSettingsSchema.safeParse({action:'starter-duration',service:'regular',reserveMinutes:30}).success);
  assert(!aiSettingsSchema.safeParse({action:'starter-duration',service:'regular',confirm:true}).success);
  assert(aiSettingsSchema.safeParse({action:'starter-duration',service:'deep',reserveMinutes:0,confirm:true}).success);
 });
@@ -72,11 +72,11 @@ test('targeted live-readiness database boundaries',{skip:!url},async t=>{
  try{
   await t.test('owner confirmation creates versioned active rules and audit with NULL extras',async()=>{
    assert.equal(await db.durationRule.count({where:{active:true}}),0);
-   await assert.rejects(runAiSettings(db,owner.id,{action:'starter-duration',service:'regular',reserveMinutes:10}),/confirm/);
-   for(const service of ['regular','deep']){const result=await runAiSettings(db,owner.id,{action:'starter-duration',service,reserveMinutes:10,confirm:true}) as {id:string};ruleIds.push(result.id);const r=await db.durationRule.findUniqueOrThrow({where:{id:result.id}});assert(r.active);assert.equal(r.cleanerCount,2);assert.equal(r.baseMinutes,service==='regular'?150:480);assert.equal(r.reserveMinutes,10);assert(Object.values(r.extraMinutes as object).every(v=>v===null));assert.equal(await db.auditLog.count({where:{entityId:r.id,action:'DURATION_RULE_CREATED'}}),1);}
+   await assert.rejects(runAiSettings(db,owner.id,{action:'starter-duration',service:'regular',reserveMinutes:30}),/confirm/);
+   for(const service of ['regular','deep']){const result=await runAiSettings(db,owner.id,{action:'starter-duration',service,reserveMinutes:30,confirm:true}) as {id:string};ruleIds.push(result.id);const r=await db.durationRule.findUniqueOrThrow({where:{id:result.id}});assert(r.active);assert.equal(r.cleanerCount,2);assert.equal(r.baseMinutes,service==='regular'?150:480);assert.equal(r.reserveMinutes,30);assert(Object.values(r.extraMinutes as object).every(v=>v===null));assert.equal(await db.auditLog.count({where:{entityId:r.id,action:'DURATION_RULE_CREATED'}}),1);}
   });
   await t.test('confirmed duration stops being UNCONFIGURED even before crew onboarding',async()=>{const r=await readiness(db);assert.equal(r.checks.find(c=>c.id==='duration')?.status,'READY');assert.equal(r.checks.find(c=>c.id==='cleaners')?.status,'BLOCKS_AUTO');});
-  await t.test('two ready cleaners do not require payoutPercent',async()=>{for(let n=0;n<2;n++){const c=await db.cleaner.create({data:{name:`Readiness crew ${n}`,phone:`+38160999110${n}`,homeAddress:'Synthetic start',homeLatitude:44.82,homeLongitude:20.45,payoutPercent:null,availability:{create:Array.from({length:7},(_,i)=>({kind:'WEEKLY',weekday:i+1,startMinute:480,endMinute:1080}))}}});crewIds.push(c.id);}assert.equal((await readiness(db)).checks.find(c=>c.id==='cleaners')?.status,'READY');});
+  await t.test('two ready cleaners do not require payoutPercent',async()=>{for(let n=0;n<2;n++){const c=await db.cleaner.create({data:{name:`Readiness crew ${n}`,phone:`+38160999110${n}`,homeAddress:'Synthetic start',homeCoordinatesConfirmed:true,homeLatitude:44.82,homeLongitude:20.45,payoutPercent:null,availability:{create:Array.from({length:7},(_,i)=>({kind:'WEEKLY',weekday:i+1,startMinute:480,endMinute:1080}))}}});crewIds.push(c.id);}assert.equal((await readiness(db)).checks.find(c=>c.id==='cleaners')?.status,'READY');});
   await t.test('missing Google is a hard blocker and prevents live test without creating a batch',async()=>{const r=await readiness(db);assert.equal(r.checks.find(c=>c.id==='transit')?.status,'BLOCKS_AUTO');const count=await db.agentLiveTest.count();await assert.rejects(runLiveBookingTest(db,owner.id,date),/LIVE_TEST_BLOCKED/);assert.equal(await db.agentLiveTest.count(),count);});
   await t.test('server rejects forged AUTO confirmation with blockers and preserves SHADOW',async()=>{await assert.rejects(runInboxCommand(db,owner.id,{action:'mode',mode:'AUTO',confirmAuto:true}),/AUTO_BLOCKED/);assert.equal((await db.businessSettings.findUniqueOrThrow({where:{id:'default'}})).aiAgentMode,'SHADOW');});
   await t.test('synthetic batch cannot impersonate another conversation',async()=>{const batch=randomUUID();batchIds.push(batch);await db.agentLiveTest.create({data:{id:batch}});const foreign=await db.conversation.create({data:{channel:'WEBSITE'}});try{await assert.rejects(assertPreviewBatch(db,batch,foreign.id),/LIVE_TEST_NAMESPACE_INVALID/);}finally{await db.conversation.delete({where:{id:foreign.id}});}});
@@ -87,19 +87,24 @@ test('targeted live-readiness database boundaries',{skip:!url},async t=>{
    const qualification={service:'regular',area:50,soilLevel:'NORMAL',extras:[],urgent:false};
    await executeAgentTool(db,ctx,'createOrUpdateLead',{intent:'cleaning',name:`Preview test ${batch}`,phone:'+381609991199'});assert.equal((await executeAgentTool(db,ctx,'calculatePrice',qualification)).total,4600);assert.equal((await executeAgentTool(db,ctx,'estimateDuration',{})).minutes,150);
    ctx.state.address={fullAddress:'Synthetic address, Beograd',proof:signLocation({address:'Synthetic address, Beograd',placeId:'readiness-synthetic-place',latitude:44.81,longitude:20.46,expires:Date.now()+1800000})};await db.conversation.update({where:{id:c.id},data:{state:json(ctx.state)}});
-   const snapshot=await routingSnapshot(db,date),candidate:RoutingOrder={id:'new-order',addressId:'new-address',status:'DRAFT',scheduleMode:'FLEXIBLE',scheduledStart:null,windowFrom:localInstant(window.from),windowTo:localInstant(window.to),manualDurationMinutes:150,estimatedDurationMinutes:null,requiredCleaners:2,travelBufferMinutes:30,cleaningReserveMinutes:10,cleanerIds:[],point:{latitude:44.81,longitude:20.46,placeId:'readiness-synthetic-place'},label:'Synthetic',reference:'Synthetic',updatedAt:''};
+   const snapshot=await routingSnapshot(db,date),candidate:RoutingOrder={id:'new-order',addressId:'new-address',status:'DRAFT',scheduleMode:'FLEXIBLE',scheduledStart:null,windowFrom:localInstant(window.from),windowTo:localInstant(window.to),manualDurationMinutes:150,estimatedDurationMinutes:null,requiredCleaners:2,travelBufferMinutes:30,cleaningReserveMinutes:30,cleanerIds:[],point:{latitude:44.81,longitude:20.46,placeId:'readiness-synthetic-place'},label:'Synthetic',reference:'Synthetic',updatedAt:''};
    const verified=(r:RouteRequest):RouteResult=>({status:'VERIFIED',durationSeconds:1200,distanceMeters:3000,source:'Google',sampledAt:routeSample(r),calculatedAt:new Date().toISOString(),expiresAt:new Date(Date.now()+600000).toISOString()});
    const routes:RoutingProvider={getTravelTime:async r=>verified(r),getRouteDetails:async r=>({result:verified(r),steps:[]}),getRouteMatrix:async(origins,destinations,mode,at,timing)=>origins.map(origin=>destinations.map(destination=>verified({origin,destination,mode,at,timing})))};
    await new RoutingService(db,routes).prepare(preparationRequests(snapshot,[candidate]));
    const slots=await executeAgentTool(db,ctx,'findAvailableSlots',window);assert(!slots.error,JSON.stringify(slots));const token=ctx.state.slots![0].token;assert((await executeAgentTool(db,ctx,'validateSlot',{slotToken:token})).recap);
    const latest=await db.conversation.findUniqueOrThrow({where:{id:c.id}}),confirmation=await acceptMessage(db,latest,{id:randomUUID(),text:'Подтверждаю запись',locale:'ru',confirmationNonce:ctx.state.pending!.nonce});await db.agentJob.update({where:{id:job.id},data:{status:'DONE',leaseUntil:null,leaseKey:null}});
    const current=await db.conversation.findUniqueOrThrow({where:{id:c.id}}),newLease=randomUUID(),newJob=await db.agentJob.update({where:{messageId:confirmation.messageId},data:{status:'RUNNING',leaseKey:newLease,leaseUntil:new Date(Date.now()+180000)}});ctx={...ctx,jobId:newJob.id,leaseKey:newLease,revision:current.revision,state:stateOf(current)};
+   for(const switchedMode of ['SHADOW','OFF'] as const){
+   await db.businessSettings.update({where:{id:'default'},data:{aiAgentMode:'AUTO',aiChannelModes:{WEBSITE:'AUTO',TELEGRAM:'OFF',WHATSAPP:'OFF',VIBER:'OFF'}}});
+   const productionContext={...ctx,previewTestId:undefined};
    let toggled=false;
-   const racingDb={$transaction:(fn:(tx:Prisma.TransactionClient)=>Promise<unknown>,options?:{timeout?:number;maxWait?:number})=>db.$transaction(tx=>fn(new Proxy(tx,{get(target,property){if(property==='durationRule')return new Proxy(target.durationRule,{get(model,key){if(key==='findMany')return async(args:Parameters<typeof model.findMany>[0])=>{const result=await model.findMany(args);await db.businessSettings.update({where:{id:'default'},data:{aiAgentMode:'OFF'}});toggled=true;return result;};return Reflect.get(model,key);}});return Reflect.get(target,property);}})),options)} as unknown as PrismaClient;
-   await assert.rejects(executeAgentTool(racingDb,ctx,'createOrder',{}),/AGENT_CONTROL_CHANGED/);assert(toggled);assert.equal(await db.order.count(),before[2]);assert.equal(await db.client.count(),before[0]);
+   const racingDb={$transaction:(fn:(tx:Prisma.TransactionClient)=>Promise<unknown>,options?:{timeout?:number;maxWait?:number})=>db.$transaction(tx=>fn(new Proxy(tx,{get(target,property){if(property==='durationRule')return new Proxy(target.durationRule,{get(model,key){if(key==='findMany')return async(args:Parameters<typeof model.findMany>[0])=>{const result=await model.findMany(args);await db.businessSettings.update({where:{id:'default'},data:{aiAgentMode:switchedMode}});toggled=true;return result;};return Reflect.get(model,key);}});return Reflect.get(target,property);}})),options)} as unknown as PrismaClient;
+   await assert.rejects(executeAgentTool(racingDb,productionContext,'createOrder',{}),/AGENT_CONTROL_CHANGED/);assert(toggled);assert.equal(await db.order.count(),before[2]);assert.equal(await db.client.count(),before[0]);
+   }
    await db.businessSettings.update({where:{id:'default'},data:{aiAgentMode:'SHADOW'}});
    // Mocked routes stay exclusively on this isolated verification branch; this is not a live proof.
    assert((await executeAgentTool(db,ctx,'createOrder',{})).booked);
+   const bookedOrder=await db.order.findFirstOrThrow({where:{client:{name:`Preview test ${batch}`}}});assert.equal(bookedOrder.estimatedDurationMinutes,150);assert.equal(bookedOrder.cleaningReserveMinutes,30);assert.equal(bookedOrder.travelBufferMinutes,30);
    assert.equal(await db.order.count(),before[2]+1);assert.equal(await db.client.count(),before[0]+1);
    assert.equal(await db.notification.count({where:{conversationId:c.id}}),0);
    await cleanupLiveTest(db,batch);assert.equal(await db.conversation.count({where:{id:c.id}}),0);assert.deepEqual([await db.client.count(),await db.lead.count(),await db.order.count()],before);
@@ -108,7 +113,7 @@ test('targeted live-readiness database boundaries',{skip:!url},async t=>{
  }finally{
   for(const batch of batchIds){await cleanupLiveTest(db,batch);await db.agentLiveTest.delete({where:{id:batch}});}
   await db.cleanerAvailability.deleteMany({where:{cleanerId:{in:crewIds}}});await db.cleaner.deleteMany({where:{id:{in:crewIds}}});await db.durationRule.deleteMany({where:{id:{in:ruleIds}}});
-  await db.user.update({where:{id:owner.id},data:{active:false}});await db.businessSettings.update({where:{id:'default'},data:{aiAgentMode:settings.aiAgentMode,aiLiveTestProof:settings.aiLiveTestProof??undefined}});
+  await db.user.update({where:{id:owner.id},data:{active:false}});await db.businessSettings.update({where:{id:'default'},data:{aiAgentMode:settings.aiAgentMode,aiChannelModes:settings.aiChannelModes!,aiLiveTestProof:settings.aiLiveTestProof??undefined}});
   await db.$disconnect();for(const key of Object.keys(process.env))if(!(key in env))delete process.env[key];Object.assign(process.env,env);
  }
 });
