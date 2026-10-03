@@ -34,6 +34,11 @@ export function websiteSummary(checks:Check[]){
   const groups=[['master','credentials','primary','fallback'],['places','transit'],['duration','pricing'],['cleaners','settings'],['tests','scope','channels','liveBooking']];
   return{ready:groups.filter(ids=>ids.every(id=>checks.some(c=>c.id===id&&c.status!=='BLOCKS_AUTO'))).length,total:groups.length};
 }
+export function previewBookingReady(checks:Check[],confirmedTestService:boolean){
+  // Preview proves the actual failover path; AUTO admission still requires every check.
+  const fallbackReady=checks.some(c=>c.id==='fallback'&&c.status==='READY');
+  return confirmedTestService&&fallbackReady&&checks.every(c=>['liveBooking','duration','pricing'].includes(c.id)||(c.id==='primary'&&fallbackReady)||c.status!=='BLOCKS_AUTO');
+}
 export async function readiness(db:DB,provided?:BusinessSettings){
   const settings=provided??await db.businessSettings.findUnique({where:{id:'default'}});
   const checks:Check[]=[];
@@ -88,7 +93,7 @@ export async function readiness(db:DB,provided?:BusinessSettings){
   const testService=services.find(s=>s.code==='regular')??services[0];
   let confirmedTestService=false;
   try {confirmedTestService=!!testService?.active&&!!estimateDuration({serviceId:testService.id,area:50,soilLevel:'NORMAL',requiredCleaners:Math.min(...testService.durationRules.map(r=>r.cleanerCount)),extras:[]},testService.durationRules.map(durationConfig))&&quote(testService.code as Parameters<typeof quote>[0],50,[],false).total>0;}catch{/* No owner-confirmed test rule. */}
-  return {checks,summary:websiteSummary(checks),blockers:checks.filter(c=>c.status==='BLOCKS_AUTO'),canRunLiveTest:confirmedTestService&&checks.every(c=>['liveBooking','duration','pricing'].includes(c.id)||c.status!=='BLOCKS_AUTO'),routingStatus:fresh&&diag?.transit.ok?(diag.transit.quality==='LIVE_EXTERNAL'?'READY':'DEGRADED'):'BLOCKED',shadow:{suggestions,accepted,rejected,n},canActivate:checks.every(c=>c.status!=='BLOCKS_AUTO'),checkedAt:settings?.aiDiagnosticsAt?.toISOString()??null};
+  return {checks,summary:websiteSummary(checks),blockers:checks.filter(c=>c.status==='BLOCKS_AUTO'),canRunLiveTest:previewBookingReady(checks,confirmedTestService),routingStatus:fresh&&diag?.transit.ok?(diag.transit.quality==='LIVE_EXTERNAL'?'READY':'DEGRADED'):'BLOCKED',shadow:{suggestions,accepted,rejected,n},canActivate:checks.every(c=>c.status!=='BLOCKS_AUTO'),checkedAt:settings?.aiDiagnosticsAt?.toISOString()??null};
 }
 export async function assertAutoReady(db:DB,settings?:BusinessSettings){
   const report=await readiness(db,settings);

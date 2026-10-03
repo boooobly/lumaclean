@@ -1,0 +1,180 @@
+{
+  "checkedAt": "2026-10-03T16:59:04.301177+00:00",
+  "branch": "codex/admin-motis-routing",
+  "pullRequest": "https://github.com/boooobly/lumaclean/pull/1",
+  "busmaps": {
+    "status": "PENDING_APPROVAL",
+    "httpRequests": 0,
+    "errors": 0,
+    "monthlyCap": 1000,
+    "optional": true
+  },
+  "routingReadiness": "DEGRADED",
+  "cleaners": {
+    "existingRealCleaners": 2,
+    "previewExplicitCoordinateConfirmation": true,
+    "productionConfirmed": 2,
+    "guessedCoordinates": false,
+    "fakeCleanersCreated": false
+  },
+  "duration": [
+    {
+      "code": "regular",
+      "activeDurationRules": 1,
+      "rules": [
+        {
+          "baseMinutes": 150,
+          "cleanerCount": 2,
+          "reserveMinutes": 0
+        }
+      ]
+    },
+    {
+      "code": "deep",
+      "activeDurationRules": 0,
+      "rules": []
+    }
+  ],
+  "preview": {
+    "initialPrimaryNative": [
+      {
+        "ok": true,
+        "model": "gpt-6-luna",
+        "provider": "poyo",
+        "errorCode": null,
+        "latencyMs": 13424
+      }
+    ],
+    "finalAttempts": [
+      {
+        "ok": false,
+        "model": "gpt-6-luna",
+        "provider": "poyo",
+        "errorCode": "PROVIDER_TIMEOUT_OR_NETWORK",
+        "latencyMs": 22006
+      },
+      {
+        "ok": true,
+        "model": "openai/gpt-6-luna",
+        "provider": "openrouter",
+        "errorCode": null,
+        "latencyMs": 1598
+      }
+    ],
+    "status": "PASSED",
+    "cleaned": true,
+    "steps": [
+      {
+        "ok": true,
+        "label": "AI понял запрос"
+      },
+      {
+        "ok": true,
+        "label": "Цена рассчитана"
+      },
+      {
+        "ok": true,
+        "label": "Duration рассчитан"
+      },
+      {
+        "ok": true,
+        "label": "Адрес найден"
+      },
+      {
+        "ok": true,
+        "label": "Маршрут рассчитан"
+      },
+      {
+        "ok": true,
+        "label": "Свободный слот найден"
+      },
+      {
+        "ok": true,
+        "label": "Повторная проверка слота"
+      },
+      {
+        "ok": true,
+        "label": "Order создан"
+      }
+    ],
+    "sourceDatabase": "Preview",
+    "gatewayEnvironment": "production",
+    "syntheticClientsRemaining": 0,
+    "syntheticConversationsRemaining": 0,
+    "ordersRemaining": 0,
+    "routeObservations": [
+      {
+        "quality": "FALLBACK_80",
+        "durationSeconds": 4800,
+        "count": 12
+      }
+    ]
+  },
+  "scheduling": {
+    "single": {
+      "previousEnd": "12:00",
+      "travelMinutes": 80,
+      "bufferMinutes": 30,
+      "earliest": "13:50",
+      "rejected": "13:30",
+      "feasible": "14:00",
+      "crewChecks": 2
+    },
+    "multiple": {
+      "arrivals": [
+        "13:40",
+        "14:10"
+      ],
+      "rejected": "14:00",
+      "feasible": "14:10",
+      "crewChecks": 2
+    },
+    "firstOrderExtraBuffer": 0,
+    "passed": true,
+    "cleaned": true,
+    "cleanup": "Entire synthetic transaction rolled back; existing records and two real cleaners preserved"
+  },
+  "engineering": {
+    "targetedTestsPassed": 59,
+    "unitDatabaseSuiteSkipped": 1,
+    "typecheck": true,
+    "targetedLint": true,
+    "previewBuild": "READY",
+    "productionBuild": "READY",
+    "productionSchemaDiff": "empty",
+    "additiveMigrations": [
+      "20261003130000_address_coordinate_confirmation",
+      "20261003160000_hybrid_routing"
+    ]
+  },
+  "production": {
+    "masterMode": "SHADOW",
+    "autoEnabled": false,
+    "website": "https://lumacleanrs.com",
+    "separatePrivateEngine": true,
+    "separateVolume": true,
+    "separateGatewayCredential": true,
+    "anonymousGatewayHttpStatus": 401,
+    "healthHttpStatus": 200,
+    "engineVersion": "2.11.3",
+    "walkingQuality": "WALKING",
+    "fallbackQuality": "FALLBACK_80",
+    "fallbackSeconds": 4800,
+    "mapLibreTilesVerifiedInChrome": true,
+    "previewProofImportedAndValidatedInUI": true,
+    "syntheticOrdersCreated": 0,
+    "syntheticClientsCreated": 0
+  },
+  "auto": {
+    "ownerDeepConfirmationRequired": true,
+    "ownerCleaningReserveConfirmationRequiredForDeep": true,
+    "explicitOwnerModeChangeRequired": true,
+    "shadowReviewWarning": true,
+    "operationalLimitation": "PoYo intermittent timeout; actual native failover passed. AUTO primary diagnostic gate unchanged."
+  },
+  "historicalTransitAccuracy": {
+    "independentBenchmark": "not completed",
+    "staticTransitIsHardProof": false,
+    "blocksConservativeRouting": false
+  }
+}

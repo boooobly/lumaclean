@@ -4,7 +4,7 @@ import {randomUUID} from 'node:crypto';
 import {PrismaPg} from '@prisma/adapter-pg';
 import {PrismaClient,type Prisma} from '../../src/generated/prisma/client';
 import {pgConnectionString} from '../../src/lib/database/connection';
-import {cleanerReadiness,readiness,websiteSummary} from '../../src/lib/agent/readiness';
+import {cleanerReadiness,readiness,websiteSummary,previewBookingReady,type Check} from '../../src/lib/agent/readiness';
 import {previewTestAllowed,signLiveProof,validLiveProof,assertPreviewBatch} from '../../src/lib/agent/live-proof';
 import {runLiveBookingTest,cleanupLiveTest} from '../../src/lib/agent/live-test';
 import {aiSettingsSchema,runAiSettings} from '../../src/lib/agent/settings';
@@ -19,6 +19,14 @@ import {routeSample,type RoutingProvider,type RouteRequest,type RouteResult} fro
 import {localInstant} from '../../src/lib/domain/crm';
 const secret='test-only-live-readiness-secret-32-characters';
 const previewEnv={VERCEL_ENV:'preview',AI_LIVE_TEST_SECRET:secret,DATABASE_URL:'postgresql://test:test@ep-preview.c-14.us-east-1.aws.neon.tech/neondb',AI_LIVE_TEST_DATABASE_HOST:'ep-preview.c-14.us-east-1.aws.neon.tech'};
+
+test('Preview can prove native failover without weakening AUTO or other booking guards',()=>{
+ const checks:Check[]=['credentials','primary','fallback','places','transit','cleaners','duration','liveBooking'].map(id=>({id,label:id,status:['primary','duration','liveBooking'].includes(id)?'BLOCKS_AUTO':'READY',detail:''}));
+ assert(previewBookingReady(checks,true));assert(checks.some(c=>c.status==='BLOCKS_AUTO'));
+ assert(!previewBookingReady(checks,false));
+ for(const id of ['fallback','credentials','places','transit','cleaners'])assert(!previewBookingReady(checks.map(c=>c.id===id?{...c,status:'BLOCKS_AUTO'}:c),true),id+' remains required');
+ assert(!previewBookingReady(checks.filter(c=>c.id!=='fallback'),true));
+});
 test('Preview guard requires explicit environment and strong signing credential',()=>{
  assert.equal(previewTestAllowed({VERCEL_ENV:'production',AI_LIVE_TEST_SECRET:secret}),false);
  assert.equal(previewTestAllowed({VERCEL_ENV:'preview',AI_LIVE_TEST_SECRET:'short'}),false);

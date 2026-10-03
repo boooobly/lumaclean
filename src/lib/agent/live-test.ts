@@ -2,6 +2,7 @@ import {randomUUID,randomInt} from 'node:crypto';
 import type {PrismaClient} from '@/generated/prisma/client';
 import {AgentError,qualificationSchema,type ToolResult} from './contracts';
 import {configuredProviders} from './providers';
+import {completeWithFallback} from './runner';
 import {readiness} from './readiness';
 import {canonicalJson,executeAgentTool,json,stateOf,type ToolContext} from './tools';
 import {acceptMessage} from './inbox';
@@ -10,7 +11,7 @@ import {normalizedPhone} from '@/lib/domain/crm';
 import {writeAudit} from '@/lib/services/audit';
 
 export const liveTestSteps=['AI понял запрос','Цена рассчитана','Duration рассчитан','Адрес найден','Маршрут рассчитан','Свободный слот найден','Повторная проверка слота','Order создан'] as const;
-export type LiveTestReport={status:'PASSED'|'FAILED';steps:{label:string;ok:boolean}[];blocker:string|null;cleaned:boolean;proof?:ReturnType<typeof signLiveProof>};
+export type LiveTestReport={status:'PASSED'|'FAILED';steps:{label:string;ok:boolean}[];blocker:string|null;cleaned:boolean;aiAttempts?:{provider:string;model:string;ok:boolean;errorCode:string|null;latencyMs:number}[];proof?:ReturnType<typeof signLiveProof>};
 export async function cleanupLiveTest(db:PrismaClient,batchId:string){
   if(!previewTestAllowed())throw new AgentError('PREVIEW_TEST_ONLY');
   await db.$transaction(async tx=>{
@@ -70,17 +71,19 @@ export async function runLiveBookingTest(db:PrismaClient,userId:string,date:stri
     const request=`Синтетический тест: нужна ${service==='regular'?'поддерживающая':'генеральная'} уборка квартиры 50 м², обычное загрязнение, без дополнений, не срочно.`;
     const message=await db.message.create({data:{conversationId:conversation.id,author:'CLIENT',text:request}});
     ctx=await context(message.id);
-    const primary=configuredProviders()[0],answer=await primary.complete([{role:'system',content:'You are qualifying this synthetic Website cleaning request. Call calculatePrice exactly once with the explicit facts. No CRM actions yet.'},{role:'user',content:request}],AbortSignal.timeout(60000));
+    const answer=await completeWithFallback(configuredProviders(),[{role:'system',content:'You are qualifying this synthetic Website cleaning request. Call calculatePrice exactly once with the explicit facts. No CRM actions yet.'},{role:'user',content:request}],async(provider,result,errorCode,latencyMs)=>{
+      (report.aiAttempts??=[]).push({provider:provider.name,model:provider.model,ok:result!==null,errorCode,latencyMs});
+    },AbortSignal.timeout(60000));
     if(answer.toolCalls.length!==1||answer.toolCalls[0].name!=='calculatePrice')throw new AgentError('PRIMARY_DID_NOT_QUALIFY');
     const qualification=qualificationSchema.parse(JSON.parse(answer.toolCalls[0].arguments));
     if(canonicalJson(qualification)!==canonicalJson(input))throw new AgentError('PRIMARY_MISUNDERSTOOD_REQUEST');
     completeStep(0);
     await tool('calculatePrice',qualification);completeStep(1);
     await tool('estimateDuration',{});completeStep(2);
-    const candidates=await tool('resolveAddress',{query:'Terazije 1, Beograd'});
+    const candidates=await tool('resolveAddress',{query:'Теразије 1'});
     const rows=candidates.candidates as {placeId:string;text:string}[]|undefined;
     // Explicit synthetic customer's preselected public destination, never an existing customer's address.
-    const selected=rows?.find(r=>/Terazije\s*1(?:\D|$)/i.test(r.text));
+    const selected=rows?.find(r=>/^(?:Terazije|Теразије)\s*1(?:[,\s]|$)/i.test(r.text)&&/(?:Beograd|Београд)/i.test(r.text));
     if(!selected)throw new AgentError('TEST_ADDRESS_AMBIGUOUS');
     await tool('resolveAddress',{query:selected.text,placeId:selected.placeId});completeStep(3);
     const slots=await tool('findAvailableSlots',{date,from:`${date}T08:00`,to:`${date}T22:00`});

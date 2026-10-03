@@ -1,5 +1,5 @@
 {
-  "fingerprint": "5a893fc4c705a25e726447a6f395d4678d1a131d6f2c26c5c91ed8394513aacf",
+  "fingerprint": "b38cc229cdac2a54e2cdb6cae9ed8c0487e655bc990b16d0ef6ceacc6d201bbb",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -79,7 +79,7 @@
     "src/components/admin/import-workspace.tsx": "b19741a863f2d0aa4f39a6a5a5a4dd8207f4d01d3257c5fe87e6ad3e93304498",
     "src/components/admin/inbox-controls.tsx": "42b616fc1ae33cbcd65b7fa828f0954c25360d8b407b978be479d90756f187a4",
     "src/components/admin/inbox-list.tsx": "ca8538f11fb69ebaa6bbe1349f6c9d1f0ff0665fa135bdf3b7cf6a8c57820ce7",
-    "src/components/admin/live-readiness-controls.tsx": "6eeb5af047364c150f2d1b174e7c9ce1827899d4b5d8297a74e99418d06f93b5",
+    "src/components/admin/live-readiness-controls.tsx": "f0c04a641609a951ff2fcc4c7e2aca3d5fb6e6bf11edd0e07f53c284288ff1a3",
     "src/components/admin/login-form.tsx": "66a2e1b5406317c8d7fac52f35e0f3ebaec184f5e0b4883a729ae8339e3c2e91",
     "src/components/admin/logistics-status.tsx": "1f2484c5ed3d45565d71df169e7056caef27750a6e260af2748db85b94ecc2b5",
     "src/components/admin/navigation.tsx": "e394a654d5893a727a9549518b04a584ceb199d945606464ed15471a901af7ad",
@@ -111,13 +111,13 @@
     "src/lib/agent/contracts.ts": "b52466daab8f88dc83c5f996c6bbcc3a4a23fb21ee3d402c06865d24dd59d18e",
     "src/lib/agent/inbox.ts": "f743de8fce713110961b974a8be3aa5d3820145ea8368e50c1a21b3e1dd3f188",
     "src/lib/agent/live-proof.ts": "65d68495c820b0db707b526524b50b64171882206c51170baa7d4993d113091a",
-    "src/lib/agent/live-test.ts": "bed2d59b0fe6fd5341c1a7cc169c274027ad8bac45285a4babe191637e493e88",
+    "src/lib/agent/live-test.ts": "dfff778972588488fca284cecd268a716b1d30ea837e112c8beb8fe26354635d",
     "src/lib/agent/notifications.ts": "b8a7e9a96e5935bc29b43cdc980a834f1b53df3ca696c6210ced8b4b59ffc47c",
     "src/lib/agent/policy.ts": "83c9935ad4d3ac5f316706f0de96fe28f6fd234181f8bc987452af3274fc1ffd",
     "src/lib/agent/providers.ts": "3fa9fd3d737877a58ac8b2f6b881e94b5d81195de5980554a76103a296eaee72",
     "src/lib/agent/queries.ts": "0424e678b6f00578ff536f7abbb8326eba4006b3d4a43e444e9ce832d09a6cce",
     "src/lib/agent/queue.ts": "7544dba6cb5a7dba2233c7ea74c99fe7271e17163a831898012651c5eb0019df",
-    "src/lib/agent/readiness.ts": "60856a9628d525b886aa9ee928c48dd423082fff44fe38f01351f5aabd9c1436",
+    "src/lib/agent/readiness.ts": "31bc5537338d94c74bb536a04e681f3a93fda4e7bad6b431084e709f52a2dca8",
     "src/lib/agent/release-verification.d.mts": "922a8223a92a36f373f1f850962fb8efc441cf9944c7bae83bcda9d0ed631aff",
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
     "src/lib/agent/runner.ts": "8bb72f12b5d9d4c50565213f4fbe42c368e35f8f7ed13c7e7b2229e5c04d94fe",
@@ -192,7 +192,7 @@
     "src/lib/services/route-cache.ts": "7f38d8400d34fe72fa91eb11f025b1767e76b755162fd9fbd73a27ebfa83477d",
     "src/lib/services/routing-planning.ts": "b35437df5e99174150dcd46f6054b57bba63cc04efc2f10a36a7edb1c5e38525",
     "src/lib/services/scheduling-commands.ts": "d3d07847a71a41400981a74621a0deaa3b62726ff870cfd05f5c8e4307698067",
-    "src/lib/services/scheduling-queries.ts": "1d4ad295694361048583028c03f1d52653fa4f5e7d20cb3ea78203bbac69e227",
+    "src/lib/services/scheduling-queries.ts": "844f4ff35648c0de300e1532f2b75903187a830d207c31ccf7bde9002a325c6b",
     "src/lib/services/website-leads.ts": "4ca5300424b00b02f237d2f3109deb63f394c36a05807572025fea7bd0ff3d26",
     "src/lib/site-content.tsx": "a657104896a984a76cb9833abab9593f650c1c0dfc1af17ac69316693eefce2c",
     "src/lib/validation/admin.ts": "9c1d0a705faffed2af3fd53cf4d5ec10713ba3d90d52769370288655b95f4a4f",
@@ -222,23 +222,24 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 36,
+  "tests": 59,
   "lint": true,
   "typecheck": true,
   "migration": true,
-  "checkedAt": "2026-10-03T15:47:35.151Z",
+  "checkedAt": "2026-10-03T16:48:13.108Z",
   "suites": [
     "BusMaps contract, pending approval, quota/error, no key exposure",
     "MOTIS adapter, house-number IDs, fallback80, static hard feasibility, 80+30, first trip, multiple crew, fresh slot revalidation",
     "Preview guard, proof authentication, cleaner confirmation, owner duration confirmation",
+    "Native PoYo/OpenRouter contracts, timeout sanitization and existing failover",
     "App Preview additive migration and empty schema diff",
     "Real Railway authenticated health, walking and fallback80 smoke"
   ],
-  "verificationScope": "36 passed; 1 isolated database suite intentionally skipped in this unit invocation. Real Preview booking and production promotion are not certified by this evidence; separate live reports are required.",
+  "verificationScope": "59 passed; 1 isolated database suite intentionally skipped in this unit invocation. Real Preview booking and production promotion are not certified by this evidence; separate live reports are required.",
   "previousVerification": {
-    "fingerprint": "e4859688625c9575c52e500dd473a51a62d965333e8e5dba1d75d6194b09c4cf",
-    "tests": 36,
-    "checkedAt": "2026-10-03T15:45:04.098Z",
-    "verificationScope": "36 passed; 1 isolated database suite intentionally skipped in this unit invocation. Real Preview booking and production promotion are not certified by this evidence; separate live reports are required."
+    "fingerprint": "88a021a664d7aa358aa91f5345068fc6b4aa04651d4c591ecf93df96f7e73f90",
+    "tests": 58,
+    "checkedAt": "2026-10-03T16:17:17.899Z",
+    "verificationScope": "58 passed; 1 isolated database suite intentionally skipped in this unit invocation. Real Preview booking and production promotion are not certified by this evidence; separate live reports are required."
   }
 }
