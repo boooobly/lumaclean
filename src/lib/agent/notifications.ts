@@ -5,6 +5,7 @@ import type { Prisma, PrismaClient } from '@/generated/prisma/client';
 import { localInput } from '@/lib/domain/crm';
 import { customerTelegramConfigured, channelAdapter, type DeliveryResult } from './channels';
 import { AgentError } from './contracts';
+import { deliverHandoffNotification, handoffKinds } from './telegram-handoff';
 type Tx=Prisma.TransactionClient;
 export const notificationWake=z.object({notificationId:z.string().min(1).max(80)}).strict();
 /** Events are committed with domain changes; delivery is always a separate worker. */
@@ -39,6 +40,13 @@ export async function orderNotifications(tx:Tx,orderId:string,kind:'BOOKED'|'CHA
 export async function handoffNotification(tx:Tx,conversationId:string,eventId:string,reason:string){
   const owner=await tx.user.findFirst({where:{active:true,role:'ADMIN'},orderBy:{createdAt:'asc'},select:{id:true}});
   if(owner)await tx.notification.upsert({where:{eventKey:`handoff:${eventId}`},create:{eventKey:`handoff:${eventId}`,conversationId,userId:owner.id,audience:'ADMIN',kind:'HANDOFF',channel:'WEBSITE',text:`AI требуется помощь\nПричина: ${reason}`,scheduledAt:new Date(),deliveryState:'INTERNAL',payload:{reason}},update:{}});
+  if(owner){
+    const c=await tx.conversation.findUniqueOrThrow({where:{id:conversationId},include:{client:{select:{name:true}},lead:{select:{name:true}},messages:{where:{author:'CLIENT'},orderBy:{sentAt:'desc'},take:1,select:{text:true}}}});
+    const state=c.state as {name?:unknown}|null;
+    const name=c.client?.name??c.lead?.name??(typeof state?.name==='string'?state.name:'Новый клиент');
+    const reasons:Record<string,string>={CLIENT_REQUEST:'Клиент попросил оператора',UNCERTAINTY:'Нужно уточнение оператора',TOOL_ERRORS:'Не удалось выполнить действие',PROVIDERS_UNAVAILABLE:'AI временно недоступен',COMPLAINT:'Жалоба клиента',DISCOUNT:'Нестандартная скидка'};
+    await tx.notification.upsert({where:{eventKey:`handoff:${eventId}:telegram`},create:{eventKey:`handoff:${eventId}:telegram`,conversationId,userId:owner.id,audience:'ADMIN',kind:'HANDOFF_TELEGRAM',channel:'TELEGRAM',text:`🙋 AI передал клиента человеку\nКлиент: ${name.slice(0,80)}\nПричина: ${reasons[reason]??reason}\n${c.messages[0]?.text.slice(0,500)??''}`,scheduledAt:new Date(),deliveryState:'PENDING',payload:{handoffId:eventId,reason}},update:{}});
+  }
 }
 /** Repeated publishing is harmless. Long reminders are refreshed by daily recovery. */
 export async function publishNotifications(db:PrismaClient){
@@ -74,11 +82,15 @@ export async function deliverNotification(db:PrismaClient,id:string,deliver?:(th
     await db.notification.update({where:{id},data:{deliveryState:'INTERNAL',leaseKey:null,leaseUntil:null}});return;
   }
   const c=row.conversationId?await db.conversation.findUnique({where:{id:row.conversationId}}):null;
-  if(!c?.identityVerified||c.clientId!==row.clientId||c.channel!=='TELEGRAM'||!customerTelegramConfigured())result={status:'FAILED',errorCode:'CUSTOMER_CHANNEL_UNCONFIGURED'};
+  if(row.audience==='ADMIN'&&handoffKinds.includes(row.kind??'')){
+    result=await deliverHandoffNotification(db,id,leaseKey,deliver?async(text)=>deliver(process.env.TELEGRAM_CHAT_ID??'',text):undefined);
+    if(result.errorCode==='HANDOFF_CANCELLED')return;
+  }
+  else if(!c?.identityVerified||c.clientId!==row.clientId||c.channel!=='TELEGRAM'||!customerTelegramConfigured())result={status:'FAILED',errorCode:'CUSTOMER_CHANNEL_UNCONFIGURED'};
   else try{result=await (deliver?deliver(c.externalThreadId??'',row.text):channelAdapter('TELEGRAM').send({id,externalThreadId:c.externalThreadId??'',text:row.text}));}catch{result={status:'UNKNOWN',errorCode:'DELIVERY_OUTCOME_UNKNOWN'};}
   const retry=result.status==='FAILED'&&result.errorCode==='TELEGRAM_RATE_LIMIT'&&row.attempts<4;
   await db.notification.updateMany({where:{id,leaseKey},data:{deliveryState:retry?'PENDING':result.status,status:result.status==='DELIVERED'?'SENT':retry?'PENDING':'FAILED',lastErrorCode:result.errorCode??null,sentAt:result.status==='DELIVERED'?new Date():null,nextAttemptAt:retry?new Date(Date.now()+Math.min(300000,30000*2**row.attempts)):null,publishedAt:retry?null:row.publishedAt,leaseKey:null,leaseUntil:null}});
-  if(result.status!=='DELIVERED'&&c)await db.conversation.update({where:{id:c.id},data:{needsAttention:true}});
+  if(result.status!=='DELIVERED'&&c)await db.conversation.updateMany({where:{id:c.id,...(handoffKinds.includes(row.kind??'')?{control:'HUMAN_CONTROL',ownerId:null}:{})},data:{needsAttention:true}});
   if(retry)throw new AgentError('NOTIFICATION_RETRY');
 }
 export async function recoverNotifications(db:PrismaClient){
