@@ -1,5 +1,5 @@
 {
-  "fingerprint": "aa979862cb63720dcc5fedfed6a320ead46c30fe6a15fcdfe0008bd102cdf21f",
+  "fingerprint": "6b2133c3b20aabd9f635c22d4d558a2a8defc159a470e905392f4e1d09bb638a",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -81,7 +81,7 @@
     "src/components/admin/duration-estimate.tsx": "ebb1a54126311efbcdd8ed0375e97ab48e5009e36c4a4b4bab7365ea0097dbce",
     "src/components/admin/finance-forms.tsx": "6401fdc1bd6d28510ab43fd771c430f04ced940b2924fe29b061b34ec2facac1",
     "src/components/admin/import-workspace.tsx": "b19741a863f2d0aa4f39a6a5a5a4dd8207f4d01d3257c5fe87e6ad3e93304498",
-    "src/components/admin/inbox-controls.tsx": "29ae0a4e0810a5c275ddd37eb5af747a0ea4775f684d63e9efdfb864fcf27fb7",
+    "src/components/admin/inbox-controls.tsx": "f626dbcdd79e398b42a12f9338f822de7a24ff139c78bd30ae30139cf0fb1f7a",
     "src/components/admin/inbox-list.tsx": "ca8538f11fb69ebaa6bbe1349f6c9d1f0ff0665fa135bdf3b7cf6a8c57820ce7",
     "src/components/admin/live-readiness-controls.tsx": "d402d9400cd5ec6fa4403a421de1c8ce26933fdcbf77806b9f00b6fec71c0eee",
     "src/components/admin/login-form.tsx": "66a2e1b5406317c8d7fac52f35e0f3ebaec184f5e0b4883a729ae8339e3c2e91",
@@ -235,7 +235,7 @@
   "lint": true,
   "typecheck": true,
   "migration": true,
-  "checkedAt": "2026-10-04T14:27:47.461Z",
+  "checkedAt": "2026-10-04T14:45:52.019Z",
   "suites": [
     "47 Chat V2 + native provider/policy tests, including 16 isolated Preview database cases",
     "7 HTTP tests against current build: SSE cookie scope/reconnect, CSRF, real private Blob, actual receipts/typing",
@@ -243,9 +243,9 @@
   ],
   "verificationScope": "55 targeted tests passed. Typecheck, affected lint and production build passed. Real native image probes: OpenRouter 3/3; PoYo clean-kitchen native vision+tool call passed, dirty-kitchen/bathroom exceeded 22s timeout; tested failover and blind fallback. Chrome local supplied two-turn transcript and 390px layout passed. Actual Vercel Preview booking and deployment QA require separate live proof.",
   "previousVerification": {
-    "fingerprint": "22408039121a62ac274bfc8769748c92f571f9335db9f38d7a446b094c61eab0",
+    "fingerprint": "aa979862cb63720dcc5fedfed6a320ead46c30fe6a15fcdfe0008bd102cdf21f",
     "tests": 55,
-    "checkedAt": "2026-10-04T14:08:29.887Z",
+    "checkedAt": "2026-10-04T14:27:47.461Z",
     "verificationScope": "55 targeted tests passed. Typecheck, affected lint and production build passed. Real native image probes: OpenRouter 3/3; PoYo clean-kitchen native vision+tool call passed, dirty-kitchen/bathroom exceeded 22s timeout; tested failover and blind fallback. Chrome local supplied two-turn transcript and 390px layout passed. Actual Vercel Preview booking and deployment QA require separate live proof."
   }
 }

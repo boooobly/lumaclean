@@ -94,7 +94,7 @@ export function InboxControls({
         }),
         b = await r.json();
       if (!r.ok) {
-        setError(b.error ?? "Не удалось выполнить действие");
+        setError(typeof b.error === "string" ? b.error : typeof b.error?.message === "string" ? b.error.message : "Не удалось выполнить действие");
         return;
       }
       if (payload.action === "reply") {
