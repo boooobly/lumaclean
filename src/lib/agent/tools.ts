@@ -11,6 +11,7 @@ import { assessScheduling, lockCrew, schedulingLock } from "@/lib/services/sched
 import { writeAudit } from "@/lib/services/audit";
 import { effectiveMode,assertAutoReady } from './readiness';
 import {assertPreviewBatch} from './live-proof';
+import {photoQualificationAllowed} from './chat-attachments';
 import { orderNotifications, handoffNotification } from './notifications';
 import { AgentError, toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
@@ -165,10 +166,12 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   }
   if(name==="createOrUpdateLead")return updateLead(tx,c,ctx,toolSchemas[name].parse(payload));
   if(name==="calculatePrice"){
-    const input=toolSchemas[name].parse(payload),pricing=await activePrice(tx,state,c,input);
+    const input=toolSchemas[name].parse(payload);
+    if(!await photoQualificationAllowed(tx,c.id,input))return{error:'CUSTOMER_FACTS_REQUIRED',message:'Photos cannot supply floor area or dirt category. Ask the customer to confirm the area and dirt level in text before calculating a price.'};
+    const pricing=await activePrice(tx,state,c,input);
     state.qualification=input;
     state.quote={id:randomUUID(),serviceId:pricing.service.id,input,total:pricing.snapshot.finalPrice,base:pricing.calculated.base,discountPercent:pricing.snapshot.discountPercent,requiresHumanReview:pricing.requiresHumanReview,at:new Date().toISOString()};
-    delete state.duration;delete state.slots;delete state.pending;
+    delete state.duration;delete state.slots;delete state.selectedSlotToken;delete state.pending;
     if(ctx.mode==="AUTO"&&c.leadId)await tx.lead.update({where:{id:c.leadId},data:{area:input.area,serviceId:pricing.service.id,urgent:input.urgent,estimatedPrice:state.quote.total}});
     if(ctx.mode==="AUTO")await aiAudit(tx,ctx,"AI_QUOTE_GENERATED","Conversation",c.id);
     return{quoteId:state.quote.id,base:pricing.calculated.base,extras:pricing.calculated.extras,total:state.quote.total,currency:"RSD",discountPercent:state.quote.discountPercent,requiresHumanReview:pricing.requiresHumanReview,estimate:true};
@@ -190,7 +193,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     if(input.placeId&&!state.addressCandidates?.some(a=>a.placeId===input.placeId))return{error:"ADDRESS_SELECTION_REQUIRED"};
     const result=await placesRequest(input.placeId?"place":"autocomplete",{query:state.addressCandidates?.find(a=>a.placeId===input.placeId)?.query??input.query,placeId:input.placeId,sessionToken});
     if(!result.available)return{error:"ROUTING_UNRELIABLE"};
-    if("proof" in result&&result.proof&&result.address){state.address={fullAddress:result.address,proof:result.proof,apartment:input.apartment};delete state.pending;delete state.slots;return{verified:true,address:result.address};}
+    if("proof" in result&&result.proof&&result.address){state.address={fullAddress:result.address,proof:result.proof,apartment:input.apartment};delete state.pending;delete state.slots;delete state.selectedSlotToken;return{verified:true,address:result.address};}
     if("suggestions" in result){state.addressCandidates=(result.suggestions as {placeId:string;text:string}[]).map(a=>({...a,query:input.query}));return{candidates:state.addressCandidates,needsSelection:true};}
     return{error:"AMBIGUOUS"};
   }
@@ -198,7 +201,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     if(!c.identityVerified||!c.clientId)return{error:"IDENTITY_REQUIRED"};
     const input=toolSchemas[name].parse(payload);
     const addresses=await tx.clientAddress.findMany({where:{clientId:c.clientId,active:true},select:{id:true,fullAddress:true,latitude:true,longitude:true,placeId:true,coordinatesConfirmed:true},take:10});
-    if(input.addressId){const selected=addresses.find(a=>a.id===input.addressId);if(!selected)return{error:"IDENTITY_REQUIRED"};if(selected.latitude===null||selected.longitude===null||!selected.coordinatesConfirmed)return{error:"ROUTING_UNRELIABLE"};state.address={fullAddress:selected.fullAddress,addressId:selected.id};delete state.pending;delete state.slots;}
+    if(input.addressId){const selected=addresses.find(a=>a.id===input.addressId);if(!selected)return{error:"IDENTITY_REQUIRED"};if(selected.latitude===null||selected.longitude===null||!selected.coordinatesConfirmed)return{error:"ROUTING_UNRELIABLE"};state.address={fullAddress:selected.fullAddress,addressId:selected.id};delete state.pending;delete state.slots;delete state.selectedSlotToken;}
     return{addresses:addresses.map(a=>({addressId:a.id,address:a.fullAddress}))};
   }
   if(name==="findAvailableSlots"){
@@ -213,7 +216,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const snapshot=await routingSnapshot(tx,window.date);
     const result=await findSlots(tx,{...window,duration:state.duration.minutes,requiredCleaners:state.duration.requiredCleaners,...(state.address.addressId?{addressId:state.address.addressId}:{locationProof:state.address.proof}),...(state.rescheduleRequested?{orderId:c.orderId}:{})},{reserveMinutes:state.duration.reserve,allowReschedule:!!state.rescheduleRequested});
     if(!result.slots.length)return{error:"NO_SLOTS",slots:[],requiresHumanReview:true};
-    state.slots=[];
+    state.slots=[];delete state.selectedSlotToken;
     for(const s of result.slots.slice(0,3)){
       const token=randomUUID();
       if(ctx.mode==="AUTO")await tx.agentSlot.create({data:{id:token,conversationId:c.id,fingerprint:slotFingerprint(state),scheduleVersion:snapshot.version,start:s.start,durationMinutes:state.duration.minutes,requiredCleaners:state.duration.requiredCleaners,cleanerIds:s.cleanerIds,routingSnapshot:json(s.legs.map(l=>({cleanerId:l.cleanerId,status:l.route.status,expiresAt:l.route.expiresAt}))),expiresAt:new Date(Date.now()+10*60000)}});
@@ -224,6 +227,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   }
   if(name==="validateSlot"){
     const input=toolSchemas[name].parse(payload);
+    if(state.selectedSlotToken&&input.slotToken!==state.selectedSlotToken)return{error:'STALE_SLOT'};
     if(!state.name||!state.phone||!normalizedPhone(state.phone))return{error:"CONTACT_REQUIRED"};
     if(ctx.mode==="SHADOW")return{planned:true,error:"SHADOW_MUTATION_BLOCKED",operation:"validateSlot"};
     const slot=await checkedSlot(tx,c,ctx,input.slotToken);

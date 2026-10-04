@@ -34,6 +34,7 @@
     "@next/env": "16.3.8",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
+    "@vercel/blob": "^2.8.0",
     "@vercel/functions": "3.9.9",
     "@vercel/queue": "0.7.0",
     "better-auth": "1.7.7",
@@ -48,6 +49,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "server-only": "0.0.1",
+    "sharp": "^0.35.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {

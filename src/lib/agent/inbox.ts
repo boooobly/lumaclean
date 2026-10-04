@@ -8,6 +8,8 @@ import { detectLocale, confirmsRecap, rescheduleIntent } from "./policy";
 import { json, stateOf } from "./tools";
 import { channelAdapter, type InboundEvent } from "./channels";
 import { assertAutoReady, effectiveMode } from './readiness';
+import {chooseAlias,quickReplies,replyText,isReplyKey} from './chat-presentation';
+import {attachmentSelect} from './chat-attachments';
 
 export const anonymousHash=(token:string)=>createHash("sha256").update(token).digest("hex");
 export async function rateLimit(db:PrismaClient,scope:string,max:number,periodMs=60000){
@@ -22,10 +24,11 @@ export async function scopedConversation(db:PrismaClient,token:string|null){
 export async function startWebsiteConversation(db:PrismaClient,locale:AgentLocale,ipHash:string){
   await rateLimit(db,`new:${ipHash}`,12,86400000);
   const token=randomBytes(32).toString("hex");
-  const conversation=await db.conversation.create({data:{channel:"WEBSITE",locale,anonymousHash:anonymousHash(token),sessionExpiresAt:new Date(Date.now()+30*86400000)}});
+  const recent=await db.conversation.findMany({where:{channel:'WEBSITE'},orderBy:{createdAt:'desc'},take:3,select:{displayAlias:true}});
+  const conversation=await db.conversation.create({data:{channel:"WEBSITE",locale,displayAlias:chooseAlias(recent.map(c=>c.displayAlias)),anonymousHash:anonymousHash(token),sessionExpiresAt:new Date(Date.now()+30*86400000)}});
   return{token,conversation};
 }
-export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:string;text:string;locale:string;confirmationNonce?:string}){
+export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:string;text:string;locale?:string;confirmationNonce?:string;attachmentIds?:string[];quickReply?:{key:string;messageId:string;revision:number}}){
   const accepted=await db.message.findUnique({where:{conversationId_externalMessageId:{conversationId:c.id,externalMessageId:`in:${input.id}`}}});
   if(accepted)return{messageId:accepted.id,created:false};
   await rateLimit(db,`message:${c.id}`,8);
@@ -40,13 +43,25 @@ export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:str
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
     if(count>=Math.min(1000,Math.max(1,settings.aiMaxAnonymousMessages)))throw new AgentError("CONVERSATION_LIMIT");
     const state=stateOf(current);
-    const confirmation=!!state.pending&&(input.confirmationNonce===state.pending.nonce||confirmsRecap(input.text,state.pending.recap));
+    let text=input.text;
+    if(input.quickReply){
+      const last=await tx.message.findFirst({where:{conversationId:c.id},orderBy:[{sentAt:'desc'},{id:'desc'}]});
+      const q=input.quickReply;
+      if(current.revision!==q.revision||last?.id!==q.messageId||last.author!=='AI'||!quickReplies(last.text,state,current.locale,current.control).some(r=>r.key===q.key))throw new AgentError('STALE_QUICK_REPLY');
+      if(isReplyKey(q.key))text=replyText(q.key,current.locale);
+      else{const slot=state.slots?.find(s=>`SLOT:${s.token}`===q.key);if(!slot||!await tx.agentSlot.count({where:{id:slot.token,conversationId:c.id,expiresAt:{gt:new Date()},usedAt:null}}))throw new AgentError('STALE_SLOT');state.selectedSlotToken=slot.token;text=`${current.locale==='ru'?'Выбираю время':current.locale==='en'?'I select this time':current.locale==='sr-Cyrl'?'Бирам термин':'Biram termin'}: ${new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Belgrade',dateStyle:'short',timeStyle:'short'}).format(new Date(slot.start))}`;}
+    }
+    const ids=[...new Set(input.attachmentIds??[])];
+    if(ids.length>4||ids.length!==input.attachmentIds?.length&&!!input.attachmentIds)throw new AgentError('INVALID_ATTACHMENTS');
+    if(ids.length&&await tx.chatAttachment.count({where:{id:{in:ids},conversationId:c.id,messageId:null,uploader:'CLIENT',processingStatus:'READY'}})!==ids.length)throw new AgentError('INVALID_ATTACHMENTS');
+    const confirmation=!!state.pending&&(input.confirmationNonce===state.pending.nonce||confirmsRecap(text,state.pending.recap));
   if(input.confirmationNonce&&input.confirmationNonce!==state.pending?.nonce)throw new AgentError("INVALID_CONFIRMATION");
-    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text:input.text,externalMessageId:`in:${input.id}`}});
+    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text,externalMessageId:`in:${input.id}`}});
+    if(ids.length)await tx.chatAttachment.updateMany({where:{id:{in:ids},conversationId:c.id,messageId:null},data:{messageId:message.id}});
     if(confirmation)state.pending!.confirmedByMessageId=message.id;
     else if(state.pending)delete state.pending;
-    if(rescheduleIntent(input.text)){state.rescheduleRequested=true;delete state.booking;}
-    await tx.conversation.update({where:{id:c.id},data:{locale:detectLocale(input.text,input.locale),state:json(state),revision:{increment:1},unreadCount:{increment:1},lastMessageAt:new Date(),needsAttention:true,shadowProposal:Prisma.DbNull}});
+    if(rescheduleIntent(text)){state.rescheduleRequested=true;delete state.booking;}
+    await tx.conversation.update({where:{id:c.id},data:{locale:detectLocale(text,current.locale),operatorTypingUntil:null,state:json(state),revision:{increment:1},unreadCount:{increment:1},lastMessageAt:new Date(),needsAttention:true,shadowProposal:Prisma.DbNull}});
     await tx.agentJob.create({data:{conversationId:c.id,messageId:message.id}});
     return{messageId:message.id,created:true};
   });
@@ -57,14 +72,17 @@ export async function acceptChannelMessage(db:PrismaClient,event:InboundEvent){
 }
 export async function publicConversation(db:PrismaClient,c:Conversation){
   const latest=await db.conversation.findUniqueOrThrow({where:{id:c.id}}),state=stateOf(latest);
-  const messages=await db.message.findMany({where:{conversationId:c.id,deliveryStatus:"DELIVERED",author:{in:["CLIENT","AI","ADMIN","SYSTEM"]}},orderBy:{sentAt:"desc"},take:50,select:{id:true,author:true,text:true,sentAt:true,structured:true}});
-  const pending=await db.agentJob.count({where:{conversationId:c.id,status:{in:["PENDING","RUNNING"]}}});
+  const messages=await db.message.findMany({where:{conversationId:c.id,deliveryStatus:"DELIVERED",author:{in:["CLIENT","AI","ADMIN","SYSTEM"]}},orderBy:[{sentAt:"desc"},{id:'desc'}],take:50,select:{id:true,author:true,text:true,sentAt:true,readAt:true,structured:true,externalMessageId:true,attachments:{select:attachmentSelect}}});
+  const jobs=await db.agentJob.findMany({where:{conversationId:c.id,status:{in:["PENDING","RUNNING"]}},select:{status:true,leaseUntil:true}});
   const notifications=await db.notification.findMany({where:{conversationId:c.id,audience:"CLIENT",clientId:latest.clientId,deliveryState:"INTERNAL",scheduledAt:{lte:new Date()}},orderBy:{scheduledAt:"desc"},take:10,select:{id:true,text:true,kind:true,scheduledAt:true}});
-  return{notifications,messages:messages.reverse(),control:latest.control,locale:latest.locale,pending:pending>0,confirmation:state.pending?{nonce:state.pending.nonce,recap:state.pending.recap}:null,booking:state.booking?{reference:state.booking.reference,recap:(({orderId,reference,...r})=>{void orderId;void reference;return r;})(state.booking)}:null};
+  const last=messages[0],choices=last?.author==='AI'?quickReplies(last.text,state,latest.locale,latest.control):[];
+  return{notifications,messages:messages.reverse().map(({externalMessageId,...m})=>({...m,...(m.author==='CLIENT'?{requestId:externalMessageId?.startsWith('in:')?externalMessageId.slice(3):null}:{})})),displayAlias:latest.displayAlias,revision:latest.revision,quickReplies:choices.length?{messageId:last.id,revision:latest.revision,choices}:null,typing:latest.control==='HUMAN_CONTROL'?!!latest.operatorTypingUntil&&latest.operatorTypingUntil>new Date():latest.control==='AI_CONTROL'&&jobs.some(j=>j.status==='RUNNING'&&!!j.leaseUntil&&j.leaseUntil>new Date()),control:latest.control,locale:latest.locale,pending:jobs.length>0,confirmation:state.pending?{nonce:state.pending.nonce,recap:state.pending.recap}:null,booking:state.booking?{reference:state.booking.reference,recap:(({orderId,reference,...r})=>{void orderId;void reference;return r;})(state.booking)}:null};
 }
 export const inboxCommandSchema=z.discriminatedUnion("action",[
-  z.object({action:z.enum(["takeover","resume","close","read","retry"]),id:z.string().min(1).max(80)}).strict(),
-  z.object({action:z.literal("reply"),id:z.string().min(1).max(80),requestId:z.uuid(),text:z.string().trim().min(1).max(3000)}).strict(),
+  z.object({action:z.literal('typing'),id:z.string().min(1).max(80),active:z.boolean()}).strict(),
+  z.object({action:z.enum(["takeover","resume","close","retry"]),id:z.string().min(1).max(80)}).strict(),
+  z.object({action:z.literal('read'),id:z.string().min(1).max(80),messageId:z.string().min(1).max(80).optional()}).strict(),
+  z.object({action:z.literal("reply"),id:z.string().min(1).max(80),requestId:z.uuid(),text:z.string().trim().max(3000),attachmentIds:z.array(z.uuid()).max(4).optional()}).strict().refine(v=>!!v.text||!!v.attachmentIds?.length),
   z.object({action:z.literal("mode"),mode:z.enum(["OFF","SHADOW","AUTO"]),confirmAuto:z.literal(true).optional()}).strict(),
   z.object({action:z.literal("verifyIdentity"),id:z.string().min(1).max(80),clientId:z.string().min(1).max(80),verificationConfirmed:z.literal(true)}).strict(),
   z.object({action:z.literal('evaluate'),id:z.string().min(1).max(80),suggestionId:z.string().min(1).max(80),verdict:z.enum(['ACCEPTED','REJECTED']),reason:z.enum(['MISUNDERSTOOD','TONE','EXTRA_QUESTION','TOOL','PRICE','SCHEDULING','OTHER']).optional()}).strict(),
@@ -85,6 +103,11 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
     }
     await schedulingLock(tx,"conversation",input.id);
     const c=await tx.conversation.findUniqueOrThrow({where:{id:input.id}});
+    if(input.action==='typing'){
+      if(c.control!=='HUMAN_CONTROL'||c.ownerId!==userId)throw new AgentError('TAKEOVER_REQUIRED');
+      await tx.conversation.update({where:{id:c.id},data:{operatorTypingUntil:input.active?new Date(Date.now()+7000):null}});
+      return{ok:true};
+    }
     if(input.action==='evaluate'){
       if(input.verdict==='REJECTED'&&!input.reason)throw new AgentError('REJECTION_REASON_REQUIRED');
       const suggestion=await tx.shadowSuggestion.findFirst({where:{id:input.suggestionId,conversationId:c.id}});
@@ -92,14 +115,19 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
       await tx.shadowSuggestion.update({where:{id:suggestion.id},data:{verdict:input.verdict,reason:input.verdict==='REJECTED'?input.reason:null,reviewedById:userId,reviewedAt:new Date()}});
     }else if(input.action==="reply"){
       if(c.control!=="HUMAN_CONTROL")throw new AgentError("TAKEOVER_REQUIRED");
-      await tx.message.upsert({where:{conversationId_externalMessageId:{conversationId:c.id,externalMessageId:`admin:${input.requestId}`}},create:{conversationId:c.id,userId,author:"ADMIN",text:input.text,externalMessageId:`admin:${input.requestId}`,deliveryStatus:c.channel==="WEBSITE"?"DELIVERED":"PENDING"},update:{}});
-      await tx.conversation.update({where:{id:c.id},data:{ownerId:userId,lastMessageAt:new Date(),needsAttention:false,unreadCount:0,revision:{increment:1}}});
+      const existing=await tx.message.findUnique({where:{conversationId_externalMessageId:{conversationId:c.id,externalMessageId:`admin:${input.requestId}`}}});
+      if(!existing){const ids=[...new Set(input.attachmentIds??[])];if(ids.length&&await tx.chatAttachment.count({where:{id:{in:ids},conversationId:c.id,messageId:null,uploader:'ADMIN'}})!==ids.length)throw new AgentError('INVALID_ATTACHMENTS');const message=await tx.message.create({data:{conversationId:c.id,userId,author:"ADMIN",text:input.text,externalMessageId:`admin:${input.requestId}`,deliveryStatus:c.channel==="WEBSITE"?"DELIVERED":"PENDING"}});if(ids.length)await tx.chatAttachment.updateMany({where:{id:{in:ids}},data:{messageId:message.id}});}
+      await tx.message.updateMany({where:{conversationId:c.id,author:'CLIENT',readAt:null},data:{readAt:new Date()}});
+      await tx.conversation.update({where:{id:c.id},data:{operatorTypingUntil:null,ownerId:userId,lastMessageAt:new Date(),needsAttention:false,unreadCount:0,revision:{increment:1}}});
     }else if(input.action==="verifyIdentity"){
       if(c.control!=="HUMAN_CONTROL")throw new AgentError("TAKEOVER_REQUIRED");
       await tx.client.findUniqueOrThrow({where:{id:input.clientId}});
       const state:AgentState={};
       await tx.conversation.update({where:{id:c.id},data:{clientId:input.clientId,orderId:null,identityVerified:true,state:json(state),shadowState:json({}),revision:{increment:1},shadowProposal:Prisma.DbNull}});
     }else if(input.action==="read"){
+      const through=input.messageId?await tx.message.findFirst({where:{id:input.messageId,conversationId:c.id,author:'CLIENT'}}):null;
+      if(input.messageId&&!through)throw new AgentError('INVALID_MESSAGE');
+      if(c.control==='HUMAN_CONTROL')await tx.message.updateMany({where:{conversationId:c.id,author:'CLIENT',readAt:null,...(through?{sentAt:{lte:through.sentAt}}:{})},data:{readAt:new Date()}});
       await tx.conversation.update({where:{id:c.id},data:{unreadCount:0}});
     }else if(input.action==="retry"){
       const retried=await tx.agentJob.updateMany({where:{conversationId:c.id,status:{in:["FAILED","PENDING"]}},data:{status:"PENDING",leaseUntil:null,leaseKey:null,errorCode:null,completedAt:null}});
@@ -108,7 +136,7 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
     }else{
       const state=stateOf(c);delete state.pending;
       const control=input.action==="takeover"?"HUMAN_CONTROL":input.action==="close"?"CLOSED":"AI_CONTROL";
-      await tx.conversation.update({where:{id:c.id},data:{control,ownerId:control==="HUMAN_CONTROL"?userId:null,stage:control==="CLOSED"?"CLOSED":input.action==="resume"?"DISCOVERY":c.stage,state:json(state),revision:{increment:1},unreadCount:0,needsAttention:false,shadowProposal:Prisma.DbNull}});
+      await tx.conversation.update({where:{id:c.id},data:{operatorTypingUntil:null,closedAt:control==='CLOSED'?new Date():null,control,ownerId:control==="HUMAN_CONTROL"?userId:null,stage:control==="CLOSED"?"CLOSED":input.action==="resume"?"DISCOVERY":c.stage,state:json(state),revision:{increment:1},unreadCount:0,needsAttention:false,shadowProposal:Prisma.DbNull}});
       await tx.message.updateMany({where:{conversationId:c.id,author:"AI",deliveryStatus:"PENDING"},data:{deliveryStatus:"CANCELLED"}});
       if(input.action==="resume"){
         await tx.humanHandoff.updateMany({where:{conversationId:c.id,resolvedAt:null},data:{resolvedAt:new Date(),resolvedById:userId,resolution:"Возврат AI владельцем"}});

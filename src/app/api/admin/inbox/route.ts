@@ -18,7 +18,7 @@ export async function POST(request:Request){
     const payload=inboxCommandSchema.parse(JSON.parse((await boundedBody(request,15000)).toString()));
     const db=getDatabase();await runInboxCommand(db,user.id,payload);
     if(payload.action==="reply"||payload.action==="retry"||payload.action==="resume")if(!await enqueueAgent(db,payload.id))after(()=>drainAgentJobs(db,payload.id));
-    revalidatePath("/admin","layout");
+    if(payload.action!=='typing')revalidatePath("/admin","layout");
     return NextResponse.json({ok:true},{headers:{"Cache-Control":"private, no-store"}});
   }catch(e){return NextResponse.json({ok:false,error:e instanceof AgentError?e.code:"Проверьте запрос или повторите позже."},{status:e instanceof AgentError&&e.code==="FORBIDDEN"?403:400});}
 }

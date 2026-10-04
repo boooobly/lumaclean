@@ -2,7 +2,7 @@ import { z } from "zod";
 import { AgentError, type ToolName, nativeTools } from "./contracts";
 
 export type ToolCall = {id:string;name:ToolName;arguments:string};
-export type AgentMessage = {role:"system"|"user"|"assistant"|"tool";content:string;toolCalls?:ToolCall[];toolCallId?:string};
+export type AgentMessage = {role:"system"|"user"|"assistant"|"tool";content:string;images?:{mimeType:'image/jpeg';data:string}[];toolCalls?:ToolCall[];toolCallId?:string};
 export type Completion = {text:string;toolCalls:ToolCall[];inputTokens:number;cachedInputTokens:number;outputTokens:number;latencyMs:number;provider:string;model:string;estimatedCostUsd:number|null};
 export interface AIProvider { readonly name:string; readonly model:string; complete(messages:AgentMessage[],signal?:AbortSignal):Promise<Completion>; }
 const wireTool = z.object({id:z.string().min(1).max(200),function:z.object({name:z.string().max(100),arguments:z.string().max(8000)})});
@@ -48,13 +48,13 @@ abstract class HTTPProvider implements AIProvider {
 }
 export class OpenRouterProvider extends HTTPProvider {
   readonly name="openrouter";
-  complete(messages:AgentMessage[],signal?:AbortSignal){return this.request("https://openrouter.ai/api/v1/chat/completions",{model:this.model,messages:messages.map(m=>({role:m.role,content:m.content,...(m.toolCallId?{tool_call_id:m.toolCallId}:{}),...(m.toolCalls?{tool_calls:m.toolCalls.map(c=>({id:c.id,type:"function",function:{name:c.name,arguments:c.arguments}}))}:{})})),tools:nativeTools,max_tokens:1200,provider:{require_parameters:true}},"chat",signal);}
+  complete(messages:AgentMessage[],signal?:AbortSignal){return this.request("https://openrouter.ai/api/v1/chat/completions",{model:this.model,messages:messages.map(m=>({role:m.role,content:m.images?.length?[{type:'text',text:m.content},...m.images.map(i=>({type:'image_url',image_url:{url:`data:${i.mimeType};base64,${i.data}`}}))]:m.content,...(m.toolCallId?{tool_call_id:m.toolCallId}:{}),...(m.toolCalls?{tool_calls:m.toolCalls.map(c=>({id:c.id,type:"function",function:{name:c.name,arguments:c.arguments}}))}:{})})),tools:nativeTools,max_tokens:1200,provider:{require_parameters:true}},"chat",signal);}
 }
 export class PoyoProvider extends HTTPProvider {
   readonly name="poyo";
   // Native Responses function calling, never parse pseudo-tool JSON from plain text.
   complete(messages:AgentMessage[],signal?:AbortSignal){
-    const input=messages.flatMap<Record<string,unknown>>(m=>m.role==="tool"?[{type:"function_call_output",call_id:m.toolCallId,output:m.content}]:m.toolCalls?m.toolCalls.map(c=>({type:"function_call",call_id:c.id,name:c.name,arguments:c.arguments})):[{role:m.role,content:m.content}]);
+    const input=messages.flatMap<Record<string,unknown>>(m=>m.role==="tool"?[{type:"function_call_output",call_id:m.toolCallId,output:m.content}]:m.toolCalls?m.toolCalls.map(c=>({type:"function_call",call_id:c.id,name:c.name,arguments:c.arguments})):[{role:m.role,content:m.images?.length?[{type:'input_text',text:m.content},...m.images.map(i=>({type:'input_image',image_url:`data:${i.mimeType};base64,${i.data}`,detail:'auto'}))]:m.content}]);
     return this.request("https://api.poyo.ai/v1/responses",{model:this.model,input,tools:nativeTools.map(t=>({type:"function",...t.function})),max_output_tokens:1200,parallel_tool_calls:false,reasoning:{effort:"low"},store:false},"responses",signal);
   }
 }
