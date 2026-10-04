@@ -1,5 +1,5 @@
 {
-  "fingerprint": "3f6beb2d6a3204f4bf2b34fcaabbd7ea330615df4b30d81014b2d12e9c350f37",
+  "fingerprint": "38f59d50ab7576fac243171403b5aa009a00a696317ab5653c9c5f161fabc1b0",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -44,6 +44,7 @@
     "src/app/api/admin/inbox/route.ts": "a8b95842a78da010ada6fe1e3ff37af8599bb727a63b22416d7c1cc32b0ea143",
     "src/app/api/admin/routing/[command]/route.ts": "e806221f50eacd7e91c9888b820d4c561f62918158b69b332471f98258d46bb6",
     "src/app/api/admin/scheduling/[command]/route.ts": "a808df5f4c0be7dd68784dd330276670a3277fc469e876771d9a2e94bc457727",
+    "src/app/api/admin/telegram-handoff/route.ts": "06655bdde69f4c8ac083b216c3d91a7cade36d35a4d4aaf09762f7c8965639db",
     "src/app/api/agent/recover/route.ts": "2cd917b230a3876472b63d5aa6098f26a8fda18a7b4ceaef506992243fba094d",
     "src/app/api/auth/[...all]/route.ts": "ec656fe6ca65cc8670f619a8169e199628fbfa00da10af85e3f96ded88e0c485",
     "src/app/api/channels/telegram/route.ts": "2302478fc888407a9fc2613c592a6340fb4568914c26a8f8a0f5c66ca2e1be10",
@@ -53,7 +54,8 @@
     "src/app/api/chat/route.ts": "efac93cb01c358bcde185f3fa8e68dca4810df9a6ea2c9c846b7acfc2525ebbb",
     "src/app/api/lead/route.ts": "94abddc6411f13ca5b9ac2c80c7c1995f9465aa02a1868143b3a12082519c8e1",
     "src/app/api/queues/agent/route.ts": "9c56c701256720464971d1315ac967008863a4974d4a61b493052f775e821a54",
-    "src/app/api/queues/notifications/route.ts": "544958e3a432fe7da4898e68532a6d4ac51d1f7123b6b53a1d706fb7038ac2d8",
+    "src/app/api/queues/notifications/route.ts": "e479a94f1a407c92fd008e9e7a5d28d7f078e73abdf90cc1425eba3ace8c32c4",
+    "src/app/api/telegram/handoff/route.ts": "32bcc58c21cf6ba0455080f2b75b2ef2112b89dea6598631e20f9404653324af",
     "src/app/globals.css": "b5c3edc1fcc2f480f1c7080920c7618a296a63ec53ed700b4d5a9629b59e93a4",
     "src/app/icon.svg": "01cde45ba72881463221bd30579e4cb1240bdd7b5eb8059f46edcc35da1d6e0f",
     "src/app/robots.ts": "d76d0417be060de32e5948a59bfcd5b886a9d2cca4ed429900cd089670d4d637",
@@ -117,10 +119,10 @@
     "src/lib/agent/chat-presentation.ts": "df237afee2a6226fcc4609891bb5eb2195aa3a2cbd04bab8f7f9625f82fbb81d",
     "src/lib/agent/chat-upload-http.ts": "217ce3fc7f5e3be3c613bfebda0d4316fd222550a0473b02daf023262dd45302",
     "src/lib/agent/contracts.ts": "57e6610ddd72b66edf7d0f8516c282cd7d848ab8efec034dcddd85fe29032e3c",
-    "src/lib/agent/inbox.ts": "55cde153fbeff1b68d37b2d07ce54aa7c2393dd484fa3e96ca7a3fd82a39bf38",
+    "src/lib/agent/inbox.ts": "13704228a4042063b9b4ec9e9a0d2bfe43495e06a95df0cf9f25822dc09c3242",
     "src/lib/agent/live-proof.ts": "65d68495c820b0db707b526524b50b64171882206c51170baa7d4993d113091a",
     "src/lib/agent/live-test.ts": "22256c8f2bf9877d7cb9c3040ab83472e0bcb24bd731477db4a8201ff749dcbb",
-    "src/lib/agent/notifications.ts": "b8a7e9a96e5935bc29b43cdc980a834f1b53df3ca696c6210ced8b4b59ffc47c",
+    "src/lib/agent/notifications.ts": "2959a67d9f931def58f44664ada2c22cecdaca9f11003f4c3020a5261bd33810",
     "src/lib/agent/policy.ts": "742785459196a910a151cfa4f6e4a06ae943793408ee6dd6ddb26e6184d3ab30",
     "src/lib/agent/providers.ts": "0718f09a7e9c18ced95a00a503d58b3528675b1d4f41d4729de3e98ef6977f46",
     "src/lib/agent/queries.ts": "fe8d551ce9660694fde080f5e5f885fce08f85aae28749119fe045a16f4b6588",
@@ -130,6 +132,7 @@
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
     "src/lib/agent/runner.ts": "ab59415b7a6c911b67201a6afc40a4acaf6bb9a3043e7659ab3b9ca9ade95169",
     "src/lib/agent/settings.ts": "75dd022523f454c55275f80cdfde1bfd6a5683ad44aa807697d7121d7f0c6634",
+    "src/lib/agent/telegram-handoff.ts": "6af3f4aa05345a484e9b5b65ef65381de0e67bf79cabef71cb8e99e30920ba44",
     "src/lib/agent/tools.ts": "d463b947eacab63945360b8a5059bf0382ce24d3f40e3f482cb2d4cfb0f04fd5",
     "src/lib/analytics.ts": "ac20e7f318855188db315705788fff372d2375f33cb1114b48612fa30f839498",
     "src/lib/articles/airbnb.ts": "6ac8861e9d41cadf626a26d54c10c2da58dd6bcfa376cb5cf40d35fd19952857",
@@ -231,21 +234,20 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 56,
+  "tests": 61,
   "lint": true,
   "typecheck": true,
   "migration": true,
-  "checkedAt": "2026-10-04T15:03:03.933Z",
+  "checkedAt": "2026-10-04T16:32:53.260Z",
   "suites": [
-    "48 Chat V2 + native provider/policy tests, including 17 isolated Preview database cases",
-    "7 HTTP tests against current build: SSE cookie scope/reconnect, CSRF, real private Blob, actual receipts/typing",
-    "1 isolated migration preservation proof: original Orders, AUTO mode and historical AI rows unchanged"
+    "13 Telegram handoff tests including 10 isolated Preview database cases: outbox idempotency, 120-second reminder, claim, Inbox cancellation, signed callback scoping and concurrent claim/leased reminder suppression",
+    "48 Chat V2 and native provider/policy regression tests including 17 isolated Preview database cases"
   ],
-  "verificationScope": "56 targeted tests passed. Typecheck, affected lint and production build passed. Real native image probes: OpenRouter 3/3; PoYo clean-kitchen native vision+tool call passed, dirty-kitchen/bathroom exceeded 22s timeout; tested failover and blind fallback. Chrome local and Vercel Preview supplied transcript, four languages, private photos, human takeover/typing/expiry and 390px layout passed. Fallback affinity applies to all tool chains and restarts primary on each new job. Actual Vercel Preview booking and deployment QA require separate live proof.",
+  "verificationScope": "61 targeted tests passed. Typecheck, affected lint and production build passed. Existing schema and all 13 migration files unchanged; no database migration required. Actual Telegram queue delivery and webhook setup are verified separately in production. Website mode remains AUTO; other customer channels remain OFF.",
   "previousVerification": {
-    "fingerprint": "6b2133c3b20aabd9f635c22d4d558a2a8defc159a470e905392f4e1d09bb638a",
-    "tests": 55,
-    "checkedAt": "2026-10-04T14:45:52.019Z",
-    "verificationScope": "55 targeted tests passed. Typecheck, affected lint and production build passed. Real native image probes: OpenRouter 3/3; PoYo clean-kitchen native vision+tool call passed, dirty-kitchen/bathroom exceeded 22s timeout; tested failover and blind fallback. Chrome local supplied two-turn transcript and 390px layout passed. Actual Vercel Preview booking and deployment QA require separate live proof."
+    "fingerprint": "3f6beb2d6a3204f4bf2b34fcaabbd7ea330615df4b30d81014b2d12e9c350f37",
+    "tests": 56,
+    "checkedAt": "2026-10-04T15:03:03.933Z",
+    "verificationScope": "56 targeted tests passed. Typecheck, affected lint and production build passed. Real native image probes: OpenRouter 3/3; PoYo clean-kitchen native vision+tool call passed, dirty-kitchen/bathroom exceeded 22s timeout; tested failover and blind fallback. Chrome local and Vercel Preview supplied transcript, four languages, private photos, human takeover/typing/expiry and 390px layout passed. Fallback affinity applies to all tool chains and restarts primary on each new job. Actual Vercel Preview booking and deployment QA require separate live proof."
   }
 }

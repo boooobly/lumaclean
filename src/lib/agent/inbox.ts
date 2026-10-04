@@ -8,6 +8,7 @@ import { detectLocale, confirmsRecap, rescheduleIntent } from "./policy";
 import { json, stateOf } from "./tools";
 import { channelAdapter, type InboundEvent } from "./channels";
 import { assertAutoReady, effectiveMode } from './readiness';
+import { resolveHandoffNotifications } from './telegram-handoff';
 import {chooseAlias,quickReplies,replyText,isReplyKey} from './chat-presentation';
 import {attachmentSelect} from './chat-attachments';
 
@@ -119,6 +120,7 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
       if(!existing){const ids=[...new Set(input.attachmentIds??[])];if(ids.length&&await tx.chatAttachment.count({where:{id:{in:ids},conversationId:c.id,messageId:null,uploader:'ADMIN'}})!==ids.length)throw new AgentError('INVALID_ATTACHMENTS');const message=await tx.message.create({data:{conversationId:c.id,userId,author:"ADMIN",text:input.text,externalMessageId:`admin:${input.requestId}`,deliveryStatus:c.channel==="WEBSITE"?"DELIVERED":"PENDING"}});if(ids.length)await tx.chatAttachment.updateMany({where:{id:{in:ids}},data:{messageId:message.id}});}
       await tx.message.updateMany({where:{conversationId:c.id,author:'CLIENT',readAt:null},data:{readAt:new Date()}});
       await tx.conversation.update({where:{id:c.id},data:{operatorTypingUntil:null,ownerId:userId,lastMessageAt:new Date(),needsAttention:false,unreadCount:0,revision:{increment:1}}});
+      await resolveHandoffNotifications(tx,c.id,userId,'Ответ оператора в Inbox');
     }else if(input.action==="verifyIdentity"){
       if(c.control!=="HUMAN_CONTROL")throw new AgentError("TAKEOVER_REQUIRED");
       await tx.client.findUniqueOrThrow({where:{id:input.clientId}});
@@ -138,8 +140,8 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
       const control=input.action==="takeover"?"HUMAN_CONTROL":input.action==="close"?"CLOSED":"AI_CONTROL";
       await tx.conversation.update({where:{id:c.id},data:{operatorTypingUntil:null,closedAt:control==='CLOSED'?new Date():null,control,ownerId:control==="HUMAN_CONTROL"?userId:null,stage:control==="CLOSED"?"CLOSED":input.action==="resume"?"DISCOVERY":c.stage,state:json(state),revision:{increment:1},unreadCount:0,needsAttention:false,shadowProposal:Prisma.DbNull}});
       await tx.message.updateMany({where:{conversationId:c.id,author:"AI",deliveryStatus:"PENDING"},data:{deliveryStatus:"CANCELLED"}});
+      await resolveHandoffNotifications(tx,c.id,userId,input.action==='takeover'?'Клиент забран в Inbox':input.action==='close'?'Диалог закрыт':'Возврат AI владельцем');
       if(input.action==="resume"){
-        await tx.humanHandoff.updateMany({where:{conversationId:c.id,resolvedAt:null},data:{resolvedAt:new Date(),resolvedById:userId,resolution:"Возврат AI владельцем"}});
         const last=await tx.message.findFirst({where:{conversationId:c.id,author:"CLIENT"},orderBy:{sentAt:"desc"}});
         if(last)await tx.agentJob.upsert({where:{messageId:last.id},create:{conversationId:c.id,messageId:last.id},update:{status:"PENDING",attempts:0,leaseUntil:null,errorCode:null}});
       }
