@@ -50,10 +50,13 @@ export async function prepareChatPhoto(file: File) {
 export function ChatPhotos({
   photos,
   label = "Photo",
+  locale = "ru",
 }: {
   photos: ChatPhoto[];
   label?: string;
+  locale?: string;
 }) {
+  const words = locale === "en" ? ["Close", "Previous photo", "Next photo"] : locale === "sr-Latn" ? ["Zatvori", "Prethodna fotografija", "Sledeća fotografija"] : locale === "sr-Cyrl" ? ["Затвори", "Претходна фотографија", "Следећа фотографија"] : ["Закрыть", "Предыдущее фото", "Следующее фото"];
   const [selected, setSelected] = useState<number | null>(null),
     close = useRef<HTMLButtonElement>(null),
     restore = useRef<HTMLElement | null>(null);
@@ -107,7 +110,7 @@ export function ChatPhotos({
             ref={close}
             type="button"
             className="chat-lightbox-close"
-            aria-label="Close"
+            aria-label={words[0]}
             onClick={() => setSelected(null)}
           >
             <X />
@@ -115,7 +118,7 @@ export function ChatPhotos({
           {photos.length > 1 && (
             <button
               type="button"
-              aria-label="Previous photo"
+              aria-label={words[1]}
               onClick={(e) => {
                 e.stopPropagation();
                 setSelected((selected + photos.length - 1) % photos.length);
@@ -132,7 +135,7 @@ export function ChatPhotos({
           {photos.length > 1 && (
             <button
               type="button"
-              aria-label="Next photo"
+              aria-label={words[2]}
               onClick={(e) => {
                 e.stopPropagation();
                 setSelected((selected + 1) % photos.length);

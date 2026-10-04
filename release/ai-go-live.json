@@ -1,5 +1,5 @@
 {
-  "fingerprint": "22408039121a62ac274bfc8769748c92f571f9335db9f38d7a446b094c61eab0",
+  "fingerprint": "aa979862cb63720dcc5fedfed6a320ead46c30fe6a15fcdfe0008bd102cdf21f",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -100,7 +100,7 @@
     "src/components/site/arrow-icon.tsx": "7ae46870e46fbf1252edc983d80c7bda786d2d0b04f5d784560296528aabe735",
     "src/components/site/article-components.tsx": "d97070aeb7b3a2922b045973ee61c991c0018771c2a13828ae4382e0eaaa7974",
     "src/components/site/article-data-table.tsx": "c1dc2f13055eb0946d5c28d187188ffc10a9af38e90e8800e3c6ed45e16dc96c",
-    "src/components/site/chat-photos.tsx": "26ddcd8db94ed7697306db40da6425fe1fc890cdd444041d8d09f380108d1349",
+    "src/components/site/chat-photos.tsx": "ebd544c245156cf58e1bec05c311e26e4e44901ff53c02860adbfcdd376b6039",
     "src/components/site/estimate.tsx": "7bbbcbc58592ec238a6019d730296df44d288a423559e5f675173e1d3caf36de",
     "src/components/site/google-profile-links.module.css": "68b9667bc02da1087c32600f1dfd65a722e10ef4f1215e9a27292976cfd0f3f5",
     "src/components/site/google-profile-links.tsx": "cf276374eb0dc502d611d59449976a86544d4d12b2da75790d450b09d33c0e40",
@@ -109,7 +109,7 @@
     "src/components/site/service-planning.tsx": "d8bfe885bad227fbed02e270326f635ee101420944d53c7789bdc3bdb04ac96f",
     "src/components/site/site-header.tsx": "ffa4d928e30464b9f4cf0af1194b2b943cf33e3216ca303520654dab9f785187",
     "src/components/site/website-chat.css": "4aa429c578bb8cf0053202cf29d642992119012f91f41f521cb59372d7a5c349",
-    "src/components/site/website-chat.tsx": "41839394746f4a102ded167549378480ac33c7513a751a02b41618f2803307ff",
+    "src/components/site/website-chat.tsx": "76192d94d5e84064d8d62310f0ae4f4180c5940ea118efc757610b3425b44402",
     "src/i18n/request.ts": "9e8c03ca10ec8022d7c4e46ecf5e25c4d9e723d9f7c9b04fc8a5401d00aead7a",
     "src/i18n/routing.ts": "68dfd0fa0c1ade7562be6a856caf3c410205dd654859cbeb2f7c5066842b4b50",
     "src/lib/agent/channels.ts": "c7854752725af7e9d003f489db462a0ff5436c885261f2cc2d214b02f1a700d9",
@@ -235,7 +235,7 @@
   "lint": true,
   "typecheck": true,
   "migration": true,
-  "checkedAt": "2026-10-04T14:08:29.887Z",
+  "checkedAt": "2026-10-04T14:27:47.461Z",
   "suites": [
     "47 Chat V2 + native provider/policy tests, including 16 isolated Preview database cases",
     "7 HTTP tests against current build: SSE cookie scope/reconnect, CSRF, real private Blob, actual receipts/typing",
@@ -243,9 +243,9 @@
   ],
   "verificationScope": "55 targeted tests passed. Typecheck, affected lint and production build passed. Real native image probes: OpenRouter 3/3; PoYo clean-kitchen native vision+tool call passed, dirty-kitchen/bathroom exceeded 22s timeout; tested failover and blind fallback. Chrome local supplied two-turn transcript and 390px layout passed. Actual Vercel Preview booking and deployment QA require separate live proof.",
   "previousVerification": {
-    "fingerprint": "edd2e472421378210c21bd3099b3b4e6b23c38c16909709478d9ed4d89aec864",
-    "tests": 26,
-    "checkedAt": "2026-10-03T17:26:07.846Z",
-    "verificationScope": "26 targeted tests passed (10 go-live + 16 live-readiness including isolated database). No broad audit repeated. Existing hybrid routing baseline retained. Actual Deep Preview booking requires separate live evidence."
+    "fingerprint": "22408039121a62ac274bfc8769748c92f571f9335db9f38d7a446b094c61eab0",
+    "tests": 55,
+    "checkedAt": "2026-10-04T14:08:29.887Z",
+    "verificationScope": "55 targeted tests passed. Typecheck, affected lint and production build passed. Real native image probes: OpenRouter 3/3; PoYo clean-kitchen native vision+tool call passed, dirty-kitchen/bathroom exceeded 22s timeout; tested failover and blind fallback. Chrome local supplied two-turn transcript and 390px layout passed. Actual Vercel Preview booking and deployment QA require separate live proof."
   }
 }

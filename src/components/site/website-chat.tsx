@@ -697,7 +697,7 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
                   )}
                   {m.text && <p>{m.text}</p>}
                   {m.attachments?.length > 0 && (
-                    <ChatPhotos photos={m.attachments} label={d.photo} />
+                    <ChatPhotos photos={m.attachments} label={d.photo} locale={locale} />
                   )}
                   <footer>
                     <time dateTime={m.sentAt}>
@@ -759,7 +759,7 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
                       {d.retry}
                     </button>
                   ) : (
-                    <span role="img" aria-label="Sending">
+                    <span role="img" aria-label={locale === "en" ? "Sending" : locale === "sr-Latn" ? "Slanje" : locale === "sr-Cyrl" ? "Слање" : "Отправляется"}>
                       <Clock size={13} />
                     </span>
                   )}
@@ -927,7 +927,7 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
           <MessageCircle size={21} />
           <span>{words.open}</span>
           {unread > 0 && (
-            <b aria-label={`${unread} unread`}>
+            <b aria-label={`${unread} ${locale === "en" ? "unread" : locale === "sr-Latn" ? "nepročitano" : locale === "sr-Cyrl" ? "непрочитано" : "непрочитанных"}`}>
               {unread > 99 ? "99+" : unread}
             </b>
           )}
