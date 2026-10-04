@@ -9,8 +9,20 @@ import {mandatoryHandoff,conversationPolicy,outputAllowed} from '../../src/lib/a
 import {toolSchemas,type AgentState} from '../../src/lib/agent/contracts';
 import {findSlots} from '../../src/lib/services/routing-planning';
 import type {Prisma} from '../../src/generated/prisma/client';
+import {qualificationProvider} from '../../src/lib/agent/live-test';
+import {completeWithFallback} from '../../src/lib/agent/runner';
+import type {AIProvider,Completion} from '../../src/lib/agent/providers';
 const settings={timezone:'Europe/Belgrade',sameDayBookingCutoffMinute:1020,latestCleanerDepartureMinute:1020};
 const at=(time:string)=>new Date(`2026-10-04T${time}+02:00`);
+test('native Preview qualification rejects wrong tools or changed facts and really uses fallback',async()=>{
+ const input={service:'deep' as const,area:50,soilLevel:'NORMAL' as const,extras:[],urgent:false};
+ const answer=(tool:string,facts:unknown):Completion=>({text:'',toolCalls:[{id:'synthetic',name:tool as 'calculatePrice',arguments:JSON.stringify(facts)}],provider:'synthetic',model:'synthetic',inputTokens:1,cachedInputTokens:0,outputTokens:1,latencyMs:1,estimatedCostUsd:0});
+ const provider=(tool:string,facts:unknown):AIProvider=>({name:tool,model:'synthetic',complete:async()=>answer(tool,facts)});
+ const attempts:(string|null)[]=[];
+ const result=await completeWithFallback([qualificationProvider(provider('recordCustomerFacts',input),input),qualificationProvider(provider('calculatePrice',input),input)],[],async(_,r,code)=>{attempts.push(r?'OK':code);});
+ assert.deepEqual(attempts,['NATIVE_QUALIFICATION_INVALID','OK']);assert.equal(result.toolCalls[0].name,'calculatePrice');
+ await assert.rejects(qualificationProvider(provider('calculatePrice',{...input,area:80}),input).complete([]),/NATIVE_QUALIFICATION_FACTS_MISMATCH/);
+});
 for(const [time,allowed] of [['16:59:59',true],['17:00:00',false],['20:00:00',false]] as const) test(`Belgrade same-day at ${time}`,()=>{
   const context=buildAgentTemporalContext(at('16:59:00'),settings,at(time));assert.equal(context.sameDayBookingAllowedNow,allowed);
   const policy=serviceDatePolicy('2026-10-04',settings,at(time));assert.equal('error' in policy,!allowed);if(!allowed)assert.equal(policy.earliestDate,'2026-10-05');

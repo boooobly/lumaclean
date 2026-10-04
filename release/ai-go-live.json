@@ -1,5 +1,5 @@
 {
-  "fingerprint": "86020ec10cf219bb4710d74b6bc206e791cebf17b8a0593e34bd799b4e08d1cd",
+  "fingerprint": "ed1dc7c2e6b84937598bc8d4c591c0206d444f2e357078efa4fed7a47809cd1d",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -126,7 +126,7 @@
     "src/lib/agent/customer-facts.ts": "e23803a7282975cb88cd40ed8439bfb0adef5d967975f49ce2e36ed038d4087f",
     "src/lib/agent/inbox.ts": "fa641c9b1c632e4ce84af0cd8c6c65cb3b20f0565f424c01faae0c9dffe28daa",
     "src/lib/agent/live-proof.ts": "ef6d87668d05e67ac93d9930d7110a2f31be35fe622583096b421b4bb8c566bf",
-    "src/lib/agent/live-test.ts": "9456e2b1be775a3293e90500c312054b46701f728a3a3fde4996fd1196564b25",
+    "src/lib/agent/live-test.ts": "138a06224dd228015c69de39e8997f1b359db79255e1bf6eeb6f48c0cf513f2b",
     "src/lib/agent/notifications.ts": "62bc6b5f87e61d4dfad36e373297336904e5e3caa20a520d4914fbea4674b07e",
     "src/lib/agent/persona.ts": "eed1e3cb5f5e62d6aa043c689d671be79c27d43dc35a88f989bfb87540794af3",
     "src/lib/agent/policy.ts": "925d42588f4330e1ef364e3fa7aae6ef96e2afefb6c8f17fd6770dd46706a48d",
@@ -242,22 +242,22 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 205,
+  "tests": 206,
   "lint": true,
   "typecheck": true,
   "migration": true,
-  "checkedAt": "2026-10-04T18:06:33.515Z",
+  "checkedAt": "2026-10-04T18:12:54.873Z",
   "suites": [
     "112 synthetic behavior scenarios in 18 categories and 4 languages plus corpus integrity",
-    "19 temporal/persona/correction/domain boundary tests",
+    "20 temporal/persona/correction/domain and native qualification fallback tests",
     "12 isolated Preview persistence/native-job tests including bounded persona repair, client facts, photos, clock and stale-token boundaries",
     "61 existing Chat V2/native provider/Telegram regression tests"
   ],
-  "verificationScope": "205 targeted tests passed with isolated Preview database cleanup. Additional final core/corpus recheck: 132 passed. Affected lint passed (2 existing image warnings), typecheck and production build passed. Additive migration 20261004180000_agent_behavior_hardening applied to isolated Preview; all 14 migrations available in source. Native provider evaluation, Preview UI examples and fresh booking proof are performed separately before release. Production owner mode must remain unchanged.",
+  "verificationScope": "205 targeted tests passed with isolated Preview database cleanup. Final core/corpus and new native qualification fallback test: 133 passed, yielding 206 maintained targeted checks. Affected lint passed (2 existing image warnings), typecheck and production build passed. Additive migration 20261004180000_agent_behavior_hardening applied to isolated Preview; all 14 migrations available in source. Native provider evaluation, Preview UI examples and fresh booking proof are performed separately before release. Production owner mode must remain unchanged.",
   "previousVerification": {
-    "fingerprint": "406d093aa7aa454f35947c1b90c630eb4df24153594d5a8c44a1d24cd014d8f3",
+    "fingerprint": "86020ec10cf219bb4710d74b6bc206e791cebf17b8a0593e34bd799b4e08d1cd",
     "tests": 205,
-    "checkedAt": "2026-10-04T17:45:34.242Z",
+    "checkedAt": "2026-10-04T18:06:33.515Z",
     "verificationScope": "205 targeted tests passed with isolated Preview database cleanup. Additional final core/corpus recheck: 132 passed. Affected lint passed (2 existing image warnings), typecheck and production build passed. Additive migration 20261004180000_agent_behavior_hardening applied to isolated Preview; all 14 migrations available in source. Native provider evaluation, Preview UI examples and fresh booking proof are performed separately before release. Production owner mode must remain unchanged."
   }
 }
