@@ -52,6 +52,7 @@ export type AgentState = {
   addressCandidates?:{placeId:string;text:string;query?:string}[];
   requestedWindow?:{date:string;from:string;to:string};
   slots?:{token:string;start:string;duration:number}[];
+  selectedSlotToken?:string;
   pending?:{slotToken:string;nonce:string;confirmedByMessageId?:string;recap:BookingRecap;reschedule:boolean};
   booking?:BookingRecap & {reference:string;orderId:string};
   rescheduleRequested?:boolean;
@@ -63,5 +64,5 @@ export class AgentError extends Error {
 }
 export const publicInboundSchema = z.discriminatedUnion("action",[
   z.object({action:z.literal("start"),locale:z.enum(locales)}).strict(),
-  z.object({action:z.literal("message"),id:z.uuid(),text:z.string().trim().min(1).max(1500),locale:z.enum(locales),confirmationNonce:z.uuid().optional()}).strict(),
+  z.object({action:z.literal("message"),id:z.uuid(),text:z.string().trim().max(1500),confirmationNonce:z.uuid().optional(),attachmentIds:z.array(z.uuid()).max(4).optional(),quickReply:z.object({key:z.string().max(80),messageId:z.string().max(80),revision:z.number().int().nonnegative()}).strict().optional()}).strict().refine(v=>!!v.text||!!v.attachmentIds?.length||!!v.quickReply),
 ]);
