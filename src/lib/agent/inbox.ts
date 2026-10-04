@@ -6,7 +6,10 @@ import { writeAudit } from "@/lib/services/audit";
 import { AgentError, type AgentState, type AgentLocale } from "./contracts";
 import { detectLocale, confirmsRecap, rescheduleIntent } from "./policy";
 import { json, stateOf } from "./tools";
-import { channelAdapter, type InboundEvent } from "./channels";
+import { channelAdapter, type InboundEvent, type ChannelAdapter } from "./channels";
+import {inboundKey,resolveChannelConversation,channelAttachments,type ChannelMediaDependencies} from './channel-ingress';
+import {PrivateBlobStorage} from './chat-attachments';
+import {channelReady} from './channel-diagnostics';
 import { assertAutoReady, effectiveMode } from './readiness';
 import { resolveHandoffNotifications } from './telegram-handoff';
 import {chooseAlias,activeReplySet,replyText,isReplyKey,replyFacts} from './chat-presentation';
@@ -32,8 +35,8 @@ export async function startWebsiteConversation(db:PrismaClient,locale:AgentLocal
   const conversation=await db.conversation.create({data:{channel:"WEBSITE",locale,displayAlias:chooseAlias(recent.map(c=>c.displayAlias)),anonymousHash:anonymousHash(token),sessionExpiresAt:new Date(Date.now()+30*86400000)}});
   return{token,conversation};
 }
-export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:string;text:string;locale?:string;confirmationNonce?:string;attachmentIds?:string[];quickReply?:{key:string;messageId:string;replySetId:string;revision:number}}){
-  const receivedAt=new Date();
+export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:string;text:string;locale?:string;confirmationNonce?:string;attachmentIds?:string[];transport?:{key:string;receivedAt:Date;metadata:Prisma.InputJsonValue};quickReply?:{key:string;messageId:string;replySetId:string;revision:number}}){
+  const receivedAt=input.transport?.receivedAt??new Date();
   const accepted=await db.message.findUnique({where:{conversationId_externalMessageId:{conversationId:c.id,externalMessageId:`in:${input.id}`}}});
   if(accepted)return{messageId:accepted.id,created:false};
   await rateLimit(db,`message:${c.id}`,8);
@@ -69,7 +72,7 @@ export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:str
     if(ids.length&&await tx.chatAttachment.count({where:{id:{in:ids},conversationId:c.id,messageId:null,uploader:'CLIENT',processingStatus:'READY'}})!==ids.length)throw new AgentError('INVALID_ATTACHMENTS');
     const confirmation=!!state.pending&&(input.confirmationNonce===state.pending.nonce||confirmsRecap(text,state.pending.recap));
   if(input.confirmationNonce&&input.confirmationNonce!==state.pending?.nonce)throw new AgentError("INVALID_CONFIRMATION");
-    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text,sentAt:receivedAt,externalMessageId:`in:${input.id}`}});
+    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text,sentAt:receivedAt,externalMessageId:`in:${input.id}`,...(input.transport?{inboundKey:input.transport.key,receivedAt,structured:input.transport.metadata}:{})}});
     if(ids.length)await tx.chatAttachment.updateMany({where:{id:{in:ids},conversationId:c.id,messageId:null},data:{messageId:message.id}});
     if(confirmation)state.pending!.confirmedByMessageId=message.id;
     else if(state.pending)delete state.pending;
@@ -79,9 +82,14 @@ export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:str
     return{messageId:message.id,created:true};
   });
 }
-export async function acceptChannelMessage(db:PrismaClient,event:InboundEvent){
-  const c=await db.conversation.upsert({where:{channel_externalThreadId:{channel:event.channel,externalThreadId:event.externalThreadId}},create:{channel:event.channel,externalThreadId:event.externalThreadId,locale:event.locale},update:{}});
-  return acceptMessage(db,c,{id:event.externalMessageId,text:event.text,locale:c.locale});
+export async function acceptChannelMessage(db:PrismaClient,event:InboundEvent,mediaDependencies:ChannelMediaDependencies={}){
+  if(event.channel==='WEBSITE'||event.externalUserId&&event.externalUserId!==event.externalThreadId)throw new AgentError('INVALID_CHANNEL_IDENTITY');
+  const key=inboundKey(event),existing=await db.message.findUnique({where:{inboundKey:key},include:{conversation:true}});
+  if(existing){if(existing.conversation.channel!==event.channel||existing.conversation.externalThreadId!==event.externalThreadId)throw new AgentError('INBOUND_IDENTITY_CONFLICT');return{messageId:existing.id,created:false};}
+  const c=await resolveChannelConversation(db,event),media=await channelAttachments(db,c.id,event,mediaDependencies);
+  const metadata={channel:event.channel,externalConversationId:event.externalThreadId,externalUserId:event.externalUserId??event.externalThreadId,externalMessageId:event.externalMessageId,receivedAt:(event.receivedAt??new Date()).toISOString(),providerSentAt:event.providerSentAt?.toISOString()??null,replyTo:event.replyTo??null,attachments:media.metadata};
+  try{return await acceptMessage(db,c,{id:event.externalMessageId,text:event.text,locale:c.locale,attachmentIds:media.ids,transport:{key,receivedAt:event.receivedAt??new Date(),metadata}});}
+  catch(e){if(e instanceof Prisma.PrismaClientKnownRequestError&&e.code==='P2002'){const duplicate=await db.message.findUnique({where:{inboundKey:key}});if(duplicate?.conversationId===c.id)return{messageId:duplicate.id,created:false};}throw e;}
 }
 export async function publicConversation(db:PrismaClient,c:Conversation){
   const latest=await db.conversation.findUniqueOrThrow({where:{id:c.id}}),state=stateOf(latest);
@@ -109,7 +117,8 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
       await schedulingLock(tx,'settings','ai');
       if(input.mode==="AUTO"&&(!input.confirmAuto||process.env.AI_AGENT_ENABLED!=="true"||!process.env.PRIMARY_AGENT_MODEL||!process.env.FALLBACK_AGENT_MODEL))throw new AgentError("AUTO_CONFIRMATION_REQUIRED");
       if(input.mode==='AUTO')await assertAutoReady(tx);
-      await tx.businessSettings.update({where:{id:"default"},data:{aiAgentMode:input.mode,...(input.mode==='AUTO'?{aiChannelModes:{WEBSITE:'AUTO',TELEGRAM:'OFF',WHATSAPP:'OFF',VIBER:'OFF'}}:{})}});
+      const old=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+      await tx.businessSettings.update({where:{id:"default"},data:{aiAgentMode:input.mode,...(input.mode==='AUTO'?{aiChannelModes:{...old.aiChannelModes as object,WEBSITE:'AUTO'}}:{})}});
       await tx.conversation.updateMany({where:{control:"AI_CONTROL"},data:{revision:{increment:1}}});
       await writeAudit(tx,{type:"USER",userId},{action:"AI_AGENT_MODE_CHANGED",entityType:"BusinessSettings",entityId:"default",changes:{status:{before:null,after:input.mode}}});
       return{ok:true};
@@ -163,18 +172,33 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
   });
 }
 /** Durable outbox. UNKNOWN is deliberately not retried: Telegram has no send idempotency key. */
-export async function deliverOutbox(db:PrismaClient,conversationId?:string){
-  const rows=await db.message.findMany({where:{deliveryStatus:"PENDING",...(conversationId?{conversationId}:{})},include:{conversation:true},orderBy:{sentAt:"asc"},take:12});
+export async function deliverOutbox(db:PrismaClient,conversationId?:string,adapterFor:(channel:string)=>ChannelAdapter=channelAdapter){
+  const rows=await db.message.findMany({where:{deliveryStatus:"PENDING",OR:[{nextDeliveryAttemptAt:null},{nextDeliveryAttemptAt:{lte:new Date()}}],...(conversationId?{conversationId}:{})},include:{conversation:true,attachments:true},orderBy:{sentAt:"asc"},take:12});
   for(const row of rows){
-    const claimed=await db.message.updateMany({where:{id:row.id,deliveryStatus:"PENDING"},data:{deliveryStatus:"SENDING",deliveryAttempts:{increment:1}}});
+    const claimed=await db.message.updateMany({where:{id:row.id,deliveryStatus:"PENDING",deliveryAttempts:row.deliveryAttempts,OR:[{nextDeliveryAttemptAt:null},{nextDeliveryAttemptAt:{lte:new Date()}}]},data:{deliveryStatus:"SENDING",sendingStartedAt:new Date(),deliveryAttempts:{increment:1}}});
     if(!claimed.count)continue;
     // Re-read control after claiming; owner takeover cancels AI outbox before any new send.
     const current=await db.conversation.findUniqueOrThrow({where:{id:row.conversationId}});
     const settings=await db.businessSettings.findUniqueOrThrow({where:{id:"default"}});
-    if(row.author==="AI"&&(effectiveMode(settings,current.channel)!=='AUTO'||current.control!=="AI_CONTROL"&&current.ownerId)){await db.message.update({where:{id:row.id},data:{deliveryStatus:"CANCELLED"}});continue;}
-    const result=await channelAdapter(current.channel).send({id:row.id,externalThreadId:current.externalThreadId??"",text:row.text});
-    await db.message.update({where:{id:row.id},data:{deliveryStatus:result.status,deliveryError:result.errorCode??null,channelMessageId:result.externalMessageId??null}});
-    if(result.status!=="DELIVERED")await db.conversation.update({where:{id:current.id},data:{needsAttention:true}});
+    if(row.author==="AI"&&(effectiveMode(settings,current.channel)!=='AUTO'||current.control==="CLOSED"||current.control!=="AI_CONTROL"&&current.ownerId)){await db.message.update({where:{id:row.id},data:{deliveryStatus:"CANCELLED"}});continue;}
+    if(row.author==='AI'&&['TELEGRAM','WHATSAPP','VIBER'].includes(current.channel)&&!channelReady(settings,current.channel as 'TELEGRAM'|'WHATSAPP'|'VIBER')){await db.message.update({where:{id:row.id},data:{deliveryStatus:'CANCELLED',deliveryError:'CHANNEL_CONNECTION_TEST_REQUIRED'}});await db.conversation.update({where:{id:current.id},data:{needsAttention:true}});continue;}
+    if(row.author==='SYSTEM'&&(row.structured as {notificationId?:string}|null)?.notificationId&&!(settings.customerNotificationChannels as Record<string,boolean>)[current.channel]){await db.message.update({where:{id:row.id},data:{deliveryStatus:'CANCELLED'}});continue;}
+    const lastInbound=await db.message.findFirst({where:{conversationId:current.id,author:'CLIENT'},orderBy:{sentAt:'desc'},select:{sentAt:true,structured:true}});
+    let result:import('./channels').DeliveryResult;
+    try{
+      if(row.attachments.length>1)result={status:'FAILED',errorCode:'ONE_OUTBOUND_ATTACHMENT_REQUIRED'};
+      else{
+        const attachment=row.attachments[0],prepared=attachment?{id:attachment.id,bytes:await new PrivateBlobStorage().read(attachment.storageKey),mime:attachment.mimeType}:undefined;
+        // Storage/network preparation may take time. Check the kill switch immediately before sending.
+        const [live,liveSettings]=await Promise.all([db.conversation.findUniqueOrThrow({where:{id:current.id}}),db.businessSettings.findUniqueOrThrow({where:{id:'default'}})]);
+        if(row.author==='AI'&&(effectiveMode(liveSettings,live.channel)!=='AUTO'||live.control==='CLOSED'||live.control!=='AI_CONTROL'&&!!live.ownerId||['TELEGRAM','WHATSAPP','VIBER'].includes(live.channel)&&!channelReady(liveSettings,live.channel as 'TELEGRAM'|'WHATSAPP'|'VIBER'))||row.author==='SYSTEM'&&(row.structured as {notificationId?:string}|null)?.notificationId&&!(liveSettings.customerNotificationChannels as Record<string,boolean>)[live.channel]){await db.message.update({where:{id:row.id},data:{deliveryStatus:'CANCELLED'}});continue;}
+        result=await adapterFor(current.channel).send({id:row.id,externalThreadId:current.externalThreadId??'',text:row.text,lastInboundAt:(lastInbound?.structured as {providerSentAt?:string}|null)?.providerSentAt?new Date((lastInbound!.structured as {providerSentAt:string}).providerSentAt):lastInbound?.sentAt,...(prepared?{attachment:prepared}:{})});
+      }
+    }catch{result={status:'UNKNOWN',errorCode:'DELIVERY_OUTCOME_UNKNOWN'};}
+    const retry=result.status==='FAILED'&&result.retryable&&row.deliveryAttempts<3,now=new Date();
+    await db.message.update({where:{id:row.id},data:{deliveryStatus:retry?'PENDING':result.status,deliveryError:result.errorCode??null,channelMessageId:result.externalMessageId??null,deliveryUpdatedAt:now,providerSentAt:['SENT','DELIVERED','READ'].includes(result.status)?now:null,nextDeliveryAttemptAt:retry?new Date(Date.now()+Math.min(3600000,Math.max(result.retryAfterSeconds??0,30*2**row.deliveryAttempts)*1000)):null}});
+    if(['FAILED','UNKNOWN'].includes(result.status))await db.conversation.update({where:{id:current.id},data:{needsAttention:true}});
   }
-  await db.message.updateMany({where:{deliveryStatus:"SENDING",sentAt:{lt:new Date(Date.now()-180000)}},data:{deliveryStatus:"UNKNOWN",deliveryError:"DELIVERY_OUTCOME_UNKNOWN"}});
+  const stale=await db.message.findMany({where:{deliveryStatus:'SENDING',OR:[{sendingStartedAt:{lt:new Date(Date.now()-180000)}},{sendingStartedAt:null,sentAt:{lt:new Date(Date.now()-180000)}}]},select:{id:true,conversationId:true},take:100});
+  if(stale.length){await db.message.updateMany({where:{id:{in:stale.map(m=>m.id)},deliveryStatus:'SENDING'},data:{deliveryStatus:'UNKNOWN',deliveryError:'DELIVERY_OUTCOME_UNKNOWN'}});await db.conversation.updateMany({where:{id:{in:stale.map(m=>m.conversationId)}},data:{needsAttention:true}});}
 }

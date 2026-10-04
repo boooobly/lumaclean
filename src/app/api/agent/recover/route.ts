@@ -13,5 +13,7 @@ export async function GET(request:Request){
   const db=getDatabase();
   const jobs=await db.agentJob.findMany({where:{OR:[{status:'PENDING'},{status:'RUNNING',leaseUntil:{lt:new Date()}}]},select:{conversationId:true},distinct:['conversationId'],take:50});
   for(const job of jobs)await enqueueAgent(db,job.conversationId);
+  const outbox=await db.message.findMany({where:{deliveryStatus:{in:['PENDING','SENDING']}},select:{conversationId:true},distinct:['conversationId'],take:50});
+  for(const row of outbox)if(!jobs.some(j=>j.conversationId===row.conversationId))await enqueueAgent(db,row.conversationId);
   await drainAgentJobs(db);await recoverNotifications(db);if(process.env.BLOB_READ_WRITE_TOKEN)await cleanupAttachments(db);return NextResponse.json({ok:true},{headers:{"Cache-Control":"no-store"}});
 }

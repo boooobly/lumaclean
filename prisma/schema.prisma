@@ -603,9 +603,16 @@ model Message {
   text              String
   sentAt            DateTime      @default(now()) @db.Timestamptz(3)
   externalMessageId String?
+  inboundKey        String? @unique
+  receivedAt        DateTime? @db.Timestamptz(3)
   deliveryStatus    String @default("DELIVERED")
   deliveryError     String?
   deliveryAttempts  Int @default(0)
+  nextDeliveryAttemptAt DateTime? @db.Timestamptz(3)
+  sendingStartedAt  DateTime? @db.Timestamptz(3)
+  deliveryUpdatedAt DateTime? @db.Timestamptz(3)
+  providerSentAt    DateTime? @db.Timestamptz(3)
+  deliveredAt       DateTime? @db.Timestamptz(3)
   channelMessageId  String?
   structured        Json?
   readAt            DateTime? @db.Timestamptz(3)
@@ -616,6 +623,7 @@ model Message {
 
   @@unique([conversationId, externalMessageId])
   @@index([conversationId, sentAt])
+  @@index([deliveryStatus, nextDeliveryAttemptAt])
 }
 
 model ChatAttachment {
@@ -768,6 +776,8 @@ model BusinessSettings {
   aiMaxConversationCostUsd Decimal @default(0.1) @db.Decimal(10, 5)
   aiDailyCostWarningUsd Decimal @default(5) @db.Decimal(10, 2)
   aiDiagnostics Json?
+  customerChannelDiagnostics Json @default("{}")
+  customerNotificationChannels Json @default("{\"TELEGRAM\":false,\"WHATSAPP\":false,\"VIBER\":false}")
   aiDiagnosticsAt DateTime? @db.Timestamptz(3)
   aiLiveTestProof Json?
   updatedAt                   DateTime @updatedAt @db.Timestamptz(3)

@@ -59,7 +59,7 @@ export default async function ConversationPage({
             </Link>
           )}
           <div className="inbox-history">
-            {data.messages.map((m) => (
+            {data.messages.filter(m=>m.author!=='SYSTEM').map((m) => (
               <article
                 key={m.id}
                 className={`inbox-message inbox-message-${m.author.toLowerCase()}`}
@@ -84,9 +84,10 @@ export default async function ConversationPage({
                 </div>
                 <p>{m.text}</p>
                 {m.attachments.length > 0 && (
-                  <ChatPhotos photos={m.attachments} label="Фото" />
+                  <><ChatPhotos photos={m.attachments.filter(a=>a.mimeType.startsWith('image/'))} label="Фото" />{m.attachments.filter(a=>!a.mimeType.startsWith('image/')).map(a=><a key={a.id} href={`/api/chat/attachments/${a.id}`} target="_blank" rel="noopener noreferrer">Документ · {Math.ceil(a.byteSize/1024)} КБ</a>)}</>
                 )}
-                {m.deliveryStatus !== "DELIVERED" && (
+                {data.channel!=='WEBSITE'&&<details><summary>Доставка и вложения</summary><p>Provider ID: {m.providerId??'нет'} · Получено: {m.receivedAt??'нет'} · Отправлено: {m.providerSentAt??'нет'} · Статус обновлён: {m.deliveryUpdatedAt??'нет'}</p>{m.replyTo&&<p>Ответ на сообщение: {m.replyTo}</p>}{m.deliveredAt&&<p>Доставлено: {m.deliveredAt}</p>}{m.readAt&&m.author!=='CLIENT'&&<p>Прочитано: {m.readAt}</p>}{m.rejectedAttachments.map((a,i)=><p key={i}>Вложение {a.kind}: {a.status}</p>)}</details>}
+                {(data.channel!=='WEBSITE'||m.deliveryStatus !== "DELIVERED") && (
                   <small>
                     Доставка: {m.deliveryStatus} {m.deliveryError ?? ""}
                   </small>
@@ -94,6 +95,7 @@ export default async function ConversationPage({
               </article>
             ))}
           </div>
+          <details><summary>Системные сообщения</summary>{data.messages.filter(m=>m.author==='SYSTEM').map(m=><p key={m.id}>{m.text} · {m.deliveryStatus}</p>)}</details>
           {data.shadow && (
             <aside className="inbox-shadow">
               <div className="admin-eyebrow">
