@@ -3,7 +3,8 @@ import { send } from '@vercel/queue';
 import { z } from 'zod';
 import type { Prisma, PrismaClient } from '@/generated/prisma/client';
 import { localInput } from '@/lib/domain/crm';
-import { customerTelegramConfigured, channelAdapter, type DeliveryResult } from './channels';
+import { channelConfiguration, type CustomerChannel, type DeliveryResult } from './channels';
+import {deliverOutbox} from './inbox';
 import { AgentError } from './contracts';
 import { deliverHandoffNotification, handoffKinds } from './telegram-handoff';
 type Tx=Prisma.TransactionClient;
@@ -22,10 +23,11 @@ export async function orderNotifications(tx:Tx,orderId:string,kind:'BOOKED'|'CHA
   const title=kind==='CANCELLED'?'Заказ отменён':kind==='CHANGED'?'Заказ изменён':ai?'AI оформила запись клиента':'Новый заказ';
   await tx.notification.updateMany({where:{orderId,kind:{in:['REMINDER','TOMORROW']},deliveryState:'PENDING'},data:{deliveryState:'CANCELLED',status:'CANCELLED'}});
   const records:Prisma.NotificationCreateManyInput[]=[];
-  const add=(audience:string,recipient:string,jobKind:string,text:string,scheduledAt=now,external=false)=>records.push({eventKey:`${event}:${audience}:${recipient}:${jobKind}`,orderId,conversationId:c?.id,audience,kind:jobKind,userId:audience==='ADMIN'?recipient:null,clientId:audience==='CLIENT'?client.id:null,cleanerId:audience==='CLEANER'?recipient:null,channel:external?'TELEGRAM':'WEBSITE',text,scheduledAt,payload:{reference:order.reference,date:start?.toISOString()??null,price:String(order.finalPrice??order.basePrice??''),channel:c?.channel??order.source},deliveryState:external||scheduledAt>now?'PENDING':'INTERNAL'});
+  const add=(audience:string,recipient:string,jobKind:string,text:string,scheduledAt=now,external=false)=>records.push({eventKey:`${event}:${audience}:${recipient}:${jobKind}`,orderId,conversationId:c?.id,audience,kind:jobKind,userId:audience==='ADMIN'?recipient:null,clientId:audience==='CLIENT'?client.id:null,cleanerId:audience==='CLEANER'?recipient:null,channel:external?c!.channel:'WEBSITE',text,scheduledAt,payload:{reference:order.reference,date:start?.toISOString()??null,price:String(order.finalPrice??order.basePrice??''),channel:c?.channel??order.source},deliveryState:external||scheduledAt>now?'PENDING':'INTERNAL'});
   const owner=await tx.user.findFirst({where:{active:true,role:'ADMIN'},orderBy:{createdAt:'asc'},select:{id:true}});
   if(owner)add('ADMIN',owner.id,kind,`${title}\n${details}`);
-  const external=c?.channel==='TELEGRAM'&&c.identityVerified&&!!c.externalThreadId&&customerTelegramConfigured();
+  const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+  const external=!!c&&['TELEGRAM','WHATSAPP','VIBER'].includes(c.channel)&&c.identityVerified&&!!c.externalThreadId&&channelConfiguration(c.channel as CustomerChannel).configured&&!!(settings.customerNotificationChannels as Record<string,boolean>)[c.channel];
   const clientWords=c?.locale==='en'?{BOOKED:'Cleaning confirmed',CHANGED:'Cleaning updated',CANCELLED:'Cleaning cancelled',REMINDER:'Reminder: cleaning tomorrow'}:c?.locale.startsWith('sr')?{BOOKED:'Čišćenje je potvrđeno',CHANGED:'Termin je promenjen',CANCELLED:'Čišćenje je otkazano',REMINDER:'Podsetnik: čišćenje sutra'}:{BOOKED:'Запись подтверждена',CHANGED:'Уборка перенесена / обновлена',CANCELLED:'Уборка отменена',REMINDER:'Напоминание: уборка завтра'};
   add('CLIENT',client.id,kind,`${clientWords[kind]}\n${details}`,now,external);
   const reminder=start?new Date(start.getTime()-86400000):null;
@@ -62,7 +64,7 @@ export async function publishNotifications(db:PrismaClient){
 }
 /** UNKNOWN is terminal: Telegram provides no idempotency key for ambiguous sends. */
 export async function deliverNotification(db:PrismaClient,id:string,deliver?:(thread:string,text:string)=>Promise<DeliveryResult>){
-  const row=await db.notification.findUnique({where:{id}});if(!row||['INTERNAL','DELIVERED','CANCELLED','UNKNOWN','FAILED','LEGACY'].includes(row.deliveryState))return;
+  const row=await db.notification.findUnique({where:{id}});if(!row||['INTERNAL','SENT','READ','DELIVERED','CANCELLED','UNKNOWN','FAILED','LEGACY'].includes(row.deliveryState))return;
   const now=new Date();
   if(row.deliveryState==='SENDING'){
     if(row.leaseUntil&&row.leaseUntil<now)await db.notification.updateMany({where:{id,deliveryState:'SENDING',leaseKey:row.leaseKey},data:{deliveryState:'UNKNOWN',status:'FAILED',lastErrorCode:'DELIVERY_OUTCOME_UNKNOWN'}});
@@ -86,11 +88,21 @@ export async function deliverNotification(db:PrismaClient,id:string,deliver?:(th
     result=await deliverHandoffNotification(db,id,leaseKey,deliver?async(text)=>deliver(process.env.TELEGRAM_CHAT_ID??'',text):undefined);
     if(result.errorCode==='HANDOFF_CANCELLED')return;
   }
-  else if(!c?.identityVerified||c.clientId!==row.clientId||c.channel!=='TELEGRAM'||!customerTelegramConfigured())result={status:'FAILED',errorCode:'CUSTOMER_CHANNEL_UNCONFIGURED'};
-  else try{result=await (deliver?deliver(c.externalThreadId??'',row.text):channelAdapter('TELEGRAM').send({id,externalThreadId:c.externalThreadId??'',text:row.text}));}catch{result={status:'UNKNOWN',errorCode:'DELIVERY_OUTCOME_UNKNOWN'};}
-  const retry=result.status==='FAILED'&&result.errorCode==='TELEGRAM_RATE_LIMIT'&&row.attempts<4;
-  await db.notification.updateMany({where:{id,leaseKey},data:{deliveryState:retry?'PENDING':result.status,status:result.status==='DELIVERED'?'SENT':retry?'PENDING':'FAILED',lastErrorCode:result.errorCode??null,sentAt:result.status==='DELIVERED'?new Date():null,nextAttemptAt:retry?new Date(Date.now()+Math.min(300000,30000*2**row.attempts)):null,publishedAt:retry?null:row.publishedAt,leaseKey:null,leaseUntil:null}});
-  if(result.status!=='DELIVERED'&&c)await db.conversation.updateMany({where:{id:c.id,...(handoffKinds.includes(row.kind??'')?{control:'HUMAN_CONTROL',ownerId:null}:{})},data:{needsAttention:true}});
+  else{
+    const settings=await db.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    if(!c?.identityVerified||c.clientId!==row.clientId||c.channel!==row.channel||!(settings.customerNotificationChannels as Record<string,boolean>)[c.channel]){await db.notification.update({where:{id},data:{deliveryState:'CANCELLED',status:'CANCELLED',leaseKey:null,leaseUntil:null}});return;}
+    if(deliver)result=await deliver(c.externalThreadId??'',row.text);
+    else{
+      const message=await db.message.upsert({where:{conversationId_externalMessageId:{conversationId:c.id,externalMessageId:`notification:${row.id}`}},create:{conversationId:c.id,author:'SYSTEM',text:row.text,externalMessageId:`notification:${row.id}`,deliveryStatus:'PENDING',structured:{notificationId:row.id}},update:{}});
+      await deliverOutbox(db,c.id);
+      const delivered=await db.message.findUniqueOrThrow({where:{id:message.id}});
+      if(['PENDING','SENDING'].includes(delivered.deliveryStatus)){await db.notification.update({where:{id},data:{deliveryState:'PENDING',publishedAt:null,nextAttemptAt:delivered.nextDeliveryAttemptAt??new Date(Date.now()+60000),leaseKey:null,leaseUntil:null}});throw new AgentError('NOTIFICATION_RETRY');}
+      result={status:delivered.deliveryStatus as DeliveryResult['status'],errorCode:delivered.deliveryError??undefined};
+    }
+  }
+  const retry=result.status==='FAILED'&&(result.retryable||result.errorCode==='TELEGRAM_RATE_LIMIT')&&row.attempts<4;
+  await db.notification.updateMany({where:{id,leaseKey},data:{deliveryState:retry?'PENDING':result.status,status:['SENT','DELIVERED','READ'].includes(result.status)?'SENT':retry?'PENDING':'FAILED',lastErrorCode:result.errorCode??null,sentAt:['SENT','DELIVERED','READ'].includes(result.status)?new Date():null,nextAttemptAt:retry?new Date(Date.now()+Math.min(300000,30000*2**row.attempts)):null,publishedAt:retry?null:row.publishedAt,leaseKey:null,leaseUntil:null}});
+  if(['FAILED','UNKNOWN'].includes(result.status)&&c)await db.conversation.updateMany({where:{id:c.id,...(handoffKinds.includes(row.kind??'')?{control:'HUMAN_CONTROL',ownerId:null}:{})},data:{needsAttention:true}});
   if(retry)throw new AgentError('NOTIFICATION_RETRY');
 }
 export async function recoverNotifications(db:PrismaClient){

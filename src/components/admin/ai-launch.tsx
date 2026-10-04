@@ -163,7 +163,7 @@ export function AILaunch({
                     )}
                   </select>
                   {k !== "WEBSITE" && (
-                    <input type="hidden" name={k} value="OFF" />
+                    <input type="hidden" name={k} value={settings.channels[k] ?? "OFF"} />
                   )}
                 </label>
               ))}

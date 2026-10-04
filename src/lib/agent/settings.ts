@@ -7,19 +7,37 @@ import {assertAutoReady,runDiagnostics} from './readiness';
 import {runFinanceCommand} from '@/lib/services/finance-commands';
 import {extrasPrices} from '@/lib/pricing';
 import {liveConfigFingerprint,validLiveProof} from './live-proof';
+import {customerChannels,assertCustomerChannelReady,testChannelConnection} from './channel-diagnostics';
+import {channelConfiguration} from './channels';
 const mode=z.enum(['OFF','SHADOW','AUTO']);
 export const aiSettingsSchema=z.discriminatedUnion('action',[
+  z.object({action:z.literal('channel-test'),channel:z.enum(customerChannels)}).strict(),
+  z.object({action:z.literal('channel-mode'),channel:z.enum(customerChannels),mode,notifications:z.boolean(),confirmAuto:z.literal(true).optional()}).strict(),
   z.object({action:z.literal('behavior-settings'),sameDayBookingCutoffMinute:z.number().int().min(0).max(1439),latestCleanerDepartureMinute:z.number().int().min(0).max(1439),expectedVersion:z.number().int().positive()}).strict(),
   z.object({action:z.literal('behavior-eval'),provider:z.enum(['primary','fallback'])}).strict(),
   z.object({action:z.literal('diagnostics')}).strict(),
   z.object({action:z.literal('starter-duration'),service:z.enum(['regular','deep']),reserveMinutes:z.number().int().min(0).max(60),confirm:z.literal(true)}).strict(),
   z.object({action:z.literal('live-test'),date:z.iso.date(),service:z.enum(['regular','deep']).optional()}).strict(),
   z.object({action:z.literal('import-live-proof'),proof:z.string().min(1).max(2000)}).strict(),
-  z.object({action:z.literal('settings'),channels:z.object({WEBSITE:mode,TELEGRAM:z.literal('OFF'),WHATSAPP:z.literal('OFF'),VIBER:z.literal('OFF')}).strict(),allowedServices:z.array(z.enum(['regular','deep','move','airbnb','office'])).min(1).max(5),canary:z.literal(true),maxMessages:z.number().int().min(10).max(1000),maxModelCalls:z.number().int().min(1).max(16),maxToolSteps:z.number().int().min(1).max(8),maxConversationCost:z.number().finite().min(0.01).max(10),dailyWarning:z.number().finite().min(0.1).max(100),confirmAuto:z.literal(true).optional()}).strict(),
+  z.object({action:z.literal('settings'),channels:z.object({WEBSITE:mode,TELEGRAM:mode,WHATSAPP:mode,VIBER:mode}).strict(),allowedServices:z.array(z.enum(['regular','deep','move','airbnb','office'])).min(1).max(5),canary:z.literal(true),maxMessages:z.number().int().min(10).max(1000),maxModelCalls:z.number().int().min(1).max(16),maxToolSteps:z.number().int().min(1).max(8),maxConversationCost:z.number().finite().min(0.01).max(10),dailyWarning:z.number().finite().min(0.1).max(100),confirmAuto:z.literal(true).optional()}).strict(),
 ]);
 export async function runAiSettings(db:PrismaClient,userId:string,payload:unknown){
   const input=aiSettingsSchema.parse(payload);
   if(!await db.user.count({where:{id:userId,active:true,role:'ADMIN'}}))throw new AgentError('FORBIDDEN');
+  if(input.action==='channel-test')return testChannelConnection(db,input.channel);
+  if(input.action==='channel-mode')return db.$transaction(async tx=>{
+    await schedulingLock(tx,'settings','ai');
+    const old=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    if(input.mode!=='OFF'&&!channelConfiguration(input.channel).configured)throw new AgentError('CHANNEL_CREDENTIALS_MISSING');
+    if(input.mode==='AUTO'){if(!input.confirmAuto)throw new AgentError('AUTO_CONFIRMATION_REQUIRED');assertCustomerChannelReady(old,input.channel);await assertAutoReady(tx);}
+    if(input.notifications)assertCustomerChannelReady(old,input.channel);
+    const channels={...old.aiChannelModes as Record<string,string>,[input.channel]:input.mode},notifications={...old.customerNotificationChannels as Record<string,boolean>,[input.channel]:input.notifications};
+    await tx.businessSettings.update({where:{id:'default'},data:{aiChannelModes:channels,customerNotificationChannels:notifications}});
+    await tx.conversation.updateMany({where:{channel:input.channel,control:'AI_CONTROL'},data:{revision:{increment:1}}});
+    if(input.mode!=='AUTO')await tx.message.updateMany({where:{conversation:{channel:input.channel},author:'AI',deliveryStatus:'PENDING'},data:{deliveryStatus:'CANCELLED'}});
+    await writeAudit(tx,{type:'USER',userId},{action:'CUSTOMER_CHANNEL_MODE_CHANGED',entityType:'BusinessSettings',entityId:'default',changes:{status:{before:JSON.stringify({mode:(old.aiChannelModes as Record<string,string>)[input.channel],notifications:(old.customerNotificationChannels as Record<string,boolean>)[input.channel]}),after:JSON.stringify({channel:input.channel,mode:input.mode,notifications:input.notifications})}}});
+    return{ok:true};
+  });
   if(input.action==='behavior-settings')return db.$transaction(async tx=>{
     await schedulingLock(tx,'settings','ai');
     if(!await tx.user.count({where:{id:userId,active:true,role:'ADMIN'}}))throw new AgentError('FORBIDDEN');
@@ -48,6 +66,7 @@ export async function runAiSettings(db:PrismaClient,userId:string,payload:unknow
     const data={aiChannelModes:input.channels,aiAllowedServices:[...new Set(input.allowedServices)],aiCanary:true,aiMaxAnonymousMessages:input.maxMessages,aiMaxModelCalls:input.maxModelCalls,aiMaxToolSteps:input.maxToolSteps,aiMaxConversationCostUsd:input.maxConversationCost,aiDailyCostWarningUsd:input.dailyWarning};
     const next={...old,...data,aiMaxConversationCostUsd:old.aiMaxConversationCostUsd,aiDailyCostWarningUsd:old.aiDailyCostWarningUsd};
     const previousChannels=old.aiChannelModes as Record<string,string>;
+    for(const channel of customerChannels){if(input.channels[channel]!==previousChannels[channel])throw new AgentError('USE_CHANNEL_MODE_CONTROL');}
     const expandsAuto=Object.entries(input.channels).some(([channel,value])=>value==='AUTO'&&previousChannels[channel]!=='AUTO')||input.allowedServices.some(service=>!old.aiAllowedServices.includes(service));
     if(old.aiAgentMode==='AUTO'&&expandsAuto&&Object.values(input.channels).includes('AUTO')){
       if(!input.confirmAuto)throw new AgentError('AUTO_CONFIRMATION_REQUIRED');

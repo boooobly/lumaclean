@@ -42,7 +42,7 @@ export class PrivateBlobStorage implements ChatAttachmentStorage {
   async write(key: string, bytes: Buffer) {
     await put(key, bytes, {
       access: "private",
-      contentType: "image/jpeg",
+      contentType: key.endsWith('.pdf') ? 'application/pdf' : "image/jpeg",
       addRandomSuffix: false,
       allowOverwrite: true,
     });
@@ -291,7 +291,7 @@ export async function messageImages(
   storage: ChatAttachmentStorage = new PrivateBlobStorage(),
 ) {
   const rows = await db.chatAttachment.findMany({
-    where: { messageId, conversationId, processingStatus: "READY" },
+    where: { messageId, conversationId, processingStatus: "READY", mimeType: 'image/jpeg' },
     take: 4,
   });
   const images = [];

@@ -10,6 +10,7 @@ import {busMapsAccess} from '@/lib/infrastructure/busmaps-status';
 import { configuredProviders } from './providers';
 import { AgentError } from './contracts';
 import {liveConfigFingerprint,validLiveProof} from './live-proof';
+import {channelReady,customerChannels} from './channel-diagnostics';
 
 export type Check = { id:string; label:string; status:'READY'|'WARNING'|'BLOCKS_AUTO'; detail:string;href?:string;action?:string };
 type DB=Prisma.TransactionClient;
@@ -83,7 +84,7 @@ export async function readiness(db:DB,provided?:BusinessSettings){
   add('shadow','Оценка SHADOW',n>=5&&rejected===0,`Проверено: ${n}; accepted: ${accepted}; rejected: ${rejected}. ${n<5?'Недостаточно данных для оценки качества.':'Оцените причины исправлений.'}`,true);
   add('scope','AUTO — ограниченный запуск',!!settings?.aiCanary,'Стандартные сценарии; исключения всегда передаются человеку.');
   const modes=settings?.aiChannelModes as Record<string,string>|undefined;
-  add('channels','Каналы',modes?.WHATSAPP==='OFF'&&modes?.VIBER==='OFF'&&modes?.TELEGRAM==='OFF','Ограниченный AUTO работает только на Website. Telegram/WhatsApp/Viber остаются OFF.');
+  add('channels','Каналы',!!settings&&customerChannels.every(c=>modes?.[c]!=='AUTO'||channelReady(settings,c)),'Website и каждый внешний канал включаются владельцем отдельно. Внешний AUTO требует подтверждённого соединения; OFF не блокирует Website.');
   const spent=await db.aIInvocation.aggregate({where:{createdAt:{gte:new Date(new Date().toISOString().slice(0,10))}},_sum:{estimatedCostUsd:true}});
   add('cost','Расход за сутки',Number(spent._sum.estimatedCostUsd??0)<=Number(settings?.aiDailyCostWarningUsd??5),`≈ $${Number(spent._sum.estimatedCostUsd??0).toFixed(4)}; warning $${settings?.aiDailyCostWarningUsd??5}. Это предупреждение, лимиты каждого диалога обязательны.`,true);
   const config=await liveConfigFingerprint(db);

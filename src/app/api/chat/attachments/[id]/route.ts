@@ -27,7 +27,7 @@ export async function GET(
     if (!row || (user?.role !== "ADMIN" && row.conversationId !== c?.id))
       return new Response(null, { status: 404, headers });
     const bytes = await new PrivateBlobStorage().read(
-      new URL(request.url).searchParams.get("thumb") === "1"
+      row.mimeType.startsWith('image/') && new URL(request.url).searchParams.get("thumb") === "1"
         ? row.thumbnailKey
         : row.storageKey,
     );
@@ -35,7 +35,7 @@ export async function GET(
       headers: {
         ...headers,
         "Content-Type": row.mimeType,
-        "Content-Disposition": "inline",
+        "Content-Disposition": row.mimeType.startsWith('image/') ? "inline" : 'attachment; filename="document.pdf"',
       },
     });
   } catch {

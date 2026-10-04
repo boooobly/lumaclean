@@ -14,6 +14,7 @@ import {masculineSelfReference,personaRepairInstruction,repairPreservesFacts,tra
 import {createReplySet} from './chat-presentation';
 import {behaviorMetric} from './behavior-telemetry';
 import {messageImages} from './chat-attachments';
+import {channelAdapter,type ChannelAdapter} from './channels';
 
 export function modelState(state:AgentState){
   return{...state,address:state.address?{fullAddress:state.address.fullAddress,apartment:state.address.apartment}:undefined,pending:state.pending?{recap:state.pending.recap,slotToken:state.pending.slotToken,reschedule:state.pending.reschedule,confirmed:!!state.pending.confirmedByMessageId,confirmedByMessageId:state.pending.confirmedByMessageId?"server-confirmed":undefined}:undefined,booking:state.booking?{...state.booking,orderId:undefined}:undefined};
@@ -90,7 +91,7 @@ async function persistAnswer(db:PrismaClient,ctx:ToolContext,text:string,plan:un
     await tx.agentJob.update({where:{id:ctx.jobId},data:{status:"DONE",completedAt:new Date(),leaseUntil:null,leaseKey:null,errorCode:null}});
   });
 }
-export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<ReturnType<typeof claimJob>>>,providers?:[AIProvider,AIProvider],loadImages:typeof messageImages=messageImages){
+export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<ReturnType<typeof claimJob>>>,providers?:[AIProvider,AIProvider],loadImages:typeof messageImages=messageImages,outbound:(channel:string)=>ChannelAdapter=channelAdapter){
   const {job,conversation:c,mode,leaseKey}=claim;
   const ctx:ToolContext={conversationId:c.id,jobId:job.id,leaseKey,revision:c.revision,mode,state:mode==="SHADOW"?{...structuredClone(c.shadowState) as AgentState,draftFacts:stateOf(c).draftFacts}:stateOf(c)};
   const plan:{tool:string;outcome:string}[]=[];
@@ -191,7 +192,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       const old=await db.message.findMany({where:{conversationId:c.id,author:"CLIENT"},orderBy:{sentAt:"desc"},skip:6,take:6,select:{text:true}});
       await db.conversation.updateMany({where:{id:c.id,revision:ctx.revision},data:{summary:JSON.stringify({facts:modelState(ctx.state),earlierCustomerMessages:old.reverse().map(m=>m.text.slice(0,200))}).slice(0,3500)}});
     }
-    await deliverOutbox(db,c.id);
+    await deliverOutbox(db,c.id,outbound);
   }catch(e){
     const code=e instanceof AgentError?e.code:"AGENT_OPERATION_FAILED";
     const stale=['AGENT_CONTROL_CHANGED','JOB_LEASE_LOST'].includes(code);
@@ -213,7 +214,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
         await tx.conversation.update({where:{id:c.id},data:{state:json(state),control:"HUMAN_CONTROL",stage:"HANDOFF"}});
         await tx.message.upsert({where:{responseToMessageId:job.messageId},create:{conversationId:c.id,responseToMessageId:job.messageId,author:"AI",text:handoffText[current.locale as keyof typeof handoffText]??handoffText.ru,externalMessageId:`agent:${job.id}:${ctx.revision}`,deliveryStatus:current.channel==="WEBSITE"?"DELIVERED":"PENDING"},update:{}});
       });
-      if(mode==="AUTO")await deliverOutbox(db,c.id);
+      if(mode==="AUTO")await deliverOutbox(db,c.id,outbound);
     }
   }
 }

@@ -1,4 +1,6 @@
 import {AgentBehaviorSettings} from "@/components/admin/agent-behavior-settings";
+import {CustomerChannels} from '@/components/admin/customer-channels';
+import {customerChannelSummary} from '@/lib/agent/channel-diagnostics';
 import {LogisticsStatus} from "@/components/admin/logistics-status";
 import {MotisRoutingProvider} from "@/lib/infrastructure/motis-routing";
 import Link from "next/link";
@@ -22,6 +24,7 @@ export default async function Settings() {
   const ai = await getDatabase().businessSettings.findUniqueOrThrow({where:{id:"default"},});
   const [report,logistics,busmaps]=await Promise.all([readiness(getDatabase(),ai),new MotisRoutingProvider().datasetsStatus(),busMapsUsage()]);
   const latestTest=process.env.VERCEL_ENV==='preview'?await getDatabase().agentLiveTest.findFirst({orderBy:{startedAt:'desc'}}):null;
+  const channels=await customerChannelSummary(getDatabase());
   return (
     <>
       <CrmHeader
@@ -30,6 +33,7 @@ export default async function Settings() {
       />
       <AILaunch checks={report.checks} summary={report.summary} checkedAt={report.checkedAt} sample={report.shadow} settings={{mode:ai.aiAgentMode,channels:ai.aiChannelModes as Record<string,string>,services:ai.aiAllowedServices,maxMessages:ai.aiMaxAnonymousMessages,maxModelCalls:ai.aiMaxModelCalls,maxToolSteps:ai.aiMaxToolSteps,maxConversationCost:Number(ai.aiMaxConversationCostUsd),dailyWarning:Number(ai.aiDailyCostWarningUsd)}}/><AgentModeControl mode={ai.aiAgentMode} enabled={process.env.AI_AGENT_ENABLED === "true"} canActivate={report.canActivate} blockers={report.blockers.map(c=>`${c.label}: ${c.detail}`)} />
       <AgentBehaviorSettings cutoff={ai.sameDayBookingCutoffMinute} departure={ai.latestCleanerDepartureMinute} version={ai.behaviorSettingsVersion}/>
+      <CustomerChannels channels={channels}/>
       <LogisticsStatus status={logistics} busmaps={busmaps} routingStatus={report.routingStatus}/>
       <StarterDuration activeServices={data.services.filter(s=>data.rules.some(r=>r.serviceId===s.id&&r.active)).map(s=>s.code)}/>
       <LiveBookingControl today={new Date().toISOString().slice(0,10)} testDate={new Date(new Date().getTime()+7*86400000).toISOString().slice(0,10)} preview={process.env.VERCEL_ENV==='preview'} canRun={report.canRunLiveTest} report={latestTest?.report as LiveTestReport|null} previewUrl={process.env.AI_LIVE_TEST_PREVIEW_URL??null}/>

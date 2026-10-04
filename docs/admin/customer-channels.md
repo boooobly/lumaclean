@@ -1,0 +1,36 @@
+# Customer channels
+
+Website, Telegram, WhatsApp and Viber use the existing Conversation, Message, AgentJob, tools, policies and Message outbox. Channel adapters contain transport operations only. Website AUTO is preserved. All three external channels and their customer notifications remain OFF until the owner enables each explicitly.
+
+## Owner setup
+
+Add secrets as encrypted **server-only Production environment variables** in the existing LumaClean Vercel project, then redeploy. Never use `NEXT_PUBLIC_` variables, Git, chat messages or fixtures for real credentials. Use separate Preview credentials/accounts for end-to-end testing; registering a webhook replaces the provider's existing webhook.
+
+| Channel | Required server environment | Production webhook |
+| --- | --- | --- |
+| Telegram | `TELEGRAM_CUSTOMER_BOT_TOKEN`, `TELEGRAM_CUSTOMER_WEBHOOK_SECRET` | `https://lumacleanrs.com/api/channels/telegram` |
+| WhatsApp | `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_BUSINESS_ACCOUNT_ID`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_GRAPH_VERSION` | `https://lumacleanrs.com/api/channels/whatsapp` |
+| Viber | `VIBER_CUSTOMER_BOT_TOKEN` | `https://lumacleanrs.com/api/channels/viber` |
+
+**Telegram:** create a new customer-facing bot using the official BotFather. Store its token and a random webhook secret (Telegram-compatible letters, digits, `_` and `-`). Register `setWebhook` with the URL above, `secret_token` equal to the stored secret and `allowed_updates: ["message"]`. The existing `TELEGRAM_BOT_TOKEN` is exclusively the internal administrator alert/claim bot: do not reuse its token or replace its webhook. Open the customer bot and send `/start` or a test question. [Official Bot API](https://core.telegram.org/bots/api).
+
+**WhatsApp:** create/use Meta Business Portfolio and an app with the WhatsApp use case; add the WABA and register/verify the business phone number. Complete the business, billing or app approval steps Meta requires for that account. Assign the app and WABA assets to a system user; obtain a server access token with `whatsapp_business_messaging` and `whatsapp_business_management`. Record the phone number ID, WABA ID and app secret. Choose a random verification token and a currently supported Graph API version (`vNN.0`; the current official example uses `v26.0`), then configure the webhook URL/verification token and subscribe the app to that WABA's **messages** webhook field. This adapter is for one WABA and one phone with a token scoped to that messaging account; multi-account billing is outside this release. Send one real inbound message while the channel is OFF, then check the connection. [Official setup overview](https://developers.facebook.com/documentation/business-messaging/whatsapp/overview), [webhook authentication](https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/create-webhook-endpoint), [service messages](https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/send-messages).
+
+**Viber:** request a commercial chatbot through Rakuten Viber/their official approved partner, complete their required approval/contract and create the bot with an active administrator Viber account. Obtain its authentication token. Register the webhook using `set_webhook`, with `event_types: ["delivered", "seen", "failed"]`; message events are delivered automatically. Incoming requests must carry a valid `X-Viber-Content-Signature` computed from the raw JSON body. Subscribe/start the bot before requesting a reply. This release uses official chatbot REST API, not phone-list Business Messages. [Official Viber REST Bot API](https://developers.viber.com/docs/api/rest-bot-api/).
+
+For **each** channel after redeployment: open `/admin/settings` → **Customer channels** → **Проверить соединение**. A successful connection must match the configured credentials and webhook; WhatsApp also requires authenticated inbound evidence. Select SHADOW first and inspect the suggestion in Inbox. To activate real automatic replies, select AUTO, tick the explicit limited-AUTO confirmation and save that channel. Common server readiness must pass. Customer confirmations/reminders require a separate optional checkbox; keep it off unless wanted. These controls never change Website mode.
+
+## Operational boundaries
+
+- Telegram reports provider acceptance as SENT. It has no delivered/read callbacks. WhatsApp exposes sent/delivered/read/failed callbacks; Viber exposes delivered/seen/failed. The Inbox never fabricates receipts.
+- WhatsApp free-form responses are limited to the 24-hour customer service window. Outside it, the outbox records `WHATSAPP_TEMPLATE_REQUIRED`; this release does not create or send approved business templates. Obtain customer consent before enabling customer notifications.
+- Supported inbound files: JPEG, PNG, WebP and PDF, at most 4 MB each and four per message, with bounded downloads and strict provider-host validation. Images pass through the existing sanitization and untrusted AI image flow. PDFs are download-only for the operator and are not expanded into AI instructions. Rejected attachments remain visible as metadata.
+- Outbound supports one image or PDF per Message. Telegram/WhatsApp media captions are limited to 1024 characters. Viber PDFs must be sent without a caption; send explanatory text as a separate operator message. Unsupported combinations produce a visible failure rather than silently dropping content. Viber fetches private outbound files using a short-lived signed URL without credentials in it.
+- Confirmed rate limits are retried with bounded backoff, at most four total send attempts. Timeouts, server errors and expired send leases become UNKNOWN: they are never blindly resent, since these APIs do not provide a universal send-idempotency key. Check the provider before sending a new operator reply. Provider IDs, final errors and delivery states remain in the existing Message outbox/Inbox.
+- Identity resolution uses the authenticated WhatsApp phone or an explicit administrator verification. Telegram/Viber display names and usernames cannot link CRM customers. Conversations and history remain separate per channel/user.
+- Existing handoff and controlled resume apply to every channel. The internal Telegram administrator alert, “Забрал клиента” claim and two-minute reminder are unchanged.
+- Diagnostics expose credential names/completeness, connection results, last authenticated webhook and last outbound result, never plaintext secrets. A connection check remains tied to its credential fingerprint; credential changes require a new check.
+
+## Rollout evidence
+
+Provider-mocked adapters and isolated Preview database tests cover inbound duplicates, concurrent outbox claims, photos, rejection metadata, takeover/resume, OFF/SHADOW/AUTO, identity isolation, actual receipts, prompt-injection limits and twelve Website/Telegram domain-action comparisons. Real messenger end-to-end testing requires the owner's external credentials and approvals. Missing credentials are an external blocker, not a successful production connection. No production test Order is created during release verification.
