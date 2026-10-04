@@ -3,6 +3,7 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import { websiteLeadSchema } from "@/lib/validation/crm";
 import { normalizedPhone, CrmError, serviceLabels } from "@/lib/domain/crm";
 import { quote } from "@/lib/domain/crm-pricing";
+import {serviceDatePolicy,buildAgentTemporalContext} from "@/lib/agent/temporal";
 import { writeAudit } from "./audit";
 export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
   const input = websiteLeadSchema.parse(payload);
@@ -29,6 +30,7 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
           created: false,
         };
       }
+      if(input.urgent){const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}}),now=new Date();const date=buildAgentTemporalContext(now,settings,now).nowLocalDate;if('error' in serviceDatePolicy(date,settings,now))throw new CrmError('VALIDATION','SAME_DAY_CUTOFF');}
       const service = await tx.service.findUnique({
         where: { code: input.service },
         select: { id: true, active: true },

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import {Minus, Plus} from "lucide-react";
-import {useMemo, useRef, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import type {Locale} from "@/i18n/routing";
 import type {SiteContent} from "@/lib/content";
 import {calculatePrice, extrasPrices, formatRsd, serviceIds, type ServiceId} from "@/lib/pricing";
@@ -26,6 +26,13 @@ export function Estimate({locale, copy, content, initialService = "regular"}: {l
   const [counts, setCounts] = useState<Record<CountExtra, number>>({standardWindow: 0, largeWindow: 0, cabinets: 0, ironing: 0});
   const [toggles, setToggles] = useState<Record<ToggleExtra, boolean>>({balcony: false, fridge: false, oven: false, steam: false, petHair: false, linen: false});
   const [urgent, setUrgent] = useState(false);
+  const [sameDayAllowed,setSameDayAllowed]=useState(false);
+  useEffect(()=>{
+    let active=true;
+    const refresh=async()=>{try{const response=await fetch('/api/booking-policy',{cache:'no-store'});const policy=await response.json();if(active){const allowed=response.ok&&policy.allowed===true;setSameDayAllowed(allowed);if(!allowed)setUrgent(false);}}catch{if(active){setSameDayAllowed(false);setUrgent(false);}}};
+    void refresh();const timer=setInterval(refresh,15000);
+    return()=>{active=false;clearInterval(timer);};
+  },[]);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [comment, setComment] = useState("");
@@ -92,7 +99,7 @@ export function Estimate({locale, copy, content, initialService = "regular"}: {l
               </div>
             ))}
             {toggleKeys.map((key) => <label key={key}><input type="checkbox" checked={toggles[key]} onChange={(event) => setToggles((current) => ({...current, [key]: event.target.checked}))}/><span>{content.calculator.labels[key]}</span><small>+{formatRsd(extrasPrices[key], locale)}</small></label>)}
-            <label className="site-urgent"><input type="checkbox" checked={urgent} onChange={(event) => setUrgent(event.target.checked)}/><span>{content.calculator.urgent}</span><small>+20%</small></label>
+            <label className="site-urgent"><input type="checkbox" disabled={!sameDayAllowed} checked={urgent} onChange={(event) => setUrgent(event.target.checked)}/><span>{content.calculator.urgent}</span><small>+20%</small></label>{!sameDayAllowed&&<p role="status">{locale==='ru'?'Выезд сегодня уже недоступен — ближайшая запись с завтра.':locale==='en'?'Same-day departure is unavailable; the next booking date is tomorrow.':'Dolazak danas nije dostupan; najraniji termin je sutra.'}</p>}
           </div>
         </fieldset>
       </div>

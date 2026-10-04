@@ -1,7 +1,7 @@
 import {randomUUID,randomInt} from 'node:crypto';
 import type {PrismaClient} from '@/generated/prisma/client';
 import {AgentError,qualificationSchema,type ToolResult} from './contracts';
-import {configuredProviders} from './providers';
+import {configuredProviders,type AIProvider} from './providers';
 import {completeWithFallback} from './runner';
 import {readiness} from './readiness';
 import {canonicalJson,executeAgentTool,json,stateOf,type ToolContext} from './tools';
@@ -10,8 +10,18 @@ import {liveConfigFingerprint,previewTestAllowed,signLiveProof} from './live-pro
 import {normalizedPhone} from '@/lib/domain/crm';
 import {writeAudit} from '@/lib/services/audit';
 
-export const liveTestSteps=['AI понял запрос','Цена рассчитана','Duration рассчитан','Адрес найден','Маршрут рассчитан','Свободный слот найден','Повторная проверка слота','Order создан'] as const;
+export const liveTestSteps=['AI поняла запрос','Цена рассчитана','Duration рассчитан','Адрес найден','Маршрут рассчитан','Свободный слот найден','Повторная проверка слота','Order создан'] as const;
 export type LiveTestReport={status:'PASSED'|'FAILED';steps:{label:string;ok:boolean}[];blocker:string|null;cleaned:boolean;service?:'regular'|'deep';booking?:{estimatedDurationMinutes:number|null;cleaningReserveMinutes:number;travelBufferMinutes:number;requiredCleaners:number;assignedCleaners:number;price:number};aiAttempts?:{provider:string;model:string;ok:boolean;errorCode:string|null;latencyMs:number}[];proof?:ReturnType<typeof signLiveProof>};
+/** A syntactically valid response still has to qualify the explicit synthetic request. */
+export function qualificationProvider(provider:AIProvider,input:ReturnType<typeof qualificationSchema.parse>):AIProvider{
+  return{name:provider.name,model:provider.model,complete:async(messages,signal)=>{
+    const result=await provider.complete(messages,signal);
+    if(result.toolCalls.length!==1||result.toolCalls[0].name!=='calculatePrice')throw new AgentError('NATIVE_QUALIFICATION_INVALID');
+    let facts:unknown;try{facts=qualificationSchema.parse(JSON.parse(result.toolCalls[0].arguments));}catch{throw new AgentError('NATIVE_QUALIFICATION_INVALID');}
+    if(canonicalJson(facts)!==canonicalJson(input))throw new AgentError('NATIVE_QUALIFICATION_FACTS_MISMATCH');
+    return result;
+  }};
+}
 export async function cleanupLiveTest(db:PrismaClient,batchId:string){
   if(!previewTestAllowed())throw new AgentError('PREVIEW_TEST_ONLY');
   await db.$transaction(async tx=>{
@@ -73,7 +83,8 @@ export async function runLiveBookingTest(db:PrismaClient,userId:string,date:stri
     const request=`Синтетический тест: нужна ${service==='regular'?'поддерживающая':'генеральная'} уборка квартиры 50 м², обычное загрязнение, без дополнений, не срочно.`;
     const message=await db.message.create({data:{conversationId:conversation.id,author:'CLIENT',text:request}});
     ctx=await context(message.id);
-    const answer=await completeWithFallback(configuredProviders(),[{role:'system',content:'You are qualifying this synthetic Website cleaning request. Call calculatePrice exactly once with the explicit facts. No CRM actions yet.'},{role:'user',content:request}],async(provider,result,errorCode,latencyMs)=>{
+    const [primary,fallback]=configuredProviders();
+    const answer=await completeWithFallback([qualificationProvider(primary,input),qualificationProvider(fallback,input)],[{role:'system',content:'You are qualifying this synthetic Website cleaning request. Call calculatePrice exactly once with the explicit facts. No CRM actions yet.'},{role:'user',content:request}],async(provider,result,errorCode,latencyMs)=>{
       (report.aiAttempts??=[]).push({provider:provider.name,model:provider.model,ok:result!==null,errorCode,latencyMs});
     },AbortSignal.timeout(60000));
     if(answer.toolCalls.length!==1||answer.toolCalls[0].name!=='calculatePrice')throw new AgentError('PRIMARY_DID_NOT_QUALIFY');

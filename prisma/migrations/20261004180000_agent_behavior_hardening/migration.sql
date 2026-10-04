@@ -1,0 +1,2 @@
+ALTER TABLE "BusinessSettings" ADD COLUMN "sameDayBookingCutoffMinute" INTEGER NOT NULL DEFAULT 1020, ADD COLUMN "latestCleanerDepartureMinute" INTEGER NOT NULL DEFAULT 1020, ADD COLUMN "behaviorSettingsVersion" INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE "BusinessSettings" ADD CONSTRAINT "sameDayBookingCutoffMinute_range" CHECK ("sameDayBookingCutoffMinute" BETWEEN 0 AND 1439), ADD CONSTRAINT "latestCleanerDepartureMinute_range" CHECK ("latestCleanerDepartureMinute" BETWEEN 0 AND 1439);

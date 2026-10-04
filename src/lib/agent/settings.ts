@@ -9,6 +9,8 @@ import {extrasPrices} from '@/lib/pricing';
 import {liveConfigFingerprint,validLiveProof} from './live-proof';
 const mode=z.enum(['OFF','SHADOW','AUTO']);
 export const aiSettingsSchema=z.discriminatedUnion('action',[
+  z.object({action:z.literal('behavior-settings'),sameDayBookingCutoffMinute:z.number().int().min(0).max(1439),latestCleanerDepartureMinute:z.number().int().min(0).max(1439),expectedVersion:z.number().int().positive()}).strict(),
+  z.object({action:z.literal('behavior-eval'),provider:z.enum(['primary','fallback'])}).strict(),
   z.object({action:z.literal('diagnostics')}).strict(),
   z.object({action:z.literal('starter-duration'),service:z.enum(['regular','deep']),reserveMinutes:z.number().int().min(0).max(60),confirm:z.literal(true)}).strict(),
   z.object({action:z.literal('live-test'),date:z.iso.date(),service:z.enum(['regular','deep']).optional()}).strict(),
@@ -18,6 +20,17 @@ export const aiSettingsSchema=z.discriminatedUnion('action',[
 export async function runAiSettings(db:PrismaClient,userId:string,payload:unknown){
   const input=aiSettingsSchema.parse(payload);
   if(!await db.user.count({where:{id:userId,active:true,role:'ADMIN'}}))throw new AgentError('FORBIDDEN');
+  if(input.action==='behavior-settings')return db.$transaction(async tx=>{
+    await schedulingLock(tx,'settings','ai');
+    if(!await tx.user.count({where:{id:userId,active:true,role:'ADMIN'}}))throw new AgentError('FORBIDDEN');
+    const old=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    if(old.behaviorSettingsVersion!==input.expectedVersion)throw new AgentError('SETTINGS_CHANGED');
+    await tx.businessSettings.update({where:{id:'default'},data:{sameDayBookingCutoffMinute:input.sameDayBookingCutoffMinute,latestCleanerDepartureMinute:input.latestCleanerDepartureMinute,behaviorSettingsVersion:{increment:1}}});
+    await writeAudit(tx,{type:'USER',userId},{action:'AI_BOOKING_POLICY_CHANGED',entityType:'BusinessSettings',entityId:'default',changes:{version:{before:String(old.behaviorSettingsVersion),after:String(old.behaviorSettingsVersion+1)},changedFields:{before:[String(old.sameDayBookingCutoffMinute),String(old.latestCleanerDepartureMinute)],after:[String(input.sameDayBookingCutoffMinute),String(input.latestCleanerDepartureMinute)]}}});
+    await tx.conversation.updateMany({where:{control:'AI_CONTROL'},data:{revision:{increment:1}}});
+    return{ok:true};
+  });
+  if(input.action==='behavior-eval'){const {evaluateBehavior}=await import('./behavior-eval');return evaluateBehavior(db,input.provider);}
   if(input.action==='diagnostics')return runDiagnostics(db);
   if(input.action==='live-test'){const {runLiveBookingTest}=await import('./live-test');return runLiveBookingTest(db,userId,input.date,input.service);}
   if(input.action==='starter-duration'){

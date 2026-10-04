@@ -751,6 +751,9 @@ model BusinessSettings {
   timezone                    String   @default("Europe/Belgrade")
   currency                    String   @default("RSD") @db.VarChar(3)
   defaultTravelBufferMinutes  Int      @default(30)
+  sameDayBookingCutoffMinute Int @default(1020)
+  latestCleanerDepartureMinute Int @default(1020)
+  behaviorSettingsVersion Int @default(1)
   fallbackTravelMinutes Int @default(80)
   defaultCleanerPayoutPercent Decimal? @db.Decimal(5, 2)
   workdayStartMinute          Int?

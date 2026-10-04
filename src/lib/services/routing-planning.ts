@@ -1,3 +1,5 @@
+import {serviceDatePolicy,incomingDeparturePolicy} from "@/lib/agent/temporal";
+import {behaviorMetric} from "@/lib/agent/behavior-telemetry";
 import {orderNotifications} from "@/lib/agent/notifications";
 import { createHash } from "node:crypto";
 import type { Prisma } from "@/generated/prisma/client";
@@ -6,6 +8,7 @@ import {
   calendarRange,
   plainDate,
   SchedulingConflictService,
+  plannedEnd,
 } from "@/lib/domain/scheduling-conflicts";
 import { SchedulingError } from "@/lib/domain/scheduling-types";
 import { ROUTING_CONFIG, routeUsable, geo } from "@/lib/domain/routing";
@@ -168,9 +171,13 @@ export async function dayLogistics(
     version: snapshot.version,
   };
 }
-export async function findSlots(db: RoutingDb, payload: unknown, options: { reserveMinutes?: number; cacheOnly?: boolean; allowReschedule?: boolean; forceFresh?:boolean; selectedStart?:string; selectedCleanerIds?:string[] } = {}) {
+export async function findSlots(db: RoutingDb, payload: unknown, options: { now?:Date; reserveMinutes?: number; cacheOnly?: boolean; allowReschedule?: boolean; forceFresh?:boolean; selectedStart?:string; selectedCleanerIds?:string[] } = {}) {
   const input = routingSchemas.slots.parse(payload),
-    snapshot = await routingSnapshot(db, input.date),
+    settings=await db.businessSettings.findUniqueOrThrow({where:{id:"default"}}),
+    now=options.now??new Date(),
+    policy=serviceDatePolicy(input.date,settings,now);
+  if("error" in policy){if(policy.error==="SAME_DAY_CUTOFF")behaviorMetric("sameDayCutoffRejected");return{...policy,slots:[]};}
+  const snapshot = await routingSnapshot(db, input.date),
     stored = input.orderId
       ? await db.order.findUnique({
           where: { id: input.orderId },
@@ -256,7 +263,16 @@ export async function findSlots(db: RoutingDb, payload: unknown, options: { rese
   const table=await routing.prepare(preparationRequests(searchSnapshot,[searching]),options.cacheOnly??false);
   const candidates=AvailabilityService.findAvailableSlots(searching,searchSnapshot,table);
   await routing.prepareCritical(candidates.slice(0,4).flatMap(s=>s.legs.map(l=>l.request)),{table,cacheOnly:options.cacheOnly,forceFresh:options.forceFresh});
-  const slots=AvailabilityService.findAvailableSlots(searching,searchSnapshot,table);
+  const slots=AvailabilityService.findAvailableSlots(searching,searchSnapshot,table).filter(slot=>{
+    const incoming=slot.legs.filter(leg=>leg.orderId===searching.id);
+    if(incoming.length!==slot.cleanerIds.length)return false;
+    return incoming.every(leg=>{
+      const previous=leg.previousId?snapshot.orders.find(order=>order.id===leg.previousId):undefined;
+      const result=incomingDeparturePolicy({departure:leg.recommendedDeparture,start:slot.start,travelSeconds:leg.route.durationSeconds!,bufferMinutes:leg.bufferMinutes,previous:previous?{status:previous.status,end:plannedEnd(previous)?.toISOString()??null}:undefined},input.date,settings,options.now??new Date());
+      if('error' in result&&result.error==='PAST_DEPARTURE')behaviorMetric('pastDepartureRejected');
+      return !('error' in result);
+    });
+  });
   return {
     slots,
     orderId: stored?.id,
