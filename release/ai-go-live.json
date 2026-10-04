@@ -1,5 +1,5 @@
 {
-  "fingerprint": "406d093aa7aa454f35947c1b90c630eb4df24153594d5a8c44a1d24cd014d8f3",
+  "fingerprint": "86020ec10cf219bb4710d74b6bc206e791cebf17b8a0593e34bd799b4e08d1cd",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -116,7 +116,7 @@
     "src/components/site/website-chat.tsx": "2d90aa002d5c08685270bb43943cae090c6a249285800972af3848a3a65ea499",
     "src/i18n/request.ts": "9e8c03ca10ec8022d7c4e46ecf5e25c4d9e723d9f7c9b04fc8a5401d00aead7a",
     "src/i18n/routing.ts": "68dfd0fa0c1ade7562be6a856caf3c410205dd654859cbeb2f7c5066842b4b50",
-    "src/lib/agent/behavior-eval.ts": "586f931246e56bb2350b4d654b59e3659fe90219052be75472640215fea5bca3",
+    "src/lib/agent/behavior-eval.ts": "58875967d9aebc564f9ecc67ec83768c4376a30e2591d735c10c8780b705a097",
     "src/lib/agent/behavior-telemetry.ts": "70cbebd54663a2993fa6f6d5a76bd7a2d04803f62365491e962a57be72bf51fe",
     "src/lib/agent/channels.ts": "c7854752725af7e9d003f489db462a0ff5436c885261f2cc2d214b02f1a700d9",
     "src/lib/agent/chat-attachments.ts": "a7b3cfde486eb4d0939ed7ae934e24e4376c410a61b6f1bf970ed3299fe50583",
@@ -246,7 +246,7 @@
   "lint": true,
   "typecheck": true,
   "migration": true,
-  "checkedAt": "2026-10-04T17:45:34.242Z",
+  "checkedAt": "2026-10-04T18:06:33.515Z",
   "suites": [
     "112 synthetic behavior scenarios in 18 categories and 4 languages plus corpus integrity",
     "19 temporal/persona/correction/domain boundary tests",
@@ -255,9 +255,9 @@
   ],
   "verificationScope": "205 targeted tests passed with isolated Preview database cleanup. Additional final core/corpus recheck: 132 passed. Affected lint passed (2 existing image warnings), typecheck and production build passed. Additive migration 20261004180000_agent_behavior_hardening applied to isolated Preview; all 14 migrations available in source. Native provider evaluation, Preview UI examples and fresh booking proof are performed separately before release. Production owner mode must remain unchanged.",
   "previousVerification": {
-    "fingerprint": "38f59d50ab7576fac243171403b5aa009a00a696317ab5653c9c5f161fabc1b0",
-    "tests": 61,
-    "checkedAt": "2026-10-04T16:32:53.260Z",
-    "verificationScope": "61 targeted tests passed. Typecheck, affected lint and production build passed. Existing schema and all 13 migration files unchanged; no database migration required. Actual Telegram queue delivery and webhook setup are verified separately in production. Website mode remains AUTO; other customer channels remain OFF."
+    "fingerprint": "406d093aa7aa454f35947c1b90c630eb4df24153594d5a8c44a1d24cd014d8f3",
+    "tests": 205,
+    "checkedAt": "2026-10-04T17:45:34.242Z",
+    "verificationScope": "205 targeted tests passed with isolated Preview database cleanup. Additional final core/corpus recheck: 132 passed. Affected lint passed (2 existing image warnings), typecheck and production build passed. Additive migration 20261004180000_agent_behavior_hardening applied to isolated Preview; all 14 migrations available in source. Native provider evaluation, Preview UI examples and fresh booking proof are performed separately before release. Production owner mode must remain unchanged."
   }
 }
