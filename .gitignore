@@ -52,3 +52,11 @@ next-env.d.ts
 
 .vercel
 .env*
+
+/src/generated/prisma/
+/artifacts/admin/
+
+# Isolated routing service dependencies
+/infrastructure/**/node_modules/
+
+/public/maplibre/

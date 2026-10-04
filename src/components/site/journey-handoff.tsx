@@ -48,7 +48,11 @@ export function JourneyHandoff({copy}: {copy: EditorialContent["handoff"]}) {
       <div className="handoff-sticky">
         <div className="handoff-wash" />
         <figure ref={kitchenRef} className="kitchen-frame">
-          <Image src="/media/kitchen-clean.webp" alt="" fill sizes="100vw" />
+          <picture>
+            <source media="(min-width: 681px), (orientation: landscape)" srcSet="/media/journey-v5/stills/032-desktop.webp" />
+            <source media="(max-width: 680px) and (orientation: portrait)" srcSet="/media/journey-v5/stills/032-mobile.webp" />
+            <img src="/media/journey-v5/stills/032-mobile.webp" alt="" width={608} height={1080} loading="eager" />
+          </picture>
         </figure>
         <div ref={copyRef} className="handoff-copy">
           <span className="kicker">{copy.kicker}</span>

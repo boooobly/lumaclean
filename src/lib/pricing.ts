@@ -1,6 +1,13 @@
 export const serviceIds = ["regular", "deep", "move", "airbnb", "office"] as const;
 export type ServiceId = (typeof serviceIds)[number];
 
+// Shared by the homepage price list and every service's price table.
+export const priceAreaLabels: Record<"ru" | "sr" | "en", [string, string, string, string, string]> = {
+  ru: ["До 39 м²", "40–59 м²", "60–79 м²", "80–99 м²", "От 100 м²"],
+  sr: ["Do 39 m²", "40–59 m²", "60–79 m²", "80–99 m²", "Od 100 m²"],
+  en: ["Up to 39 m²", "40–59 m²", "60–79 m²", "80–99 m²", "100 m² and up"],
+};
+
 export const priceMatrix: Record<ServiceId, [number, number, number, number, number]> = {
   regular: [4000, 4600, 5700, 7200, 85],
   deep: [9300, 10700, 12900, 14900, 180],
@@ -24,13 +31,22 @@ export const extrasPrices = {
 
 export function basePrice(service: ServiceId, area: number) {
   const row = priceMatrix[service];
-  if (area <= 40) return row[0];
-  if (area <= 60) return row[1];
-  if (area <= 80) return row[2];
+  if (area < 40) return row[0];
+  if (area < 60) return row[1];
+  if (area < 80) return row[2];
   if (area < 100) return row[3];
   return Math.max(4000, Math.round((area * row[4]) / 100) * 100);
 }
 
 export function formatRsd(value: number, locale = "sr") {
   return `${new Intl.NumberFormat(locale === "en" ? "en-US" : locale === "ru" ? "ru-RU" : "sr-Latn-RS").format(value)} RSD`;
+}
+
+// One source for public calculation and CRM snapshots.
+export function calculatePrice(service: ServiceId, area: number, extras: {code: keyof typeof extrasPrices; quantity: number}[], urgent: boolean) {
+  const base = basePrice(service, area);
+  const lines = extras.filter(e => e.quantity > 0).map(e => ({...e, unitPrice: extrasPrices[e.code]}));
+  const subtotal = base + lines.reduce((sum,e) => sum + e.quantity * e.unitPrice, 0);
+  const surcharge = urgent ? Math.round(subtotal * 0.2 / 100) * 100 : 0;
+  return {base, extras:lines, surcharge, total:subtotal+surcharge};
 }

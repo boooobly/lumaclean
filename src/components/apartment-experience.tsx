@@ -151,13 +151,15 @@ function getScrubSource(index: number, mobile: boolean) {
   return `/media/journey-v5/${folder}/${SCRUB_CLIPS[index].file}.mp4`;
 }
 
-export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {locale: Locale; calculatorHref: string; finalFrameSrc?: string}) {
+export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; calculatorHref: string}) {
   const track = useRef<HTMLElement>(null);
   const hero = useRef<HTMLDivElement>(null);
+  const finalStill = useRef<HTMLImageElement>(null);
   const videos = useRef<Array<HTMLVideoElement | null>>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [activeChapter, setActiveChapter] = useState<number | null>(null);
   const [isSeeking, setIsSeeking] = useState(false);
+  const [beforeRequested, setBeforeRequested] = useState(false);
   const text = copy[locale];
   const activePhase = getPhase(currentStep);
   const firstTransitionActive = currentStep > 0
@@ -170,10 +172,9 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     if (!trackElement || videoElements.length !== SCRUB_CLIPS.length || videoElements.some((element) => !element)) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const abortController = new AbortController();
+    let disposed = false;
     const resolvedVideos = videoElements as HTMLVideoElement[];
     const mediaCleanups: Array<() => void> = [];
-    const objectUrls: string[] = [];
     let step = 0;
     let requestedClip = 0;
     let activeClip = -1;
@@ -189,7 +190,12 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     let motionFrom = 0;
     let motionStarted = 0;
     let motionDuration = 140;
-    let laidOutWidth = window.innerWidth;
+    const finalStillElement = finalStill.current;
+    let finalStillReady = Boolean(finalStillElement?.complete && finalStillElement.naturalWidth);
+
+    const syncFinalStill = () => {
+      trackElement.classList.toggle("is-final-still", finalStillReady && step >= TOTAL_STEPS - 0.01);
+    };
 
     const isMobileVideo = () => window.innerWidth <= 680 && window.innerHeight >= window.innerWidth;
 
@@ -197,6 +203,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       index: number;
       element: HTMLVideoElement;
       ready: boolean;
+      loading: boolean;
+      failed: boolean;
       desiredTime: number;
       revision: number;
     };
@@ -204,17 +212,21 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       index,
       element,
       ready: false,
+      loading: false,
+      failed: false,
       desiredTime: 0,
       revision: 0,
     }));
 
     const paintClip = (state: ClipState, revision: number) => {
-      if (revision !== seekRevision || state.index !== requestedClip) return;
+      if (disposed || step <= 0 || revision !== seekRevision || state.index !== requestedClip
+        || state.element.seeking || state.element.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
       resolvedVideos.forEach((element, index) => element.classList.toggle("is-active", index === state.index));
       activeClip = state.index;
       trackElement.classList.add("is-video-painted");
       trackElement.classList.remove("is-video-loading");
       setIsSeeking(false);
+      updateHandoff();
     };
 
     const revealOnPaint = (state: ClipState, revision: number) => {
@@ -259,17 +271,23 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
 
     const seekToStep = (targetStep: number, direction: Direction, chapter: number | null) => {
       step = Math.max(0, Math.min(TOTAL_STEPS, targetStep));
+      syncFinalStill();
       setCurrentStep(step);
       setActiveChapter(chapter);
       trackElement.classList.toggle("journey-started", step > 0);
-      if (step < TOTAL_STEPS) trackElement.classList.remove("journey-handed-off");
+      if (step < TOTAL_STEPS - 0.01) {
+        trackElement.classList.remove("journey-handed-off");
+      }
       if (reducedMotion || step <= 0) {
+        seekRevision += 1;
+        trackElement.classList.remove("is-video-loading");
         setIsSeeking(false);
         return;
       }
 
       const position = getClipPosition(step, direction);
       const state = clipStates[position.index];
+      if (state.loading) state.element.preload = "auto";
       requestedClip = position.index;
       const duration = state.element.duration || 1;
       const lastFrameTime = Math.max(0, duration - 1 / 60);
@@ -280,17 +298,23 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       setIsSeeking(true);
 
       if (!state.ready) {
-        trackElement.classList.add("is-video-loading");
+        if (!state.failed) { trackElement.classList.add("is-video-loading"); void loadClip(state); }
+        else { trackElement.classList.remove("is-video-loading"); setIsSeeking(false); }
         return;
       }
-      trackElement.classList.remove("is-video-loading");
+      if (position.local > 0.7 && direction === "forward" && clipStates[position.index + 1]) loadClip(clipStates[position.index + 1], "metadata");
+      trackElement.classList.add("is-video-loading");
       performSeek(state);
     };
 
     const updateHandoff = () => {
       trackElement.classList.toggle(
         "journey-handed-off",
-        scrollProgress >= 0.999 && renderedStep >= TOTAL_STEPS - 0.01,
+        !reducedMotion
+          && scrollProgress >= 1
+          && renderedStep >= TOTAL_STEPS - 0.01
+          && finalStillReady
+          && (document.getElementById("handoff")?.getBoundingClientRect().top ?? 1) <= 0,
       );
     };
 
@@ -332,12 +356,13 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
 
     const readScrollPosition = () => {
       scrollReadFrame = 0;
-      const travel = Math.max(1, trackElement.offsetHeight - window.innerHeight);
+      const stickyHeight = trackElement.firstElementChild?.getBoundingClientRect().height ?? window.innerHeight;
+      const travel = Math.max(1, trackElement.getBoundingClientRect().height - stickyHeight);
       scrollProgress = Math.max(
         0,
         Math.min(1, (window.scrollY - trackElement.offsetTop) / travel),
       );
-      if (scrollProgress < 0.999) trackElement.classList.remove("journey-handed-off");
+      if (scrollProgress < 1) trackElement.classList.remove("journey-handed-off");
       setScrollTarget(mapScrollProgress(scrollProgress));
     };
 
@@ -346,9 +371,6 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     };
 
     const handleResize = () => {
-      const widthChanged = window.innerWidth !== laidOutWidth;
-      if (isMobileVideo() && !widthChanged) return;
-      laidOutWidth = window.innerWidth;
       requestScrollRead();
     };
 
@@ -359,15 +381,17 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
       void promise.then(() => element.pause()).catch(() => undefined);
     };
 
-    if (!reducedMotion) clipStates.forEach((state) => {
+    const loadClip = (state: ClipState, preload: "auto" | "metadata" = "auto") => {
+      if (state.loading || state.ready || state.failed || reducedMotion || disposed) return;
+      state.loading = true;
       const handleLoadedMetadata = () => {
         state.ready = true;
         state.element.pause();
         if (firstGesture) primeClip(state.element);
-        if (state.index === requestedClip && step > 0) performSeek(state);
+        if (state.index === requestedClip && step > 0) seekToStep(step, lastDirection, targetChapter);
       };
       const handleSeeked = () => {
-        if (state.index !== requestedClip) return;
+        if (disposed || step <= 0 || state.index !== requestedClip) return;
         const frameTolerance = 1 / 120;
         if (Math.abs(state.element.currentTime - state.desiredTime) > frameTolerance) {
           performSeek(state);
@@ -376,44 +400,48 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
         revealOnPaint(state, state.revision);
       };
       const handleError = () => {
+        state.failed = true;
+        state.ready = false;
         if (state.index !== requestedClip) return;
         trackElement.classList.remove("is-video-loading");
         setIsSeeking(false);
+        updateHandoff();
         if (activeClip < 0) trackElement.classList.remove("is-video-painted");
       };
 
       state.element.addEventListener("loadedmetadata", handleLoadedMetadata);
       state.element.addEventListener("seeked", handleSeeked);
+      state.element.addEventListener("loadeddata", handleSeeked);
+      state.element.addEventListener("canplay", handleSeeked);
       state.element.addEventListener("error", handleError);
       mediaCleanups.push(() => {
         state.element.removeEventListener("loadedmetadata", handleLoadedMetadata);
         state.element.removeEventListener("seeked", handleSeeked);
+        state.element.removeEventListener("loadeddata", handleSeeked);
+        state.element.removeEventListener("canplay", handleSeeked);
         state.element.removeEventListener("error", handleError);
       });
 
-      const source = getScrubSource(state.index, isMobileVideo());
-      void fetch(source, {cache: "force-cache", signal: abortController.signal})
-        .then((response) => {
-          if (!response.ok) throw new Error(`Failed to load ${source}`);
-          return response.blob();
-        })
-        .then((blob) => {
-          if (abortController.signal.aborted) return;
-          const objectUrl = URL.createObjectURL(blob);
-          objectUrls.push(objectUrl);
-          state.element.src = objectUrl;
-          state.element.load();
-        })
-        .catch(() => {
-          if (!abortController.signal.aborted) handleError();
-        });
-    });
+      // Direct URLs let the media loader request only the byte ranges needed
+      // for a seek, instead of waiting for a complete multi-megabyte Blob.
+      state.element.preload = preload;
+      state.element.src = getScrubSource(state.index, isMobileVideo());
+      state.element.load();
+    };
 
     const handleFirstGesture = () => {
       if (firstGesture) return;
       firstGesture = true;
       clipStates.forEach((state) => state.ready && primeClip(state.element));
     };
+
+    const handleFinalStillLoad = () => {
+      finalStillReady = true;
+      syncFinalStill();
+      updateHandoff();
+    };
+
+    finalStillElement?.addEventListener("load", handleFinalStillLoad);
 
     window.addEventListener("scroll", requestScrollRead, {passive: true});
     window.addEventListener("resize", handleResize);
@@ -423,11 +451,12 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
     readScrollPosition();
 
     return () => {
-      abortController.abort();
+      disposed = true;
       seekRevision += 1;
       if (scrollReadFrame) cancelAnimationFrame(scrollReadFrame);
       if (motionFrame) cancelAnimationFrame(motionFrame);
-      trackElement.classList.remove("journey-started", "journey-handed-off", "is-transitioning", "is-video-painted", "is-video-loading");
+      trackElement.classList.remove("journey-started", "journey-handed-off", "is-transitioning", "is-video-painted", "is-video-loading", "is-final-still");
+      finalStillElement?.removeEventListener("load", handleFinalStillLoad);
       window.removeEventListener("scroll", requestScrollRead);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", requestScrollRead);
@@ -440,11 +469,11 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
         element.removeAttribute("src");
         element.load();
       });
-      objectUrls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [finalFrameSrc]);
+  }, []);
 
   function revealBefore(show: boolean) {
+    if (show) setBeforeRequested(true);
     hero.current?.classList.toggle("is-before", show);
   }
 
@@ -460,8 +489,8 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
           onPointerUp={() => revealBefore(false)}
           onPointerCancel={() => revealBefore(false)}
         >
-          <Image className="journey-image journey-clean" src="/media/journey-v5/stills/000.webp" alt="" fill priority unoptimized sizes="100vw" />
-          <Image className="journey-image journey-dirty" src="/media/journey-v5/stills/000-before.webp" alt="" fill loading="eager" unoptimized sizes="100vw" />
+          <Image className="journey-image journey-clean" src="/media/journey-v5/stills/000.webp" alt="" fill preload sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" />
+          {beforeRequested && <Image className="journey-image journey-dirty" src="/media/journey-v5/stills/000-before.webp" alt="" fill loading="eager" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" />}
           <div className="journey-shade" />
         </div>
 
@@ -472,7 +501,7 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
                 videos.current[index] = element;
               }}
               className="journey-video"
-              preload="auto"
+              preload="none"
               muted
               playsInline
               disablePictureInPicture
@@ -485,12 +514,16 @@ export function ApartmentExperience({locale, calculatorHref, finalFrameSrc}: {lo
               src="/media/journey-v5/stills/000.webp"
               alt=""
               fill
-              sizes="100vw"
-              unoptimized
-              priority
+              sizes="(max-aspect-ratio: 16/9) 178vh, 100vw"
+              loading="eager"
             />
           </div>
           <div className="journey-video-vignette" />
+          <picture className="journey-final-still">
+            <source media="(min-width: 681px), (orientation: landscape)" srcSet="/media/journey-v5/stills/032-desktop.webp" />
+            <source media="(max-width: 680px) and (orientation: portrait)" srcSet="/media/journey-v5/stills/032-mobile.webp" />
+            <img ref={finalStill} src="/media/journey-v5/stills/032-mobile.webp" alt="" width={608} height={1080} loading="eager" />
+          </picture>
           <div className="journey-loading-indicator" />
         </div>
 

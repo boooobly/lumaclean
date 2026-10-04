@@ -1,9 +1,15 @@
 import type {Metadata} from "next";
 import {Geist} from "next/font/google";
 import {hasLocale} from "next-intl";
-import {getTranslations, setRequestLocale} from "next-intl/server";
+import {setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 import {routing} from "@/i18n/routing";
+import {siteUrl} from "@/lib/seo";
+import {Analytics} from "@/components/site/analytics";
+import {WebsiteChat} from "@/components/site/website-chat";
+import {articlePath, getPublishedArticles} from "@/lib/articles";
+import {getServicePath} from "@/lib/seo-services";
+import {serviceIds} from "@/lib/pricing";
 import "../globals.css";
 
 const geist = Geist({subsets: ["latin", "cyrillic"], variable: "--font-geist"});
@@ -12,32 +18,13 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({locale}));
 }
 
-export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
-  const {locale} = await params;
-  if (!hasLocale(routing.locales, locale)) notFound();
-  const t = await getTranslations({locale, namespace: "Metadata"});
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://lumacleanrs.com";
-  const openGraphLocale = {ru: "ru_RU", sr: "sr_RS", en: "en_US"}[locale];
-  return {
-    metadataBase: new URL(base),
-    title: t("title"),
-    description: t("description"),
-    alternates: {
-      canonical: `/${locale}`,
-      languages: {sr: "/sr", ru: "/ru", en: "/en", "x-default": "/ru"},
-    },
-    openGraph: {title: t("title"), description: t("description"), type: "website", locale: openGraphLocale, siteName: "LumaClean", url: `/${locale}`, images: [{url: "/media/apartment-journey-poster.jpg", width: 1280, height: 720, alt: "LumaClean — cleaning in Belgrade"}]},
-    twitter: {card: "summary_large_image", title: t("title"), description: t("description"), images: ["/media/apartment-journey-poster.jpg"]},
-    robots: {index: true, follow: true},
-    verification: {
-      google:
-        process.env.GOOGLE_SITE_VERIFICATION ||
-        "zgG5SSwresZFL8dIqWx9S52oIR8Y9GwLhS4mDAQ9tGQ",
-      yandex: process.env.YANDEX_SITE_VERIFICATION || undefined,
-    },
-    other: {"geo.region": "RS-00", "geo.placename": "Belgrade"},
-  };
-}
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION || "zgG5SSwresZFL8dIqWx9S52oIR8Y9GwLhS4mDAQ9tGQ",
+    yandex: process.env.YANDEX_SITE_VERIFICATION || undefined,
+  },
+};
 
 export default async function LocaleLayout({children, params}: {children: React.ReactNode; params: Promise<{locale: string}>}) {
   const {locale} = await params;
@@ -45,7 +32,7 @@ export default async function LocaleLayout({children, params}: {children: React.
   setRequestLocale(locale);
   return (
     <html lang={locale} className={geist.variable}>
-      <body>{children}</body>
+      <body>{children}<WebsiteChat locale={locale}/><Analytics locale={locale} enabled={process.env.VERCEL_ENV === "production"} measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ""} paths={routing.locales.flatMap(l => [`/${l}`, `/${l}/articles`, ...serviceIds.map(s => getServicePath(l, s)), ...getPublishedArticles().map(a => articlePath(a, l))])}/></body>
     </html>
   );
 }

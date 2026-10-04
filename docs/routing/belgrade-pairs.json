@@ -1,0 +1,303 @@
+{
+  "source": "https://data.gov.rs/sr/datasets/r/729be9a1-7ed9-453d-9a3d-68fa30f07529",
+  "publisher": "City of Belgrade Secretariat for Public Transport",
+  "downloadedAt": "2026-10-03",
+  "license": "https://data.gov.rs/sr/terms/",
+  "modifications": "35 directed pairs selected from original stops; no coordinates altered",
+  "points": [
+    {
+      "name": "Terazije",
+      "district": "Stari Grad",
+      "latitude": 44.812661,
+      "longitude": 20.461043,
+      "stopId": "20195"
+    },
+    {
+      "name": "Trg Republike",
+      "district": "Stari Grad",
+      "latitude": 44.817026,
+      "longitude": 20.45983,
+      "stopId": "20193"
+    },
+    {
+      "name": "Kalemegdan (Donji grad)",
+      "district": "Dorcol",
+      "latitude": 44.827155,
+      "longitude": 20.453271,
+      "stopId": "20001"
+    },
+    {
+      "name": "Trg Slavija /Nemanjina/",
+      "district": "Vracar",
+      "latitude": 44.803494,
+      "longitude": 20.464055,
+      "stopId": "20067"
+    },
+    {
+      "name": "Vukov spomenik",
+      "district": "Zvezdara",
+      "latitude": 44.805481,
+      "longitude": 20.477927,
+      "stopId": "20063"
+    },
+    {
+      "name": "Studentski grad",
+      "district": "Novi Beograd",
+      "latitude": 44.826066,
+      "longitude": 20.397835,
+      "stopId": "21118"
+    },
+    {
+      "name": "Blok 45",
+      "district": "Novi Beograd",
+      "latitude": 44.793922,
+      "longitude": 20.374021,
+      "stopId": "20144"
+    },
+    {
+      "name": "KBC Zemun",
+      "district": "Zemun",
+      "latitude": 44.841191,
+      "longitude": 20.406453,
+      "stopId": "20313"
+    },
+    {
+      "name": "Banovo brdo",
+      "district": "Banovo Brdo",
+      "latitude": 44.768022,
+      "longitude": 20.413747,
+      "stopId": "20110"
+    },
+    {
+      "name": "Banjica",
+      "district": "Vozdovac",
+      "latitude": 44.757215,
+      "longitude": 20.478068,
+      "stopId": "20170"
+    },
+    {
+      "name": "Konjarnik",
+      "district": "Vozdovac",
+      "latitude": 44.782079,
+      "longitude": 20.511325,
+      "stopId": "20221"
+    },
+    {
+      "name": "Autokomanda",
+      "district": "Vozdovac",
+      "latitude": 44.7908214473,
+      "longitude": 20.4673792804,
+      "stopId": "27052"
+    },
+    {
+      "name": "Sava centar",
+      "district": "Novi Beograd",
+      "latitude": 44.80915,
+      "longitude": 20.429385,
+      "stopId": "20120"
+    },
+    {
+      "name": "Muzej Jugoslavije",
+      "district": "Savski Venac",
+      "latitude": 44.789679,
+      "longitude": 20.454349,
+      "stopId": "20275"
+    },
+    {
+      "name": "GO Rakovica",
+      "district": "Rakovica",
+      "latitude": 44.743645,
+      "longitude": 20.446048,
+      "stopId": "20875"
+    },
+    {
+      "name": "Mirijevo 3",
+      "district": "Mirijevo",
+      "latitude": 44.793439,
+      "longitude": 20.536946,
+      "stopId": "20464"
+    }
+  ],
+  "pairs": [
+    {
+      "id": "p01",
+      "origin": 0,
+      "destination": 1
+    },
+    {
+      "id": "p02",
+      "origin": 1,
+      "destination": 2
+    },
+    {
+      "id": "p03",
+      "origin": 3,
+      "destination": 4
+    },
+    {
+      "id": "p04",
+      "origin": 0,
+      "destination": 3
+    },
+    {
+      "id": "p05",
+      "origin": 2,
+      "destination": 4
+    },
+    {
+      "id": "p06",
+      "origin": 0,
+      "destination": 5
+    },
+    {
+      "id": "p07",
+      "origin": 1,
+      "destination": 6
+    },
+    {
+      "id": "p08",
+      "origin": 2,
+      "destination": 7
+    },
+    {
+      "id": "p09",
+      "origin": 3,
+      "destination": 8
+    },
+    {
+      "id": "p10",
+      "origin": 4,
+      "destination": 9
+    },
+    {
+      "id": "p11",
+      "origin": 0,
+      "destination": 10
+    },
+    {
+      "id": "p12",
+      "origin": 1,
+      "destination": 11
+    },
+    {
+      "id": "p13",
+      "origin": 2,
+      "destination": 12
+    },
+    {
+      "id": "p14",
+      "origin": 3,
+      "destination": 13
+    },
+    {
+      "id": "p15",
+      "origin": 4,
+      "destination": 14
+    },
+    {
+      "id": "p16",
+      "origin": 0,
+      "destination": 15
+    },
+    {
+      "id": "p17",
+      "origin": 5,
+      "destination": 7
+    },
+    {
+      "id": "p18",
+      "origin": 5,
+      "destination": 6
+    },
+    {
+      "id": "p19",
+      "origin": 6,
+      "destination": 8
+    },
+    {
+      "id": "p20",
+      "origin": 7,
+      "destination": 9
+    },
+    {
+      "id": "p21",
+      "origin": 8,
+      "destination": 10
+    },
+    {
+      "id": "p22",
+      "origin": 9,
+      "destination": 11
+    },
+    {
+      "id": "p23",
+      "origin": 10,
+      "destination": 12
+    },
+    {
+      "id": "p24",
+      "origin": 11,
+      "destination": 13
+    },
+    {
+      "id": "p25",
+      "origin": 12,
+      "destination": 14
+    },
+    {
+      "id": "p26",
+      "origin": 13,
+      "destination": 15
+    },
+    {
+      "id": "p27",
+      "origin": 15,
+      "destination": 5
+    },
+    {
+      "id": "p28",
+      "origin": 6,
+      "destination": 7
+    },
+    {
+      "id": "p29",
+      "origin": 7,
+      "destination": 8
+    },
+    {
+      "id": "p30",
+      "origin": 8,
+      "destination": 9
+    },
+    {
+      "id": "p31",
+      "origin": 9,
+      "destination": 10
+    },
+    {
+      "id": "p32",
+      "origin": 10,
+      "destination": 11
+    },
+    {
+      "id": "p33",
+      "origin": 11,
+      "destination": 12
+    },
+    {
+      "id": "p34",
+      "origin": 12,
+      "destination": 13
+    },
+    {
+      "id": "p35",
+      "origin": 14,
+      "destination": 15
+    }
+  ],
+  "departures": [
+    "2026-10-05T07:00:00+02:00",
+    "2026-10-05T13:00:00+02:00",
+    "2026-10-05T18:00:00+02:00"
+  ]
+}

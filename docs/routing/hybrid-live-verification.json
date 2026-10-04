@@ -1,0 +1,160 @@
+{
+  "checkedAt": "2026-10-03T17:36:34.693377+00:00",
+  "branch": "codex/admin-motis-routing",
+  "pullRequest": "https://github.com/boooobly/lumaclean/pull/1",
+  "readiness": {
+    "productionReady": 5,
+    "total": 5,
+    "serverSide": true,
+    "verifiedInChrome": true,
+    "canActivate": true,
+    "blockers": []
+  },
+  "duration": [
+    {
+      "service": "deep",
+      "version": 1,
+      "baseMinutes": 480,
+      "cleaners": 2,
+      "reserveMinutes": 30,
+      "minArea": "40",
+      "maxArea": "60",
+      "referenceArea": "50",
+      "audit": true
+    },
+    {
+      "service": "regular",
+      "version": 2,
+      "baseMinutes": 150,
+      "cleaners": 2,
+      "reserveMinutes": 30,
+      "minArea": "1",
+      "maxArea": "100",
+      "referenceArea": "100",
+      "audit": true
+    }
+  ],
+  "cleaningReserveMinutes": 30,
+  "defaultTravelBufferMinutes": 30,
+  "versioned": true,
+  "auditVerified": true,
+  "historicalOrdersUnchanged": true,
+  "preview": {
+    "url": "https://lumaclean-i4y8n64eh-vladislavs-projects-0eae0ea3.vercel.app",
+    "deploymentId": "dpl_363X95La8eY1cENLFEG6zutqHx1N",
+    "status": "PASSED",
+    "service": "deep",
+    "booking": {
+      "price": 10700,
+      "assignedCleaners": 2,
+      "requiredCleaners": 2,
+      "travelBufferMinutes": 30,
+      "cleaningReserveMinutes": 30,
+      "estimatedDurationMinutes": 480
+    },
+    "steps": [
+      {
+        "ok": true,
+        "label": "AI понял запрос"
+      },
+      {
+        "ok": true,
+        "label": "Цена рассчитана"
+      },
+      {
+        "ok": true,
+        "label": "Duration рассчитан"
+      },
+      {
+        "ok": true,
+        "label": "Адрес найден"
+      },
+      {
+        "ok": true,
+        "label": "Маршрут рассчитан"
+      },
+      {
+        "ok": true,
+        "label": "Свободный слот найден"
+      },
+      {
+        "ok": true,
+        "label": "Повторная проверка слота"
+      },
+      {
+        "ok": true,
+        "label": "Order создан"
+      }
+    ],
+    "nativeAiAttempts": [
+      {
+        "ok": true,
+        "model": "gpt-6-luna",
+        "provider": "poyo",
+        "errorCode": null,
+        "latencyMs": 3151
+      }
+    ],
+    "startedAt": "2026-10-03T17:30:20.678Z",
+    "finishedAt": "2026-10-03T17:30:27.381Z",
+    "cleaned": true,
+    "sourceDatabase": "Preview",
+    "gatewayEnvironment": "production",
+    "syntheticClientsRemaining": 0,
+    "syntheticConversationsRemaining": 0,
+    "ordersRemaining": 0,
+    "routeObservations": [
+      {
+        "quality": "FALLBACK_80",
+        "durationSeconds": 4800,
+        "count": 12
+      }
+    ]
+  },
+  "routing": {
+    "status": "DEGRADED",
+    "productionPermitted": true,
+    "motisHealthy": true,
+    "busmapsStatus": "PENDING_APPROVAL",
+    "busmapsHttpRequests": 0,
+    "fallbackMinutes": 80,
+    "travelBufferSeparate": true,
+    "firstTripExtraBuffer": 0
+  },
+  "autoSafety": {
+    "off": "PASSED",
+    "shadow": "PASSED",
+    "serverReadinessRequired": "PASSED",
+    "autoToShadowDuringBooking": "PASSED",
+    "autoToOffDuringBooking": "PASSED",
+    "boundary": "mode lock, fresh control and server readiness immediately before first CRM mutation",
+    "isolatedDatabaseTests": true
+  },
+  "engineering": {
+    "targetedTestsPassed": 26,
+    "skippedDatabaseTests": 0,
+    "typecheck": true,
+    "targetedLint": true,
+    "previewBuild": "READY",
+    "productionBuild": "READY",
+    "previousHybridBaselineTests": 59,
+    "broadAuditRepeated": false,
+    "newArchitecture": false,
+    "newMigrations": false
+  },
+  "production": {
+    "url": "https://lumacleanrs.com",
+    "deploymentId": "dpl_5wgKrYNac2754Fmd7juWYY85NeCi",
+    "deploymentUrl": "https://lumaclean-bizl72sa6-vladislavs-projects-0eae0ea3.vercel.app",
+    "masterMode": "SHADOW",
+    "autoEnabled": false,
+    "otherChannels": "OFF",
+    "previewProofImportedAndValidatedInUI": true,
+    "syntheticOrdersCreated": 0,
+    "ordersRemaining": 0,
+    "clientsRemaining": 0,
+    "ownerButtonAvailable": true
+  },
+  "websiteLimitedAutoReady": true,
+  "ownerAction": "Use Settings to enable limited AUTO with explicit owner confirmation; no automatic activation or merge."
+}

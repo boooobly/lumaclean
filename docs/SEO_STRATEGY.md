@@ -1,6 +1,6 @@
 # LumaClean SEO strategy
 
-Updated: 2026-07-16  
+Updated: 2026-09-11
 Primary market: Belgrade, Serbia  
 Languages: Serbian (Latin), Russian, English
 
@@ -8,7 +8,7 @@ Languages: Serbian (Latin), Russian, English
 
 The goal is to earn strong local visibility for transactional cleaning searches in Belgrade. No search engine or agency can guarantee a #1 organic position; rankings depend on relevance, competition, authority, user satisfaction and time.
 
-At the start of this work, `site:lumacleanrs.com` returned no indexed pages. The domain is new, so the first priority is discovery and correct indexing. The initial site exposed only three homepage URLs and placed every service on the same page.
+Historical baseline (2026-07-16): `site:lumacleanrs.com` returned no indexed pages. This is not the current index status: public search now discovers LumaClean pages; only the search-engine consoles can establish full index coverage. The initial site exposed only three homepage URLs and placed every service on the same page.
 
 ## Search-intent map
 
@@ -101,3 +101,15 @@ No facts should be invented for SEO.
 - Improve conversion rate per landing page, not traffic alone.
 
 The commercial KPI is qualified cleaning enquiries from organic landing pages. Rankings are a diagnostic metric, not the final business outcome.
+
+## September 2026 audit
+
+See [SEO_AUDIT_2026-09-11.md](SEO_AUDIT_2026-09-11.md) and `seo-audit/` for evidence. Local fixes require deployment before search engines can see them.
+
+- Disabled next-intl automatic alternate Link headers: they reused untranslated service slugs. HTML and XML reciprocal alternates remain.
+- Scoped homepage metadata to the homepage so service 404s do not inherit its canonical and index directive.
+- Normalized the public origin in one shared module. Removed the unmaintained global lastmod; restore it only with accurate per-page content dates.
+- Distinguished general cleaning homepage titles from regular apartment cleaning titles without changing established URLs.
+- Adapted hero image delivery and moved sequential video downloads after window load. Total video size still warrants a separate media optimization pass.
+- Represented service starting prices as minimum price specifications, preserving all prices and booking behavior.
+- Google discontinued FAQ rich results on May 7, 2026. Existing FAQPage data matches visible questions but is not a rich-result growth tactic. [Source](https://developers.google.com/search/updates).

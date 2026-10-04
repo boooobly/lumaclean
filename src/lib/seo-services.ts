@@ -87,7 +87,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
   ru: {
     regular: {
       slug: "uborka-kvartir",
-      title: "Уборка квартир в Белграде — цены от 4 000 RSD | LumaClean",
+      title: "Поддерживающая уборка квартир в Белграде | LumaClean",
       description: "Поддерживающая уборка квартир по всему Белграду: комнаты, кухня, санузел и полы. Цена от 4 000 RSD, расчёт до выезда.",
       eyebrow: "Регулярный уход · Белград",
       h1: "Поддерживающая уборка квартир в Белграде",
@@ -110,7 +110,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Нужно ли покупать чистящие средства?", a: "Нет. Мы можем приехать со своими средствами или использовать ваши — как удобнее и безопаснее для поверхностей."},
       ],
       image: "/media/living-room-clean.jpg",
-      imageAlt: "Чистая гостиная после поддерживающей уборки квартиры в Белграде",
+      imageAlt: "Интерьер светлой гостиной",
     },
     deep: {
       slug: "generalnaya-uborka",
@@ -137,7 +137,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Можно добавить духовку и холодильник?", a: "Да. Мойка внутри духовки стоит 1 100 RSD, холодильника — 900 RSD."},
       ],
       image: "/media/material-chrome.webp",
-      imageAlt: "Бережно очищенный смеситель после генеральной уборки",
+      imageAlt: "Хромированный смеситель крупным планом",
     },
     move: {
       slug: "uborka-pri-pereezde",
@@ -225,29 +225,30 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
     regular: {
       slug: "ciscenje-stanova",
       title: "Čišćenje stanova Beograd — cena od 4.000 RSD | LumaClean",
-      description: "Održavajuće čišćenje stanova u svim delovima Beograda: sobe, kuhinja, kupatilo i podovi. Cena od 4.000 RSD.",
+      description: "Redovno čišćenje stanova širom Beograda: sobe, kuhinja, kupatilo i podovi. Jasne cene prema kvadraturi od 4.000 RSD, dodatni radovi posebno.",
       eyebrow: "Redovno održavanje · Beograd",
-      h1: "Održavajuće čišćenje stanova u Beogradu",
-      lead: "Vraćamo stanu uredan svakodnevni izgled: brišemo prašinu, čistimo podove, kuhinju, kupatilo i ogledala.",
+      h1: "Čišćenje stanova u Beogradu za redovno održavanje",
+      lead: "Vraćamo stanu uredan svakodnevni izgled: brišemo prašinu i čistimo podove, kuhinju, kupatilo i ogledala.",
       intro: [
-        "Održavajuće čišćenje je namenjeno stanu bez jakih i starih zaprljanja. Dobar je izbor za negu jednom nedeljno, na dve nedelje ili pre dolaska gostiju.",
-        "Pre dolaska proveravamo kvadraturu, deo grada i stanje prostora. Unapred vidite okvirnu cenu, a prozore, balkon, rernu, frižider, ormariće ili promenu posteljine dodajete po potrebi.",
+        "Redovno čišćenje, koje se u svakodnevnom govoru često naziva i spremanje stana, namenjeno je prostoru bez jakih i starih zaprljanja. Dobar je izbor za negu jednom nedeljno, na dve nedelje ili pre dolaska gostiju.",
+        "Pre dolaska proveravamo kvadraturu, deo Beograda i stanje prostora. Unapred vidite okvirnu cenu, a prozore, balkon, rernu, frižider, ormariće ili promenu posteljine dodajete samo ako su vam potrebni.",
       ],
       included: ["Brisanje prašine sa dostupnih otvorenih površina", "Usisavanje i vlažno čišćenje podova", "Kuhinjski frontovi i radne površine spolja", "Kupatilo, sanitarije i ogledala", "Odnošenje kućnog otpada po dogovoru", "Završno sređivanje prostorija"],
       suitable: ["Za redovno održavanje stana", "Pre dolaska gostiju ili nakon naporne nedelje", "Kada detaljno generalno čišćenje još nije potrebno"],
       details: [
         {title: "Kuhinja i kupatilo", text: "Fokusiramo se na svakodnevno korišćene zone: uklanjamo sveže tragove, masnoću sa dostupnih površina, kapljice i naslage sapuna."},
-        {title: "Jasna cena", text: "Okvir zavisi od kvadrature. Dlake kućnih ljubimaca, jača zaprljanja i dodatni radovi potvrđuju se pre početka."},
+        {title: "Cena prema kvadraturi", text: "Osnovna cena počinje od 4.000 RSD. Prozore, balkon, unutrašnjost uređaja i ormarića, mnogo dlaka i jača zaprljanja dogovaramo i obračunavamo odvojeno."},
         {title: "Sredstva", text: "Možemo doneti svoja sredstva ili koristiti vaša. Za odgovarajuće površine dostupna je i parna obrada bez kućne hemije."},
       ],
       faq: [
         {q: "Koliko košta čišćenje stana u Beogradu?", a: "Održavajuće čišćenje počinje od 4.000 RSD. Tačan okvir zavisi od kvadrature, stanja i dodatnih radova."},
+        {q: "Koja je razlika između redovnog i generalnog čišćenja?", a: "Redovno čišćenje obuhvata prašinu, podove, kuhinjske površine spolja, kupatilo i ogledala. Generalno čišćenje predviđa više vremena za vrata, lajsne, prekidače, frontove i zahtevne zone."},
         {q: "Mogu li da zakažem čišćenje istog dana?", a: "Da, ako postoji slobodan termin. Hitni dolazak istog dana uvećava cenu za 20%."},
         {q: "Da li su prozori uključeni?", a: "Prozori se dodaju posebno: standardni je 900 RSD, a veliki ili panoramski od 1.200 RSD."},
         {q: "Da li moram da kupim sredstva?", a: "Ne. Možemo doneti svoja sredstva ili koristiti vaša, u zavisnosti od vaših želja i površina."},
       ],
       image: "/media/living-room-clean.jpg",
-      imageAlt: "Čista dnevna soba nakon održavajućeg čišćenja stana u Beogradu",
+      imageAlt: "Enterijer svetle dnevne sobe",
     },
     deep: {
       slug: "generalno-ciscenje",
@@ -274,7 +275,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Mogu li da dodam rernu i frižider?", a: "Da. Rerna iznutra je 1.100 RSD, a frižider iznutra 900 RSD."},
       ],
       image: "/media/material-chrome.webp",
-      imageAlt: "Pažljivo očišćena slavina nakon generalnog čišćenja",
+      imageAlt: "Hromirana slavina izbliza",
     },
     move: {
       slug: "ciscenje-pri-selidbi",
@@ -292,7 +293,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
       details: [
         {title: "Nakon iznošenja stvari", text: "Najbolji rezultat se postiže kada su kutije i lični predmeti uklonjeni i sve dogovorene površine dostupne."},
         {title: "Unutrašnje zone", text: "Ormarići, frižider i rerna iznutra dodaju se posebno. Količinu i stanje potvrđujemo pre konačne cene."},
-        {title: "Nije post-renovation", text: "Ova usluga je namenjena kućnim tragovima nakon stanovanja. Građevinska prašina i materijali traže drugačiju tehnologiju."},
+        {title: "Ne obuhvata čišćenje nakon renoviranja", text: "Ova usluga je namenjena kućnim tragovima nakon stanovanja. Građevinska prašina i materijali traže drugačiju tehnologiju."},
       ],
       faq: [
         {q: "Kada je najbolje zakazati čišćenje pri selidbi?", a: "Nakon iznošenja stvari i pre predaje ključeva, kako bi podovi, lajsne i prazne površine bili dostupni."},
@@ -332,27 +333,28 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
     },
     office: {
       slug: "ciscenje-kancelarija",
-      title: "Čišćenje kancelarija Beograd | LumaClean",
-      description: "Redovno i jednokratno čišćenje manjih kancelarija u Beogradu: radne površine, podovi, kupatilo i coffee point. Od 4.000 RSD.",
+      title: "Čišćenje kancelarija Beograd — od 4.000 RSD | LumaClean",
+      description: "Čišćenje manjih kancelarija i studija širom Beograda: radne površine, podovi, kupatilo i coffee point. Cene prema kvadraturi od 4.000 RSD.",
       eyebrow: "Male kancelarije · Beograd",
       h1: "Čišćenje manjih kancelarija u Beogradu",
-      lead: "Održavamo red u manjim radnim prostorima: dostupni stolovi, podovi, kupatilo, coffee point i kućni otpad.",
+      lead: "Jednokratno ili redovno čistimo manje kancelarije i studije: dostupne stolove, podove, kupatilo, coffee point, kvake i dogovorene zone otpada.",
       intro: [
-        "Usluga je namenjena manjim kancelarijama bez industrijskih zaprljanja i specijalizovanih zona. Moguća je jednokratna poseta ili dogovoreni redovan raspored.",
-        "Pre prvog dolaska proveravamo kvadraturu, broj radnih mesta, kupatila i pogodno vreme. Za redovan rad unapred definišemo listu zadataka.",
+        "Usluga je namenjena manjim kancelarijama i studijima bez industrijskih zaprljanja i specijalizovanih zona. Možete izabrati jednokratnu posetu ili dogovoriti redovan raspored.",
+        "Pre prvog dolaska proveravamo kvadraturu, broj radnih mesta i toaleta, coffee point i pogodno vreme. Osnovna cena počinje od 4.000 RSD, a dodatne radove potvrđujemo odvojeno.",
       ],
       included: ["Brisanje prašine sa dostupnih radnih površina", "Usisavanje i vlažno čišćenje podova", "Čišćenje kupatila i ogledala", "Spoljašnje čišćenje coffee pointa", "Sakupljanje kućnog otpada u dogovorenim zonama", "Brisanje kvaka i dostupnih prekidača"],
       suitable: ["Za manje kancelarije i studije", "Za jednokratno čišćenje ili redovan raspored", "Kada je važan unapred definisan obim"],
       details: [
         {title: "Bez ometanja rada", text: "Dogovaramo vreme i zone pristupa. Dokumenta, opremu i lične stvari zaposlenih ne pomeramo bez posebnog dogovora."},
-        {title: "Redovan format", text: "Nakon prve posete možemo definisati listu i učestalost. Sve izmene obima potvrđuju se unapred."},
+        {title: "Cena i redovan raspored", text: "Cena zavisi od kvadrature, broja radnih zona i stanja prostora. Nakon prve posete možemo definisati ponavljajuću listu i učestalost."},
         {title: "Granice usluge", text: "Ne radimo industrijsko čišćenje, fasade, opasna zaprljanja ni specijalizovane proizvodne prostore."},
       ],
       faq: [
+        {q: "Koliko košta čišćenje male kancelarije u Beogradu?", a: "Cena počinje od 4.000 RSD za prostor do 39 m². Za 40–59 m² osnovna cena je 4.700 RSD, za 60–79 m² 5.900 RSD, a za 80–99 m² 7.200 RSD. Od 100 m² obračun je 75 RSD po m²."},
         {q: "Da li radite po redovnom rasporedu?", a: "Da, za manju kancelariju možemo dogovoriti ponavljajuću listu i odgovarajuću učestalost."},
         {q: "Može li čišćenje van radnog vremena?", a: "Navedite željeno vreme u upitu. Dostupan termin potvrđujemo pre dolaska."},
         {q: "Da li čistite velike poslovne objekte?", a: "Ne. Specijalizovani smo za manje kancelarije i ne pružamo industrijsko ili fasadno čišćenje."},
-        {q: "Od čega zavisi cena?", a: "Od kvadrature, broja kupatila i radnih zona, stanja prostora, učestalosti i dodatnih radova."},
+        {q: "Da li su prozori i unutrašnjost frižidera uključeni?", a: "Ne. Prozore, unutrašnjost frižidera i ormarića dogovaramo i obračunavamo kao dodatne radove."},
       ],
       image: "/media/material-cabinet.webp",
       imageAlt: "Čista radna zona manje kancelarije u Beogradu",
@@ -361,10 +363,10 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
   en: {
     regular: {
       slug: "apartment-cleaning",
-      title: "Apartment Cleaning Belgrade — from 4,000 RSD | LumaClean",
+      title: "Regular Apartment Cleaning Belgrade | LumaClean",
       description: "Regular apartment cleaning across Belgrade: rooms, kitchen, bathroom and floors. Prices from 4,000 RSD with an upfront estimate.",
       eyebrow: "Regular home care · Belgrade",
-      h1: "Apartment cleaning in Belgrade",
+      h1: "Regular apartment cleaning in Belgrade",
       lead: "We restore a calm everyday finish: dusting, floors, kitchen exteriors, bathroom fixtures and mirrors.",
       intro: [
         "Regular cleaning suits a home without heavy or long-standing soiling. It works well weekly, every two weeks or before guests arrive.",
@@ -384,7 +386,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Do I need to buy cleaning products?", a: "No. We can bring our own or use yours, depending on your preferences and the surfaces in your home."},
       ],
       image: "/media/living-room-clean.jpg",
-      imageAlt: "Clean living room after regular apartment cleaning in Belgrade",
+      imageAlt: "Bright living room interior",
     },
     deep: {
       slug: "deep-cleaning",
@@ -411,7 +413,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Can I add the oven and fridge?", a: "Yes. Oven interior cleaning is 1,100 RSD and fridge interior cleaning is 900 RSD."},
       ],
       image: "/media/material-chrome.webp",
-      imageAlt: "Carefully cleaned fixture after a deep apartment clean",
+      imageAlt: "Close-up of a chrome tap",
     },
     move: {
       slug: "move-in-move-out-cleaning",

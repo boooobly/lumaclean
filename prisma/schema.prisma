@@ -1,0 +1,918 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  CLEANER
+}
+
+enum LeadStatus {
+  NEW
+  IN_PROGRESS
+  WAITING_CLIENT
+  READY_TO_BOOK
+  CONVERTED
+  LOST
+}
+
+enum Channel {
+  WEBSITE
+  TELEGRAM
+  WHATSAPP
+  VIBER
+  MANUAL
+  OTHER
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  SCHEDULED
+  EN_ROUTE
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum SoilLevel {
+  LIGHT
+  NORMAL
+  HEAVY
+  EXTREME
+}
+
+enum ScheduleMode {
+  FIXED
+  FLEXIBLE
+}
+
+enum AvailabilityKind {
+  WEEKLY
+  AVAILABLE
+  UNAVAILABLE
+}
+
+enum TravelMode {
+  PUBLIC_TRANSIT
+  WALKING
+  CAR
+  TAXI
+}
+
+enum MessageAuthor {
+  CLIENT
+  ADMIN
+  AI
+  SYSTEM
+}
+
+enum ActorType {
+  USER
+  AI
+  SYSTEM
+}
+
+enum ExpenseCategory {
+  TRANSPORT
+  TAXI
+  CHEMICALS
+  EQUIPMENT
+  PAYOUT
+  MARKETING
+  SOFTWARE
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+// Better Auth core models; role and active are never accepted from auth input.
+model User {
+  id               String         @id @default(cuid())
+  name             String
+  email            String         @unique
+  emailVerified    Boolean        @default(false)
+  image            String?
+  role             Role           @default(CLEANER)
+  active           Boolean        @default(true)
+  createdAt        DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(3)
+  sessions         Session[]
+  accounts         Account[]
+  cleaner          Cleaner?
+  auditLogs        AuditLog[]
+  messages         Message[]
+  notifications    Notification[]
+  resolvedHandoffs HumanHandoff[]
+  schedulingOverrides SchedulingOverride[]
+  schedulingProposals SchedulingProposal[]
+  importBatches ImportBatch[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime @db.Timestamptz(3)
+  token     String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime? @db.Timestamptz(3)
+  refreshTokenExpiresAt DateTime? @db.Timestamptz(3)
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([identifier])
+}
+
+model RateLimit {
+  id          String @id @default(cuid())
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+}
+
+model Cleaner {
+  id                String                @id @default(cuid())
+  userId            String?               @unique
+  user              User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name              String
+  phone             String
+  additionalContact String?
+  active            Boolean               @default(true)
+  homeAddress       String?
+  homeLatitude      Decimal?              @db.Decimal(10, 7)
+  homeLongitude     Decimal?              @db.Decimal(10, 7)
+  homeCoordinatesConfirmed Boolean @default(false)
+  homePlaceId       String?
+  languages         String[]
+  skills            String[]
+  internalRating    Decimal?              @db.Decimal(3, 2)
+  notes             String?
+  payoutPercent     Decimal?              @db.Decimal(5, 2)
+  defaultTravelMode TravelMode            @default(PUBLIC_TRANSIT)
+  availability      CleanerAvailability[]
+  assignments       OrderCleaner[]
+  payouts           CleanerPayout[]
+  notifications     Notification[]
+  createdAt         DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime              @updatedAt @db.Timestamptz(3)
+
+  @@index([active])
+}
+
+// Weekly local wall-clock minutes, or a dated override in business timezone.
+model CleanerAvailability {
+  id          String           @id @default(cuid())
+  cleanerId   String
+  cleaner     Cleaner          @relation(fields: [cleanerId], references: [id], onDelete: Cascade)
+  kind        AvailabilityKind
+  weekday     Int?
+  date        DateTime?        @db.Date
+  startMinute Int?
+  endMinute   Int?
+  reason      String?
+  createdAt   DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime         @updatedAt @db.Timestamptz(3)
+
+  @@index([cleanerId, weekday])
+  @@index([cleanerId, date])
+}
+
+model Client {
+  id               String          @id @default(cuid())
+  name             String
+  phone            String
+  normalizedPhone  String?
+  telegram         String?
+  whatsapp         String?
+  viber            String?
+  preferredChannel Channel?
+  notes            String?
+  discountPercent  Decimal?        @db.Decimal(5, 2)
+  individualTerms  String?
+  addresses        ClientAddress[]
+  leads            Lead[]
+  orders           Order[]
+  conversations    Conversation[]
+  notifications    Notification[]
+  createdAt        DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@index([phone])
+  @@index([normalizedPhone])
+  @@index([createdAt])
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([phone(ops: raw("gin_trgm_ops"))], type: Gin, map: "Client_phone_search_idx")
+  @@index([telegram(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([whatsapp(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([viber(ops: raw("gin_trgm_ops"))], type: Gin)
+}
+
+model ClientAddress {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  label       String?
+  fullAddress String
+  comment     String?
+  apartment   String?
+  floor       String?
+  intercom    String?
+  latitude    Decimal? @db.Decimal(10, 7)
+  longitude   Decimal? @db.Decimal(10, 7)
+  coordinatesConfirmed Boolean @default(false)
+  placeId     String?
+  active      Boolean  @default(true)
+  orders      Order[]
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  @@unique([id, clientId])
+  @@index([clientId, active])
+}
+
+model Lead {
+  id              String             @id @default(cuid())
+  reference       String?            @unique
+  submissionId    String?            @unique
+  submissionHash  String?
+  normalizedPhone String?
+  area            Decimal?           @db.Decimal(10, 2)
+  estimatedPrice  Decimal?           @db.Decimal(12, 2)
+  urgent          Boolean            @default(false)
+  entrySource     String?
+  landingPage     String?
+  internalNote    String?
+  telegramStatus  NotificationStatus @default(PENDING)
+  extras          LeadExtra[]
+  clientId        String?
+  client          Client?            @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  name            String
+  phone           String
+  locale          String?
+  status          LeadStatus         @default(NEW)
+  channel         Channel            @default(WEBSITE)
+  lostReason      String?
+  serviceId       String?
+  service         Service?           @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  comment         String?
+  estimateText    String?
+  orders          Order[]
+  conversations   Conversation[]
+  createdAt       DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime           @updatedAt @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+  @@index([clientId])
+  @@index([createdAt])
+  @@index([channel, createdAt])
+  @@index([serviceId, createdAt])
+  @@index([normalizedPhone])
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([phone(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([reference(ops: raw("gin_trgm_ops"))], type: Gin)
+}
+
+model LeadExtra {
+  id        String       @id @default(cuid())
+  leadId    String
+  lead      Lead         @relation(fields: [leadId], references: [id], onDelete: Restrict)
+  extraId   String
+  extra     ServiceExtra @relation(fields: [extraId], references: [id], onDelete: Restrict)
+  quantity  Decimal      @db.Decimal(10, 2)
+  unitPrice Decimal      @db.Decimal(12, 2)
+
+  @@unique([leadId, extraId])
+}
+
+model Service {
+  id            String             @id @default(cuid())
+  code          String             @unique
+  name          String
+  active        Boolean            @default(true)
+  orders        Order[]
+  leads         Lead[]
+  priceBands    ServicePriceBand[]
+  durationRules DurationRule[]
+  createdAt     DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime           @updatedAt @db.Timestamptz(3)
+}
+
+// Versioned price catalogue; public pricing.ts remains the source until cutover.
+model ServicePriceBand {
+  id             String    @id @default(cuid())
+  serviceId      String
+  service        Service   @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  minArea        Decimal   @db.Decimal(10, 2)
+  maxArea        Decimal?  @db.Decimal(10, 2)
+  fixedPrice     Decimal?  @db.Decimal(12, 2)
+  pricePerSquare Decimal?  @db.Decimal(12, 2)
+  validFrom      DateTime  @db.Timestamptz(3)
+  validUntil     DateTime? @db.Timestamptz(3)
+
+  @@index([serviceId, validFrom])
+}
+
+model ServiceExtra {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  name        String
+  unit        String
+  unitPrice   Decimal      @db.Decimal(12, 2)
+  active      Boolean      @default(true)
+  orderExtras OrderExtra[]
+  leadExtras  LeadExtra[]
+  createdAt   DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime     @updatedAt @db.Timestamptz(3)
+}
+
+model Order {
+  id                       String          @id @default(cuid())
+  reference                String?         @unique
+  requestId                String?         @unique
+  clientId                 String
+  client                   Client          @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  addressId                String
+  address                  ClientAddress   @relation(fields: [addressId, clientId], references: [id, clientId], onDelete: Restrict)
+  leadId                   String?
+  lead                     Lead?           @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  status                   OrderStatus     @default(DRAFT)
+  serviceId                String
+  service                  Service         @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  area                     Decimal         @db.Decimal(10, 2)
+  soilLevel                SoilLevel?      @default(NORMAL)
+  urgent                   Boolean         @default(false)
+  manualDurationMinutes    Int?
+  durationOverrideReason   String?
+  durationSnapshot         Json?
+  durationRuleVersion      Int?
+  historical               Boolean         @default(false)
+  legacyId                 String?
+  legacyFinance            Json?
+  cancellationReason       String?
+  discountPercent          Decimal         @default(0) @db.Decimal(5, 2)
+  scheduleMode             ScheduleMode    @default(FIXED)
+  scheduledStart           DateTime?       @db.Timestamptz(3)
+  // Derived from the selected duration by a database trigger, never a guessed formula.
+  scheduledEnd             DateTime?       @db.Timestamptz(3)
+  windowFrom               DateTime?       @db.Timestamptz(3)
+  windowTo                 DateTime?       @db.Timestamptz(3)
+  estimatedDurationMinutes Int?
+  actualDurationMinutes    Int?
+  cleaningReserveMinutes   Int             @default(0)
+  travelBufferMinutes      Int
+  durationRuleId           String?
+  durationRule             DurationRule?   @relation(fields: [durationRuleId], references: [id], onDelete: SetNull)
+  basePrice                Decimal?        @db.Decimal(12, 2)
+  finalPrice               Decimal?        @db.Decimal(12, 2)
+  priceAdjustment          Decimal?        @db.Decimal(12, 2)
+  priceChangeReason        String?
+  discountAmount           Decimal         @default(0) @db.Decimal(12, 2)
+  currency                 String          @default("RSD") @db.VarChar(3)
+  clientComment            String?
+  internalComment          String?
+  requiredCleaners         Int             @default(1)
+  source                   Channel         @default(MANUAL)
+  completedAt              DateTime?       @db.Timestamptz(3)
+  assignments              OrderCleaner[]
+  schedulingOverrides      SchedulingOverride[]
+  extras                   OrderExtra[]
+  conversations            Conversation[]
+  expenses                 Expense[]
+  payouts                  CleanerPayout[]
+  createdAt                DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@index([status, scheduledStart])
+  @@index([scheduledEnd])
+  @@index([windowFrom, windowTo])
+  @@index([status, completedAt])
+  @@index([clientId])
+  @@index([addressId, clientId])
+  @@index([leadId])
+  @@index([serviceId])
+  @@index([createdAt])
+  @@index([reference(ops: raw("gin_trgm_ops"))], type: Gin)
+}
+
+model OrderCleaner {
+  id         String    @id @default(cuid())
+  orderId    String
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  cleanerId  String
+  cleaner    Cleaner   @relation(fields: [cleanerId], references: [id], onDelete: Restrict)
+  assignedAt DateTime  @default(now()) @db.Timestamptz(3)
+  acceptedAt DateTime? @db.Timestamptz(3)
+  startedAt  DateTime? @db.Timestamptz(3)
+  finishedAt DateTime? @db.Timestamptz(3)
+  removedAt  DateTime? @db.Timestamptz(3)
+  notes      String?
+
+  @@unique([orderId, cleanerId])
+  @@index([cleanerId])
+}
+
+// Reasons are kept in this protected business record, not copied into audit diffs.
+model SchedulingOverride {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  issueKeys String[]
+  reason    String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([orderId, createdAt])
+}
+
+model OrderExtra {
+  id              String       @id @default(cuid())
+  orderId         String
+  order           Order        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  extraId         String
+  extra           ServiceExtra @relation(fields: [extraId], references: [id], onDelete: Restrict)
+  quantity        Decimal      @db.Decimal(10, 2)
+  unitPrice       Decimal      @db.Decimal(12, 2)
+  durationMinutes Int?
+
+  @@unique([orderId, extraId])
+}
+
+// No formula seeded. Future rules are typed, versioned and explicitly approved.
+model DurationRule {
+  id               String   @id @default(cuid())
+  serviceId        String
+  service          Service  @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  version          Int
+  active           Boolean  @default(false)
+  minArea          Decimal? @db.Decimal(10, 2)
+  maxArea          Decimal? @db.Decimal(10, 2)
+  cleanerCount     Int
+  soilLevel        String?
+  referenceArea    Decimal  @default(0) @db.Decimal(10, 2)
+  soilMultipliers  Json     @default("{\"LIGHT\":1,\"NORMAL\":1,\"HEAVY\":1,\"EXTREME\":1}")
+  extraMinutes     Json     @default("{}")
+  reserveMinutes   Int      @default(0)
+  unknownExtraReserveMinutes Int @default(0)
+  baseMinutes      Int?
+  minutesPerSquare Decimal? @db.Decimal(10, 4)
+  notes            String?
+  orders           Order[]
+  createdAt        DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([serviceId, version])
+}
+
+model RouteCalculation {
+  id                   String     @id @default(cuid())
+  cacheKey             String     @unique
+  origin               String
+  originLatitude       Decimal?   @db.Decimal(10, 7)
+  originLongitude      Decimal?   @db.Decimal(10, 7)
+  destination          String
+  destinationLatitude  Decimal?   @db.Decimal(10, 7)
+  destinationLongitude Decimal?   @db.Decimal(10, 7)
+  travelMode           TravelMode @default(PUBLIC_TRANSIT)
+  departureAt          DateTime?  @db.Timestamptz(3)
+  durationSeconds      Int
+  distanceMeters       Int
+  provider             String
+  calculatedAt         DateTime   @default(now()) @db.Timestamptz(3)
+  expiresAt            DateTime   @db.Timestamptz(3)
+
+  @@index([expiresAt])
+}
+
+// Server-generated, owner-bound proposal; never trust a client-supplied plan.
+model SchedulingProposal {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  date       String   @db.VarChar(10)
+  version    String
+  plan       Json
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt  DateTime @db.Timestamptz(3)
+  appliedAt  DateTime? @db.Timestamptz(3)
+
+  @@index([userId, expiresAt])
+}
+
+model Conversation {
+  id               String         @id @default(cuid())
+  channel          Channel
+  externalThreadId String?
+  clientId         String?
+  client           Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  leadId           String?
+  lead             Lead?          @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  orderId          String?
+  order            Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  messages         Message[]
+  handoffs         HumanHandoff[]
+  control          ConversationControl @default(AI_CONTROL)
+  stage            ConversationStage @default(DISCOVERY)
+  locale           String @default("ru")
+  state            Json @default("{}")
+  summary          String?
+  anonymousHash    String? @unique
+  sessionExpiresAt DateTime? @db.Timestamptz(3)
+  identityVerified Boolean @default(false)
+  ownerId          String?
+  revision         Int @default(0)
+  unreadCount      Int @default(0)
+  needsAttention   Boolean @default(false)
+  lastMessageAt    DateTime @default(now()) @db.Timestamptz(3)
+  shadowProposal   Json?
+  shadowState      Json @default("{}")
+  jobs             AgentJob[]
+  invocations      AIInvocation[]
+  toolTraces       AgentToolTrace[]
+  slots            AgentSlot[]
+  createdAt        DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(3)
+
+  @@unique([channel, externalThreadId])
+  @@index([clientId])
+  @@index([leadId])
+  @@index([orderId])
+  @@index([control, lastMessageAt])
+  @@index([needsAttention, lastMessageAt])
+}
+
+model Message {
+  id                String        @id @default(cuid())
+  conversationId    String
+  conversation      Conversation  @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  author            MessageAuthor
+  userId            String?
+  user              User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  text              String
+  sentAt            DateTime      @default(now()) @db.Timestamptz(3)
+  externalMessageId String?
+  deliveryStatus    String @default("DELIVERED")
+  deliveryError     String?
+  deliveryAttempts  Int @default(0)
+  channelMessageId  String?
+  structured        Json?
+
+  @@unique([conversationId, externalMessageId])
+  @@index([conversationId, sentAt])
+}
+
+model HumanHandoff {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  reason         String
+  requestedAt    DateTime     @default(now()) @db.Timestamptz(3)
+  resolvedAt     DateTime?    @db.Timestamptz(3)
+  resolvedById   String?
+  resolvedBy     User?        @relation(fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolution     String?
+
+  @@index([resolvedAt, requestedAt])
+}
+
+model Expense {
+  id          String          @id @default(cuid())
+  category    ExpenseCategory
+  amount      Decimal         @db.Decimal(12, 2)
+  currency    String          @default("RSD") @db.VarChar(3)
+  occurredAt  DateTime        @db.Timestamptz(3)
+  orderId     String?
+  order       Order?          @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  payoutId    String?         @unique
+  payout      CleanerPayout?  @relation(fields: [payoutId], references: [id], onDelete: Restrict)
+  description String
+  deletedAt DateTime? @db.Timestamptz(3)
+  deletionReason String?
+  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@index([occurredAt, currency])
+  @@index([orderId])
+}
+
+model CleanerPayout {
+  id             String        @id @default(cuid())
+  cleanerId      String
+  cleaner        Cleaner       @relation(fields: [cleanerId], references: [id], onDelete: Restrict)
+  orderId        String
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  appliedPercent Decimal       @db.Decimal(5, 2)
+  basisAmount    Decimal       @db.Decimal(12, 2)
+  amount         Decimal       @db.Decimal(12, 2)
+  currency       String        @default("RSD") @db.VarChar(3)
+  status         PaymentStatus @default(PENDING)
+  paidAt         DateTime?     @db.Timestamptz(3)
+  adjustmentReason String?
+  expense        Expense?
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
+
+  @@unique([orderId, cleanerId])
+  @@index([cleanerId, status])
+}
+
+model Notification {
+  id            String             @id @default(cuid())
+  clientId      String?
+  client        Client?            @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  cleanerId     String?
+  cleaner       Cleaner?           @relation(fields: [cleanerId], references: [id], onDelete: SetNull)
+  userId        String?
+  user          User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  channel       Channel
+  text          String
+  status        NotificationStatus @default(PENDING)
+  scheduledAt   DateTime           @db.Timestamptz(3)
+  sentAt        DateTime?          @db.Timestamptz(3)
+  attempts      Int                @default(0)
+  lastErrorCode String?
+  createdAt     DateTime           @default(now()) @db.Timestamptz(3)
+  eventKey String? @unique
+  orderId String?
+  conversationId String?
+  audience String?
+  kind String?
+  payload Json?
+  deliveryState String @default("LEGACY")
+  nextAttemptAt DateTime? @db.Timestamptz(3)
+  leaseUntil DateTime? @db.Timestamptz(3)
+  leaseKey String?
+  publishedAt DateTime? @db.Timestamptz(3)
+
+  @@index([status, scheduledAt])
+  @@index([deliveryState, scheduledAt])
+  @@index([orderId])
+}
+
+model AuditLog {
+  id         String    @id @default(cuid())
+  actorType  ActorType
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  actorKey   String?
+  action     String
+  entityType String
+  entityId   String
+  // Allowlisted field changes only: no password, tokens, full contacts or messages.
+  changes    Json?
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([userId, createdAt])
+}
+
+model BusinessSettings {
+  id                          String   @id @default("default")
+  timezone                    String   @default("Europe/Belgrade")
+  currency                    String   @default("RSD") @db.VarChar(3)
+  defaultTravelBufferMinutes  Int      @default(30)
+  fallbackTravelMinutes Int @default(80)
+  defaultCleanerPayoutPercent Decimal? @db.Decimal(5, 2)
+  workdayStartMinute          Int?
+  workdayEndMinute            Int?
+  aiAgentMode                 AgentMode @default(SHADOW)
+  aiChannelModes Json @default("{\"WEBSITE\":\"AUTO\",\"TELEGRAM\":\"OFF\",\"WHATSAPP\":\"OFF\",\"VIBER\":\"OFF\"}")
+  aiAllowedServices String[] @default(["regular", "deep"])
+  aiCanary Boolean @default(true)
+  aiMaxAnonymousMessages Int @default(200)
+  aiMaxModelCalls Int @default(8)
+  aiMaxToolSteps Int @default(6)
+  aiMaxConversationCostUsd Decimal @default(0.1) @db.Decimal(10, 5)
+  aiDailyCostWarningUsd Decimal @default(5) @db.Decimal(10, 2)
+  aiDiagnostics Json?
+  aiDiagnosticsAt DateTime? @db.Timestamptz(3)
+  aiLiveTestProof Json?
+  updatedAt                   DateTime @updatedAt @db.Timestamptz(3)
+}
+
+// Preview-only synthetic batch. No customer contacts or raw model messages in reports.
+model AgentLiveTest {
+  id String @id @default(uuid())
+  conversationId String? @unique
+  status String @default("RUNNING")
+  report Json @default("{}")
+  startedAt DateTime @default(now()) @db.Timestamptz(3)
+  finishedAt DateTime? @db.Timestamptz(3)
+}
+
+model ShadowSuggestion {
+  id String @id @default(cuid())
+  conversationId String
+  jobId String @unique
+  snapshot Json
+  verdict String?
+  reason String?
+  reviewedById String?
+  reviewedAt DateTime? @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([conversationId, createdAt])
+  @@index([reviewedAt, verdict])
+}
+
+enum AgentMode {
+  OFF
+  SHADOW
+  AUTO
+}
+enum ConversationControl {
+  AI_CONTROL
+  HUMAN_CONTROL
+  CLOSED
+}
+enum ConversationStage {
+  DISCOVERY
+  QUALIFYING
+  QUOTING
+  SCHEDULING
+  AWAITING_CONFIRMATION
+  BOOKED
+  HANDOFF
+  CLOSED
+}
+// A persisted inbox job survives process death. Lease + conversation lock prevent concurrent turns.
+model AgentJob {
+  id String @id @default(cuid())
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  messageId String @unique
+  status String @default("PENDING")
+  attempts Int @default(0)
+  leaseUntil DateTime? @db.Timestamptz(3)
+  leaseKey String?
+  errorCode String?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  completedAt DateTime? @db.Timestamptz(3)
+  @@index([status, leaseUntil, createdAt])
+  @@index([conversationId, createdAt])
+}
+model AIInvocation {
+  id String @id @default(cuid())
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  jobId String
+  provider String
+  model String
+  inputTokens Int @default(0)
+  cachedInputTokens Int @default(0)
+  outputTokens Int @default(0)
+  latencyMs Int
+  estimatedCostUsd Decimal? @db.Decimal(12, 8)
+  toolCallCount Int @default(0)
+  success Boolean
+  errorCode String?
+  mode AgentMode
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([createdAt, provider, model])
+  @@index([conversationId, createdAt])
+}
+// Allowlisted diagnostics only; no raw arguments, full prompts, contacts or reasoning.
+model AgentToolTrace {
+  id String @id @default(cuid())
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  jobId String
+  tool String
+  outcome String
+  entityId String?
+  latencyMs Int
+  shadow Boolean
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([conversationId, createdAt])
+  @@index([createdAt, outcome])
+}
+// Opaque random token, scoped to one conversation and its quote/address/duration/revision.
+model AgentSlot {
+  id String @id @default(uuid())
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  fingerprint String
+  scheduleVersion String
+  start DateTime @db.Timestamptz(3)
+  durationMinutes Int
+  requiredCleaners Int
+  cleanerIds String[]
+  routingSnapshot Json
+  expiresAt DateTime @db.Timestamptz(3)
+  usedAt DateTime? @db.Timestamptz(3)
+  result Json?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([conversationId, expiresAt])
+}
+
+// Preview is owner-bound. Applying selected rows is explicit and transactional.
+model ImportBatch {
+  id        String @id @default(cuid())
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  fileHash  String
+  fileName  String
+  preview   Json
+  result    Json?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  appliedAt DateTime? @db.Timestamptz(3)
+  records   ImportRecord[]
+  @@unique([userId, fileHash])
+  @@index([userId, createdAt])
+}
+
+// Stable legacy ID survives re-export; changed source content requires review.
+model ImportRecord {
+  sourceKey String @id
+  rowHash   String
+  batchId   String
+  batch     ImportBatch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  entityType String
+  entityId   String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+}
+
+model Investment {
+  id        String @id @default(cuid())
+  occurredAt DateTime @db.Timestamptz(3)
+  paidBy    String
+  description String
+  amount    Decimal @db.Decimal(12, 2)
+  returnedAmount Decimal @default(0) @db.Decimal(12, 2)
+  currency String @default("RSD") @db.VarChar(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+}
+
+// Atomic server-side quota; kept outside booking transactions so rollbacks do not refund API calls.
+model RoutingUsageMonth {
+  period String @id
+  requests Int @default(0)
+  cacheHits Int @default(0)
+  errors Int @default(0)
+  liveLegs Int @default(0)
+  fallbackLegs Int @default(0)
+}
+model RoutingRequestLease {
+  key String @id
+  owner String
+  expiresAt DateTime @db.Timestamptz(3)
+}
+model RoutingBenchmark {
+  id String @id
+  request Json
+  motis Json?
+  busmaps Json?
+  checkedAt DateTime? @db.Timestamptz(3)
+  googleMinutes Int?
+  referenceAt DateTime? @db.Timestamptz(3)
+  referenceDate DateTime? @db.Timestamptz(3)
+  updatedBy String?
+}

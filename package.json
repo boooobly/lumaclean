@@ -4,34 +4,73 @@
   "description": "Multilingual LumaClean service website for Belgrade.",
   "private": true,
   "engines": {
-    "node": ">=20.9.0"
+    "node": "^22.13.0 || >=24.0.0"
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "prisma generate",
+    "typecheck": "next typegen && tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:validate": "prisma validate",
+    "db:migrate": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
+    "db:seed": "prisma db seed",
+    "admin:bootstrap": "tsx scripts/admin/bootstrap.ts",
+    "test:admin": "tsx --test tests/admin/*.test.ts",
+    "test:crm": "tsx --test tests/crm/*.test.ts",
+    "test:scheduling": "tsx --test tests/scheduling/*.test.ts",
+    "test:routing": "node --conditions=react-server --import tsx --test tests/routing/*.test.ts",
+    "test:finance": "tsx --test tests/finance/*.test.ts",
+    "test:agent": "tsx --test tests/agent/*.test.ts",
+    "benchmark:agent": "tsx scripts/admin/ai-benchmark.ts --live",
+    "prebuild": "node scripts/copy-maplibre-worker.mjs",
+    "predev": "node scripts/copy-maplibre-worker.mjs"
   },
   "dependencies": {
+    "@js-temporal/polyfill": "0.5.1",
+    "@next/env": "16.3.8",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "@vercel/functions": "3.9.9",
+    "@vercel/queue": "0.7.0",
+    "better-auth": "1.7.7",
+    "exceljs": "4.4.0",
     "gsap": "^3.15.0",
+    "libphonenumber-js": "1.13.14",
     "lucide-react": "^1.24.0",
-    "next": "16.2.10",
+    "maplibre-gl": "6.11.2",
+    "next": "16.3.8",
     "next-intl": "^4.13.2",
+    "pg": "8.23.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "server-only": "0.0.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@inquirer/prompts": "8.7.2",
     "@types/node": "^20",
+    "@types/pg": "8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.3.8",
+    "prisma": "7.10.0",
+    "tsx": "4.23.15",
     "typescript": "^5"
   },
   "overrides": {
-    "next": {
-      "postcss": "8.5.19"
+    "@prisma/config": {
+      "deepmerge-ts": "8.0.2"
+    },
+    "prisma": {
+      "mysql2": "3.24.5"
+    },
+    "exceljs": {
+      "uuid": "11.1.1"
     }
   }
 }

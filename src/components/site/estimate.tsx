@@ -2,11 +2,14 @@
 
 import Image from "next/image";
 import {Minus, Plus} from "lucide-react";
-import {useMemo, useState} from "react";
+import {useMemo, useRef, useState} from "react";
 import type {Locale} from "@/i18n/routing";
 import type {SiteContent} from "@/lib/content";
-import {basePrice, extrasPrices, formatRsd, serviceIds, type ServiceId} from "@/lib/pricing";
+import {calculatePrice, extrasPrices, formatRsd, serviceIds, type ServiceId} from "@/lib/pricing";
 import type {EditorialContent} from "@/lib/site-content";
+
+import {leadAttribution, trackEvent} from "@/lib/analytics";
+import {ArrowIcon} from "@/components/site/arrow-icon";
 
 type CountExtra = "standardWindow" | "largeWindow" | "cabinets" | "ironing";
 type ToggleExtra = "balcony" | "fridge" | "oven" | "steam" | "petHair" | "linen";
@@ -15,6 +18,9 @@ const countKeys: CountExtra[] = ["standardWindow", "largeWindow", "cabinets", "i
 const toggleKeys: ToggleExtra[] = ["balcony", "fridge", "oven", "steam", "petHair", "linen"];
 
 export function Estimate({locale, copy, content, initialService = "regular"}: {locale: Locale; copy: EditorialContent["estimate"]; content: SiteContent; initialService?: ServiceId}) {
+  const started = useRef(false);
+  const submitting = useRef(false);
+  const submission = useRef<{id: string; payload: string} | null>(null);
   const [service, setService] = useState<ServiceId>(initialService);
   const [area, setArea] = useState(55);
   const [counts, setCounts] = useState<Record<CountExtra, number>>({standardWindow: 0, largeWindow: 0, cabinets: 0, ironing: 0});
@@ -27,42 +33,42 @@ export function Estimate({locale, copy, content, initialService = "regular"}: {l
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "validation" | "error">("idle");
 
   const calculation = useMemo(() => {
-    const lines: {label: string; value: number}[] = [{label: `${content.pricing.serviceNames[service]} · ${area} m²`, value: basePrice(service, area)}];
-    for (const key of countKeys) {
-      if (counts[key]) lines.push({label: `${content.calculator.labels[key]} × ${counts[key]}`, value: extrasPrices[key] * counts[key]});
-    }
-    for (const key of toggleKeys) {
-      if (toggles[key]) lines.push({label: content.calculator.labels[key], value: extrasPrices[key]});
-    }
-    let subtotal = lines.reduce((sum, line) => sum + line.value, 0);
-    if (urgent) {
-      const surcharge = Math.round((subtotal * 0.2) / 100) * 100;
-      lines.push({label: content.calculator.urgent, value: surcharge});
-      subtotal += surcharge;
-    }
-    return {lines, total: subtotal};
+    const extras = [...countKeys.map(code => ({code, quantity:counts[code]})), ...toggleKeys.map(code => ({code, quantity:toggles[code] ? 1 : 0}))];
+    const quote = calculatePrice(service,area,extras,urgent);
+    const lines = [{label:`${content.pricing.serviceNames[service]} · ${area} m²`, value:quote.base}, ...quote.extras.map(e => ({label:`${content.calculator.labels[e.code]}${countKeys.includes(e.code as CountExtra) ? ` × ${e.quantity}` : ""}`,value:e.unitPrice*e.quantity}))];
+    if (urgent) lines.push({label:content.calculator.urgent,value:quote.surcharge});
+    return {lines,total:quote.total,extras};
   }, [area, content, counts, service, toggles, urgent]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting.current) return;
     if (name.trim().length < 2 || phone.trim().length < 6 || !consent) {
       setStatus("validation");
+      trackEvent("lead_error", {locale, service, error_type: "validation"});
       return;
     }
+    submitting.current = true;
     setStatus("sending");
     const details = calculation.lines.map((line) => `${line.label}: ${formatRsd(line.value, locale)}`).join("\n");
     const estimate = `${copy.calculation}\n${details}\n${copy.total}: ${formatRsd(calculation.total, locale)}`;
     try {
-      const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({name, phone, comment: comment.trim() || undefined, estimate, locale, consent})});
-      setStatus(response.ok ? "success" : "error");
+      const payload = JSON.stringify({name, phone, comment: comment.trim() || undefined, estimate, locale, service, area, urgent, extras:calculation.extras, consent, attribution: leadAttribution()});
+      if (!submission.current || submission.current.payload !== payload) submission.current = {id:crypto.randomUUID(),payload};
+      const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({...JSON.parse(payload),submissionId:submission.current.id})});
+      const result = await response.json().catch(() => null);
+      const success = response.ok && result?.ok === true;
+      setStatus(success ? "success" : "error");
+      trackEvent(success ? "generate_lead" : "lead_error", {locale, service, ...(success ? {} : {error_type: "server"})});
     } catch {
       setStatus("error");
-    }
+      trackEvent("lead_error", {locale, service, error_type: "network"});
+    } finally { submitting.current = false; }
   }
 
   return (
-    <form className="estimate-sheet" onSubmit={submit} noValidate>
-      <div className="estimate-form">
+    <form className="estimate-sheet" onSubmit={submit} onFocusCapture={() => { if (!started.current) { started.current = true; trackEvent("form_start", {locale, service}); } }} noValidate>
+      <div className="estimate-form" onChange={() => trackEvent("calculator_interaction", {locale, service})} onClick={(event) => { if ((event.target as HTMLElement).closest("button")) trackEvent("calculator_interaction", {locale, service}); }}>
         <fieldset>
           <legend>{copy.service}</legend>
           <div className="service-options">
@@ -74,7 +80,7 @@ export function Estimate({locale, copy, content, initialService = "regular"}: {l
           <input className="site-area-range" type="range" min="25" max="180" value={area} onChange={(event) => setArea(Number(event.target.value))} aria-label={copy.area} />
         </fieldset>
         <a className="site-mobile-total" href="#receipt">
-          <span>{copy.total}</span><strong>{formatRsd(calculation.total, locale)}</strong><i>{copy.toReceipt} ↓</i>
+          <span>{copy.total}</span><strong>{formatRsd(calculation.total, locale)}</strong><i>{copy.toReceipt}<ArrowIcon direction="down" /></i>
         </a>
         <fieldset>
           <legend>{copy.extras}</legend>
@@ -103,7 +109,7 @@ export function Estimate({locale, copy, content, initialService = "regular"}: {l
             <label className="site-comment"><span>{copy.comment}</span><textarea name="comment" value={comment} onChange={(event) => setComment(event.target.value)} placeholder={copy.commentHint} maxLength={1000} rows={4}/></label>
             <label className="site-consent"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} required aria-invalid={status === "validation" && !consent}/><span>{copy.consent}</span></label>
           </div>
-          <button type="submit" disabled={status === "sending"}>{status === "sending" ? copy.sending : copy.send}<span>↗</span></button>
+          <button type="submit" disabled={status === "sending"}>{status === "sending" ? copy.sending : copy.send}<span><ArrowIcon /></span></button>
           {status === "success" && <p className="site-form-status success" role="status">{copy.success}</p>}
           {status === "validation" && <p className="site-form-status error" role="alert">{copy.validation}</p>}
           {status === "error" && <p className="site-form-status error" role="alert">{copy.error}</p>}

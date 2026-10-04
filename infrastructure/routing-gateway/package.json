@@ -1,0 +1,1 @@
+{"name":"lumaclean-routing-gateway","private":true,"type":"module","scripts":{"start":"node server.mjs","test":"node --test test/*.test.mjs"},"engines":{"node":">=24"},"dependencies":{"adm-zip":"0.6.1","csv-parse":"7.0.3","gtfs-realtime-bindings":"2.2.0","yaml":"2.9.1","zod":"4.4.3"}}

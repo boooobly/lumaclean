@@ -3,17 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import {useEffect, useState} from "react";
+import {ArrowIcon} from "@/components/site/arrow-icon";
 import type {Locale} from "@/i18n/routing";
 import type {EditorialContent} from "@/lib/site-content";
 
-export function SiteHeader({locale, copy, homeHref = "", estimateHref = "#estimate", localeHrefs}: {
+export function SiteHeader({locale, copy, homeHref = "", estimateHref = "#estimate", localeHrefs, initialPaper = false, articlesLabel}: {
   locale: Locale;
   copy: EditorialContent["nav"];
   homeHref?: string;
   estimateHref?: string;
   localeHrefs?: Partial<Record<Locale, string>>;
+  initialPaper?: boolean;
+  articlesLabel?: string;
 }) {
-  const [paper, setPaper] = useState(false);
+  const [paper, setPaper] = useState(initialPaper);
 
   useEffect(() => {
     let frame = 0;
@@ -59,12 +62,13 @@ export function SiteHeader({locale, copy, homeHref = "", estimateHref = "#estima
         <a href={`${homeHref}#scope`}>{copy.services}</a>
         <a href={`${homeHref}#rates`}>{copy.prices}</a>
         <a href={`${homeHref}#method`}>{copy.process}</a>
+        {articlesLabel && <Link href={`/${locale}/articles`}>{articlesLabel}</Link>}
       </nav>
       <div className="site-header-actions">
         <div className="site-locales" role="navigation" aria-label={copy.languageLabel}>
           {(["ru", "sr", "en"] as Locale[]).map((item) => <Link className={item === locale ? "active" : ""} href={localeHrefs?.[item] || `/${item}`} key={item}>{item.toUpperCase()}</Link>)}
         </div>
-        <a className="header-cta" href={estimateHref}><b className="site-cta-long">{copy.cta}</b><b className="site-cta-short">{copy.shortCta}</b><i aria-hidden="true">↘</i></a>
+        <a className="header-cta" href={estimateHref}><b className="site-cta-long">{copy.cta}</b><b className="site-cta-short">{copy.shortCta}</b><i aria-hidden="true"><ArrowIcon direction="down-right" /></i></a>
       </div>
     </header>
   );
