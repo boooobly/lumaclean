@@ -1,5 +1,5 @@
 {
-  "fingerprint": "6b2133c3b20aabd9f635c22d4d558a2a8defc159a470e905392f4e1d09bb638a",
+  "fingerprint": "3f6beb2d6a3204f4bf2b34fcaabbd7ea330615df4b30d81014b2d12e9c350f37",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -128,7 +128,7 @@
     "src/lib/agent/readiness.ts": "31bc5537338d94c74bb536a04e681f3a93fda4e7bad6b431084e709f52a2dca8",
     "src/lib/agent/release-verification.d.mts": "922a8223a92a36f373f1f850962fb8efc441cf9944c7bae83bcda9d0ed631aff",
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
-    "src/lib/agent/runner.ts": "e89fcc1681a979553c9fb954c03089525bd5af8a2713988b0f94340249471b98",
+    "src/lib/agent/runner.ts": "ab59415b7a6c911b67201a6afc40a4acaf6bb9a3043e7659ab3b9ca9ade95169",
     "src/lib/agent/settings.ts": "75dd022523f454c55275f80cdfde1bfd6a5683ad44aa807697d7121d7f0c6634",
     "src/lib/agent/tools.ts": "d463b947eacab63945360b8a5059bf0382ce24d3f40e3f482cb2d4cfb0f04fd5",
     "src/lib/analytics.ts": "ac20e7f318855188db315705788fff372d2375f33cb1114b48612fa30f839498",
@@ -231,21 +231,21 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 55,
+  "tests": 56,
   "lint": true,
   "typecheck": true,
   "migration": true,
-  "checkedAt": "2026-10-04T14:45:52.019Z",
+  "checkedAt": "2026-10-04T15:03:03.933Z",
   "suites": [
-    "47 Chat V2 + native provider/policy tests, including 16 isolated Preview database cases",
+    "48 Chat V2 + native provider/policy tests, including 17 isolated Preview database cases",
     "7 HTTP tests against current build: SSE cookie scope/reconnect, CSRF, real private Blob, actual receipts/typing",
     "1 isolated migration preservation proof: original Orders, AUTO mode and historical AI rows unchanged"
   ],
-  "verificationScope": "55 targeted tests passed. Typecheck, affected lint and production build passed. Real native image probes: OpenRouter 3/3; PoYo clean-kitchen native vision+tool call passed, dirty-kitchen/bathroom exceeded 22s timeout; tested failover and blind fallback. Chrome local supplied two-turn transcript and 390px layout passed. Actual Vercel Preview booking and deployment QA require separate live proof.",
+  "verificationScope": "56 targeted tests passed. Typecheck, affected lint and production build passed. Real native image probes: OpenRouter 3/3; PoYo clean-kitchen native vision+tool call passed, dirty-kitchen/bathroom exceeded 22s timeout; tested failover and blind fallback. Chrome local and Vercel Preview supplied transcript, four languages, private photos, human takeover/typing/expiry and 390px layout passed. Fallback affinity applies to all tool chains and restarts primary on each new job. Actual Vercel Preview booking and deployment QA require separate live proof.",
   "previousVerification": {
-    "fingerprint": "aa979862cb63720dcc5fedfed6a320ead46c30fe6a15fcdfe0008bd102cdf21f",
+    "fingerprint": "6b2133c3b20aabd9f635c22d4d558a2a8defc159a470e905392f4e1d09bb638a",
     "tests": 55,
-    "checkedAt": "2026-10-04T14:27:47.461Z",
+    "checkedAt": "2026-10-04T14:45:52.019Z",
     "verificationScope": "55 targeted tests passed. Typecheck, affected lint and production build passed. Real native image probes: OpenRouter 3/3; PoYo clean-kitchen native vision+tool call passed, dirty-kitchen/bathroom exceeded 22s timeout; tested failover and blind fallback. Chrome local supplied two-turn transcript and 390px layout passed. Actual Vercel Preview booking and deployment QA require separate live proof."
   }
 }

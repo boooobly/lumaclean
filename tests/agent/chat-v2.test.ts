@@ -644,7 +644,7 @@ test(
         const result=await uploadAttachment(db,c.id,requestId,jpeg,"image/jpeg","CLIENT",flaky);
         assert(result.id);assert.equal(await db.chatAttachment.count({where:{conversationId:c.id}}),1);
       });
-      await t.test("vision fallback stays selected for subsequent tool steps",async()=>{
+      for(const withPhoto of [false,true])await t.test(`${withPhoto?'vision':'text'} fallback stays selected for subsequent tool steps`,async()=>{
         const {c}=await inbound("Фото"),claim=await claimJob(db,c.id);assert(claim);
         let primaryCalls=0,fallbackCalls=0;
         const primary={...mock,name:"primary",complete:async()=>{primaryCalls++;throw new AgentError("PROVIDER_TIMEOUT");}};
@@ -652,9 +652,13 @@ test(
           fallbackCalls++;
           return normalizeCompletion("fallback","gpt-6-luna","chat",{choices:[{message:fallbackCalls===1?{content:"",tool_calls:[{id:"facts",type:"function",function:{name:"getBusinessInfo",arguments:"{}"}}]}:{content:"Какую уборку вы хотите?"}}]},1,{input:0.1,output:0.5});
         }};
-        await runClaimedJob(db,claim,[primary,fallback],async()=>({images:[{mimeType:"image/jpeg",data:"synthetic"}],count:1}));
+        await runClaimedJob(db,claim,[primary,fallback],async()=>withPhoto?({images:[{mimeType:"image/jpeg",data:"synthetic"}],count:1}):({images:[],count:0}));
         assert.equal(primaryCalls,1);assert.equal(fallbackCalls,2);
         assert.equal(await db.message.count({where:{conversationId:c.id,author:"AI"}}),1);
+        primaryCalls=0;fallbackCalls=0;
+        const next=await inbound('Вы здесь?'),nextClaim=await claimJob(db,next.c.id);assert(nextClaim);
+        await runClaimedJob(db,nextClaim,[primary,fallback],async()=>({images:[],count:0}));
+        assert.equal(primaryCalls,1,'Each new job still starts with the primary provider');
       });
       await t.test(
         "both vision providers unavailable strip images and require a description",
