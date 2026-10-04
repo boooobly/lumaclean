@@ -10,7 +10,7 @@ import {liveConfigFingerprint,previewTestAllowed,signLiveProof} from './live-pro
 import {normalizedPhone} from '@/lib/domain/crm';
 import {writeAudit} from '@/lib/services/audit';
 
-export const liveTestSteps=['AI понял запрос','Цена рассчитана','Duration рассчитан','Адрес найден','Маршрут рассчитан','Свободный слот найден','Повторная проверка слота','Order создан'] as const;
+export const liveTestSteps=['AI поняла запрос','Цена рассчитана','Duration рассчитан','Адрес найден','Маршрут рассчитан','Свободный слот найден','Повторная проверка слота','Order создан'] as const;
 export type LiveTestReport={status:'PASSED'|'FAILED';steps:{label:string;ok:boolean}[];blocker:string|null;cleaned:boolean;service?:'regular'|'deep';booking?:{estimatedDurationMinutes:number|null;cleaningReserveMinutes:number;travelBufferMinutes:number;requiredCleaners:number;assignedCleaners:number;price:number};aiAttempts?:{provider:string;model:string;ok:boolean;errorCode:string|null;latencyMs:number}[];proof?:ReturnType<typeof signLiveProof>};
 export async function cleanupLiveTest(db:PrismaClient,batchId:string){
   if(!previewTestAllowed())throw new AgentError('PREVIEW_TEST_ONLY');

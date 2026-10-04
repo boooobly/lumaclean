@@ -27,6 +27,7 @@ type Message = {
 };
 type Quick = {
   messageId: string;
+  replySetId: string;
   revision: number;
   choices: { key: string; label: string }[];
 };
@@ -55,7 +56,7 @@ type Attempt = {
   photos: DraftPhoto[];
   status: "pending" | "failed";
   confirmationNonce?: string;
-  quickReply?: { key: string; messageId: string; revision: number };
+  quickReply?: { key: string; messageId: string; replySetId: string; revision: number };
 };
 const details = {
   ru: {
@@ -134,7 +135,7 @@ const copy = {
     close: "Закрыть чат",
     language: "Язык диалога",
     wait: "Сообщение передано. Ожидаем ответа.",
-    human: "На связи администратор",
+    human: "Администратор подключился",
     error: "Не удалось отправить. Повторите попытку.",
     rate: "Слишком много сообщений. Попробуйте через минуту.",
     confirm: "Подтвердить запись",
@@ -563,6 +564,7 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
             quickReply: {
               key,
               messageId: chat.quickReplies.messageId,
+              replySetId: chat.quickReplies.replySetId,
               revision: chat.quickReplies.revision,
             },
           }
@@ -651,8 +653,8 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
               </h2>
               <p>
                 {chat?.control === "HUMAN_CONTROL"
-                  ? `${alias} ${d.here}`
-                  : "Belgrade · LumaClean"}
+                  ? words.human
+                  : locale==='ru'?'AI-администратор · Belgrade':locale==='en'?'AI assistant · Belgrade':locale==='sr-Cyrl'?'AI администратор · Београд':'AI administrator · Beograd'}
               </p>
             </div>
             <button

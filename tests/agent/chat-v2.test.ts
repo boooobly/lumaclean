@@ -8,7 +8,7 @@ import { detectLocale, conversationPolicy } from "../../src/lib/agent/policy";
 import {
   displayAliases,
   chooseAlias,
-  quickReplies,
+  createReplySet,
 } from "../../src/lib/agent/chat-presentation";
 import { publicInboundSchema, AgentError } from "../../src/lib/agent/contracts";
 import {
@@ -102,35 +102,11 @@ test("continuation policy addresses the supplied repeated acknowledgment", () =>
     ),
   );
 });
-test("chips are allowlisted, state-bound and use only real slot tokens", () => {
-  assert.deepEqual(
-    quickReplies(
-      "Загрязнения обычные или сильные?",
-      {},
-      "ru",
-      "AI_CONTROL",
-    ).map((q) => q.key),
-    ["SOIL_NORMAL", "SOIL_HEAVY"],
-  );
-  assert.equal(
-    quickReplies("Загрязнения обычные или сильные?", {}, "ru", "HUMAN_CONTROL")
-      .length,
-    0,
-  );
-  assert.equal(
-    quickReplies("Выберите время?", {}, "ru", "AI_CONTROL").length,
-    0,
-  );
-  const token = randomUUID();
-  assert.equal(
-    quickReplies(
-      "Выберите время?",
-      { slots: [{ token, start: new Date().toISOString(), duration: 150 }] },
-      "ru",
-      "AI_CONTROL",
-    )[0].key,
-    `SLOT:${token}`,
-  );
+test("chips are allowlisted, stored intent-bound and use only real slot tokens",()=>{
+ assert.deepEqual(createReplySet({nextInput:'SOIL_LEVEL'},'ru',0,'AI_CONTROL')?.choices.map(q=>q.key),['SOIL_NORMAL','SOIL_HEAVY']);
+ assert.equal(createReplySet({nextInput:'SOIL_LEVEL'},'ru',0,'HUMAN_CONTROL'),null);
+ assert.equal(createReplySet({nextInput:'SLOT_SELECTION'},'ru',0,'AI_CONTROL'),null);
+ const token=randomUUID();assert.equal(createReplySet({nextInput:'SLOT_SELECTION',slots:[{token,start:new Date().toISOString(),duration:150}]},'ru',0,'AI_CONTROL')?.choices[0].key,`SLOT:${token}`);
 });
 test("image magic, size, decoded bounds and EXIF stripping", async () => {
   const jpeg = await sharp({
@@ -255,7 +231,7 @@ test(
           "chat",
           {
             choices: [
-              { message: { content: "Загрязнения обычные или сильные?" } },
+              { message: { content: "",tool_calls:[{id:"question",type:"function",function:{name:"requestCustomerInput",arguments:JSON.stringify({intent:"SOIL_LEVEL"})}}] } },
             ],
           },
           1,
@@ -519,6 +495,7 @@ test(
           const q = {
               key: "SOIL_NORMAL",
               messageId: snapshot.quickReplies.messageId,
+              replySetId: snapshot.quickReplies.replySetId,
               revision: snapshot.revision,
             },
             id = randomUUID();
@@ -626,8 +603,9 @@ test(
         const c=await conversation(),start=new Date(Date.now()+86400000),token=randomUUID();
         await db.agentSlot.create({data:{id:token,conversationId:c.id,fingerprint:"synthetic",scheduleVersion:"synthetic",start,durationMinutes:180,requiredCleaners:2,cleanerIds:[],routingSnapshot:{},expiresAt:new Date(Date.now()-1000)}});
         await db.conversation.update({where:{id:c.id},data:{state:{slots:[{token,start:start.toISOString(),duration:180}]}}});
-        const ai=await db.message.create({data:{conversationId:c.id,author:"AI",text:"Выберите время?"}});
-        const input={id:randomUUID(),text:"",quickReply:{key:`SLOT:${token}`,messageId:ai.id,revision:0}};
+        const replySet=createReplySet({nextInput:"SLOT_SELECTION",slots:[{token,start:start.toISOString(),duration:180}]},"ru",0,"AI_CONTROL")!;
+        const ai=await db.message.create({data:{conversationId:c.id,author:"AI",text:"Выберите время?",structured:{replySet}}});
+        const input={id:randomUUID(),text:"",quickReply:{key:`SLOT:${token}`,messageId:ai.id,replySetId:replySet.id,revision:0}};
         await assert.rejects(acceptMessage(db,c,input),/STALE_SLOT/);
         await db.agentSlot.update({where:{id:token},data:{expiresAt:new Date(Date.now()+60000)}});
         await acceptMessage(db,c,input);

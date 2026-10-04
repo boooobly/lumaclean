@@ -3,7 +3,7 @@ import type {Article} from "./types";
 export const sameDay: Article = {
   id: "same-day",
   status: "draft",
-  updatedAt: "2026-09-20",
+  updatedAt: "2026-10-04",
   image: "/media/articles/same-day.webp",
   services: ["regular", "deep"],
   relatedIds: ["prepare", "duration", "regular-deep"],
@@ -20,7 +20,7 @@ export const sameDay: Article = {
           id: "availability",
           title: "Сначала проверьте свободное время и доплату",
           paragraphs: [
-            "LumaClean принимает обращения ежедневно с 09:00 до 22:00 по времени Белграда. Срочный выезд в тот же день возможен при наличии свободного окна и увеличивает рассчитанную стоимость на 20%. Это не отдельный пакет и не гарантия приезда: менеджер сначала проверяет график и детали квартиры.",
+            "LumaClean принимает обращения ежедневно с 09:00 до 22:00 по времени Белграда. Запрос и подтверждение записи на сегодня должны быть до 17:00 по Белграду; каждый клинер должен выехать до 17:00. После 17:00 выбираем дату начиная с завтра. Срочный выезд возможен только после проверки свободной команды и маршрута и увеличивает рассчитанную стоимость на 20%. Это не отдельный пакет и не гарантия приезда: менеджер сначала проверяет график и детали квартиры.",
             "В сообщении укажите желаемое время и напишите, подходит ли вам ближайший другой вариант, если сегодня свободного окна нет. Так ответ будет содержать не только «да» или «нет», но и понятное ограничение по времени.",
           ],
           tip: "Не отправляйте несколько одинаковых заявок подряд. Одного сообщения с площадью, районом, задачами и удобным временем достаточно для первой проверки.",
@@ -70,7 +70,7 @@ export const sameDay: Article = {
           id: "availability",
           title: "Prvo proverite termin i doplatu",
           paragraphs: [
-            "LumaClean prima upite svakog dana od 09:00 do 22:00 po beogradskom vremenu. Dolazak istog dana moguć je ako postoji slobodan termin i uvećava obračunatu cenu za 20%. To nije poseban paket niti garancija dolaska: menadžer prvo proverava raspored i detalje stana.",
+            "LumaClean prima upite svakog dana od 09:00 do 22:00 po beogradskom vremenu. Upit i potvrda za danas moraju biti pre 17:00 po vremenu Beograda; svaki član tima mora krenuti pre 17:00. Posle 17:00 proveravamo termine od sutra. Dolazak je moguć samo nakon provere tima i rute i uvećava obračunatu cenu za 20%. To nije poseban paket niti garancija dolaska: menadžer prvo proverava raspored i detalje stana.",
             "U poruci navedite željeno vreme i napišite da li vam odgovara najbliži drugi termin ako danas nema slobodnog mesta. Tako odmah razdvajamo obavezno vreme od onoga što može da se prilagodi.",
           ],
           tip: "Ne šaljite više istih poruka. Za prvu proveru dovoljan je jedan upit sa kvadraturom, delom grada, zadacima i željenim vremenom.",
@@ -120,7 +120,7 @@ export const sameDay: Article = {
           id: "availability",
           title: "Check availability and the surcharge first",
           paragraphs: [
-            "LumaClean accepts enquiries every day from 09:00 to 22:00 Belgrade time. A visit on the same day is possible when a slot is available and adds 20% to the calculated price. It is not a separate package or a guaranteed arrival: the manager checks the schedule and apartment details first.",
+            "LumaClean accepts enquiries every day from 09:00 to 22:00 Belgrade time. Same-day requests and confirmation must be before 17:00 Belgrade time; each cleaner must depart before 17:00. After 17:00 we check dates from tomorrow. A visit is possible only after checking crew and route availability and adds 20% to the calculated price. It is not a separate package or a guaranteed arrival: the manager checks the schedule and apartment details first.",
             "State your preferred time and whether the nearest alternative would work if today is full. This separates a fixed deadline from the part of the request that can be adjusted.",
           ],
           tip: "Do not send several copies of the same request. One message with the floor area, part of the city, tasks and preferred time is enough for the first check.",

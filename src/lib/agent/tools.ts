@@ -6,6 +6,7 @@ import { normalizedPhone, localInput, localInstant } from "@/lib/domain/crm";
 import { estimateDuration } from "@/lib/domain/duration";
 import { durationConfig, durationData } from "@/lib/services/duration-engine";
 import { placesRequest, verifyLocation, normalizeAddress } from "@/lib/services/google-places";
+import {plannedEnd} from "@/lib/domain/scheduling-conflicts";
 import { findSlots, routingSnapshot } from "@/lib/services/routing-planning";
 import { assessScheduling, lockCrew, schedulingLock } from "@/lib/services/scheduling-commands";
 import { writeAudit } from "@/lib/services/audit";
@@ -13,10 +14,14 @@ import { effectiveMode,assertAutoReady } from './readiness';
 import {assertPreviewBatch} from './live-proof';
 import {photoQualificationAllowed} from './chat-attachments';
 import { orderNotifications, handoffNotification } from './notifications';
+import {buildAgentTemporalContext,serviceDatePolicy,latestStartForEndBy,incomingDeparturePolicy,type DepartureLegInput} from "./temporal";
+import {applyCustomerFacts,explicitCustomerFacts,supportedFacts} from "./customer-facts";
+import {inputQuestion,inputAlreadyKnown} from "./chat-presentation";
+import {behaviorMetric} from "./behavior-telemetry";
 import { AgentError, toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
 type Tx=Prisma.TransactionClient;
-export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[];previewTestId?:string};
+export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; validatedDepartures?:DepartureLegInput[]};
 export const json=(value:unknown)=>JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 export const stateOf=(c:Pick<Conversation,"state">)=>structuredClone(c.state) as AgentState;
 // PostgreSQL jsonb reorders object keys. Hash and compare facts, never their insertion order.
@@ -51,6 +56,8 @@ async function activePrice(tx:Tx,state:AgentState,c:Conversation,input:ReturnTyp
 async function updateLead(tx:Tx,c:Conversation,ctx:ToolContext,input:ReturnType<typeof toolSchemas.createOrUpdateLead.parse>){
   if([input.name,input.phone].some(v=>v&&/^(?:не указано|неизвестно|уточняется|unknown|not provided|n\/a|null)$/i.test(v)))return{error:"CONTACT_REQUIRED",message:"Omit missing name/phone entirely. Never send a placeholder. Contact is not required to record cleaning intent or quote."};
   if(input.phone&&!normalizedPhone(input.phone))return{error:"INVALID_PHONE",message:"Ask for a valid customer phone or omit phone. Do not invent contact details."};
+  if(input.name&&input.name!==ctx.state.name)delete ctx.state.pending;
+  if(input.phone&&input.phone!==ctx.state.phone)delete ctx.state.pending;
   if(input.name)ctx.state.name=input.name;
   if(input.phone)ctx.state.phone=input.phone;
   const service=input.service?await tx.service.findUnique({where:{code:input.service},select:{id:true,active:true}}):null;
@@ -73,6 +80,10 @@ async function checkedSlot(tx:Tx,c:Conversation,ctx:ToolContext,token:string){
   if(!slot||slot.expiresAt.getTime()<Date.now()||slot.fingerprint!==slotFingerprint(ctx.state))throw new AgentError("SLOT_NO_LONGER_AVAILABLE");
   if(slot.usedAt)return slot;
   const window=ctx.state.requestedWindow!;
+  const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+  const datePolicy=serviceDatePolicy(window.date,settings);
+  if('error' in datePolicy){if(datePolicy.error==='SAME_DAY_CUTOFF')behaviorMetric('sameDayCutoffRejected');throw new AgentError(datePolicy.error!);}
+  if(ctx.state.quote?.input.urgent!==datePolicy.urgent)throw new AgentError('URGENT_REPRICE_REQUIRED');
   await lockCrew(tx,slot.cleanerIds);
   const current=await routingSnapshot(tx,window.date);
   if(current.version!==slot.scheduleVersion)throw new AgentError("SLOT_NO_LONGER_AVAILABLE");
@@ -81,7 +92,12 @@ async function checkedSlot(tx:Tx,c:Conversation,ctx:ToolContext,token:string){
   const address=ctx.state.address!;
   if(address.proof)verifyLocation(address.proof);
   const available=await findSlots(tx,{date:window.date,from:window.from,to:window.to,duration:ctx.state.duration!.minutes,requiredCleaners:ctx.state.duration!.requiredCleaners,...(address.addressId?{addressId:address.addressId}:{locationProof:address.proof}),...(ctx.state.rescheduleRequested?{orderId:c.orderId}: {})},{reserveMinutes:ctx.state.duration!.reserve,forceFresh:true,selectedStart:slot.start.toISOString(),selectedCleanerIds:slot.cleanerIds,allowReschedule:!!ctx.state.rescheduleRequested});
-  if(!available.slots.some(s=>s.start===slot.start.toISOString()&&s.cleanerIds.join()===slot.cleanerIds.join()))throw new AgentError("SLOT_NO_LONGER_AVAILABLE");
+  const selected=available.slots.find(s=>s.start===slot.start.toISOString()&&s.cleanerIds.join()===slot.cleanerIds.join());
+  if(!selected)throw new AgentError("SLOT_NO_LONGER_AVAILABLE");
+  ctx.validatedDepartures=selected.legs.filter(leg=>leg.orderId===(ctx.state.rescheduleRequested?c.orderId:'new-order')).map(leg=>{
+    const previous=leg.previousId?current.orders.find(order=>order.id===leg.previousId):undefined;
+    return{departure:leg.recommendedDeparture,start:selected.start,travelSeconds:leg.route.durationSeconds!,bufferMinutes:leg.bufferMinutes,previous:previous?{status:previous.status,end:plannedEnd(previous)?.toISOString()??null}:undefined};
+  });
   return slot;
 }
 /** Atomic standard booking boundary; shares production pricing, duration and scheduling services. */
@@ -122,7 +138,17 @@ export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,resched
     await aiAudit(tx,ctx,"AI_ADDRESS_CREATED","Client",client.id);
   }
   const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:"default"}});
+  const finalDatePolicy=serviceDatePolicy(state.requestedWindow!.date,settings);
+  if('error' in finalDatePolicy)throw new AgentError(finalDatePolicy.error!);
+  if(finalDatePolicy.urgent!==state.quote.input.urgent)throw new AgentError('URGENT_REPRICE_REQUIRED');
   const data={...duration,...pricing.snapshot,serviceId:pricing.service.id,area:state.quote.input.area,soilLevel:state.quote.input.soilLevel,urgent:state.quote.input.urgent,requiredCleaners:state.duration.requiredCleaners,scheduleMode:"FIXED" as const,scheduledStart:slot.start,windowFrom:null,windowTo:null,addressId,travelBufferMinutes:settings.defaultTravelBufferMinutes,currency:"RSD",manualDurationMinutes:null};
+  const checkBoundary=()=>{
+    const policy=serviceDatePolicy(state.requestedWindow!.date,settings);
+    if('error' in policy)throw new AgentError(policy.error!);
+    if(policy.urgent!==state.quote!.input.urgent)throw new AgentError('URGENT_REPRICE_REQUIRED');
+    if(ctx.validatedDepartures?.length!==slot.cleanerIds.length)throw new AgentError('DEPARTURE_UNVERIFIED');
+    for(const leg of ctx.validatedDepartures){const result=incomingDeparturePolicy(leg,state.requestedWindow!.date,settings);if('error' in result){if(result.error==='PAST_DEPARTURE')behaviorMetric('pastDepartureRejected');throw new AgentError(result.error!);}}
+  };
   let order;
   if(reschedule){
     if(!c.orderId||!c.identityVerified||!state.rescheduleRequested)throw new AgentError("IDENTITY_REQUIRED");
@@ -130,11 +156,13 @@ export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,resched
     const previous=await tx.order.findFirst({where:{id:c.orderId,clientId:client.id,status:{in:["CONFIRMED","SCHEDULED"]}},include:{assignments:{where:{removedAt:null}}}});
     if(!previous||previous.serviceId!==pricing.service.id||Number(previous.finalPrice)!==state.quote.total||previous.addressId!==addressId)throw new AgentError("RESCHEDULE_REVIEW_REQUIRED");
     await lockCrew(tx,previous.assignments.map(a=>a.cleanerId));
+    checkBoundary();
     order=await tx.order.update({where:{id:previous.id},data});
     await tx.orderCleaner.updateMany({where:{orderId:order.id,removedAt:null},data:{removedAt:new Date()}});
   }else{
     if(c.orderId)throw new AgentError("ORDER_ALREADY_EXISTS");
     const catalogue=await tx.serviceExtra.findMany({where:{code:{in:state.quote.input.extras.map(e=>e.code)},active:true}});
+    checkBoundary();
     order=await tx.order.create({data:{...data,requestId:`agent:${slot.id}`,reference:`ORD-AI-${randomUUID().slice(0,8).toUpperCase()}`,clientId:client.id,leadId:c.leadId,status:"CONFIRMED",source:c.channel,extras:{create:pricing.calculated.extras.map(e=>({extraId:catalogue.find(x=>x.code===e.code)!.id,quantity:e.quantity,unitPrice:e.unitPrice}))}}});
   }
   // No AI override is possible, including warnings. Cache must still be fresh and verified.
@@ -154,7 +182,8 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   const state=ctx.state;
   if(name==="getBusinessInfo"){
     const content=siteContent[c.locale.startsWith("sr")?"sr":c.locale==="en"?"en":"ru"];
-    const facts={city:content.footer.location,services:content.services,scope:content.comparison,assurance:content.assurance,faq:content.faq.items,extras:content.calculator.labels,pricingPolicy:content.calculator.note};
+    const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    const facts={sameDayPolicy:{cutoffMinute:settings.sameDayBookingCutoffMinute,latestDepartureMinute:settings.latestCleanerDepartureMinute,timezone:settings.timezone,requiresRealAvailability:true,surchargePercent:20},city:content.footer.location,services:content.services,scope:content.comparison,assurance:content.assurance,faq:content.faq.items,extras:content.calculator.labels,pricingPolicy:content.calculator.note};
     ctx.factAmounts=[...JSON.stringify(facts).matchAll(/(\d[\d\s,]*?)\s*RSD/gi)].map(m=>Number(m[1].replace(/[\s,]/g,"")));
     return facts;
   }
@@ -164,12 +193,39 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const currentOrder=c.orderId?await tx.order.findFirst({where:{id:c.orderId,clientId:c.clientId},select:{service:{select:{code:true}},area:true,soilLevel:true,urgent:true,status:true,scheduledStart:true,finalPrice:true,extras:{select:{quantity:true,extra:{select:{code:true}}}}}}):null;
     return{verified:true,name:client?.name,discountPercent:Number(client?.discountPercent??0),pastServices:client?.orders.map(o=>o.service.code),currentOrder:currentOrder?{service:currentOrder.service.code,area:Number(currentOrder.area),soilLevel:currentOrder.soilLevel,urgent:currentOrder.urgent,status:currentOrder.status,start:currentOrder.scheduledStart,total:Number(currentOrder.finalPrice),extras:currentOrder.extras.map(e=>({code:e.extra.code,quantity:e.quantity}))}:null};
   }
+  if(name==='recordCustomerFacts'){
+    const input=toolSchemas.recordCustomerFacts.parse(payload);
+    const job=await tx.agentJob.findUniqueOrThrow({where:{id:ctx.jobId}});
+    const source=await tx.message.findUniqueOrThrow({where:{id:job.messageId}});
+    const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    if(source.author!=='CLIENT'||!source.text.includes(input.evidence)||!supportedFacts(input.facts,explicitCustomerFacts(input.evidence,source.sentAt,settings.timezone,state.nextInput)))return{error:'CUSTOMER_FACTS_REQUIRED'};
+    applyCustomerFacts(state,input.facts,buildAgentTemporalContext(source.sentAt,settings).nowLocalDate);
+    return{facts:state.draftFacts};
+  }
+  if(name==='requestCustomerInput'){
+    const {intent}=toolSchemas.requestCustomerInput.parse(payload);
+    if(inputAlreadyKnown(intent,state)){behaviorMetric('repeatedQuestionDetected');return{error:'FACT_ALREADY_KNOWN',facts:state.draftFacts};}
+    if(intent==='SLOT_SELECTION'&&!state.slots?.length)return{error:'SLOTS_REQUIRED'};
+    if(intent==='POST_BOOKING'&&!state.booking||intent==='BOOKING_CONFIRMATION'&&!state.pending||intent==='YES_NO'&&!state.quote)return{error:'INPUT_CONTEXT_REQUIRED'};
+    const question=inputQuestion(intent,c.locale);
+    if(!question)return{error:'UNSUPPORTED_INPUT_INTENT'};
+    state.nextInput=intent;ctx.responseText=question;
+    return{question,intent,finishTurn:true};
+  }
   if(name==="createOrUpdateLead")return updateLead(tx,c,ctx,toolSchemas[name].parse(payload));
   if(name==="calculatePrice"){
     const input=toolSchemas[name].parse(payload);
+    const facts=state.draftFacts;
+    if(!ctx.previewTestId&&!state.quote&&(!facts?.service||!facts.area||!facts.soilLevel||!facts.extrasConfirmed))return{error:'CUSTOMER_FACTS_REQUIRED',facts,message:'Need explicitly confirmed service, area, soil and extras. Ask only for missing facts.'};
+    if(facts&&['service','area','soilLevel','extras'].some(key=>facts[key as keyof typeof facts]!==undefined&&canonicalJson(facts[key as keyof typeof facts])!==canonicalJson(input[key as keyof typeof input])))return{error:'CUSTOMER_CORRECTION_REQUIRES_CURRENT_FACTS',facts};
+    const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    const date=facts?.requestedDate??state.requestedWindow?.date;
+    if(date){const policy=serviceDatePolicy(date,settings);if('error' in policy){if(policy.error==='SAME_DAY_CUTOFF')behaviorMetric('sameDayCutoffRejected');return policy;}input.urgent=policy.urgent;}
+    else input.urgent=false;
     if(!await photoQualificationAllowed(tx,c.id,input))return{error:'CUSTOMER_FACTS_REQUIRED',message:'Photos cannot supply floor area or dirt category. Ask the customer to confirm the area and dirt level in text before calculating a price.'};
     const pricing=await activePrice(tx,state,c,input);
     state.qualification=input;
+    state.draftFacts={...state.draftFacts,service:input.service,area:input.area,soilLevel:input.soilLevel,extras:input.extras,extrasConfirmed:true};
     state.quote={id:randomUUID(),serviceId:pricing.service.id,input,total:pricing.snapshot.finalPrice,base:pricing.calculated.base,discountPercent:pricing.snapshot.discountPercent,requiresHumanReview:pricing.requiresHumanReview,at:new Date().toISOString()};
     delete state.duration;delete state.slots;delete state.selectedSlotToken;delete state.pending;
     if(ctx.mode==="AUTO"&&c.leadId)await tx.lead.update({where:{id:c.leadId},data:{area:input.area,serviceId:pricing.service.id,urgent:input.urgent,estimatedPrice:state.quote.total}});
@@ -190,6 +246,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   }
   if(name==="resolveAddress"){
     const input=toolSchemas[name].parse(payload),sessionToken=randomUUID();
+    if(!input.placeId&&state.address&&input.query!==state.address.fullAddress){delete state.address;delete state.addressCandidates;delete state.pending;delete state.slots;delete state.selectedSlotToken;}
     if(input.placeId&&!state.addressCandidates?.some(a=>a.placeId===input.placeId))return{error:"ADDRESS_SELECTION_REQUIRED"};
     const result=await placesRequest(input.placeId?"place":"autocomplete",{query:state.addressCandidates?.find(a=>a.placeId===input.placeId)?.query??input.query,placeId:input.placeId,sessionToken});
     if(!result.available)return{error:"ROUTING_UNRELIABLE"};
@@ -205,16 +262,37 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     return{addresses:addresses.map(a=>({addressId:a.id,address:a.fullAddress}))};
   }
   if(name==="findAvailableSlots"){
+    const window=toolSchemas.findAvailableSlots.parse(payload);
+    if(state.timeClarificationRequired)return{error:'TIME_WINDOW_REQUIRED',message:'Ask for an explicit clock time or range. Morning/afternoon/evening/at two have no configured automatic mapping.'};
+    const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    const policy=serviceDatePolicy(window.date,settings);
+    if('error' in policy){if(policy.error==='SAME_DAY_CUTOFF')behaviorMetric('sameDayCutoffRejected');return{...policy,slots:[]};}
+    if(!ctx.previewTestId&&!state.draftFacts?.requestedDate&&!state.requestedWindow)return{error:'DATE_REQUIRED',message:'Ask for an explicit service date. Do not choose a date yourself.'};
+    if(state.draftFacts?.requestedDate&&window.date!==state.draftFacts.requestedDate)return{error:'CUSTOMER_DATE_MISMATCH',date:state.draftFacts.requestedDate};
+    if(state.quote&&state.quote.input.urgent!==policy.urgent){
+      const input={...state.quote.input,urgent:policy.urgent},pricing=await activePrice(tx,state,c,input);
+      state.quote={...state.quote,id:randomUUID(),input,total:pricing.snapshot.finalPrice,base:pricing.calculated.base,at:new Date().toISOString()};state.qualification=input;delete state.slots;delete state.selectedSlotToken;delete state.pending;
+      state.nextInput='YES_NO';
+      if(ctx.mode==='AUTO'&&c.leadId)await tx.lead.update({where:{id:c.leadId},data:{urgent:input.urgent,estimatedPrice:state.quote.total}});
+      ctx.responseText=c.locale==='ru'?`На выбранную дату цена составит ${state.quote.total} RSD${input.urgent?' с доплатой 20% за сегодня':''}. Проверить свободное время?`:c.locale==='en'?`The price for that date is ${state.quote.total} RSD${input.urgent?' including the 20% same-day surcharge':''}. Shall I check availability?`:c.locale==='sr-Cyrl'?`Цена за тај датум је ${state.quote.total} RSD${input.urgent?' са доплатом 20% за данас':''}. Да проверим термине?`:`Cena za taj datum je ${state.quote.total} RSD${input.urgent?' sa doplatom 20% za danas':''}. Da proverim termine?`;
+      return{error:'URGENT_REPRICE_REQUIRED',quote:state.quote,message:'Present the corrected server price to the customer before offering slots; call slot search again only after presenting it.'};
+    }
     if(!state.quote||state.quote.requiresHumanReview)return{error:"PRICE_REVIEW"};
     if(!state.duration)return{error:"NO_DURATION_RULE"};
     if(!state.address?.proof&&!state.address?.addressId)return{error:"ADDRESS_REQUIRED"};
     if(c.orderId&&!state.rescheduleRequested)return{error:"RESCHEDULE_REQUEST_REQUIRED"};
     if(state.rescheduleRequested&&(!c.identityVerified||!c.orderId))return{error:"IDENTITY_REQUIRED"};
-    const window=toolSchemas[name].parse(payload),from=localInstant(window.from),to=localInstant(window.to);
-    if(from.getTime()<Date.now()||from.getTime()>Date.now()+90*86400000||to<=from) return{error:"INVALID_DATE_WINDOW"};
+    const latestStart=window.timeIntent==='END_BY'?latestStartForEndBy(window.to,state.duration.minutes+state.duration.reserve,settings.timezone):undefined;
+    if(window.timeIntent==='END_BY')window.to=latestStartForEndBy(window.to,state.duration.reserve,settings.timezone);
+    if(window.timeIntent==='ARRIVE_BY')window.to=latestStartForEndBy(window.to,-state.duration.minutes,settings.timezone);
+    const rawFrom=localInstant(window.from),to=localInstant(window.to),from=new Date(Math.max(rawFrom.getTime(),Date.now()));
+    if(window.timeIntent==='START_AT'&&rawFrom.getTime()<Date.now())return{error:'PAST_START_TIME'};
+    window.from=localInput(from);
+    if(rawFrom.getTime()>Date.now()+90*86400000||to<=from) return{error:"INVALID_DATE_WINDOW"};
     state.requestedWindow=window;delete state.pending;
     const snapshot=await routingSnapshot(tx,window.date);
-    const result=await findSlots(tx,{...window,duration:state.duration.minutes,requiredCleaners:state.duration.requiredCleaners,...(state.address.addressId?{addressId:state.address.addressId}:{locationProof:state.address.proof}),...(state.rescheduleRequested?{orderId:c.orderId}:{})},{reserveMinutes:state.duration.reserve,allowReschedule:!!state.rescheduleRequested});
+    const result=await findSlots(tx,{date:window.date,from:window.from,to:window.to,duration:state.duration.minutes,requiredCleaners:state.duration.requiredCleaners,...(state.address.addressId?{addressId:state.address.addressId}:{locationProof:state.address.proof}),...(state.rescheduleRequested?{orderId:c.orderId}:{})},{reserveMinutes:state.duration.reserve,allowReschedule:!!state.rescheduleRequested,...(window.timeIntent==='START_AT'?{selectedStart:rawFrom.toISOString()}:{})});
+    if('error' in result&&result.error)return{error:result.error,slots:[]};
     if(!result.slots.length)return{error:"NO_SLOTS",slots:[],requiresHumanReview:true};
     state.slots=[];delete state.selectedSlotToken;
     for(const s of result.slots.slice(0,3)){
@@ -223,7 +301,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
       state.slots.push({token,start:s.start,duration:state.duration.minutes});
     }
     if(ctx.mode==="AUTO")await aiAudit(tx,ctx,"AI_SLOTS_PROPOSED","Conversation",c.id);
-    return{slots:state.slots.map(s=>({slotToken:s.token,start:localInput(new Date(s.start)),durationMinutes:s.duration})),...(ctx.mode==="SHADOW"?{proposalOnly:true}: {})};
+    return{...(latestStart?{latestStart}:{}),slots:state.slots.map(s=>({slotToken:s.token,start:localInput(new Date(s.start)),durationMinutes:s.duration})),...(ctx.mode==="SHADOW"?{proposalOnly:true}: {})};
   }
   if(name==="validateSlot"){
     const input=toolSchemas[name].parse(payload);
@@ -239,6 +317,8 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   if(name==="createOrder"||name==="rescheduleOrder")return bookConfirmed(tx,c,ctx,name==="rescheduleOrder");
   const input=toolSchemas.requestHumanHandoff.parse(payload);
   ctx.handoff=true;
+  delete state.nextInput;delete state.pending;
+  behaviorMetric('handoffByReason',input.reason);
   if(ctx.mode==="SHADOW")return{planned:true,error:"SHADOW_MUTATION_BLOCKED",reason:input.reason};
   const existing=await tx.humanHandoff.findFirst({where:{conversationId:c.id,resolvedAt:null}});
   const handoff=existing??await tx.humanHandoff.create({data:{conversationId:c.id,reason:input.reason}});

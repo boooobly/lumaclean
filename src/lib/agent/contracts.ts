@@ -4,22 +4,26 @@ import { extrasSchema } from "@/lib/validation/crm";
 
 export const locales = ["ru", "sr-Latn", "sr-Cyrl", "en"] as const;
 export type AgentLocale = (typeof locales)[number];
-export const reasons = ["COMPLAINT", "DISCOUNT", "OUT_OF_SCOPE", "MOLD", "RENOVATION", "AMBIGUOUS", "PRICE_REVIEW", "NO_DURATION_RULE", "ROUTING_UNRELIABLE", "NO_SLOTS", "TOOL_ERRORS", "IDENTITY_REQUIRED", "UNCERTAINTY"] as const;
+export const reasons = ["COMPLAINT", "DISCOUNT", "OUT_OF_SCOPE", "MOLD", "RENOVATION", "AMBIGUOUS", "PRICE_REVIEW", "NO_DURATION_RULE", "ROUTING_UNRELIABLE", "NO_SLOTS", "TOOL_ERRORS", "IDENTITY_REQUIRED", "UNCERTAINTY", "HAZARDOUS_CLEANING", "HEAVY_LIFTING", "CREW_PREFERENCE", "ACCESS_REVIEW", "PAYMENT_REVIEW", "CANCELLATION", "ARRIVAL_REVIEW", "OUTSIDE_SERVICE_AREA"] as const;
 export type HandoffReason = (typeof reasons)[number];
 export const qualificationSchema = z.object({
   service: z.enum(serviceIds), area: z.number().finite().min(1).max(1000),
   extras: extrasSchema, soilLevel: z.enum(["LIGHT","NORMAL","HEAVY","EXTREME"]), urgent: z.boolean(),
 }).strict();
 const empty = z.object({}).strict();
+export const customerFactsSchema = qualificationSchema.omit({urgent:true}).partial().extend({extrasConfirmed:z.literal(true).optional(),requestedDate:z.iso.date().optional(),addressQuery:z.string().trim().min(3).max(200).optional()}).strict();
+export const inputIntents = ['SERVICE_TYPE','AREA','SOIL_LEVEL','EXTRAS','YES_NO','SLOT_SELECTION','BOOKING_CONFIRMATION','POST_BOOKING'] as const;
 export const toolSchemas = {
   getBusinessInfo: empty,
   findClient: empty,
+  recordCustomerFacts: z.object({facts:customerFactsSchema,evidence:z.string().trim().min(1).max(1500)}).strict(),
+  requestCustomerInput: z.object({intent:z.enum(inputIntents)}).strict(),
   createOrUpdateLead: z.object({intent:z.literal("cleaning"),name:z.string().trim().min(2).max(100).optional(),phone:z.string().trim().min(6).max(40).optional(),service:z.enum(serviceIds).optional(),area:z.number().finite().min(1).max(1000).optional()}).strict(),
   calculatePrice: qualificationSchema,
   estimateDuration: empty,
   resolveAddress: z.object({query:z.string().trim().min(3).max(200),placeId:z.string().min(1).max(300).optional(),apartment:z.string().max(60).optional()}).strict(),
   getClientAddresses: z.object({addressId:z.string().max(80).optional()}).strict(),
-  findAvailableSlots: z.object({date:z.string().regex(/^\d{4}-\d{2}-\d{2}$/),from:z.string().max(30),to:z.string().max(30)}).strict(),
+  findAvailableSlots: z.object({date:z.string().regex(/^\d{4}-\d{2}-\d{2}$/),from:z.string().max(30),to:z.string().max(30),timeIntent:z.enum(['START_AT','ARRIVE_BY','END_BY','WINDOW']).optional()}).strict(),
   validateSlot: z.object({slotToken:z.uuid()}).strict(),
   createOrder: empty,
   rescheduleOrder: empty,
@@ -29,6 +33,8 @@ export type ToolName = keyof typeof toolSchemas;
 export const toolDescriptions:Record<ToolName,string> = {
   getBusinessInfo:"Read current public facts and FAQ, services, extras and exclusions. Must use for business questions.",
   findClient:"Read only the server-verified identity bound to this conversation. Phone or display name claims are NOT verification. Never accepts arbitrary client ID.",
+  recordCustomerFacts:"Save only allowlisted facts explicitly stated in the current CLIENT message. evidence must be an exact excerpt of that message. No image inference, guesses, internal IDs or generic updates. Last explicit correction wins; server invalidates dependent quotes and slots.",
+  requestCustomerInput:"Ask ONE next qualification question using a server-localized template and persisted choices. Use SERVICE_TYPE, AREA, SOIL_LEVEL or EXTRAS only when missing. SLOT_SELECTION uses real returned slots. Ends this turn. Never reconstruct buttons from your prose. Use for these qualification questions instead of writing free text.",
   createOrUpdateLead:"Create/update substantive cleaning inquiry immediately. ONLY intent is required; name/phone are OPTIONAL. Never wait for contact to record intent. Contact may be gathered later, do not invent it. No lead for a greeting or isolated FAQ.",
   calculatePrice:"Authoritative production price. Needs explicit service, area, soil, extras (empty means customer wants no extras), urgent. Contact is NOT required. Save current quote; invalidates old duration and slot. If requiresHumanReview, handoff.",
   estimateDuration:"Calculate current quote's duration from active owner rules and choose crew size from applicable rules. Missing rule means handoff, no guessed duration.",
@@ -45,6 +51,9 @@ export const toolDescriptions:Record<ToolName,string> = {
 export const nativeTools = Object.entries(toolSchemas).map(([name,schema])=>({type:"function" as const,function:{name,description:toolDescriptions[name as ToolName],strict:false,parameters:z.toJSONSchema(schema,{target:"draft-7"})}}));
 export type Qualification = z.infer<typeof qualificationSchema>;
 export type AgentState = {
+  draftFacts?:z.infer<typeof customerFactsSchema>;
+  nextInput?:typeof inputIntents[number];
+  timeClarificationRequired?:boolean;
   name?:string; phone?:string; qualification?:Qualification;
   quote?:{id:string;serviceId:string;input:Qualification;total:number;base:number;discountPercent:number;requiresHumanReview:boolean;at:string};
   duration?:{minutes:number;reserve:number;requiredCleaners:number;ruleId:string;version:number};
@@ -64,5 +73,5 @@ export class AgentError extends Error {
 }
 export const publicInboundSchema = z.discriminatedUnion("action",[
   z.object({action:z.literal("start"),locale:z.enum(locales)}).strict(),
-  z.object({action:z.literal("message"),id:z.uuid(),text:z.string().trim().max(1500),confirmationNonce:z.uuid().optional(),attachmentIds:z.array(z.uuid()).max(4).optional(),quickReply:z.object({key:z.string().max(80),messageId:z.string().max(80),revision:z.number().int().nonnegative()}).strict().optional()}).strict().refine(v=>!!v.text||!!v.attachmentIds?.length||!!v.quickReply),
+  z.object({action:z.literal("message"),id:z.uuid(),text:z.string().trim().max(1500),confirmationNonce:z.uuid().optional(),attachmentIds:z.array(z.uuid()).max(4).optional(),quickReply:z.object({key:z.string().max(80),messageId:z.string().max(80),replySetId:z.uuid(),revision:z.number().int().nonnegative()}).strict().optional()}).strict().refine(v=>!!v.text||!!v.attachmentIds?.length||!!v.quickReply),
 ]);
