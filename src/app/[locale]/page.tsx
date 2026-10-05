@@ -20,6 +20,7 @@ import {editorialContent} from "@/lib/site-content";
 import {siteUrl} from "@/lib/seo";
 import {articleUi, getVisibleArticles} from "@/lib/articles";
 import {ArrowIcon} from "@/components/site/arrow-icon";
+import {legalContent} from "@/lib/legal-content";
 import "./site.css";
 
 const displayFont = Onest({subsets: ["latin", "cyrillic"], variable: "--font-lc-display", display: "swap"});
@@ -190,7 +191,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
 
         <section className="closing-section"><div className="shell closing-grid"><div><div className="section-number light">{v.closing.number}</div><h2>{v.closing.title}</h2></div><div><p>{v.closing.body}</p><a className="site-closing-primary" href="#estimate">{v.closing.cta}<ArrowIcon /></a><div className="site-direct-contacts"><span>{v.closing.direct}</span><div>{messengerLinks.map((contact) => <a className="site-contact-link" href={contact.href} target={contact.id === "viber" ? undefined : "_blank"} rel={contact.id === "viber" ? undefined : "noreferrer"} key={contact.id}><small>{contact.label}</small><strong>{contact.value}</strong><i aria-hidden="true"><ArrowIcon /></i></a>)}</div></div></div></div></section>
       </main>
-      <footer className="site-footer"><div className="shell"><Image src="/brand/logo-primary.svg" alt="LumaClean" width={622} height={132}/><span>{v.footer}</span>{getVisibleArticles().length > 0 && <Link href={`/${locale}/articles`}>{articleUi[locale].all}</Link>}<div className="site-footer-locales">{(["ru", "sr", "en"] as Locale[]).map((item) => <Link className={item === locale ? "active" : ""} href={`/${item}`} key={item}>{item.toUpperCase()}</Link>)}</div><GoogleProfileLinks locale={locale}/></div></footer>
+      <footer className="site-footer"><div className="shell"><Image src="/brand/logo-primary.svg" alt="LumaClean" width={622} height={132}/><span>{v.footer}</span><Link href={`/${locale}/privacy-policy`}>{legalContent[locale].privacy}</Link><Link href={`/${locale}/data-deletion`}>{legalContent[locale].deletion}</Link>{getVisibleArticles().length > 0 && <Link href={`/${locale}/articles`}>{articleUi[locale].all}</Link>}<div className="site-footer-locales">{(["ru", "sr", "en"] as Locale[]).map((item) => <Link className={item === locale ? "active" : ""} href={`/${item}`} key={item}>{item.toUpperCase()}</Link>)}</div><GoogleProfileLinks locale={locale}/></div></footer>
     </div>
   );
 }

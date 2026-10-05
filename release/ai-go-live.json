@@ -1,5 +1,5 @@
 {
-  "fingerprint": "2bc5bbca741b88d3e1da990fc0c6a76b4975d2eb2b00bf5a1fa3a69de4d148cb",
+  "fingerprint": "6f8655ab88310b09545d23344b14dfcdd9a35ecc6b9cfbafd3683c9a9bb8f722",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -72,8 +72,10 @@
     "src/app/[locale]/articles/layout.tsx": "298f68c0324d3598bd2f0b66d59bd78e03d095ff05f0d6543e413cd94b4539b4",
     "src/app/[locale]/articles/page.tsx": "e7de3e603693eaa74a411782b532e33230e6cd7d63c6ba2d99bc558397e6c1b8",
     "src/app/[locale]/articles/[slug]/page.tsx": "bf898d72b77c0bb6d84a77cc76972668e21badca1e38e5d9c00566f305b40311",
+    "src/app/[locale]/data-deletion/page.tsx": "cc85c7559aba68b99ad1b87b2b35b7655b09a8c7e89bec3b2fe5c05172a28298",
     "src/app/[locale]/layout.tsx": "6f9fdd52d69fb2e52f32e2133c827c40fd2b9f4ee16af147433f99e476912b80",
-    "src/app/[locale]/page.tsx": "b95ec117584d14735481d7ddfb58b69be6ee2c5f15cccca4ec480e06e2532d33",
+    "src/app/[locale]/page.tsx": "324f61d66afd1cfc56a61fc2c51b038af622f7cb02964e739a1945c47796942c",
+    "src/app/[locale]/privacy-policy/page.tsx": "b52d5cc5c2c223ef5a9b1a92fde812688e0a169ec11ab6ad11940db9771ead72",
     "src/app/[locale]/services/[service]/page.tsx": "316e5a794483e55b2b541bce465b0ea02df39d7e369f98e711cedfd0b46b6dd5",
     "src/app/[locale]/services/[service]/service.css": "225bb4ad21327df1d52ebd7519d4c32fa14533066058f01cae4c4ae7b0f7f3dc",
     "src/app/[locale]/site.css": "3a043a0d289307ea0ab186ed689deb447b0fa0320892eecc14051fcbd472dc1e",
@@ -113,6 +115,8 @@
     "src/components/site/google-profile-links.module.css": "68b9667bc02da1087c32600f1dfd65a722e10ef4f1215e9a27292976cfd0f3f5",
     "src/components/site/google-profile-links.tsx": "cf276374eb0dc502d611d59449976a86544d4d12b2da75790d450b09d33c0e40",
     "src/components/site/journey-handoff.tsx": "fbcba643fefe56e160e6a39e412fb7ee841a53ee5d8fba8615b5b47550bac281",
+    "src/components/site/legal-page.css": "b2491e6ee011e16ae3e0f2641cdd067eac61e27f8e4c3d82067b67827fe80c88",
+    "src/components/site/legal-page.tsx": "64486f54053a6ad304f1bbbf2a56cd63702dfd07a6e6eae3bf66e3fec2046572",
     "src/components/site/rates.tsx": "55f79490ac629430a1494c78cc76fd4ef09800ca2ff7d639605fbcbf25b61b03",
     "src/components/site/service-planning.tsx": "d8bfe885bad227fbed02e270326f635ee101420944d53c7789bdc3bdb04ac96f",
     "src/components/site/site-header.tsx": "ffa4d928e30464b9f4cf0af1194b2b943cf33e3216ca303520654dab9f785187",
@@ -200,6 +204,7 @@
     "src/lib/infrastructure/hybrid-routing.ts": "9b44f1b35499acb5a83c6463cbe6c6ee09cd5cb660fcb844b8fbc2895b543ad3",
     "src/lib/infrastructure/motis-routing.ts": "c791890333c4ddec04cba5a9c27aee8a5207455cd0c509847da5cc0e82824d4e",
     "src/lib/infrastructure/routing-provider.ts": "6cee7a8b737b7ed97dcdbf5b8c82cf6499ddc12c904a8993d14ec834c72f378d",
+    "src/lib/legal-content.ts": "bc563353b2dfd74f8880952e9d33e7efdf9fbfbf7dd1f5afb69c1790038605f5",
     "src/lib/pricing.ts": "594e93a8f7c99f756ccc2e3b0f928a63be300465b62e4089678606aad51814d5",
     "src/lib/seo-services.ts": "97dc340726b15f01ff460ad4432d72327a1ec375d9c0e07b7a89fe3b7e170663",
     "src/lib/seo.ts": "0757f8d416b211cd9dbdf72363343ceff849b9846883a49b9786cb1172f06865",
@@ -254,7 +259,7 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 45,
+  "tests": 48,
   "captionRemovalVerification": {
     "scope": "42 generated article-page tests and 3 WhatsApp locale tests passed. Affected-file lint and production build including TypeScript passed. Removed only the visible illustration disclaimer in RU/SR/EN; image alt descriptions, AI/booking logic and operating modes unchanged. Historical channel suites below were not rerun. Fresh final-source Preview proof required before promotion."
   },
@@ -267,18 +272,23 @@
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-04T20:00:37.644Z",
+  "checkedAt": "2026-10-05T22:16:59.702Z",
   "suites": [
-    "20 official customer transport/security/media/connection unit tests",
-    "32 isolated Preview unified Inbox/native Agent/outbox channel integration checks including 12 Website/Telegram domain-action comparisons",
-    "20 reused temporal/persona/correction/native qualification checks",
-    "2 existing internal Telegram transport checks"
+    "20 customer transport/security/media/window unit tests",
+    "20 temporal/persona/correction unit tests",
+    "8 readiness unit tests"
   ],
-  "verificationScope": "72 passing targeted tests in the full run (one unchanged internal handoff DB test excluded). Final focused run passed 29 checks after the last transport/outbox changes, adding 3 unique passing checks: 75 distinct passing test records including the integration parent. Selected corpus cases were intentionally not repeated in the focused run. Affected lint and typecheck passed; all 15 additive migrations applied to isolated Preview. Previous 206-check behavior release evidence is retained below, not claimed as rerun. Native Preview booking and production deployment verification are performed separately. Website AUTO must be preserved; external channels and customer notifications remain OFF until explicit owner setup and enable. Production build passed.",
+  "verificationScope": "Privacy/deletion pages and homepage links only. 48 targeted unit checks passed; 1 isolated database test skipped (no database test requested for static pages). Affected lint and typecheck passed. No agent, database schema, migrations or credentials changed. Previous release evidence retained as baseline, not claimed as rerun. Build and Preview/public-page smoke are release gates. Production build and desktop/mobile protected Preview smoke passed; policy/deletion canonical, contact links and 390px layout verified.",
   "previousVerification": {
-    "fingerprint": "ed1dc7c2e6b84937598bc8d4c591c0206d444f2e357078efa4fed7a47809cd1d",
-    "tests": 206,
-    "checkedAt": "2026-10-04T18:12:54.873Z",
-    "verificationScope": "205 targeted tests passed with isolated Preview database cleanup. Final core/corpus and new native qualification fallback test: 133 passed, yielding 206 maintained targeted checks. Affected lint passed (2 existing image warnings), typecheck and production build passed. Additive migration 20261004180000_agent_behavior_hardening applied to isolated Preview; all 14 migrations available in source. Native provider evaluation, Preview UI examples and fresh booking proof are performed separately before release. Production owner mode must remain unchanged."
+    "fingerprint": "2bc5bbca741b88d3e1da990fc0c6a76b4975d2eb2b00bf5a1fa3a69de4d148cb",
+    "tests": 45,
+    "checkedAt": "2026-10-04T20:00:37.644Z",
+    "verificationScope": "72 passing targeted tests in the full run (one unchanged internal handoff DB test excluded). Final focused run passed 29 checks after the last transport/outbox changes, adding 3 unique passing checks: 75 distinct passing test records including the integration parent. Selected corpus cases were intentionally not repeated in the focused run. Affected lint and typecheck passed; all 15 additive migrations applied to isolated Preview. Previous 206-check behavior release evidence is retained below, not claimed as rerun. Native Preview booking and production deployment verification are performed separately. Website AUTO must be preserved; external channels and customer notifications remain OFF until explicit owner setup and enable. Production build passed.",
+    "previousVerification": {
+      "fingerprint": "ed1dc7c2e6b84937598bc8d4c591c0206d444f2e357078efa4fed7a47809cd1d",
+      "tests": 206,
+      "checkedAt": "2026-10-04T18:12:54.873Z",
+      "verificationScope": "205 targeted tests passed with isolated Preview database cleanup. Final core/corpus and new native qualification fallback test: 133 passed, yielding 206 maintained targeted checks. Affected lint passed (2 existing image warnings), typecheck and production build passed. Additive migration 20261004180000_agent_behavior_hardening applied to isolated Preview; all 14 migrations available in source. Native provider evaluation, Preview UI examples and fresh booking proof are performed separately before release. Production owner mode must remain unchanged."
+    }
   }
 }
