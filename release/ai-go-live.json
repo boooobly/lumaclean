@@ -1,5 +1,5 @@
 {
-  "fingerprint": "acb313e00273de1956509d4234defcf6e7eb51b32dec65e20b3e0d6e6921a2c6",
+  "fingerprint": "2bc5bbca741b88d3e1da990fc0c6a76b4975d2eb2b00bf5a1fa3a69de4d148cb",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -71,7 +71,7 @@
     "src/app/[locale]/articles/articles.css": "57ffe965393896f0bbb5200eb0f63ba9f7a706f85f13aaac39f42fc55e56f30f",
     "src/app/[locale]/articles/layout.tsx": "298f68c0324d3598bd2f0b66d59bd78e03d095ff05f0d6543e413cd94b4539b4",
     "src/app/[locale]/articles/page.tsx": "e7de3e603693eaa74a411782b532e33230e6cd7d63c6ba2d99bc558397e6c1b8",
-    "src/app/[locale]/articles/[slug]/page.tsx": "e49a5a1eefad59a274caeff43a15960b4e5b58a67cf6e29e6acf52e1b21e9db2",
+    "src/app/[locale]/articles/[slug]/page.tsx": "bf898d72b77c0bb6d84a77cc76972668e21badca1e38e5d9c00566f305b40311",
     "src/app/[locale]/layout.tsx": "6f9fdd52d69fb2e52f32e2133c827c40fd2b9f4ee16af147433f99e476912b80",
     "src/app/[locale]/page.tsx": "b95ec117584d14735481d7ddfb58b69be6ee2c5f15cccca4ec480e06e2532d33",
     "src/app/[locale]/services/[service]/page.tsx": "316e5a794483e55b2b541bce465b0ea02df39d7e369f98e711cedfd0b46b6dd5",
@@ -159,7 +159,7 @@
     "src/lib/articles/cost.ts": "fc9622e3cc1834763b9ac574dbb1c17b180b1c16015c40678e13b43b5470966d",
     "src/lib/articles/duration.ts": "f9abea5043a45676e98bb5e1042b8b2a0f2842a8e39b4e4cf0b4c80c6ca259ea",
     "src/lib/articles/frequency.ts": "eb0f8f4679e3c8d07d06aa34a26c469cbafe3995307aa8e56f504bcf9095e404",
-    "src/lib/articles/index.ts": "d0de13e359f09f241cf51404267f8642b059338b2b0b6f70557882eb2eb733fd",
+    "src/lib/articles/index.ts": "6b1c1588c899a9347fc6b87213f158118185e2b1199396d8a52bb2924fb3c05d",
     "src/lib/articles/kitchen.ts": "54b8f938d8a459a937587a1672d16ed1c043ca3d9f006cb50bff867100ce0040",
     "src/lib/articles/move-in.ts": "3f4bc9aabc0f71937fb898ba4777d2354777512256abfe05715eb42d6d801721",
     "src/lib/articles/move-out.ts": "d1aad78abc842c96b0702091f29b45d75989ab1f72590e75ced1c790736f5633",
@@ -254,7 +254,10 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 3,
+  "tests": 45,
+  "captionRemovalVerification": {
+    "scope": "42 generated article-page tests and 3 WhatsApp locale tests passed. Affected-file lint and production build including TypeScript passed. Removed only the visible illustration disclaimer in RU/SR/EN; image alt descriptions, AI/booking logic and operating modes unchanged. Historical channel suites below were not rerun. Fresh final-source Preview proof required before promotion."
+  },
   "contactUpdateVerification": {
     "scope": "Public WhatsApp number only: 3 locale contact tests passed; affected-file lint and production build including TypeScript passed. Phone, Viber, Telegram and all AI/booking logic unchanged. Prior 75 customer-channel checks below are carried forward, not claimed as rerun. Fresh Preview booking proof required before production promotion.",
     "baselineFingerprint": "8294117bb9aeb98e50b8fa3c1fdc3031dfba43e8ac02c03083a64eea5c20d139",
