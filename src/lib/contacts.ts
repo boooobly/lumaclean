@@ -9,6 +9,11 @@ export const businessContact = {
   days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
 } as const;
 
+export const whatsappContact = {
+  telephone: "+381653470309",
+  displayTelephone: "+381 65 347 0309",
+} as const;
+
 export const businessContactCopy = {
   ru: {title: "Связаться с LumaClean", area: "Выездная уборка по всему Белграду", hours: "Заявки принимаем ежедневно, 09:00–22:00 по времени Белграда.", languages: "По телефону — русский и английский. По-сербски — переписка в Viber.", call: "Позвонить", viber: "Написать в Viber"},
   sr: {title: "Kontaktirajte LumaClean", area: "Dolazimo na vašu adresu širom Beograda", hours: "Upite primamo svakog dana, 09:00–22:00 po beogradskom vremenu.", languages: "Telefonom razgovaramo na ruskom i engleskom. Na srpskom nam pišite preko Vibera.", call: "Pozovite nas", viber: "Pišite preko Vibera"},
@@ -30,6 +35,6 @@ export function getMessengerLinks(locale: Locale) {
   return [
     {id: "telegram", label: "Telegram", value: "@luma_clean", href: "https://t.me/luma_clean"},
     {id: "viber", label: "Viber", value: "+381 65 347 0308", href: "viber://chat?number=%2B381653470308"},
-    {id: "whatsapp", label: "WhatsApp", value: "+7 988 701-30-06", href: `https://wa.me/79887013006?text=${encodeURIComponent(whatsappMessage[locale])}`},
+    {id: "whatsapp", label: "WhatsApp", value: whatsappContact.displayTelephone, href: `https://wa.me/${whatsappContact.telephone.slice(1)}?text=${encodeURIComponent(whatsappMessage[locale])}`},
   ] as const;
 }

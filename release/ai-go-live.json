@@ -1,5 +1,5 @@
 {
-  "fingerprint": "8294117bb9aeb98e50b8fa3c1fdc3031dfba43e8ac02c03083a64eea5c20d139",
+  "fingerprint": "acb313e00273de1956509d4234defcf6e7eb51b32dec65e20b3e0d6e6921a2c6",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -73,7 +73,7 @@
     "src/app/[locale]/articles/page.tsx": "e7de3e603693eaa74a411782b532e33230e6cd7d63c6ba2d99bc558397e6c1b8",
     "src/app/[locale]/articles/[slug]/page.tsx": "e49a5a1eefad59a274caeff43a15960b4e5b58a67cf6e29e6acf52e1b21e9db2",
     "src/app/[locale]/layout.tsx": "6f9fdd52d69fb2e52f32e2133c827c40fd2b9f4ee16af147433f99e476912b80",
-    "src/app/[locale]/page.tsx": "b0afeba1a2c0b10096ca132e7a32d1dd98d36d421515c4e0e14489f3dfe61439",
+    "src/app/[locale]/page.tsx": "b95ec117584d14735481d7ddfb58b69be6ee2c5f15cccca4ec480e06e2532d33",
     "src/app/[locale]/services/[service]/page.tsx": "316e5a794483e55b2b541bce465b0ea02df39d7e369f98e711cedfd0b46b6dd5",
     "src/app/[locale]/services/[service]/service.css": "225bb4ad21327df1d52ebd7519d4c32fa14533066058f01cae4c4ae7b0f7f3dc",
     "src/app/[locale]/site.css": "3a043a0d289307ea0ab186ed689deb447b0fa0320892eecc14051fcbd472dc1e",
@@ -173,7 +173,7 @@
     "src/lib/articles/windows.ts": "3e7712a7b7ae50afcbfa914a661b7dd9e5f75488118d2f403b49623f629398bf",
     "src/lib/auth/config.ts": "28dba83ac7eab10e89b6d89b85e090c14258fd6b79e2f9fc65bbd2d9b821c422",
     "src/lib/auth/session.ts": "86664bdf3bf7185cded8e4669f0b8f5c5bd57bc74142e86baf6285489ade6a27",
-    "src/lib/contacts.ts": "a274266d6def6a877c877d786e7247ff1c82697a6a6011649480dd2a52ff27d3",
+    "src/lib/contacts.ts": "b2f5b815d86728e39746ec12383eb0124c7157ff83d338f7292088eff0fe6a58",
     "src/lib/content.ts": "ff5e093f08313d4309e36f3836e3ff217be682d6886d4376bf812aad6b5fb6e6",
     "src/lib/database/client.ts": "bccdf4e4ac91597e892be8198d47328d51f701dd7ee62c2b8921b67f5172df6e",
     "src/lib/database/connection.ts": "ec0f01d6333eced2041052d6677e55338d8c76c344d264b530aff61cd9b8860b",
@@ -254,7 +254,12 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 75,
+  "tests": 3,
+  "contactUpdateVerification": {
+    "scope": "Public WhatsApp number only: 3 locale contact tests passed; affected-file lint and production build including TypeScript passed. Phone, Viber, Telegram and all AI/booking logic unchanged. Prior 75 customer-channel checks below are carried forward, not claimed as rerun. Fresh Preview booking proof required before production promotion.",
+    "baselineFingerprint": "8294117bb9aeb98e50b8fa3c1fdc3031dfba43e8ac02c03083a64eea5c20d139",
+    "baselineTests": 75
+  },
   "lint": true,
   "typecheck": true,
   "migration": true,

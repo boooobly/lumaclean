@@ -11,7 +11,7 @@ import {JourneyHandoff} from "@/components/site/journey-handoff";
 import {SiteHeader} from "@/components/site/site-header";
 import {Rates} from "@/components/site/rates";
 import {routing, type Locale} from "@/i18n/routing";
-import {businessContact, businessContactCopy, getMessengerLinks, googleBusinessProfile} from "@/lib/contacts";
+import {businessContact, businessContactCopy, getMessengerLinks, googleBusinessProfile, whatsappContact} from "@/lib/contacts";
 import {GoogleProfileLinks} from "@/components/site/google-profile-links";
 import {siteContent} from "@/lib/content";
 import {extrasPrices, formatRsd, priceMatrix} from "@/lib/pricing";
@@ -67,7 +67,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
         telephone: businessContact.telephone,
         contactPoint: [
           {"@type": "ContactPoint", telephone: businessContact.telephone, contactType: "customer service", availableLanguage: ["ru", "en"], description: businessContactCopy[locale].languages, hoursAvailable: {"@type": "OpeningHoursSpecification", dayOfWeek: businessContact.days.map(day => `https://schema.org/${day}`), opens: businessContact.opens, closes: businessContact.closes, description: businessContactCopy[locale].hours}},
-          {"@type": "ContactPoint", telephone: "+79887013006", contactType: "customer service", availableLanguage: ["ru", "en"]},
+          {"@type": "ContactPoint", telephone: whatsappContact.telephone, contactType: "customer service", availableLanguage: ["ru", "en"]},
         ],
         sameAs: ["https://t.me/luma_clean", googleBusinessProfile.url],
       },
