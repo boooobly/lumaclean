@@ -47,6 +47,27 @@ Examined dashboard, messages/list/thread with real WhatsApp history and photo, c
 39. Lead details prioritize reference/normalized phone/source over contact/action.
 40. Cleaner details show long address/readiness/history before daily planning.
 
+## Preview findings resolved after implementation
+
+41. Finance period disappeared with its collapsed explanation; keep the current period visible.
+42. CRM columns clipped at 1024px; use labelled ledger rows through the tablet breakpoint.
+43. Mobile agenda taps opened planning instead of the order; separate the order link and planning action.
+44. Photo viewer keyboard focus excluded navigation controls and changed on photo selection; use a native modal dialog with Escape and thumbnail focus restoration.
+45. Dashboard names exposed an internal fallback/channel enum; use client/state/phone fallbacks and channel labels.
+46. Numeric CRM validation displayed default English validator text; localize the explanation while retaining every bound and precision rule.
+
+All 46 recorded presentation issues are addressed. CRM fields, financial calculations, scheduling, audit records, channel diagnostics and AI operating policies remain available.
+
 ## Verification
 
-Implementation and post-change results will be recorded here after targeted tests and Preview QA. Physical iOS/Android keyboard behavior requires a device; Chrome viewport emulation alone does not prove it.
+Protected Preview `dpl_7RFpHTNvvwoVSFP75U5AEtWQcfbp`, application commit `f044746f4af14ecd5cdce1e973660f10d505ce4f`: all nine main pages at 1440×900, 1024×768, 768×1024, 430×932, 390×844 and 360×800 (54 page/viewport checks), with no unintended horizontal page overflow. Screenshots and DOM measurements are local ignored QA artifacts under `qa-output/screenshots/` and `qa-output/preview-viewports.json`.
+
+Checked populated and empty states, long Serbian names/text, eight detail/create/edit routes, labelled tablet/mobile ledgers, agenda order navigation and separate planning dialog, seven settings groups, sticky form actions above bottom navigation, validation expanding closed sections, More sheet and focus restoration. Diagnostics, credentials, IDs, AI evaluations/tool traces, routing, histories, secondary contact fields and explanations are behind disclosures/drawers.
+
+Messenger scenarios passed: unread Website and WhatsApp rows, phone-only names, handoff complaint banner, UNKNOWN delivery kept distinct from safe retry, empty AI chat, long bounded history and older-page/latest navigation, optional context, search, native fullscreen photo with Escape/focus restoration, authenticated PDF download, synthetic photo upload and delivered Website reply, SHADOW edit/send/hide, takeover and resume. Actions used disposable isolated Preview conversations only; no real customer transport was invoked and no production order was created.
+
+34 targeted Node tests passed (14 admin UI/domain/validation and 20 existing transport/security/media checks); 10 isolated Preview integration assertions passed, including reply idempotency, bounded pagination and unchanged global/channel modes. Affected-file lint, typecheck and optimized production build passed. Schema/migrations are unchanged. The previous 200+ AI behavior suite was not rerun.
+
+The final change after the full viewport matrix is localized validation wording only, covered by a boundary regression check; its fresh Preview confirmation is recorded with the release evidence. Physical iOS Safari/Android Chrome soft-keyboard behavior remains unverified: Chrome viewport emulation verifies layout and composer sizing, not a physical keyboard. The implementation accounts for dynamic viewport height, visualViewport and safe-area insets.
+
+Fixtures and their media must be removed before release. Immutable append-only audit entries for QA actions are intentionally preserved; cleanup never disables the audit trigger or changes AI modes.

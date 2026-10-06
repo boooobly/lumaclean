@@ -13,6 +13,16 @@ import { MessengerBubble } from '../../src/components/admin/messenger-bubble';
 import type { conversationData, inboxData } from '../../src/lib/agent/queries';
 import { cleanerDay } from '../../src/lib/domain/cleaner-day';
 import { Temporal } from '@js-temporal/polyfill';
+import { clientSchema } from '../../src/lib/validation/crm';
+
+test('CRM discount boundaries remain intact and validation explains the allowed value', () => {
+  const client={name:'QA',phone:'+381000000000'};
+  assert(clientSchema.safeParse({...client,discountPercent:100}).success);
+  const result=clientSchema.safeParse({...client,discountPercent:999});
+  assert(!result.success);
+  assert.equal(result.error.issues.find(issue=>issue.path[0]==='discountPercent')?.message,'Значение должно быть не больше 100');
+  assert(!clientSchema.safeParse({...client,discountPercent:-1}).success);
+});
 
 test('day separators use business day across UTC midnight and DST', () => {
   assert.equal(daySeparator('2026-10-05T22:30:00Z', new Date('2026-10-06T08:00:00Z')), 'Сегодня');

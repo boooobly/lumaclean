@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { Temporal } from '@js-temporal/polyfill';
 import { PrismaClient } from '../../src/generated/prisma/client';
@@ -21,12 +21,12 @@ async function main() { try {
   assert(owned.every(c=>c.externalThreadId?.startsWith(m.prefix)));
   const attachments=await db.chatAttachment.findMany({where:{conversationId:{in:m.conversations}},select:{storageKey:true,thumbnailKey:true}});
   // Storage cleanup uses only records attached to these disposable Preview conversations.
-  if(attachments.length){const {PrivateBlobStorage}=await import('../../src/lib/agent/chat-attachments');await new PrivateBlobStorage().remove(attachments.flatMap(a=>[a.storageKey,a.thumbnailKey]));}
+  if(attachments.length){const {PrivateBlobStorage}=await import('../../src/lib/agent/chat-attachments');await new PrivateBlobStorage().remove([...new Set(attachments.flatMap(a=>[a.storageKey,a.thumbnailKey]))]);}
   await db.$transaction(async tx=>{
    const conv={conversationId:{in:m.conversations}}, order={orderId:{in:m.orders}};
-   await tx.notification.deleteMany({where:{OR:[{orderId:{in:m.orders}},{clientId:{in:m.clients}},{cleanerId:{in:m.cleaners}}]}});
+   await tx.notification.deleteMany({where:{OR:[{conversationId:{in:m.conversations}},{orderId:{in:m.orders}},{clientId:{in:m.clients}},{cleanerId:{in:m.cleaners}}]}});
    await tx.shadowSuggestion.deleteMany({where:conv});await tx.chatAttachment.deleteMany({where:conv});await tx.agentSlot.deleteMany({where:conv});await tx.agentToolTrace.deleteMany({where:conv});await tx.aIInvocation.deleteMany({where:conv});await tx.agentJob.deleteMany({where:conv});await tx.humanHandoff.deleteMany({where:conv});await tx.message.deleteMany({where:conv});await tx.conversation.deleteMany({where:{id:{in:m.conversations}}});
-   await tx.auditLog.deleteMany({where:{entityId:{in:[...m.conversations,...m.orders,...m.clients,...m.cleaners,...m.leads]}}});
+   // AuditLog is append-only: keep the immutable record of disposable QA actions.
    await tx.expense.deleteMany({where:order});await tx.cleanerPayout.deleteMany({where:order});await tx.schedulingOverride.deleteMany({where:order});await tx.orderCleaner.deleteMany({where:order});await tx.orderExtra.deleteMany({where:order});await tx.order.deleteMany({where:{id:{in:m.orders}}});await tx.leadExtra.deleteMany({where:{leadId:{in:m.leads}}});await tx.lead.deleteMany({where:{id:{in:m.leads}}});await tx.clientAddress.deleteMany({where:{clientId:{in:m.clients}}});await tx.client.deleteMany({where:{id:{in:m.clients}}});await tx.cleanerAvailability.deleteMany({where:{cleanerId:{in:m.cleaners}}});await tx.cleaner.deleteMany({where:{id:{in:m.cleaners}}});
   });
   const settings=await db.businessSettings.findUniqueOrThrow({where:{id:'default'}});
@@ -47,6 +47,7 @@ async function main() { try {
   m.checks=10;writeFileSync(path,JSON.stringify(m,null,2));console.log({previewIntegrationChecks:10,passed:true});
  } else {
   mkdirSync('qa-output',{recursive:true});assert(!process.argv.includes('--production'));
+  if(existsSync(path)){const previous:Manifest=JSON.parse(readFileSync(path,'utf8'));assert.equal(await db.conversation.count({where:{id:{in:previous.conversations}}}),0,'Clean existing fixtures before seeding again');}
   const prefix='ui-audit:'+randomUUID(),baseline=await db.businessSettings.findUniqueOrThrow({where:{id:'default'}});
   const m:Manifest={prefix,conversations:[],orders:[],clients:[],cleaners:[],leads:[],baselineMode:baseline.aiAgentMode,channels:baseline.aiChannelModes};
   const save=()=>writeFileSync(path,JSON.stringify(m,null,2));save();

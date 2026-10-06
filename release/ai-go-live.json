@@ -1,5 +1,5 @@
 {
-  "fingerprint": "2c6cf33b2169f000a8e3c25dc5fc58db170bfa9193b7608fce9bb91c123375a5",
+  "fingerprint": "a5713ac1b0753057d6a934c53e88dce396fb6fd005fcb7fb9b2ce415a8462bb0",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -240,7 +240,7 @@
     "src/lib/services/website-leads.ts": "a3d40efce0d5c973ac8f652171cc9976dfb528cee32647287d6ee48e7bfbbd5d",
     "src/lib/site-content.tsx": "a657104896a984a76cb9833abab9593f650c1c0dfc1af17ac69316693eefce2c",
     "src/lib/validation/admin.ts": "9c1d0a705faffed2af3fd53cf4d5ec10713ba3d90d52769370288655b95f4a4f",
-    "src/lib/validation/crm.ts": "22063d7da5c2060325eafe4f2d9103983e015fef0ffd528e640e6742de50d2c1",
+    "src/lib/validation/crm.ts": "2944c94a544727f1c378d38cd5886d1a50f409e6409a667fded76f80b5fed524",
     "src/lib/validation/finance.ts": "df2f8eab0d22c94362b78ff47e4b76d21d76911a8c79f14630b50a9f1a4fb5fc",
     "src/lib/validation/routing.ts": "a1937fa794c43952af6a54690091120cdafa560cd8c20dc220bc4a24e1d7d1ab",
     "src/lib/validation/scheduling.ts": "1bb88d0048b92b8fafe1b256971b924d26ad7dd69629a5f8c00231a5d4c0e572",
@@ -269,17 +269,17 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 33,
+  "tests": 34,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-06T18:50:07.105Z",
+  "checkedAt": "2026-10-06T19:12:05.103Z",
   "suites": [
-    "13 admin messenger/component/domain checks",
+    "14 admin messenger/component/domain and CRM validation checks",
     "20 customer transport/security/media unit checks"
   ],
-  "verificationScope": "Admin UX only, presentation queries and reusable responsive components. 33 targeted Node tests passed; affected-file lint and typecheck passed. Schema and migrations unchanged. Prior AI evidence retained as baseline and not claimed as rerun. Production build and protected Preview visual QA remain release gates. No business settings or AI operating modes changed.",
+  "verificationScope": "Admin UX presentation and validation wording only; rules and modes unchanged. 34 targeted Node checks, affected lint, typecheck and production build passed. 10 isolated Preview integration assertions passed. Protected Preview all nine pages at six viewports and messenger interaction/media/form QA passed; final validation wording follow-up awaits Preview confirmation. Prior AI evidence retained as baseline and not claimed as rerun.",
   "previousVerification": {
     "fingerprint": "6f8655ab88310b09545d23344b14dfcdd9a35ecc6b9cfbafd3683c9a9bb8f722",
     "tests": 48,
