@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowDown } from "lucide-react";
+import Link from "next/link";
 
-export function MessengerHistory({ children, latest, older = false }: { children: ReactNode; latest?: string; older?: boolean }) {
+export function MessengerHistory({ children, latest, latestHref, older = false }: { children: ReactNode; latest?: string; latestHref: string; older?: boolean }) {
   const ref = useRef<HTMLDivElement>(null), pinned = useRef(!older);
   const [away, setAway] = useState(older);
   useEffect(() => {
@@ -19,6 +20,6 @@ export function MessengerHistory({ children, latest, older = false }: { children
     pinned.current = element.scrollHeight - element.scrollTop - element.clientHeight < 80;
     setAway(!pinned.current);
   }}><div className="messenger-history-content">{children}</div></div>
-    {away && <button type="button" className="messenger-latest admin-icon-button" aria-label="К последним сообщениям" onClick={() => { pinned.current = true; if (ref.current) ref.current.scrollTop = ref.current.scrollHeight; setAway(false); }}><ArrowDown size={18} />Последние</button>}
+    {away && (older ? <Link className="messenger-latest admin-icon-button" aria-label="К последним сообщениям" href={latestHref}><ArrowDown size={18} />Последние</Link> : <button type="button" className="messenger-latest admin-icon-button" aria-label="К последним сообщениям" onClick={() => { pinned.current = true; if (ref.current) ref.current.scrollTop = ref.current.scrollHeight; setAway(false); }}><ArrowDown size={18} />Последние</button>)}
   </div>;
 }

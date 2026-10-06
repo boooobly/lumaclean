@@ -14,6 +14,12 @@ import type { conversationData, inboxData } from '../../src/lib/agent/queries';
 import { cleanerDay } from '../../src/lib/domain/cleaner-day';
 import { Temporal } from '@js-temporal/polyfill';
 import { clientSchema } from '../../src/lib/validation/crm';
+import { MessengerHistory } from '../../src/components/admin/messenger-history';
+
+test('latest action on an older history page navigates to the current conversation', () => {
+  const markup=render(<MessengerHistory older latestHref="/admin/messages/chat-a">Old history</MessengerHistory>);
+  assert.match(markup, /aria-label="К последним сообщениям" href="\/admin\/messages\/chat-a"/);
+});
 
 test('CRM discount boundaries remain intact and validation explains the allowed value', () => {
   const client={name:'QA',phone:'+381000000000'};

@@ -56,7 +56,9 @@ Examined dashboard, messages/list/thread with real WhatsApp history and photo, c
 45. Dashboard names exposed an internal fallback/channel enum; use client/state/phone fallbacks and channel labels.
 46. Numeric CRM validation displayed default English validator text; localize the explanation while retaining every bound and precision rule.
 
-All 46 recorded presentation issues are addressed. CRM fields, financial calculations, scheduling, audit records, channel diagnostics and AI operating policies remain available.
+47. The floating latest button on a paginated older history only scrolled within that page; navigate to the current conversation window instead.
+
+All 47 recorded presentation issues are addressed. CRM fields, financial calculations, scheduling, audit records, channel diagnostics and AI operating policies remain available.
 
 ## Verification
 
@@ -66,8 +68,8 @@ Checked populated and empty states, long Serbian names/text, eight detail/create
 
 Messenger scenarios passed: unread Website and WhatsApp rows, phone-only names, handoff complaint banner, UNKNOWN delivery kept distinct from safe retry, empty AI chat, long bounded history and older-page/latest navigation, optional context, search, native fullscreen photo with Escape/focus restoration, authenticated PDF download, synthetic photo upload and delivered Website reply, SHADOW edit/send/hide, takeover and resume. Actions used disposable isolated Preview conversations only; no real customer transport was invoked and no production order was created.
 
-34 targeted Node tests passed (14 admin UI/domain/validation and 20 existing transport/security/media checks); 10 isolated Preview integration assertions passed, including reply idempotency, bounded pagination and unchanged global/channel modes. Affected-file lint, typecheck and optimized production build passed. Schema/migrations are unchanged. The previous 200+ AI behavior suite was not rerun.
+35 targeted Node tests passed (15 admin UI/domain/validation and 20 existing transport/security/media checks); 10 isolated Preview integration assertions passed, including reply idempotency, bounded pagination and unchanged global/channel modes. Affected-file lint, typecheck and optimized production build passed. Schema/migrations are unchanged. The previous 200+ AI behavior suite was not rerun.
 
-The final change after the full viewport matrix is localized validation wording only, covered by a boundary regression check; its fresh Preview confirmation is recorded with the release evidence. Physical iOS Safari/Android Chrome soft-keyboard behavior remains unverified: Chrome viewport emulation verifies layout and composer sizing, not a physical keyboard. The implementation accounts for dynamic viewport height, visualViewport and safe-area insets.
+The final changes after the full viewport matrix are localized validation wording and the older-history latest link, covered by boundary/navigation regression checks; fresh Preview confirmation is recorded with the release evidence. Physical iOS Safari/Android Chrome soft-keyboard behavior remains unverified: Chrome viewport emulation verifies layout and composer sizing, not a physical keyboard. The implementation accounts for dynamic viewport height, visualViewport and safe-area insets.
 
 Fixtures and their media must be removed before release. Immutable append-only audit entries for QA actions are intentionally preserved; cleanup never disables the audit trigger or changes AI modes.

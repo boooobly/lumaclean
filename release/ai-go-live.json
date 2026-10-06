@@ -1,5 +1,5 @@
 {
-  "fingerprint": "a5713ac1b0753057d6a934c53e88dce396fb6fd005fcb7fb9b2ce415a8462bb0",
+  "fingerprint": "f63d5700de305b22bd5e6e94748bb16f89afe99ee58fd375d1404eb2d156f70e",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -19,7 +19,7 @@
     "src/app/admin/(workspace)/leads/page.tsx": "0752ae15d19c582462231cc33f23ec6b5093f38e776ebc38fdfb18e532d6b8a6",
     "src/app/admin/(workspace)/leads/[id]/page.tsx": "a50c099b9c8683af21c307f69a0c7f132173a7a749e71ef2f5ceccc543c43ba3",
     "src/app/admin/(workspace)/messages/page.tsx": "7ce1f4b9df0dc2f2c7e6e21cf0588c940dc0920cf6a075ef8d25ac98d3e7cdd0",
-    "src/app/admin/(workspace)/messages/[id]/page.tsx": "b64075ebdb2a81ca7c640ef192eb66b3068aeea80df8598c9676d0f361115014",
+    "src/app/admin/(workspace)/messages/[id]/page.tsx": "368b04a1791b8ed2f01bb62783492e1de20c58625f47d8a0d7ab8ea3cd5122c0",
     "src/app/admin/(workspace)/not-found.tsx": "971bad36b51f37fae41226b08bb0e7bbd5142d4f1ef332858559c9b5fbc8da4b",
     "src/app/admin/(workspace)/orders/loading.tsx": "7491f2b6c337b6e8bde04e7201d12f62e20befd1adbf1bd692130c9584d32a2e",
     "src/app/admin/(workspace)/orders/new/page.tsx": "5d63bab216a6381d54073900ba689d17af8657cbb0a33286c2a60b99c7d62b7d",
@@ -101,7 +101,7 @@
     "src/components/admin/logistics-status.tsx": "1f2484c5ed3d45565d71df169e7056caef27750a6e260af2748db85b94ecc2b5",
     "src/components/admin/messenger-bubble.tsx": "abfb5b776f4e19c968b7e983f133c384b4b4aab5b736fa66e917786c1bf92532",
     "src/components/admin/messenger-controls.tsx": "687d2345d2e0a515386d9c170f3b556c281c6e8a11abaa94d6a2d2b4e8f68cc5",
-    "src/components/admin/messenger-history.tsx": "fc648f37adba86dfb84d488ecc83c5c9de2fbb476fbe0cfccb1f343f6364768b",
+    "src/components/admin/messenger-history.tsx": "0fbe3961e4e6a413c89f2753461ec414e306143a907edb701230b8be74dfa4ad",
     "src/components/admin/mobile-bottom-nav.tsx": "11f66d85b897cb698d0cc3509319b34941ef2675bcc1109bd129e24fb8e33b03",
     "src/components/admin/navigation.tsx": "e394a654d5893a727a9549518b04a584ceb199d945606464ed15471a901af7ad",
     "src/components/admin/order-economics.tsx": "e3b3fbb3a94a482d4c0e2946a3ab6dbd0689514991a40b0491f23e1801db82db",
@@ -269,17 +269,17 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 34,
+  "tests": 35,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-06T19:12:05.103Z",
+  "checkedAt": "2026-10-06T19:15:43.290Z",
   "suites": [
-    "14 admin messenger/component/domain and CRM validation checks",
+    "15 admin messenger/component/domain, history navigation and CRM validation checks",
     "20 customer transport/security/media unit checks"
   ],
-  "verificationScope": "Admin UX presentation and validation wording only; rules and modes unchanged. 34 targeted Node checks, affected lint, typecheck and production build passed. 10 isolated Preview integration assertions passed. Protected Preview all nine pages at six viewports and messenger interaction/media/form QA passed; final validation wording follow-up awaits Preview confirmation. Prior AI evidence retained as baseline and not claimed as rerun.",
+  "verificationScope": "Admin UX presentation, older-history navigation and validation wording only; rules and modes unchanged. 35 targeted Node checks, affected lint, typecheck and production build passed. 10 isolated Preview integration assertions passed. Protected Preview all nine pages at six viewports and messenger interaction/media/form QA passed; final validation/navigation follow-up awaits Preview confirmation. Prior AI evidence retained as baseline and not claimed as rerun.",
   "previousVerification": {
     "fingerprint": "6f8655ab88310b09545d23344b14dfcdd9a35ecc6b9cfbafd3683c9a9bb8f722",
     "tests": 48,

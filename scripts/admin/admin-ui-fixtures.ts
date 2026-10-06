@@ -31,7 +31,21 @@ async function main() { try {
   });
   const settings=await db.businessSettings.findUniqueOrThrow({where:{id:'default'}});
   assert.equal(settings.aiAgentMode,m.baselineMode);assert.deepEqual(settings.aiChannelModes,m.channels);
-  console.log({cleaned:m.conversations.length+m.orders.length+m.clients.length+m.cleaners.length+m.leads.length,remaining:await db.conversation.count({where:{externalThreadId:{startsWith:m.prefix}}}),modesPreserved:true});
+  const remaining={
+   conversations:await db.conversation.count({where:{id:{in:m.conversations}}}),
+   messages:await db.message.count({where:{conversationId:{in:m.conversations}}}),
+   attachments:await db.chatAttachment.count({where:{conversationId:{in:m.conversations}}}),
+   jobs:await db.agentJob.count({where:{conversationId:{in:m.conversations}}}),
+   notifications:await db.notification.count({where:{OR:[{conversationId:{in:m.conversations}},{orderId:{in:m.orders}},{clientId:{in:m.clients}},{cleanerId:{in:m.cleaners}}]}}),
+   orders:await db.order.count({where:{id:{in:m.orders}}}),
+   clients:await db.client.count({where:{id:{in:m.clients}}}),
+   cleaners:await db.cleaner.count({where:{id:{in:m.cleaners}}}),
+   leads:await db.lead.count({where:{id:{in:m.leads}}}),
+   expenses:await db.expense.count({where:{orderId:{in:m.orders}}}),
+   payouts:await db.cleanerPayout.count({where:{orderId:{in:m.orders}}}),
+  };
+  assert(Object.values(remaining).every(count=>count===0),'Disposable Preview fixtures must be fully removed');
+  console.log({cleaned:m.conversations.length+m.orders.length+m.clients.length+m.cleaners.length+m.leads.length,remaining,modesPreserved:true,auditTrailPreserved:true});
  } else if(process.argv[2]==='check') {
   const m:Manifest=JSON.parse(readFileSync(path,'utf8')),owner=await db.user.findFirstOrThrow({where:{role:'ADMIN',active:true}}),id=m.conversations[3];
   await runInboxCommand(db,owner.id,{action:'takeover',id});assert.equal((await db.conversation.findUniqueOrThrow({where:{id}})).control,'HUMAN_CONTROL');
