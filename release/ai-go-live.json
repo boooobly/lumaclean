@@ -274,12 +274,12 @@
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-06T19:15:43.290Z",
+  "checkedAt": "2026-10-06T19:22:56.714Z",
   "suites": [
     "15 admin messenger/component/domain, history navigation and CRM validation checks",
     "20 customer transport/security/media unit checks"
   ],
-  "verificationScope": "Admin UX presentation, older-history navigation and validation wording only; rules and modes unchanged. 35 targeted Node checks, affected lint, typecheck and production build passed. 10 isolated Preview integration assertions passed. Protected Preview all nine pages at six viewports and messenger interaction/media/form QA passed; final validation/navigation follow-up awaits Preview confirmation. Prior AI evidence retained as baseline and not claimed as rerun.",
+  "verificationScope": "Admin UX presentation, older-history navigation and validation wording only; rules and modes unchanged. 35 targeted Node checks, affected lint, typecheck and optimized production build passed. 10 isolated Preview integration assertions passed. Protected Preview all nine pages at six viewports and messenger interaction/media/form QA passed; localized validation and older-history latest navigation confirmed in final authenticated Preview. Disposable Preview entities/media cleaned with zero remaining records and unchanged modes. Prior AI evidence retained as baseline and not claimed as rerun.",
   "previousVerification": {
     "fingerprint": "6f8655ab88310b09545d23344b14dfcdd9a35ecc6b9cfbafd3683c9a9bb8f722",
     "tests": 48,
@@ -302,5 +302,36 @@
     "checks": 10,
     "passed": true,
     "scope": "Disposable Preview conversations only: takeover/reply idempotency/resume; bounded 200-message pagination; customer-visible stream; unread/handoff/unknown-delivery filters. Global modes unchanged."
+  },
+  "previewVisual": {
+    "deploymentId": "dpl_7RFpHTNvvwoVSFP75U5AEtWQcfbp",
+    "sourceSha": "f044746f4af14ecd5cdce1e973660f10d505ce4f",
+    "pageViewportChecks": 54,
+    "unintendedHorizontalOverflow": 0,
+    "viewports": [
+      "1440x900",
+      "1024x768",
+      "768x1024",
+      "430x932",
+      "390x844",
+      "360x800"
+    ],
+    "finalFollowup": {
+      "deploymentId": "dpl_7uTqZcgUZJTi5hKpkV9ujdWS4sKu",
+      "sourceSha": "7aef146971c4ecd25487dda1a23dd7b257608376",
+      "checks": [
+        "localized numeric error and disclosure expansion",
+        "older-history floating latest navigation"
+      ],
+      "passed": true
+    },
+    "physicalMobileKeyboardTested": false
+  },
+  "previewCleanup": {
+    "removedPrimaryEntities": 11,
+    "remainingOwnedRecords": 0,
+    "privateMediaRemoved": true,
+    "modesPreserved": true,
+    "immutableAuditTrailPreserved": true
   }
 }
