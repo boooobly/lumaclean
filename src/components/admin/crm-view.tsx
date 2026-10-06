@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ledgerRows } from "./responsive-ledger";
+import { DisclosureSection } from "./disclosure";
 import {
   leadLabels,
   orderLabels,
@@ -47,7 +49,7 @@ export function CrmHeader({
           </Link>
         )}
       </div>
-      {subtitle && <p className="admin-intro">{subtitle}</p>}
+      {subtitle && <details className="admin-header-help"><summary>Что это?</summary><p className="admin-intro">{subtitle}</p></details>}
     </header>
   );
 }
@@ -63,10 +65,12 @@ export function Ledger({
   headers,
   children,
   empty,
+  secondary = [],
 }: {
   headers: string[];
   children: ReactNode;
   empty?: string;
+  secondary?: string[];
 }) {
   return empty ? (
     <div className="crm-empty">
@@ -78,7 +82,7 @@ export function Ledger({
       className="crm-ledger-scroll"
       tabIndex={0}
       role="region"
-      aria-label="Реестр: прокрутка таблицы"
+      aria-label="Реестр"
     >
       <table className="crm-ledger">
         <thead>
@@ -90,7 +94,7 @@ export function Ledger({
             ))}
           </tr>
         </thead>
-        <tbody>{children}</tbody>
+        <tbody>{ledgerRows(children, headers, secondary)}</tbody>
       </table>
     </div>
   );
@@ -103,7 +107,7 @@ export function Filters({
   query: Query;
 }) {
   return (
-    <form className="crm-filters" method="GET">
+    <DisclosureSection title="Поиск и фильтры" open={Object.values(query).some(value => Boolean(value))} className="admin-filter-disclosure"><form className="crm-filters" method="GET">
       <label>
         Поиск
         <input
@@ -206,7 +210,7 @@ export function Filters({
           Сбросить
         </Link>
       </div>
-    </form>
+    </form></DisclosureSection>
   );
 }
 export function Pager({
@@ -243,7 +247,9 @@ export function Pager({
     </nav>
   );
 }
-export function Facts({ items }: { items: [string, ReactNode][] }) {
+export function Facts({ items, secondary = [], technical = [] }: { items: [string, ReactNode][]; secondary?: string[]; technical?: string[] }) {
+  const list = (rows: [string, ReactNode][]) => <dl className="crm-facts">{rows.map(([label,value]) => <div key={label}><dt>{label}</dt><dd>{value ?? "—"}</dd></div>)}</dl>;
+  if (secondary.length || technical.length) return <>{list(items.filter(([label])=> !secondary.includes(label) && !technical.includes(label)))}{items.some(([label])=>secondary.includes(label)) && <DisclosureSection title="Подробнее">{list(items.filter(([label])=>secondary.includes(label)))}</DisclosureSection>}{items.some(([label])=>technical.includes(label)) && <DisclosureSection title="Технические детали">{list(items.filter(([label])=>technical.includes(label)))}</DisclosureSection>}</>;
   return (
     <dl className="crm-facts">
       {items.map(([label, value]) => (
@@ -290,8 +296,7 @@ const actionLabels: Record<string, string> = {
 export async function History({ type, id }: { type: string; id: string }) {
   const rows = await getHistory(type, id);
   return (
-    <section className="crm-section">
-      <h2>История</h2>
+    <DisclosureSection title="История" className="crm-history-disclosure">
       {!rows.length ? (
         <p className="crm-hint">Изменений пока нет.</p>
       ) : (
@@ -360,6 +365,6 @@ export async function History({ type, id }: { type: string; id: string }) {
           Показаны последние 50 событий. Полный аудит сохранён в БД.
         </p>
       )}
-    </section>
+    </DisclosureSection>
   );
 }

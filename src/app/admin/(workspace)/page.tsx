@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { DisclosureSection } from "@/components/admin/disclosure";
+import { getDatabase } from "@/lib/database/client";
 import { getCalendarData } from "@/lib/services/scheduling-queries";
 import { wallLabel } from "@/lib/domain/scheduling-types";
 import { getDashboard } from "@/lib/services/admin-dashboard";
@@ -12,6 +14,7 @@ export default async function DashboardPage() {
     getDashboard(),
     getCalendarData({ mode: "day" }),
   ]);
+  const upcoming = await getDatabase().order.findMany({where:{scheduledStart:{gte:new Date()},status:{notIn:["CANCELLED","NO_SHOW","COMPLETED"]}},orderBy:{scheduledStart:"asc"},take:5,select:{id:true,scheduledStart:true,client:{select:{name:true}},service:{select:{name:true}}}});
   const attention = schedule.orders.filter(
     (o) =>
       o.issues.length &&
@@ -32,7 +35,7 @@ export default async function DashboardPage() {
     month: "long",
   }).format(data.now);
   return (
-    <>
+    <div className="admin-dashboard">
       <header className="admin-page-header">
         <div className="admin-eyebrow">01 / Обзор работы</div>
         <div className="admin-heading-row">
@@ -157,7 +160,7 @@ export default async function DashboardPage() {
           </Link>
         </section>
       </div>
-      <section className="crm-section">
+      <section className="crm-section admin-dashboard-attention">
         <div className="admin-section-heading">
           <h2>Требует внимания · сегодня</h2>
           <Link href="/admin/calendar?mode=day">Проверить день →</Link>
@@ -211,8 +214,9 @@ export default async function DashboardPage() {
           </p>
         )}
       </section>
-      <AIInboxSummary />
-      <section className="admin-next">
+      <div className="admin-dashboard-inbox"><AIInboxSummary /></div>
+      {upcoming.length > 0 && <section className="crm-section admin-dashboard-upcoming"><div className="admin-section-heading"><h2>Ближайшие заказы</h2><Link href="/admin/orders">Все заказы →</Link></div><ul className="crm-linked-list">{upcoming.map(order=><li key={order.id}><Link href={`/admin/orders/${order.id}`}>{date(order.scheduledStart)} · {order.client.name}<small>{order.service.name}</small></Link></li>)}</ul></section>}
+      <DisclosureSection title="Рабочий порядок"><section className="admin-next">
         <span className="admin-eyebrow">Рабочий порядок</span>
         <h2>
           Сначала договориться.
@@ -228,10 +232,12 @@ export default async function DashboardPage() {
           Реестр заказов <span aria-hidden="true">↗</span>
         </Link>
       </section>
+      </DisclosureSection>
       <div className="admin-footnote">
         LumaClean · Внутреннее пространство
         <span>Показатели из базы данных</span>
       </div>
-    </>
+    </div>
   );
 }
+

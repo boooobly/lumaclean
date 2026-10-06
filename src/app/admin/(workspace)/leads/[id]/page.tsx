@@ -32,8 +32,8 @@ export default async function LeadPage({
   return (
     <>
       <CrmHeader
-        title={lead.reference ?? "Заявка"}
-        subtitle={lead.name}
+        title={lead.name}
+        subtitle={lead.reference ?? "Заявка"}
         back="/admin/leads"
         action={
           !["CONVERTED", "LOST"].includes(lead.status)
@@ -46,7 +46,7 @@ export default async function LeadPage({
           <h2>
             Исходные данные <Chip status={lead.status} />
           </h2>
-          <Facts
+          <Facts secondary={["Язык", "Канал", "Создана"]} technical={["Нормализованный телефон", "Источник", "Страница входа"]}
             items={[
               ["Имя", lead.name],
               [

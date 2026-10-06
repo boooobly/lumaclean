@@ -2,6 +2,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useId,
   useRef,
   useState,
@@ -45,6 +46,17 @@ export function Field({
   const form = useContext(FormContext),
     id = `${form.id}-${name}`,
     errors = form.errors.filter((e) => e.field === name);
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const invalid = errors.length > 0;
+  useEffect(() => {
+    if (!invalid) return;
+    let parent = fieldRef.current?.parentElement;
+    while (parent) {
+      if (parent instanceof HTMLDetailsElement) parent.open = true;
+      parent = parent.parentElement;
+    }
+    fieldRef.current?.scrollIntoView({ block: "nearest" });
+  }, [invalid]);
   const props = {
     id,
     name,
@@ -54,7 +66,7 @@ export function Field({
     "aria-describedby": errors.length ? `${id}-error` : undefined,
   };
   return (
-    <div className="crm-field">
+    <div ref={fieldRef} className="crm-field">
       <label htmlFor={id}>
         {label}
         {required && <span aria-hidden="true"> *</span>}

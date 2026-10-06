@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Golos_Text, Onest } from "next/font/google";
 import "../styles/tokens.css";
 import "./admin.css";
+import "./operational.css";
 
 const displayFont = Onest({
   subsets: ["latin", "cyrillic"],

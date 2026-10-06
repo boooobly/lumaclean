@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { DisclosureSection } from "./disclosure";
 import {
   useEffect,
   useRef,
@@ -318,7 +319,7 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
           ))}
         </nav>
       </div>
-      <form className="calendar-filters" action="/admin/calendar">
+      <DisclosureSection title="Фильтры и вид"><nav className="calendar-mobile-views" aria-label="Вид календаря на мобильном">{([["day","День"],["week","Неделя"],["month","Месяц"]] as const).map(([mode,label])=><Link key={mode} href={url(data.date,mode)}>{label}</Link>)}</nav><form className="calendar-filters" action="/admin/calendar">
         <input type="hidden" name="mode" value={data.mode} />
         <label>
           Дата
@@ -350,6 +351,7 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
         операционный буфер по умолчанию {data.travelBuffer} мин. Время можно
         изменить в панели заказа.
       </p>
+      </DisclosureSection>
       {pending && <p role="status">Проверяем и сохраняем перенос…</p>}
       {error && (
         <p role="alert" className="crm-form-error">
@@ -578,3 +580,4 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
     </div>
   );
 }
+

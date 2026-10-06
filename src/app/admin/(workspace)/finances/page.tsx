@@ -1,5 +1,6 @@
+import { DisclosureSection } from "@/components/admin/disclosure";
 import Link from "next/link";
-import { CrmHeader, Facts, money } from "@/components/admin/crm-view";
+import { CrmHeader, Facts, money, Ledger } from "@/components/admin/crm-view";
 import { Field } from "@/components/admin/crm-form";
 import { ExpenseFields, FinanceForm } from "@/components/admin/finance-forms";
 import { getFinances } from "@/lib/services/finance-queries";
@@ -47,7 +48,22 @@ export default async function Finances({
         subtitle={`${data.period.fromLabel} — ${data.period.toLabel} · RSD · Europe/Belgrade`}
         action={{ href: "/admin/settings/import", label: "Импорт истории" }}
       />
-      <form className="finance-period" method="get">
+      <div className="finance-metrics">
+        {[
+          ["Выручка", money(data.revenue)],
+          ["Расходы бизнеса", money(data.expenses)],
+          ["Начислено клинерам", money(data.accrued)],
+          ["Операционная прибыль", money(data.profit)],
+          ["Завершённых заказов", data.orderCount],
+          ["Средний чек", money(data.average)],
+        ].map(([label, value]) => (
+          <div key={String(label)}>
+            <span>{label}</span>
+            <strong>{value}</strong>
+          </div>
+        ))}
+      </div>
+      <DisclosureSection title="Фильтры периода"><form className="finance-period" method="get">
         <label>
           Период
           <select name="period" defaultValue={input.period ?? "month"}>
@@ -74,27 +90,12 @@ export default async function Finances({
           />
         </label>
         <button className="crm-button">Показать</button>
-      </form>
-      <div className="finance-metrics">
-        {[
-          ["Выручка", money(data.revenue)],
-          ["Расходы бизнеса", money(data.expenses)],
-          ["Начислено клинерам", money(data.accrued)],
-          ["Операционная прибыль", money(data.profit)],
-          ["Завершённых заказов", data.orderCount],
-          ["Средний чек", money(data.average)],
-        ].map(([label, value]) => (
-          <div key={String(label)}>
-            <span>{label}</span>
-            <strong>{value}</strong>
-          </div>
-        ))}
-      </div>
-      <p className="crm-hint">
+      </form></DisclosureSection>
+      <DisclosureSection title="Как считаются показатели"><p className="crm-hint">
         Выручка и начисления относятся к дате завершения заказа, расходы — к
         дате операции. Черновики и отменённые заказы не входят в выручку.
         Связанный Expense выплаты повторно не вычитается.
-      </p>
+      </p></DisclosureSection>
       {data.missing > 0 && (
         <aside className="schedule-issues">
           {data.missing} завершённых заказов без полного начисления. Процент
@@ -126,17 +127,7 @@ export default async function Finances({
           </FinanceForm>
         </details>
         {data.expenseRows.length ? (
-          <div className="admin-table-shell">
-            <table className="crm-ledger">
-              <thead>
-                <tr>
-                  <th>Дата / категория</th>
-                  <th>Описание / заказ</th>
-                  <th>Сумма</th>
-                  <th>Действия</th>
-                </tr>
-              </thead>
-              <tbody>
+          <Ledger headers={["Дата / категория", "Описание / заказ", "Сумма", "Действия"]}>
                 {data.expenseRows.map((e) => (
                   <tr key={e.id}>
                     <td>
@@ -183,9 +174,7 @@ export default async function Finances({
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </Ledger>
         ) : (
           <p className="crm-hint">Расходов за этот период нет.</p>
         )}
@@ -199,18 +188,7 @@ export default async function Finances({
           Снимок процента и базы сохраняется при завершении заказа.
         </p>
         {data.payouts.length ? (
-          <div className="admin-table-shell">
-            <table className="crm-ledger">
-              <thead>
-                <tr>
-                  <th>Клинер / заказ</th>
-                  <th>Цена / база / процент</th>
-                  <th>Начислено</th>
-                  <th>Статус / paidAt</th>
-                  <th>Действия</th>
-                </tr>
-              </thead>
-              <tbody>
+          <Ledger headers={["Клинер / заказ", "Цена / база / процент", "Начислено", "Статус / paidAt", "Действия"]}>
                 {data.payouts.map((p) => (
                   <tr key={p.id}>
                     <td>
@@ -305,9 +283,7 @@ export default async function Finances({
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </Ledger>
         ) : (
           <p className="crm-hint">
             Начислений пока нет. Задайте проценты в настройках или карточках
@@ -403,3 +379,4 @@ export default async function Finances({
     </>
   );
 }
+
