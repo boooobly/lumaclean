@@ -514,7 +514,20 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
             </div>
             <h2>{dayLabel(selected, true)}</h2>
             {dayOrders(selected).length ? (
-              dayOrders(selected).map((o) => card(o))
+              dayOrders(selected).map((o) => (
+                <article key={o.id} className="calendar-agenda-item">
+                  <Link className={"calendar-event calendar-status-" + o.status.toLowerCase()} href={"/admin/orders/" + o.id}>
+                    <time>{o.start && minuteLabel(businessMinute(o.start))}{o.end && "–" + minuteLabel(businessMinute(o.end))}</time>
+                    <strong>{o.client}</strong>
+                    <span>{o.service} · {o.duration === null ? "Длительность не задана" : o.duration + " мин"}</span>
+                    <span>{o.cleaners.map(c => c.name).join(", ") || "Команда не назначена"} · {o.cleaners.length}/{o.requiredCleaners}</span>
+                    <span>{o.address}</span>
+                    <small>{orderLabels[o.status]}{o.issues.length > 0 && " · Требует внимания"}</small>
+                    {o.logistics?.filter(l => l.conflict || l.minutes === null).map(l => <small key={l.cleaner}>{l.cleaner}: {l.conflict ? "не успевает к началу" : routeLabels[l.status]}</small>)}
+                  </Link>
+                  {!closedStatuses.includes(o.status) && <button type="button" className="messenger-takeover" onClick={() => setEditing({order:o})}>Изменить время / команду</button>}
+                </article>
+              ))
             ) : (
               <p className="crm-hint">Размещённых уборок нет.</p>
             )}

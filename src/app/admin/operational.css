@@ -176,19 +176,6 @@
   .admin-section-heading h2 { font-size: 19px; }
   .admin-section-heading a { min-height: 44px; display: inline-flex; align-items: center; }
   .crm-section { margin-bottom: 16px; }
-  .crm-ledger-scroll, .admin-table-shell { overflow: visible; border: 0; }
-  .crm-ledger { display: block; min-width: 0; font-size: 14px; }
-  .crm-ledger thead { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); }
-  .crm-ledger tbody { display: block; }
-  .crm-ledger tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; padding: 16px 0; border-block-end: 1px solid var(--lc-line); }
-  .crm-ledger td { display: block; min-width: 0; border: 0; padding: 0; overflow-wrap: anywhere; }
-  .crm-ledger td::before { display: block; content: attr(data-label); font-size: 10px; color: var(--lc-ink-soft); margin-bottom: 4px; }
-  .crm-ledger td:has(>details)::before { display: none; }
-  .crm-ledger td:first-child { grid-column: 1 / -1; font-size: 16px; }
-  .crm-ledger td:first-child::before { display: none; }
-  .crm-ledger td a { display: inline-flex; align-items: center; min-height: 44px; }
-  .crm-ledger td small { margin-top: 0; }
-  .crm-ledger .crm-form-compact { display: inline-block; margin-right: 8px; }
   .crm-fields-grid, .crm-addresses, .crm-extras { grid-template-columns: 1fr; }
   .lc-admin :is(.crm-field, .crm-picker, .crm-filters, .finance-period) :is(input, select, textarea) { min-height: 44px; font-size: 16px; }
   .crm-form:not(.crm-form-compact) > .crm-form-actions { bottom: calc(var(--admin-nav-height) + env(safe-area-inset-bottom)); padding: 10px 0; border-top: 1px solid var(--lc-line); background: var(--lc-paper); }
@@ -235,3 +222,23 @@
   .messenger-bubble p { font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .lc-admin *, .lc-admin *::before, .lc-admin *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
+
+@media (max-width: 1200px) {
+  .crm-ledger-scroll, .admin-table-shell { overflow: visible; border: 0; }
+  .crm-ledger { display: block; min-width: 0; font-size: 14px; }
+  .crm-ledger thead { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); }
+  .crm-ledger tbody { display: block; }
+  .crm-ledger tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; padding: 16px 0; border-block-end: 1px solid var(--lc-line); }
+  .crm-ledger td { display: block; min-width: 0; border: 0; padding: 0; overflow-wrap: anywhere; }
+  .crm-ledger td::before { display: block; content: attr(data-label); font-size: 10px; color: var(--lc-ink-soft); margin-bottom: 4px; }
+  .crm-ledger td:has(>details)::before { display: none; }
+  .crm-ledger td:first-child { grid-column: 1 / -1; font-size: 16px; }
+  .crm-ledger td:first-child::before { display: none; }
+  .crm-ledger td a { display: inline-flex; align-items: center; min-height: 44px; }
+  .crm-ledger td small { margin-top: 0; }
+  .crm-ledger .crm-form-compact { display: inline-block; margin-right: 8px; }
+}
+.calendar-agenda-item { margin: 12px 0 20px; }
+.calendar-agenda-item > a.calendar-event { text-decoration: none; }
+.calendar-agenda-item > a.calendar-event strong { white-space: normal; overflow: visible; }
+.finance-current-period { margin: 0 0 14px; }

@@ -48,6 +48,7 @@ export default async function Finances({
         subtitle={`${data.period.fromLabel} — ${data.period.toLabel} · RSD · Europe/Belgrade`}
         action={{ href: "/admin/settings/import", label: "Импорт истории" }}
       />
+      <p className="crm-hint finance-current-period">{data.period.fromLabel} — {data.period.toLabel} · RSD</p>
       <div className="finance-metrics">
         {[
           ["Выручка", money(data.revenue)],
