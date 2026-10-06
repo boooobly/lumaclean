@@ -27,6 +27,7 @@ export default async function ClientsPage({
       />
       <Filters kind="clients" query={query} />
       <Ledger
+        secondary={["Создан", "Выручка / завершённые"]}
         headers={[
           "Клиент",
           "Телефон / канал",

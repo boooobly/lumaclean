@@ -1,3 +1,4 @@
+import { DisclosureSection } from "@/components/admin/disclosure";
 import {AgentBehaviorSettings} from "@/components/admin/agent-behavior-settings";
 import {CustomerChannels} from '@/components/admin/customer-channels';
 import {customerChannelSummary} from '@/lib/agent/channel-diagnostics';
@@ -31,13 +32,8 @@ export default async function Settings() {
         title="Настройки"
         subtitle="Правила длительности и условий выплат."
       />
-      <AILaunch checks={report.checks} summary={report.summary} checkedAt={report.checkedAt} sample={report.shadow} settings={{mode:ai.aiAgentMode,channels:ai.aiChannelModes as Record<string,string>,services:ai.aiAllowedServices,maxMessages:ai.aiMaxAnonymousMessages,maxModelCalls:ai.aiMaxModelCalls,maxToolSteps:ai.aiMaxToolSteps,maxConversationCost:Number(ai.aiMaxConversationCostUsd),dailyWarning:Number(ai.aiDailyCostWarningUsd)}}/><AgentModeControl mode={ai.aiAgentMode} enabled={process.env.AI_AGENT_ENABLED === "true"} canActivate={report.canActivate} blockers={report.blockers.map(c=>`${c.label}: ${c.detail}`)} />
-      <AgentBehaviorSettings cutoff={ai.sameDayBookingCutoffMinute} departure={ai.latestCleanerDepartureMinute} version={ai.behaviorSettingsVersion}/>
-      <CustomerChannels channels={channels}/>
-      <LogisticsStatus status={logistics} busmaps={busmaps} routingStatus={report.routingStatus}/>
-      <StarterDuration activeServices={data.services.filter(s=>data.rules.some(r=>r.serviceId===s.id&&r.active)).map(s=>s.code)}/>
-      <LiveBookingControl today={new Date().toISOString().slice(0,10)} testDate={new Date(new Date().getTime()+7*86400000).toISOString().slice(0,10)} preview={process.env.VERCEL_ENV==='preview'} canRun={report.canRunLiveTest} report={latestTest?.report as LiveTestReport|null} previewUrl={process.env.AI_LIVE_TEST_PREVIEW_URL??null}/>
-      <section className="crm-section">
+      <p className="settings-status" role="status">AI · {ai.aiAgentMode} · {report.canActivate ? "Диагностика готова" : "Нужна проверка диагностики"}. <a href="#diagnostics">Подробнее</a></p>
+      <DisclosureSection title="Бизнес" open><section className="crm-section">
         <h2>Основные правила</h2>
         <dl className="crm-facts">
           <div>
@@ -53,8 +49,11 @@ export default async function Settings() {
             <dd>{data.travelBufferMinutes} минут</dd>
           </div>
         </dl>
-      </section>
-      <section className="crm-section">
+      </section></DisclosureSection>
+      <DisclosureSection title="AI"><AgentModeControl mode={ai.aiAgentMode} enabled={process.env.AI_AGENT_ENABLED === "true"} canActivate={report.canActivate} blockers={report.blockers.map(c=>`${c.label}: ${c.detail}`)} /></DisclosureSection>
+      <DisclosureSection title="Каналы"><CustomerChannels channels={channels}/></DisclosureSection>
+      <DisclosureSection title="Расписание"><AgentBehaviorSettings cutoff={ai.sameDayBookingCutoffMinute} departure={ai.latestCleanerDepartureMinute} version={ai.behaviorSettingsVersion}/><DurationRulesEditor rules={data.rules} services={data.services} /></DisclosureSection>
+      <DisclosureSection title="Оплата клинеров"><section className="crm-section">
         <h2>Выплаты клинерам</h2>
         <p>
           База — финальная цена заказа до общих расходов бизнеса. Процент
@@ -81,9 +80,10 @@ export default async function Settings() {
           процента действует на будущие завершения; готовые выплаты сохраняют
           снимок.
         </p>
-      </section>
-      <DurationRulesEditor rules={data.rules} services={data.services} />
-      <section className="crm-section">
+      </section></DisclosureSection>
+      <DisclosureSection title="Диагностика" id="diagnostics"><AILaunch checks={report.checks} summary={report.summary} checkedAt={report.checkedAt} sample={report.shadow} settings={{mode:ai.aiAgentMode,channels:ai.aiChannelModes as Record<string,string>,services:ai.aiAllowedServices,maxMessages:ai.aiMaxAnonymousMessages,maxModelCalls:ai.aiMaxModelCalls,maxToolSteps:ai.aiMaxToolSteps,maxConversationCost:Number(ai.aiMaxConversationCostUsd),dailyWarning:Number(ai.aiDailyCostWarningUsd)}}/><LogisticsStatus status={logistics} busmaps={busmaps} routingStatus={report.routingStatus}/></DisclosureSection>
+      <DisclosureSection title="Продвинутые настройки"><StarterDuration activeServices={data.services.filter(s=>data.rules.some(r=>r.serviceId===s.id&&r.active)).map(s=>s.code)}/>
+      <LiveBookingControl today={new Date().toISOString().slice(0,10)} testDate={new Date(new Date().getTime()+7*86400000).toISOString().slice(0,10)} preview={process.env.VERCEL_ENV==='preview'} canRun={report.canRunLiveTest} report={latestTest?.report as LiveTestReport|null} previewUrl={process.env.AI_LIVE_TEST_PREVIEW_URL??null}/><section className="crm-section">
         <h2>Импорт данных</h2>
         <p>
           Legacy LumaClean workbook: сначала preview, затем явное применение
@@ -92,7 +92,8 @@ export default async function Settings() {
         <Link className="crm-button" href="/admin/settings/import">
           Открыть импорт →
         </Link>
-      </section>
+      </section></DisclosureSection>
     </>
   );
 }
+

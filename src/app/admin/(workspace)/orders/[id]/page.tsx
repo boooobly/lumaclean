@@ -48,7 +48,7 @@ export default async function OrderPage({
           <h2>
             Уборка <Chip status={o.status} />
           </h2>
-          <Facts
+          <Facts secondary={["Загрязнение", "Срочность", "Ручная длительность", "Причина ручной длительности", "Режим времени", "Завершён"]} technical={["Версия расчёта", "Происхождение"]}
             items={[
               ["Услуга", o.service.name],
               ["Площадь", `${o.area} м²`],

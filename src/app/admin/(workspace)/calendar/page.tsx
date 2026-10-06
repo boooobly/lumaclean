@@ -1,3 +1,4 @@
+import { DisclosureSection } from "@/components/admin/disclosure";
 import {
   getCalendarData,
   calendarQuery,
@@ -35,11 +36,12 @@ export default async function CalendarPage({
         key={createHash("sha256").update(JSON.stringify(data)).digest("hex")}
         initial={data}
       />
-      <RoutingWorkspace
+      <DisclosureSection title="Логистика дня"><RoutingWorkspace
         key={data.date + data.cleanerId}
         date={data.date}
         cleanerId={data.cleanerId || undefined}
-      />
+      /></DisclosureSection>
     </>
   );
 }
+

@@ -27,6 +27,7 @@ export default async function OrdersPage({
       />
       <Filters kind="orders" query={query} />
       <Ledger
+        secondary={["Длительность"]}
         headers={[
           "Заказ / создан",
           "Клиент / адрес",

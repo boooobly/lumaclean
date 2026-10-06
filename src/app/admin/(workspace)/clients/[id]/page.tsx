@@ -33,7 +33,7 @@ export default async function ClientPage({
       <div className="crm-detail-grid">
         <section className="crm-section">
           <h2>Контакты и условия</h2>
-          <Facts
+          <Facts secondary={["Telegram", "WhatsApp", "Viber", "Предпочитаемый канал", "Индивидуальные условия", "Заметки"]} technical={["Нормализованный"]}
             items={[
               [
                 "Телефон",

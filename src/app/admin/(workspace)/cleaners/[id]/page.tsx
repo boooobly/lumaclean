@@ -1,3 +1,4 @@
+import {DisclosureSection} from "@/components/admin/disclosure";
 import {cleanerReadiness} from "@/lib/agent/readiness";
 import Link from "next/link";
 import { getCleaner } from "@/lib/services/scheduling-queries";
@@ -34,8 +35,8 @@ export default async function CleanerDetail({
       />
       <div className="crm-detail-grid">
         <section className="crm-section">
-          <h2>Контакты и условия</h2><p>Готовность AI: {readiness.ready?"Готов":"Требует настройки"}. Часы: {readiness.hours?"✓":"нет"}; старт: {readiness.address?"✓":"нет"}; координаты: {readiness.coordinates?"✓":"нет"}; active: {readiness.active?"✓":"нет"}; языки: {readiness.languages?"✓":"не заданы"}; payout: {readiness.payout?"✓":"не задан (не блокирует запись)"}.</p>
-          <Facts
+          <h2>Контакты и условия</h2>{finance.percent === null && <p role="status">Процент выплаты не настроен</p>}<DisclosureSection title="Готовность AI"><p>Готовность AI: {readiness.ready?"Готов":"Требует настройки"}. Часы: {readiness.hours?"✓":"нет"}; старт: {readiness.address?"✓":"нет"}; координаты: {readiness.coordinates?"✓":"нет"}; active: {readiness.active?"✓":"нет"}; языки: {readiness.languages?"✓":"не заданы"}; payout: {readiness.payout?"✓":"не задан (не блокирует запись)"}.</p></DisclosureSection>
+          <Facts secondary={["Дополнительный контакт", "Транспорт", "Языки", "Навыки", "Рейтинг", "Заметки", "Создан"]}
             items={[
               ["Телефон", c.phone],
               ["Дополнительный контакт", c.additionalContact],
@@ -92,7 +93,7 @@ export default async function CleanerDetail({
           </p>
         </section>
       </div>
-      <AvailabilityEditor
+      <DisclosureSection title="Подробный график"><AvailabilityEditor
         key={
           c.updatedAt.toISOString() +
           c.availability.map((r) => r.updatedAt.toISOString()).join()
@@ -108,7 +109,7 @@ export default async function CleanerDetail({
           reason: r.reason,
         }))}
       />
-      <History type="Cleaner" id={id} />
+      </DisclosureSection><History type="Cleaner" id={id} />
       <section className="crm-section">
         <h2>Финансы клинера</h2>
         <Facts

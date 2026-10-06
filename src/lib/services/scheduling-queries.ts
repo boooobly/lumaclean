@@ -305,6 +305,7 @@ export async function listCleaners(
       Math.min(100000, Number.parseInt(query.page ?? "1") || 1),
     ),
     q = (query.q ?? "").slice(0, 100);
+  const today = Temporal.Now.plainDateISO('Europe/Belgrade').toString();
   const where: Prisma.CleanerWhereInput = {
     ...(query.active === "yes"
       ? { active: true }
@@ -320,7 +321,7 @@ export async function listCleaners(
         }
       : {}),
   };
-  const [count, rows] = await Promise.all([
+  const [count, rows, settings] = await Promise.all([
     db.cleaner.count({ where }),
     db.cleaner.findMany({
       where,
@@ -332,14 +333,16 @@ export async function listCleaners(
         name: true,
         phone: true,
         active: true,
-        homeAddress:true,homeLatitude:true,homeLongitude:true,homeCoordinatesConfirmed:true,availability:{select:{kind:true,startMinute:true,endMinute:true}},
+        homeAddress:true,homeLatitude:true,homeLongitude:true,homeCoordinatesConfirmed:true,availability:{where:{OR:[{kind:'WEEKLY'},{date:new Date(today)}]},select:{kind:true,startMinute:true,endMinute:true,weekday:true,date:true}},
+        assignments:{where:{removedAt:null,order:{scheduledStart:{gte:new Date()},status:{notIn:['COMPLETED','CANCELLED','NO_SHOW']}}},orderBy:{order:{scheduledStart:'asc'}},take:1,select:{order:{select:{id:true,scheduledStart:true,client:{select:{name:true}}}}}},
         defaultTravelMode: true,
         languages: true,
         payoutPercent: true,
       },
     }),
+    db.businessSettings.findUniqueOrThrow({where:{id:'default'},select:{defaultCleanerPayoutPercent:true}}),
   ]);
-  return { count, rows, page, size: 20 };
+  return { count, rows, page, size: 20, defaultPercent:settings.defaultCleanerPayoutPercent };
 }
 export async function getCleaner(id: string) {
   await requireAdmin();

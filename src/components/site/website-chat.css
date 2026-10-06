@@ -453,6 +453,13 @@
   display: flex;
 }
 .chat-lightbox {
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
   position: fixed;
   inset: 0;
   z-index: 150;
@@ -470,6 +477,8 @@
   object-fit: contain;
 }
 .chat-lightbox button {
+  min-width: 44px;
+  min-height: 44px;
   display: grid;
   place-items: center;
   border: 1px solid #ffffff60;

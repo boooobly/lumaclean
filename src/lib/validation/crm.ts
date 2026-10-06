@@ -18,7 +18,7 @@ const text = (max = 2000) =>
   z
     .string()
     .trim()
-    .max(max)
+    .max(max, `Не более ${max} символов`)
     .nullable()
     .optional()
     .transform((v) => v || null);
@@ -30,10 +30,10 @@ export const entityId = z
 const optionalId = entityId.nullable().optional();
 const number = (min: number, max: number) =>
   z
-    .number()
-    .finite()
-    .min(min)
-    .max(max)
+    .number({ error: "Введите число" })
+    .finite("Введите конечное число")
+    .min(min, `Значение должно быть не меньше ${min}`)
+    .max(max, `Значение должно быть не больше ${max}`)
     .multipleOf(0.01, "Допустимо не более двух знаков после запятой");
 export const extrasSchema = z
   .array(

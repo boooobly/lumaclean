@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import "./website-chat.css";
 export type ChatPhoto = { id: string; width: number; height: number };
 export function photoUrl(id: string, thumb = false) {
@@ -59,13 +60,16 @@ export function ChatPhotos({
   const words = locale === "en" ? ["Close", "Previous photo", "Next photo"] : locale === "sr-Latn" ? ["Zatvori", "Prethodna fotografija", "Sledeća fotografija"] : locale === "sr-Cyrl" ? ["Затвори", "Претходна фотографија", "Следећа фотографија"] : ["Закрыть", "Предыдущее фото", "Следующее фото"];
   const [selected, setSelected] = useState<number | null>(null),
     close = useRef<HTMLButtonElement>(null),
+    dialog = useRef<HTMLDialogElement>(null),
     restore = useRef<HTMLElement | null>(null);
+  const showing = selected !== null;
   useEffect(() => {
-    if (selected === null) return;
-    restore.current = document.activeElement as HTMLElement;
+    if (!showing) return;
+    const element = dialog.current;
+    if (element && !element.open) element.showModal();
     close.current?.focus();
-    return () => restore.current?.focus();
-  }, [selected]);
+    return () => { element?.close(); restore.current?.focus(); };
+  }, [showing]);
   return (
     <>
       <div className="chat-photo-grid">
@@ -74,9 +78,10 @@ export function ChatPhotos({
             key={p.id}
             type="button"
             aria-label={`${label} ${i + 1}`}
-            onClick={() => setSelected(i)}
+            onClick={(e) => { restore.current = e.currentTarget; setSelected(i); }}
           >
-            <img
+            <Image
+              unoptimized
               loading="lazy"
               src={photoUrl(p.id, true)}
               width={p.width}
@@ -87,12 +92,12 @@ export function ChatPhotos({
         ))}
       </div>
       {selected !== null && (
-        <div
+        <dialog
+          ref={dialog}
           className="chat-lightbox"
-          role="dialog"
-          aria-modal="true"
           aria-label={label}
-          onClick={() => setSelected(null)}
+          onCancel={(e) => { e.preventDefault(); setSelected(null); }}
+          onClick={(e) => { if (e.target === e.currentTarget) setSelected(null); }}
           onKeyDown={(e) => {
             e.stopPropagation();
             if (e.key === "Escape") setSelected(null);
@@ -100,10 +105,6 @@ export function ChatPhotos({
               setSelected((selected + 1) % photos.length);
             if (e.key === "ArrowLeft")
               setSelected((selected + photos.length - 1) % photos.length);
-            if (e.key === "Tab") {
-              e.preventDefault();
-              close.current?.focus();
-            }
           }}
         >
           <button
@@ -127,7 +128,10 @@ export function ChatPhotos({
               <ChevronLeft />
             </button>
           )}
-          <img
+          <Image
+            unoptimized
+            width={photos[selected].width}
+            height={photos[selected].height}
             src={photoUrl(photos[selected].id)}
             alt={`${label} ${selected + 1}`}
             onClick={(e) => e.stopPropagation()}
@@ -144,7 +148,7 @@ export function ChatPhotos({
               <ChevronRight />
             </button>
           )}
-        </div>
+        </dialog>
       )}
     </>
   );

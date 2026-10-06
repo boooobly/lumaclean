@@ -4,6 +4,8 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { AdminNavigation } from "@/components/admin/navigation";
 import { SignOut } from "@/components/admin/sign-out";
+import { MobileBottomNav } from "@/components/admin/mobile-bottom-nav";
+import { getDatabase } from "@/lib/database/client";
 
 export default async function WorkspaceLayout({
   children,
@@ -11,6 +13,7 @@ export default async function WorkspaceLayout({
   children: React.ReactNode;
 }) {
   const user = await requireAdmin();
+  const unread = await getDatabase().conversation.aggregate({ where: { control: { not: "CLOSED" }, OR: [{ externalThreadId: null }, { NOT: { externalThreadId: { startsWith: "live-test:" } } }] }, _sum: { unreadCount: true } });
   return (
     <div className="admin-workspace">
       <a className="admin-skip" href="#admin-content">
@@ -34,12 +37,6 @@ export default async function WorkspaceLayout({
         <div className="admin-desktop-nav">
           <AdminNavigation />
         </div>
-        <details className="admin-mobile-nav">
-          <summary>
-            Разделы <span aria-hidden="true">＋</span>
-          </summary>
-          <AdminNavigation />
-        </details>
         <div className="admin-account">
           <span className="admin-account-label">Владелец · Администратор</span>
           <strong>{user.name}</strong>
@@ -49,6 +46,7 @@ export default async function WorkspaceLayout({
       <main id="admin-content" className="admin-content" tabIndex={-1}>
         {children}
       </main>
+      <MobileBottomNav unread={unread._sum.unreadCount ?? 0} />
     </div>
   );
 }

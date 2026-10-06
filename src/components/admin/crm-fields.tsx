@@ -1,5 +1,6 @@
 "use client";
 import { useId, useState } from "react";
+import { DisclosureSection } from "./disclosure";
 import { Field, CrmForm } from "./crm-form";
 import {
   channelLabels,
@@ -57,7 +58,7 @@ export function ClientFields({ value = {} }: { value?: ClientValues }) {
         type="tel"
         required
       />
-      <Field name="telegram" label="Telegram" value={value.telegram} />
+      <DisclosureSection title="Дополнительные контакты и условия"><div className="crm-fields-grid"><Field name="telegram" label="Telegram" value={value.telegram} />
       <Field name="whatsapp" label="WhatsApp" value={value.whatsapp} />
       <Field name="viber" label="Viber" value={value.viber} />
       <Field
@@ -88,6 +89,7 @@ export function ClientFields({ value = {} }: { value?: ClientValues }) {
         value={value.notes}
         type="textarea"
       />
+      </div></DisclosureSection>
     </div>
   );
 }
@@ -105,14 +107,14 @@ export type AddressValues = {
 export function AddressFields({ value = {} }: { value?: AddressValues }) {
   return (
     <div className="crm-fields-grid">
-      <Field name="label" label="Название адреса" value={value.label} />
+      
       <AddressAutocomplete
         value={value.fullAddress}
         confirmed={value.coordinatesConfirmed===true && value.latitude != null && value.longitude != null}
         initialPoint={value.latitude!=null&&value.longitude!=null?{latitude:Number(value.latitude),longitude:Number(value.longitude)}:null}
         required
       />
-      <Field name="apartment" label="Квартира" value={value.apartment} />
+      <DisclosureSection title="Квартира и доступ"><div className="crm-fields-grid"><Field name="label" label="Название адреса" value={value.label} /><Field name="apartment" label="Квартира" value={value.apartment} />
       <Field name="floor" label="Этаж" value={value.floor} />
       <Field name="intercom" label="Домофон" value={value.intercom} />
       <Field
@@ -120,7 +122,7 @@ export function AddressFields({ value = {} }: { value?: AddressValues }) {
         label="Комментарий к адресу"
         value={value.comment}
         type="textarea"
-      />
+      /></div></DisclosureSection>
     </div>
   );
 }
@@ -441,7 +443,7 @@ export function OrderForm({
             stored={value.estimatedDurationMinutes ?? null}
           />
         </div>
-        <div className="crm-extras">
+        <DisclosureSection title="Дополнительные услуги"><div className="crm-extras">
           {Object.entries(extraLabels).map(([code, label]) => (
             <div
               key={code}
@@ -464,7 +466,7 @@ export function OrderForm({
             </div>
           ))}
         </div>
-        <label className="crm-check">
+        </DisclosureSection><label className="crm-check">
           <input
             type="checkbox"
             name="urgent"
@@ -562,7 +564,7 @@ export function OrderForm({
             value={value.priceChangeReason}
             type="textarea"
           />
-          <Field
+          <DisclosureSection title="Комментарии"><div className="crm-fields-grid"><Field
             name="clientComment"
             label="Комментарий клиента"
             value={value.clientComment}
@@ -573,9 +575,10 @@ export function OrderForm({
             label="Внутренний комментарий"
             value={value.internalComment}
             type="textarea"
-          />
+          /></div></DisclosureSection>
         </div>
       </section>
     </CrmForm>
   );
 }
+
