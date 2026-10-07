@@ -1,5 +1,5 @@
 {
-  "fingerprint": "5e328a8acd2dc99ebee14ce62258fadbaaf5bc2fb0e6487b0ee229f851f3e198",
+  "fingerprint": "12ebbfaa21954f24312dc180e013e14e47dc8844e09334a6e07437064c6111f3",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -25,7 +25,7 @@
     "src/app/admin/(workspace)/orders/new/page.tsx": "5d63bab216a6381d54073900ba689d17af8657cbb0a33286c2a60b99c7d62b7d",
     "src/app/admin/(workspace)/orders/page.tsx": "b1cd6acae63766f8b0b33de68c641e5b91418ac86f44d05c76d86fd588924246",
     "src/app/admin/(workspace)/orders/[id]/edit/page.tsx": "7241a08c4c9e3a10043f22cca0668f4b7a218b401904b1e20383fca7c08ebd6f",
-    "src/app/admin/(workspace)/orders/[id]/page.tsx": "5bf4ee0fb41a0a1febb522de32691011db33b116b57832c3460f8760147db246",
+    "src/app/admin/(workspace)/orders/[id]/page.tsx": "c21d8b1f216241bd74b2307033cdcb5705cd15459bf2c9c402b4e3a4d94cf757",
     "src/app/admin/(workspace)/page.tsx": "1036c352740efca1501efd22413de01eeb961c8ecd00ed74e5d8ff7c9f01a324",
     "src/app/admin/(workspace)/settings/import/page.tsx": "84032d47d49d3489f9dce756ad09705cdeff08544887715075204fd6d5254f12",
     "src/app/admin/(workspace)/settings/page.tsx": "daadb36c789bd50ddea5ca3ab7d641a2f468c942e25dad763a1824f2c3e9a103",
@@ -278,7 +278,7 @@
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-07T15:36:50.871Z",
+  "checkedAt": "2026-10-07T15:39:52.478Z",
   "suites": [
     "339 passing unit tests across admin, CRM, scheduling, routing, finance and agent domains",
     "real workbook Preview import/reconciliation and zero-duplicate second run",
@@ -286,8 +286,8 @@
   ],
   "verificationScope": "Historical import and Admin address support. Additive Preview migration, real 14-order/4-expense/27-payout import and reconciliation passed. Two unchanged main assertions (legacy Telegram message ID and obsolete WhatsApp AUTO restriction) excluded by exact test names; 21 local-database tests skipped without their isolated local DB. Native final-source booking proof remains an independent release gate. Production channel modes remain unchanged.",
   "previousVerification": {
-    "fingerprint": "9617f7b03d930ab41e02478587a75fcdedf66b1089d5d1a133547f3de3a53d85",
+    "fingerprint": "5e328a8acd2dc99ebee14ce62258fadbaaf5bc2fb0e6487b0ee229f851f3e198",
     "tests": 339,
-    "checkedAt": "2026-10-07T15:18:31.856Z"
+    "checkedAt": "2026-10-07T15:36:50.871Z"
   }
 }

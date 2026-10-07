@@ -131,9 +131,11 @@ export default async function OrderPage({
                 ],
                 [
                   "Телефон",
-                  <a key="tel" href={`tel:${o.client.phone}`}>
-                    {o.client.phone}
-                  </a>,
+                  o.client.phone ? (
+                    <a key="tel" href={`tel:${o.client.phone}`}>
+                      {o.client.phone}
+                    </a>
+                  ) : "Телефон не указан",
                 ],
                 ["Telegram", o.client.telegram],
                 ["WhatsApp", o.client.whatsapp],
