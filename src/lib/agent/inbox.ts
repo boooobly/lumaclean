@@ -3,7 +3,8 @@ import { Prisma, type PrismaClient, type Conversation } from "@/generated/prisma
 import { z } from "zod";
 import { schedulingLock } from "@/lib/services/scheduling-commands";
 import { writeAudit } from "@/lib/services/audit";
-import { AgentError, type AgentState, type AgentLocale } from "./contracts";
+import { AgentError, customerFactsSchema, type AgentState, type AgentLocale } from "./contracts";
+import {operationalSummary,currentClientTurn} from './conversation-memory';
 import { detectLocale, confirmsRecap, rescheduleIntent } from "./policy";
 import { json, stateOf } from "./tools";
 import { channelAdapter, type InboundEvent, type ChannelAdapter } from "./channels";
@@ -65,7 +66,8 @@ export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:str
     if(activeSet&&previousAnswer){await tx.message.update({where:{id:previousAnswer.id},data:{structured:json({...previousAnswer.structured as object,replySet:{...activeSet,consumedAt:new Date().toISOString()}})}});}
     if(/утром|дн[её]м|вечером|в два|ujutru|popodne|uveče|ујутру|поподне|увече|\b(?:morning|afternoon|evening|at two)\b/iu.test(text)&&!/[0-2]?\d[:–-][0-5]?\d|\b\d{1,2}\s*(?:am|pm|час)/iu.test(text))state.timeClarificationRequired=true;
     else if(/\d{1,2}[:–-]\d{1,2}|\d{1,2}\s*(?:am|pm|час)|(?:в|у|at|u)\s+\d{1,2}(?=\s|$|[,.])/iu.test(text))delete state.timeClarificationRequired;
-    const expectedInput=state.nextInput;delete state.nextInput;
+    const unanswered=await currentClientTurn(tx,c.id);
+    const expectedInput=state.nextInput??(unanswered[0]?.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent;delete state.nextInput;
     applyCustomerFacts(state,explicitCustomerFacts(text,receivedAt,settings.timezone,expectedInput,state),buildAgentTemporalContext(new Date(),settings).nowLocalDate);
     const ids=[...new Set(input.attachmentIds??[])];
     if(ids.length>4||ids.length!==input.attachmentIds?.length&&!!input.attachmentIds)throw new AgentError('INVALID_ATTACHMENTS');
@@ -77,8 +79,11 @@ export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:str
     if(confirmation)state.pending!.confirmedByMessageId=message.id;
     else if(state.pending)delete state.pending;
     if(rescheduleIntent(text)){state.rescheduleRequested=true;delete state.booking;}
-    await tx.conversation.update({where:{id:c.id},data:{locale:detectLocale(text,current.locale),operatorTypingUntil:null,state:json(state),revision:{increment:1},unreadCount:{increment:1},lastMessageAt:new Date(),needsAttention:true,shadowProposal:Prisma.DbNull}});
-    await tx.agentJob.create({data:{conversationId:c.id,messageId:message.id}});
+    await tx.conversation.update({where:{id:c.id},data:{summary:operationalSummary(state,current.summary),locale:detectLocale(text,current.locale),operatorTypingUntil:null,state:json(state),revision:{increment:1},unreadCount:{increment:1},lastMessageAt:new Date(),needsAttention:true,shadowProposal:Prisma.DbNull}});
+    await tx.agentJob.updateMany({where:{conversationId:c.id,status:{in:['PENDING','RUNNING']}},data:{status:'SUPERSEDED',completedAt:new Date(),leaseKey:null,leaseUntil:null}});
+    // PostgreSQL NOW() is the transaction start, which may precede a contended ingress commit.
+    // Debounce from the actual enqueue time so concurrent HTTP requests can finish their locked writes.
+    if(current.control==='AI_CONTROL')await tx.agentJob.create({data:{conversationId:c.id,messageId:message.id,createdAt:new Date()}});
     return{messageId:message.id,created:true};
   });
 }
@@ -100,6 +105,7 @@ export async function publicConversation(db:PrismaClient,c:Conversation){
   return{notifications,messages:messages.reverse().map(({externalMessageId,...m})=>({...m,...(m.author==='CLIENT'?{requestId:externalMessageId?.startsWith('in:')?externalMessageId.slice(3):null}:{})})),displayAlias:latest.displayAlias,revision:latest.revision,quickReplies:set&&!['BOOKING_CONFIRMATION','POST_BOOKING'].includes(set.intent)?{messageId:last.id,replySetId:set.id,revision:set.conversationRevision,choices:set.choices}:null,typing:latest.control==='HUMAN_CONTROL'?!!latest.operatorTypingUntil&&latest.operatorTypingUntil>new Date():latest.control==='AI_CONTROL'&&jobs.some(j=>j.status==='RUNNING'&&!!j.leaseUntil&&j.leaseUntil>new Date()),control:latest.control,locale:latest.locale,pending:jobs.length>0,confirmation:state.pending?{nonce:state.pending.nonce,recap:state.pending.recap}:null,booking:state.booking?{reference:state.booking.reference,recap:(({orderId,reference,...r})=>{void orderId;void reference;return r;})(state.booking)}:null};
 }
 export const inboxCommandSchema=z.discriminatedUnion("action",[
+  z.object({action:z.literal('facts'),id:z.string().min(1).max(80),facts:customerFactsSchema}).strict(),
   z.object({action:z.literal('typing'),id:z.string().min(1).max(80),active:z.boolean()}).strict(),
   z.object({action:z.enum(["takeover","resume","close","retry"]),id:z.string().min(1).max(80)}).strict(),
   z.object({action:z.literal('read'),id:z.string().min(1).max(80),messageId:z.string().min(1).max(80).optional()}).strict(),
@@ -135,12 +141,18 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
       const suggestion=await tx.shadowSuggestion.findFirst({where:{id:input.suggestionId,conversationId:c.id}});
       if(!suggestion)throw new AgentError('SUGGESTION_NOT_FOUND');
       await tx.shadowSuggestion.update({where:{id:suggestion.id},data:{verdict:input.verdict,reason:input.verdict==='REJECTED'?input.reason:null,reviewedById:userId,reviewedAt:new Date()}});
+    }else if(input.action==='facts'){
+      if(c.control!=='HUMAN_CONTROL'||c.ownerId!==userId)throw new AgentError('TAKEOVER_REQUIRED');
+      const state=stateOf(c);applyCustomerFacts(state,input.facts);
+      if(c.leadId&&input.facts.area)await tx.lead.update({where:{id:c.leadId},data:{area:input.facts.area}});
+      await tx.conversation.update({where:{id:c.id},data:{state:json(state),summary:operationalSummary(state,c.summary,{factEdit:{at:new Date().toISOString(),facts:input.facts}}),revision:{increment:1}}});
     }else if(input.action==="reply"){
       if(c.control!=="HUMAN_CONTROL")throw new AgentError("TAKEOVER_REQUIRED");
       const existing=await tx.message.findUnique({where:{conversationId_externalMessageId:{conversationId:c.id,externalMessageId:`admin:${input.requestId}`}}});
       if(!existing){const ids=[...new Set(input.attachmentIds??[])];if(ids.length&&await tx.chatAttachment.count({where:{id:{in:ids},conversationId:c.id,messageId:null,uploader:'ADMIN'}})!==ids.length)throw new AgentError('INVALID_ATTACHMENTS');const message=await tx.message.create({data:{conversationId:c.id,userId,author:"ADMIN",text:input.text,externalMessageId:`admin:${input.requestId}`,deliveryStatus:c.channel==="WEBSITE"?"DELIVERED":"PENDING"}});if(ids.length)await tx.chatAttachment.updateMany({where:{id:{in:ids}},data:{messageId:message.id}});}
       await tx.message.updateMany({where:{conversationId:c.id,author:'CLIENT',readAt:null},data:{readAt:new Date()}});
-      await tx.conversation.update({where:{id:c.id},data:{operatorTypingUntil:null,ownerId:userId,lastMessageAt:new Date(),needsAttention:false,unreadCount:0,revision:{increment:1}}});
+      const admin=await tx.message.findUniqueOrThrow({where:{conversationId_externalMessageId:{conversationId:c.id,externalMessageId:`admin:${input.requestId}`}}});
+      await tx.conversation.update({where:{id:c.id},data:{summary:operationalSummary(stateOf(c),c.summary,{admin:{id:admin.id,text:input.text}}),operatorTypingUntil:null,ownerId:userId,lastMessageAt:new Date(),needsAttention:false,unreadCount:0,revision:{increment:1}}});
       await resolveHandoffNotifications(tx,c.id,userId,'Ответ оператора в Inbox');
     }else if(input.action==="verifyIdentity"){
       if(c.control!=="HUMAN_CONTROL")throw new AgentError("TAKEOVER_REQUIRED");
@@ -157,15 +169,19 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
       // A new revision also produces a new queue idempotency key for an explicit owner retry.
       if(retried.count)await tx.conversation.update({where:{id:c.id},data:{revision:{increment:1},shadowProposal:Prisma.DbNull,needsAttention:true}});
     }else{
-      const state=stateOf(c);delete state.pending;
+      const state=stateOf(c);
       const control=input.action==="takeover"?"HUMAN_CONTROL":input.action==="close"?"CLOSED":"AI_CONTROL";
-      await tx.conversation.update({where:{id:c.id},data:{operatorTypingUntil:null,closedAt:control==='CLOSED'?new Date():null,control,ownerId:control==="HUMAN_CONTROL"?userId:null,stage:control==="CLOSED"?"CLOSED":input.action==="resume"?"DISCOVERY":c.stage,state:json(state),revision:{increment:1},unreadCount:0,needsAttention:false,shadowProposal:Prisma.DbNull}});
+      let summary=operationalSummary(state,c.summary,{lifecycle:input.action});
+      if(input.action==='resume'){
+        // Bootstrap conversations taken over before this release as well as newly persisted memory.
+        const lastAI=await tx.message.findFirst({where:{conversationId:c.id,author:'AI',deliveryStatus:{notIn:['CANCELLED','FAILED','UNKNOWN']}},orderBy:[{sentAt:'desc'},{id:'desc'}]});
+        const human=await tx.message.findMany({where:{conversationId:c.id,author:'ADMIN',...(lastAI?{sentAt:{gt:lastAI.sentAt}}:{})},orderBy:[{sentAt:'asc'},{id:'asc'}]});
+        for(const m of human)summary=operationalSummary(state,summary,{admin:{id:m.id,text:m.text}});
+      }
+      await tx.conversation.update({where:{id:c.id},data:{summary,operatorTypingUntil:null,closedAt:control==='CLOSED'?new Date():null,control,ownerId:control==="HUMAN_CONTROL"?userId:null,stage:control==="CLOSED"?"CLOSED":c.stage,state:json(state),revision:{increment:1},unreadCount:0,needsAttention:false,shadowProposal:Prisma.DbNull}});
+      await tx.agentJob.updateMany({where:{conversationId:c.id,status:{in:['PENDING','RUNNING']}},data:{status:'SUPERSEDED',completedAt:new Date(),leaseUntil:null,leaseKey:null}});
       await tx.message.updateMany({where:{conversationId:c.id,author:"AI",deliveryStatus:"PENDING"},data:{deliveryStatus:"CANCELLED"}});
       await resolveHandoffNotifications(tx,c.id,userId,input.action==='takeover'?'Клиент забран в Inbox':input.action==='close'?'Диалог закрыт':'Возврат AI владельцем');
-      if(input.action==="resume"){
-        const last=await tx.message.findFirst({where:{conversationId:c.id,author:"CLIENT"},orderBy:{sentAt:"desc"}});
-        if(last)await tx.agentJob.upsert({where:{messageId:last.id},create:{conversationId:c.id,messageId:last.id},update:{status:"PENDING",attempts:0,leaseUntil:null,errorCode:null}});
-      }
     }
     await writeAudit(tx,{type:"USER",userId},{action:`INBOX_${input.action.toUpperCase()}`,entityType:"Conversation",entityId:c.id});
     return{ok:true};

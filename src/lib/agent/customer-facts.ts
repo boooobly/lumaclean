@@ -8,6 +8,8 @@ export type CustomerFacts = NonNullable<AgentState['draftFacts']>;
 /** Deliberately narrow. Unclear quantities, negations and word-only times require clarification. */
 export function explicitCustomerFacts(text: string, sentAt: Date, timezone: string, expectedInput?: AgentState['nextInput'],state?:AgentState): CustomerFacts {
   const facts: CustomerFacts = conversionFacts(text,sentAt,timezone,expectedInput,state);
+  const areaCorrection=state?.draftFacts?.area&&text.trim().match(/^(?:нет|не|ne|no)[,\s]+(\d{1,4}(?:[.,]\d+)?)[.!\s]*$/iu);
+  if(areaCorrection&&!['WINDOW_COUNTS','WINDOW_TYPE'].includes(expectedInput??'')){const area=Number(areaCorrection[1].replace(',','.'));if(area>=1&&area<=1000)facts.area=area;}
   if(expectedInput==='AREA'&&/^\d{1,4}(?:[.,]\d+)?[.!\s]*$/u.test(text.trim())){const value=Number(text.trim().replace(/[.!]+$/u,'').replace(',','.'));if(value>=1&&value<=1000)facts.area=value;}
   if(expectedInput==='SOIL_LEVEL'&&/^(?:обычн[а-я]*|normal|uobičajena|uobicajena|уобичајена)[.!\s]*$/iu.test(text.trim()))facts.soilLevel='NORMAL';
   if(expectedInput==='SOIL_LEVEL'&&/^(?:сильн[а-я]*|heavy|jaka|јака)[.!\s]*$/iu.test(text.trim()))facts.soilLevel='HEAVY';

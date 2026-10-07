@@ -160,16 +160,19 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
   const [activeChapter, setActiveChapter] = useState<number | null>(null);
   const [isSeeking, setIsSeeking] = useState(false);
   const [beforeRequested, setBeforeRequested] = useState(false);
+  const [compactMobile,setCompactMobile]=useState(false);
   const text = copy[locale];
   const activePhase = getPhase(currentStep);
   const firstTransitionActive = currentStep > 0
     && currentStep < CHAPTER_STEPS[1]
     && activeChapter === null;
 
+  useEffect(()=>{const media=window.matchMedia('(max-width: 680px)');const update=()=>setCompactMobile(media.matches);update();media.addEventListener('change',update);return()=>media.removeEventListener('change',update);},[]);
   useEffect(() => {
     const trackElement = track.current;
     const videoElements = videos.current.slice(0, SCRUB_CLIPS.length);
     if (!trackElement || videoElements.length !== SCRUB_CLIPS.length || videoElements.some((element) => !element)) return;
+    if(window.matchMedia('(max-width: 680px)').matches)return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let disposed = false;
@@ -470,7 +473,7 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
         element.load();
       });
     };
-  }, []);
+  }, [compactMobile]);
 
   function revealBefore(show: boolean) {
     if (show) setBeforeRequested(true);
@@ -527,6 +530,17 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
           <div className="journey-loading-indicator" />
         </div>
 
+        <div className="journey-copy">
+          <span className="cinematic-kicker">{text.eyebrow}</span>
+          <h1>{text.title}</h1>
+          <p className="journey-desktop-instruction">{text.body}</p>
+          <p className="journey-mobile-description">{locale==='ru'?'LumaClean — уборка квартир и небольших офисов в Белграде.':locale==='en'?'LumaClean — apartment and small office cleaning in Belgrade.':'LumaClean — čišćenje stanova i malih kancelarija u Beogradu.'}</p>
+          <div className="cinematic-actions">
+            <a className="button button-light" href={calculatorHref}>{text.primary}<ArrowRight size={16} /></a>
+            <a className="cinematic-link" href={calculatorHref}>{text.secondary}<ArrowDown size={15} /></a>
+          </div>
+        </div>
+
         <aside className={`journey-chapter-intro${firstTransitionActive ? " is-active" : ""}`}>
           <span>{text.transitionEyebrow}</span>
           <h2>{text.transitionTitle}</h2>
@@ -565,16 +579,6 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
             ))}
           </div>
         </aside>
-
-        <div className="journey-copy">
-          <span className="cinematic-kicker">{text.eyebrow}</span>
-          <h1>{text.title}</h1>
-          <p>{text.body}</p>
-          <div className="cinematic-actions">
-            <a className="button button-light" href={calculatorHref}>{text.primary}<ArrowRight size={16} /></a>
-            <a className="cinematic-link" href={calculatorHref}>{text.secondary}<ArrowDown size={15} /></a>
-          </div>
-        </div>
 
         <div className="journey-hover-hint">
           <MousePointer2 size={15} />

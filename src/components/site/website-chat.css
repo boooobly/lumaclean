@@ -509,14 +509,23 @@
   }
 }
 @media (max-width: 600px) {
+  body:has(.site-home) .website-chat:has(.website-chat-launcher) {
+    top: calc(9px + env(safe-area-inset-top, 0px));
+    right: 16px;
+    bottom: auto;
+  }
   .website-chat {
     bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     right: 14px;
   }
   .website-chat-launcher {
-    padding: 13px 16px;
+    min-height: 44px;
+    width: 44px;
+    justify-content: center;
+    padding: 10px;
     font-size: 12px;
   }
+  .chat-launcher-full { display: none; }
   .website-chat-panel {
     position: fixed;
     left: 0;
@@ -536,6 +545,7 @@
   .website-chat-panel textarea {
     font-size: 16px;
   }
+  .website-chat-panel header button, .website-chat-panel form button { min-width: 44px; min-height: 44px; }
   .website-chat-history {
     padding: 16px 12px;
   }
@@ -562,4 +572,5 @@
   html:has(.website-chat-panel) {
     overflow: hidden;
   }
+  body:has(.website-chat-panel) { overflow: hidden; }
 }

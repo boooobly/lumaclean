@@ -40,6 +40,53 @@
 .site-page .header-cta b { font-weight: 600; }
 .site-page .header-cta i { display: grid; place-items: center; color: var(--lc-teal); font-size: 18px; font-style: normal; }
 .site-cta-short { display: none; }
+.journey-mobile-description { display: none; }
+
+@media (hover: none) { .journey-desktop-instruction, .journey-hover-hint { display: none; } }
+
+@media (max-width: 680px) {
+  .site-home .site-header { height: 62px; padding: 0 16px; }
+  .site-home .site-header .header-cta { display: none; }
+  .site-home .site-locales a { min-width: 40px; min-height: 44px; font-size: 10px; }
+  .site-home .site-locales { margin-right: 56px; }
+  .site-home .journey-track { height: auto; --mobile-hero-height: min(660px, 82svh); }
+  .site-home .journey-sticky { position: relative; height: auto; display: grid; overflow: hidden; }
+  .site-home .journey-hero { height: var(--mobile-hero-height); bottom: auto; }
+  .site-home .journey-stage, .site-home .journey-chapter-intro, .site-home .journey-hover-hint, .site-home .journey-progress { display: none; }
+  .site-home .journey-copy { position: relative; grid-row: 1; inset: auto; width: auto; min-height: var(--mobile-hero-height); padding: 160px 20px 94px; transform: none; display: flex; flex-direction: column; justify-content: flex-end; }
+  .site-home .journey-copy h1 { font-size: clamp(43px, 12.3vw, 53px); line-height: 1; margin: 16px 0; letter-spacing: -.055em; }
+  .site-home .journey-copy .journey-desktop-instruction { display: none; }
+  .site-home .journey-copy .journey-mobile-description { display: block; font-size: 15px; line-height: 1.55; max-width: 340px; }
+  .site-home .cinematic-actions { margin-top: 22px; }
+  .site-home .cinematic-actions .cinematic-link { display: none; }
+  .site-home .cinematic-actions .button { min-height: 52px; font-size: 14px; padding: 0 22px; }
+  .site-home .journey-infographic { position: relative; inset: auto; width: auto; margin: 0; padding: 28px 20px; opacity: 1; visibility: visible; transform: none; background: var(--lc-paper); color: var(--lc-ink); border-bottom: 1px solid var(--lc-line); }
+  .site-home .journey-infographic h2 { font-size: 32px; }
+  .site-home .journey-infographic :is(p,small) { color: var(--lc-ink-soft); font-size: 14px; }
+  .site-home .journey-infographic .infographic-list { margin-top: 20px; }
+  .site-home .infographic-item { border-color: var(--lc-line); }
+  .site-home .infographic-item { background: transparent; box-shadow: none; backdrop-filter: none; }
+  .site-home .journey-infographic { text-shadow: none; }
+  .site-home .infographic-eyebrow { color: var(--lc-ink-soft); }
+  .site-home .infographic-eyebrow::before { background: var(--lc-teal); }
+  .site-home .infographic-item > span { color: var(--lc-teal); border-color: var(--lc-line); }
+  .site-home .faucet-infographic { border-radius: 0; box-shadow: none; backdrop-filter: none; }
+  .site-home .kitchen-feature { background: transparent; border-color: var(--lc-line); box-shadow: none; backdrop-filter: none; }
+  .site-home .kitchen-feature :is(strong,span) { color: var(--lc-ink); }
+  .site-home .infographic-focus-line { display: none; }
+  .site-home main .handoff { height: auto; margin-top: 0; }
+  .site-home main .handoff-sticky { position: relative; height: auto; min-height: 0; padding: 40px 20px; }
+  .site-home .handoff-copy { position: relative; inset: auto; width: auto; opacity: 1 !important; transform: none !important; }
+  .site-home .handoff-copy h2 { font-size: 44px; }
+  .site-home .handoff :is(.kitchen-frame,.handoff-route,.scroll-note) { display: none; }
+  .site-home :is(.editorial-section,.material-section,.method-section,.estimate-section) { padding: 68px 0; }
+  .site-home .scope-comparison :is(article,article+article) { min-height: 0; padding: 30px 0; }
+  .site-home .site-mobile-total { top: 70px; }
+  .site-home .service-options span { min-height: 44px; display: flex; align-items: center; justify-content: center; font-size: 12px; padding: 10px 8px; }
+  .site-home .site-extra-counter button { min-width: 44px; min-height: 44px; }
+  .site-home .site-extra-counter { grid-template-columns: minmax(0,1fr) auto; column-gap: 8px; }
+  .site-home .site-footer-locales a { min-width: 44px; min-height: 44px; }
+}
 
 .site-page .journey-track { position: relative; z-index: 2; }
 .site-page .handoff { z-index: 1; margin-top: -100dvh; }

@@ -93,7 +93,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
   };
 
   return (
-    <div id="top" className={`site-page ${displayFont.variable} ${textFont.variable}`}>
+    <div id="top" className={`site-page site-home ${displayFont.variable} ${textFont.variable}`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c")}}/>
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c")}}/>
       <SiteHeader articlesLabel={getVisibleArticles().length ? articleUi[locale].all : undefined} locale={locale} copy={v.nav}/>
