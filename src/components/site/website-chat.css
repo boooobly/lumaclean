@@ -509,6 +509,11 @@
   }
 }
 @media (max-width: 600px) {
+  body:has(.site-home) .website-chat:has(.website-chat-launcher) {
+    top: calc(9px + env(safe-area-inset-top, 0px));
+    right: 16px;
+    bottom: auto;
+  }
   .website-chat {
     bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     right: 14px;

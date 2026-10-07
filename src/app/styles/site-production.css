@@ -49,7 +49,6 @@
   .site-home .site-header .header-cta { display: none; }
   .site-home .site-locales a { min-width: 40px; min-height: 44px; font-size: 10px; }
   .site-home .site-locales { margin-right: 56px; }
-  .site-home .website-chat-launcher { top: 9px; right: 16px; bottom: auto; }
   .site-home .journey-track { height: auto; --mobile-hero-height: min(660px, 82svh); }
   .site-home .journey-sticky { position: relative; height: auto; display: grid; overflow: hidden; }
   .site-home .journey-hero { height: var(--mobile-hero-height); bottom: auto; }
