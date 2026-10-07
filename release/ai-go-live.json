@@ -1,5 +1,5 @@
 {
-  "fingerprint": "0fd6d957d232894d1816b9b445a9f03372244480c23f1b7e70eb38082b7aabce",
+  "fingerprint": "5914ab7e50a4b367f41ab8f1fdc1badf56ec3104d3414f1bee65fdb1659e107d",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -162,11 +162,11 @@
     "src/lib/agent/readiness.ts": "8a9bf485356d83a172051fdff7dc50c2849f07490a5c39921358e348c77321e8",
     "src/lib/agent/release-verification.d.mts": "922a8223a92a36f373f1f850962fb8efc441cf9944c7bae83bcda9d0ed631aff",
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
-    "src/lib/agent/runner.ts": "cafd079eb3c1a8b633024a7b846d1853377e854a98c6f82d65b5c91760fc990b",
+    "src/lib/agent/runner.ts": "f4524ceba7be3c3d7d3229dd33b59b5e13a7a9d3df73072f4125327c36a966a2",
     "src/lib/agent/settings.ts": "bf18dc0f06eaa3bb5551f2a846bb1fed31966cace4815843a1919b671e550017",
     "src/lib/agent/telegram-handoff.ts": "c9397fb01f21c3810069bc9710cd16ec98274698d2adb49a9c19036d7dbf6a7e",
     "src/lib/agent/temporal.ts": "7dff9432c06f3dd3e9da30ece37add57aa50c2f434f5dec434de3769ec39ad05",
-    "src/lib/agent/tools.ts": "58d02889aa48988eec4f50fa92c961d5b329cfa20fb3a88b0a9b94a0e1f28149",
+    "src/lib/agent/tools.ts": "c2e0513a279ad45f48091a833d4830e56a847e811b093c51ba9d938c1e467357",
     "src/lib/analytics.ts": "ac20e7f318855188db315705788fff372d2375f33cb1114b48612fa30f839498",
     "src/lib/articles/airbnb.ts": "6ac8861e9d41cadf626a26d54c10c2da58dd6bcfa376cb5cf40d35fd19952857",
     "src/lib/articles/bathroom.ts": "35e05dd40a50fa6d8b9859ea6237dc5f9e50f51ec8992a38297fb0be3ebdf549",
@@ -279,15 +279,16 @@
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-07T21:51:21.838Z",
+  "checkedAt": "2026-10-07T22:03:11.120Z",
   "suites": [
     "342 passing unit tests across agent, CRM, admin, finance and scheduling domains",
-    "10 isolated Preview database and HTTP scenarios: human continuity, long history, typed corrections, bursts, concurrency, retry, photos and retained hard handoff restrictions"
+    "10 isolated Preview database and HTTP scenarios: human continuity, long history, typed corrections, bursts, concurrency, retry, photos and retained hard handoff restrictions",
+    "Targeted repeat after reconciliation repair: repeated takeover/resume with already reviewed notes; native pending recap/slots/stage preservation"
   ],
-  "verificationScope": "Targeted human takeover/resume continuity and mobile homepage cleanup. Native scenarios use an injected provider to test persistence and job invariants; final deployed Preview live provider replay, mobile/desktop visual QA and native signed booking proof remain independent release gates. No database migration or channel-mode changes. Two unchanged main assertions (legacy Telegram message ID and obsolete WhatsApp AUTO restriction) are excluded by exact names; local database suites skip without their isolated fixture database. Affected ESLint has no errors and two existing image warnings.",
+  "verificationScope": "Targeted human takeover/resume continuity and mobile homepage cleanup. Full native suite passed before the final reconciliation repair; the affected scenario was repeated on final source with an injected provider echoing already reviewed notes and corrections. Unchanged burst/HTTP/hazard checks were not redundantly repeated. Final deployed Preview live provider replay, mobile/desktop visual QA and native signed booking proof remain independent release gates. No database migration or channel-mode changes. Two unchanged main assertions (legacy Telegram message ID and obsolete WhatsApp AUTO restriction) are excluded by exact names; local database suites skip without their isolated fixture database. Affected ESLint has no errors and two existing image warnings.",
   "previousVerification": {
-    "fingerprint": "12ebbfaa21954f24312dc180e013e14e47dc8844e09334a6e07437064c6111f3",
-    "tests": 339,
-    "checkedAt": "2026-10-07T15:39:52.478Z"
+    "fingerprint": "0fd6d957d232894d1816b9b445a9f03372244480c23f1b7e70eb38082b7aabce",
+    "tests": 352,
+    "checkedAt": "2026-10-07T21:51:21.838Z"
   }
 }

@@ -212,9 +212,13 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   }
   if(name==='reconcileHumanContext'){
     const input=toolSchemas.reconcileHumanContext.parse(payload),pending=pendingHumanStatements(c.summary);
-    const ids=[...new Set(input.reviewedMessageIds)];
-    if(!pending.length||ids.length!==pending.length||pending.some(s=>!ids.includes(s.id)))return{error:'HUMAN_CONTEXT_REQUIRED'};
-    if(input.corrections.some(p=>!pending.some(s=>s.id===p.messageId&&s.text.includes(p.evidence)))||new Set(input.corrections.map(p=>p.messageId)).size!==input.corrections.length)return{error:'HUMAN_CONTEXT_REQUIRED'};
+    const memory=conversationMemory(c.summary),pendingIds=pending.map(s=>s.id),submitted=[...new Set(input.reviewedMessageIds)];
+    if(!pending.length)return{facts:state.draftFacts,reviewed:true};
+    // Providers may echo retained, already reviewed notes as well. Accept those IDs,
+    // but require every pending note and reject IDs outside this conversation memory.
+    if(pending.some(s=>!submitted.includes(s.id))||submitted.some(id=>!pendingIds.includes(id)&&!memory.reviewedHumanIds.includes(id)))return{error:'HUMAN_CONTEXT_REQUIRED',pendingMessageIds:pendingIds,message:'Review every pending ID listed here. Previously reviewed IDs need no correction.'};
+    const ids=pendingIds;
+    if(input.corrections.some(p=>!memory.reviewedHumanIds.includes(p.messageId)&&!pending.some(s=>s.id===p.messageId&&s.text.includes(p.evidence))))return{error:'HUMAN_CONTEXT_REQUIRED',pendingMessageIds:pendingIds,statements:pending,message:'Each new correction must reference a pending ID and an exact excerpt of its statement; combine factual fields or submit separate corrections for the same statement. Already reviewed corrections are ignored.'};
     const rows=await tx.message.findMany({where:{conversationId:c.id,OR:[{id:{in:ids}},{author:'CLIENT',sentAt:{gte:(await tx.message.findFirstOrThrow({where:{id:{in:ids}},orderBy:[{sentAt:'asc'},{id:'asc'}]})).sentAt}}]},orderBy:[{sentAt:'asc'},{id:'asc'}]});
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
     const edits=conversationMemory(c.summary).factEdits??[];
@@ -222,7 +226,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     for(const event of timeline){
       if(event.facts){applyCustomerFacts(state,event.facts);continue;}
       const m=event.message!;
-      if(m.author==='ADMIN'){const correction=input.corrections.find(p=>p.messageId===m.id);if(correction)applyCustomerFacts(state,correction.facts);}
+      if(m.author==='ADMIN'){for(const correction of input.corrections.filter(p=>p.messageId===m.id))applyCustomerFacts(state,correction.facts);}
       else if(m.author==='CLIENT')applyCustomerFacts(state,explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,state));
     }
     if(ctx.mode==='AUTO'&&(c.leadId||state.draftFacts?.service&&state.draftFacts.area))await updateLead(tx,c,ctx,{intent:'cleaning'});

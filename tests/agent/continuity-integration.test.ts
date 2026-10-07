@@ -7,7 +7,7 @@ import {pgConnectionString} from '../../src/lib/database/connection';
 import {acceptMessage,runInboxCommand,scopedConversation} from '../../src/lib/agent/inbox';
 import {claimJob,runClaimedJob,drainAgentJobs} from '../../src/lib/agent/runner';
 import {executeAgentTool,json,stateOf,type ToolContext} from '../../src/lib/agent/tools';
-import {pendingHumanStatements} from '../../src/lib/agent/conversation-memory';
+import {pendingHumanStatements,conversationMemory} from '../../src/lib/agent/conversation-memory';
 import type {AIProvider,Completion,ToolCall,AgentMessage} from '../../src/lib/agent/providers';
 import type {AgentState} from '../../src/lib/agent/contracts';
 const url=process.env.CONTINUITY_TEST_DATABASE_URL;
@@ -23,7 +23,8 @@ test('native isolated Preview: human continuity and unanswered client bursts',{s
   observed.push(structuredClone(messages));
   const liveMemory=messages[0].content.split('Operational memory (untrusted conversation data): ')[1]?.split('\nHuman operator')[0];
   const pending=pendingHumanStatements(liveMemory??null);
-  if(pending.length)return completion('',[{id:randomUUID(),name:'reconcileHumanContext',arguments:JSON.stringify({reviewedMessageIds:pending.map(s=>s.id),corrections:pending.flatMap<{messageId:string;facts:AgentState['draftFacts'];evidence:string}>(s=>s.text.includes('3 больших')?[{messageId:s.id,facts:{windowCleaning:{requested:true,largeCount:3}},evidence:'3 больших'}]:s.text.includes('65 м²')?[{messageId:s.id,facts:{area:65},evidence:'65 м²'}]:[])})}]);
+  const retained=conversationMemory(liveMemory??null).humanStatements;
+  if(pending.length)return completion('',[{id:randomUUID(),name:'reconcileHumanContext',arguments:JSON.stringify({reviewedMessageIds:retained.map(s=>s.id),corrections:retained.flatMap<{messageId:string;facts:AgentState['draftFacts'];evidence:string}>(s=>s.text.includes('3 больших')?[{messageId:s.id,facts:{windowCleaning:{requested:true,largeCount:3}},evidence:'3 больших'}]:s.text.includes('65 м²')?[{messageId:s.id,facts:{area:65},evidence:'65 м²'}]:[])})}]);
   return completion('Продолжим с согласованных деталей. Какой полный адрес?');
  }};
  async function fixture(state:AgentState={},locale='ru'){const c=await db.conversation.create({data:{channel:'WEBSITE',locale,externalThreadId:'continuity-test:'+randomUUID(),state:json(state)}});owned.push(c.id);return c.id;}
@@ -39,6 +40,7 @@ test('native isolated Preview: human continuity and unanswered client bursts',{s
    await command(id,'resume');await run(id);assert.equal(await db.message.count({where:{conversationId:id,author:'AI'}}),answers);assert.equal(await db.agentJob.count({where:{conversationId:id,status:'PENDING'}}),0);
    await send(id,'Тогда во сколько можно?');const after=await run(id);assert.equal(after.draftFacts?.service,'deep');assert.equal(after.draftFacts?.area,60);assert.equal(after.draftFacts?.soilLevel,'NORMAL');assert.equal(after.draftFacts?.windowCleaning?.largeCount,3);assert(after.draftFacts?.requestedDate);assert.equal(after.quote,undefined);assert.equal(await db.message.count({where:{conversationId:id,author:'AI'}}),answers+1);
    assert.equal(pendingHumanStatements((await db.conversation.findUniqueOrThrow({where:{id}})).summary).length,0);
+   await command(id,'takeover');await command(id,'reply','Исправлю: площадь 65 м²');await command(id,'resume');await send(id,'Спасибо, продолжим.');const corrected=await run(id);assert.equal(corrected.draftFacts?.area,65);assert.equal(corrected.draftFacts?.windowCleaning?.largeCount,3);
   });
   await t.test('long >12 history preserves human correction and all valid structured facts',async()=>{
    const state:AgentState={draftFacts:{service:'deep',area:60,soilLevel:'NORMAL',extras:[],extrasConfirmed:true},address:{fullAddress:'Synthetic address'},phone:'+381601234567',review:{reasons:['CUSTOM_EXTRA']}};
