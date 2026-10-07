@@ -37,9 +37,11 @@ export default async function ClientPage({
             items={[
               [
                 "Телефон",
-                <a key="tel" href={`tel:${c.normalizedPhone ?? c.phone}`}>
-                  {c.phone}
-                </a>,
+                c.phone ? (
+                  <a key="tel" href={`tel:${c.normalizedPhone ?? c.phone}`}>
+                    {c.phone}
+                  </a>
+                ) : "Телефон не указан",
               ],
               ["Нормализованный", c.normalizedPhone ?? "Не определён"],
               ["Telegram", c.telegram],
@@ -76,7 +78,7 @@ export default async function ClientPage({
               ["Завершено", stats._count],
               ["Выручка", money(stats._sum.finalPrice ?? 0)],
               ["Средний чек", money(stats._avg.finalPrice)],
-              ["Последняя уборка", date(last?.completedAt)],
+              ["Последняя уборка", date(last?.historicalServiceDate ?? last?.completedAt, !!last?.historicalServiceDate)],
             ]}
           />
         </section>
@@ -98,7 +100,7 @@ export default async function ClientPage({
                 <h3>{a.label ?? "Адрес"}</h3>
                 <span>{a.active ? "Активен" : "Не используется"}</span>
               </header>
-              <p>{a.fullAddress}</p>
+              <p>{a.fullAddress}</p><p className="crm-hint">{a.coordinatesConfirmed ? (a.coordinatesSource === "MANUAL_ADMIN_MAP" ? "Точка подтверждена владельцем на карте" : "Координаты подтверждены") : "Координаты не подтверждены"}</p>
               <Facts
                 items={[
                   ["Квартира", a.apartment],
@@ -172,8 +174,8 @@ export default async function ClientPage({
                 <Link href={`/admin/orders/${o.id}`}>
                   {o.reference ?? "Заказ"}
                   <small>
-                    {date(o.scheduledStart ?? o.windowFrom)} ·{" "}
-                    {money(o.finalPrice, o.currency)}
+                    {date(o.historicalServiceDate ?? o.scheduledStart ?? o.windowFrom, !!o.historicalServiceDate)} ·{" "}
+                    {money(o.finalPrice, o.currency)} · {o.historicalServiceLabel ?? o.service?.name ?? "Услуга не указана"} · {String(o.area)} м² {o.historical && "· Исторический заказ"}
                   </small>
                 </Link>
                 <Chip status={o.status} />

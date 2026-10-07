@@ -27,13 +27,13 @@ export default async function OrderPage({
   const { id } = await params,
     o = await getOrder(id),
     editable = !["COMPLETED", "CANCELLED", "NO_SHOW"].includes(o.status);
-  const planning = await getOrderPlanning(id);
+  const planning = o.historical ? null : await getOrderPlanning(id);
   return (
     <>
       <CrmHeader
         title={o.reference ?? "Заказ"}
         back="/admin/orders"
-        subtitle={o.service.name}
+        subtitle={(o.historicalServiceLabel ?? o.service?.name ?? "Услуга не указана")}
         action={
           editable
             ? {
@@ -46,11 +46,11 @@ export default async function OrderPage({
       <div className="crm-detail-grid">
         <section className="crm-section">
           <h2>
-            Уборка <Chip status={o.status} />
+            {o.historical ? "Исторический заказ" : "Уборка"} <Chip status={o.status} />
           </h2>
           <Facts secondary={["Загрязнение", "Срочность", "Ручная длительность", "Причина ручной длительности", "Режим времени", "Завершён"]} technical={["Версия расчёта", "Происхождение"]}
-            items={[
-              ["Услуга", o.service.name],
+            items={o.historical ? [["Дата уборки", date(o.historicalServiceDate ?? o.completedAt, !!o.historicalServiceDate)], ["Услуга", o.historicalServiceLabel ?? o.service?.name], ["Площадь", `${o.area} м²`], ["Источник", `Excel · заказ ${o.legacyId}`]] : [
+              ["Услуга", (o.historicalServiceLabel ?? o.service?.name ?? "Услуга не указана")],
               ["Площадь", `${o.area} м²`],
               ["Загрязнение", o.soilLevel ? soilLabels[o.soilLevel] : "—"],
               ["Срочность", o.urgent ? "Да" : "Нет"],
@@ -131,14 +131,17 @@ export default async function OrderPage({
                 ],
                 [
                   "Телефон",
-                  <a key="tel" href={`tel:${o.client.phone}`}>
-                    {o.client.phone}
-                  </a>,
+                  o.client.phone ? (
+                    <a key="tel" href={`tel:${o.client.phone}`}>
+                      {o.client.phone}
+                    </a>
+                  ) : "Телефон не указан",
                 ],
                 ["Telegram", o.client.telegram],
                 ["WhatsApp", o.client.whatsapp],
                 ["Viber", o.client.viber],
                 ["Адрес", o.address.fullAddress],
+                ["Координаты", o.address.coordinatesConfirmed ? "Подтверждены" : "Не подтверждены"],
                 [
                   "Квартира / этаж",
                   [o.address.apartment, o.address.floor]
@@ -166,9 +169,9 @@ export default async function OrderPage({
             />
           </section>
           <section className="crm-section">
-            <h2>Цена · зафиксированный прайс</h2>
+            <h2>{o.historical ? "Доход по источнику" : "Цена · зафиксированный прайс"}</h2>
             <Facts
-              items={[
+              items={o.historical ? [["Доход", money(o.finalPrice, o.currency)]] : [
                 [
                   "Расчёт с дополнениями и срочностью",
                   money(o.basePrice, o.currency),
@@ -220,7 +223,7 @@ export default async function OrderPage({
           )}
         </div>
       </div>
-      <OrderPlanningPanel
+      {planning && <OrderPlanningPanel
         order={planning.order}
         cleaners={planning.cleaners}
         overrides={planning.overrides.map((r) => ({
@@ -229,7 +232,7 @@ export default async function OrderPage({
           createdAt: r.createdAt.toISOString(),
           name: r.user.name,
         }))}
-      />
+      />}
       {o.status === "COMPLETED" && (
         <OrderEconomics
           id={id}
@@ -243,7 +246,7 @@ export default async function OrderPage({
         />
       )}
       <History type="Order" id={id} />
-      <RoutingWorkspace
+      {planning && <RoutingWorkspace
         date={(
           planning.order.localStart ||
           planning.order.windowFrom ||
@@ -251,7 +254,7 @@ export default async function OrderPage({
         ).slice(0, 10)}
         order={planning.order}
         cleaners={planning.cleaners}
-      />
+      />}
     </>
   );
 }

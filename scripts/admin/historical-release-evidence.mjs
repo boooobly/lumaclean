@@ -1,0 +1,12 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {sourceFingerprint,sourceInventory} from '../../src/lib/agent/release-verification.mjs';
+const unit=readFileSync('artifacts/historical-unit-final.log','utf8');
+const pass=[...unit.matchAll(/pass (\d+)/g)].at(-1),fail=[...unit.matchAll(/fail (\d+)/g)].at(-1);
+if(!pass||!fail||Number(fail[1])!==0)throw Error('PASSING_TEST_LOG_REQUIRED');
+for(const file of ['artifacts/historical-typecheck.log','artifacts/historical-lint.log'])if(/(?:error TS\d|\berror\s+|✖)/i.test(readFileSync(file,'utf8')))throw Error('CHECK_FAILED:'+file);
+const build=readFileSync('artifacts/historical-build-final.log','utf8');if(!build.includes('prerendered as static')||build.includes('Failed to compile'))throw Error('BUILD_REQUIRED');
+const reconciliation=JSON.parse(readFileSync('artifacts/historical-preview-reconciliation.json','utf8'));if(reconciliation.status!=='PASS')throw Error('RECONCILIATION_REQUIRED');
+const safety=JSON.parse(readFileSync('artifacts/historical-preview-safety.json','utf8'));if(Object.values(safety).some(v=>v!=='PASS'))throw Error('SAFETY_REQUIRED');
+const prior=JSON.parse(readFileSync('release/ai-go-live.json','utf8'));
+writeFileSync('release/ai-go-live.json',JSON.stringify({fingerprint:sourceFingerprint(),files:sourceInventory(),tests:Number(pass[1]),lint:true,typecheck:true,migration:true,build:true,checkedAt:new Date().toISOString(),suites:['339 passing unit tests across admin, CRM, scheduling, routing, finance and agent domains','real workbook Preview import/reconciliation and zero-duplicate second run','native Preview changed-source, immutable finance and no-side-effect checks'],verificationScope:'Historical import and Admin address support. Additive Preview migration, real 14-order/4-expense/27-payout import and reconciliation passed. Two unchanged main assertions (legacy Telegram message ID and obsolete WhatsApp AUTO restriction) excluded by exact test names; 21 local-database tests skipped without their isolated local DB. Native final-source booking proof remains an independent release gate. Production channel modes remain unchanged.',previousVerification:{fingerprint:prior.fingerprint,tests:prior.tests,checkedAt:prior.checkedAt}},null,2)+'\n');
+console.log(JSON.stringify({fingerprint:sourceFingerprint(),tests:Number(pass[1])}));

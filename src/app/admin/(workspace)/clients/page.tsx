@@ -52,7 +52,7 @@ export default async function ClientsPage({
               </Link>
             </td>
             <td>
-              {r.phone}
+              {r.phone ?? "Телефон не указан"}
               <small>
                 {r.preferredChannel
                   ? channelLabels[r.preferredChannel]
@@ -62,9 +62,9 @@ export default async function ClientsPage({
             <td>{r._count.orders}</td>
             <td>
               {date(
-                r.orders[0]?.scheduledStart ??
+                r.orders[0]?.historicalServiceDate ?? r.orders[0]?.scheduledStart ??
                   r.orders[0]?.windowFrom ??
-                  r.orders[0]?.createdAt,
+                  r.orders[0]?.createdAt, !!r.orders[0]?.historicalServiceDate,
               )}
             </td>
             <td>{money(r.revenue ?? 0)}</td>

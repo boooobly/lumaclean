@@ -288,6 +288,7 @@ export async function runFinanceCommand(
         await lock(tx, "order:" + v.id);
         const o = await tx.order.findUniqueOrThrow({ where: { id: v.id } });
         fresh(o.updatedAt, v.expectedUpdatedAt);
+        if(o.historical) throw new CrmError("VALIDATION", "Историческая цена зафиксирована источником.");
         if (o.status !== "COMPLETED")
           throw new CrmError(
             "VALIDATION",
@@ -333,6 +334,8 @@ export async function runFinanceCommand(
         where: { id: v.id },
       });
       fresh(current.updatedAt, v.expectedUpdatedAt);
+      if (current.historical || !current.cleanerId)
+        throw new CrmError("VALIDATION", "Историческая выплата зафиксирована источником и доступна только для просмотра.");
       let data: Prisma.CleanerPayoutUpdateInput = {};
       if (command === "payout-pay") {
         if (current.status !== "PENDING")
@@ -352,7 +355,7 @@ export async function runFinanceCommand(
             where: { id: p.orderId },
           }),
           c = await tx.cleaner.findUniqueOrThrow({
-            where: { id: p.cleanerId },
+            where: { id: current.cleanerId },
           }),
           s = await tx.businessSettings.findUniqueOrThrow({
             where: { id: "default" },
@@ -379,12 +382,12 @@ export async function runFinanceCommand(
             after: next.amount.toString(),
           },
           appliedPercent: {
-            before: current.appliedPercent.toString(),
-            after: next.appliedPercent.toString(),
+            before: current.appliedPercent?.toString() ?? null,
+            after: next.appliedPercent?.toString() ?? null,
           },
           basisAmount: {
-            before: current.basisAmount.toString(),
-            after: next.basisAmount.toString(),
+            before: current.basisAmount?.toString() ?? null,
+            after: next.basisAmount?.toString() ?? null,
           },
           status: { before: current.status, after: next.status },
         },

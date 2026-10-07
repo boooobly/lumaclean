@@ -11,7 +11,7 @@ export function ImportWorkspace({ initial }: { initial?: Preview }) {
     [preview, setPreview] = useState(initial),
     [selected, setSelected] = useState<string[]>(
       initial?.rows
-        .filter((r) => !r.errors.length && !r.duplicate)
+        .filter((r) => !r.errors.length && (initial?.profile === "lumaclean-2026" || !r.duplicate))
         .map((r) => r.sourceKey) ?? [],
     ),
     [pending, setPending] = useState(false),
@@ -23,6 +23,7 @@ export function ImportWorkspace({ initial }: { initial?: Preview }) {
       addresses: number;
       investments: number;
       skipped: number;
+      payouts: number;
       warnings: string[];
     }>(),
     [ack, setAck] = useState(false);
@@ -48,7 +49,7 @@ export function ImportWorkspace({ initial }: { initial?: Preview }) {
         body.data.rows
           .filter(
             (r: { errors: string[]; duplicate?: boolean }) =>
-              !r.errors.length && !r.duplicate,
+              !r.errors.length && (body.data.profile === "lumaclean-2026" || !r.duplicate),
           )
           .map((r: { sourceKey: string }) => r.sourceKey),
       );
@@ -131,6 +132,7 @@ export function ImportWorkspace({ initial }: { initial?: Preview }) {
           остаётся неизменным.
         </p>
         <form onSubmit={upload} className="finance-upload">
+          <label>История<select name="profile" defaultValue="lumaclean-2026"><option value="lumaclean-2026">LumaClean · июль–октябрь 2026 · 14 заказов / 4 расхода</option><option value="generic">Другой workbook · ручная проверка каждой строки</option></select></label>
           <label className="crm-field" htmlFor={id + "-file"}>
             Excel workbook
             <input
@@ -162,6 +164,12 @@ export function ImportWorkspace({ initial }: { initial?: Preview }) {
           <div className="finance-metrics">
             {[
               ["Заказы", preview.summary.orders],
+              ["Выручка, RSD", preview.rows.filter(r=>r.kind==="order").reduce((s,r)=>s+(r.amount??0),0)],
+              ["Расходы, RSD", preview.rows.filter(r=>r.kind==="expense").reduce((s,r)=>s+(r.amount??0),0)],
+              ["Явные выплаты, RSD", preview.rows.filter(r=>r.kind==="order").reduce((s,r)=>s+Number(r.legacyFinance?.sourceVladislavPayout??0)+Number(r.legacyFinance?.sourcePartnerPayout??0),0)],
+              ["Выплат с положительной суммой", preview.rows.filter(r=>r.kind==="order").reduce((s,r)=>s+Number(Number(r.legacyFinance?.sourceVladislavPayout??0)>0)+Number(Number(r.legacyFinance?.sourcePartnerPayout??0)>0),0)],
+              ["Совпадений с CRM", new Set(preview.rows.map(r=>r.clientId).filter(Boolean)).size],
+              ["Адреса без точного текста", preview.rows.filter(r=>r.kind==="order"&&!r.address).length],
               ["Расходы", preview.summary.expenses],
               ["Вложения", preview.summary.investments],
               ["Группы клиентов", preview.summary.clients],
@@ -188,10 +196,7 @@ export function ImportWorkspace({ initial }: { initial?: Preview }) {
             . Похожее имя само по себе не объединяет клиентов.
           </p>
           <p className="crm-hint">
-            Исторические адреса будут неактивны до подтверждения. Расчётные
-            выплаты и резерв сохраняются в legacy snapshot и не считаются
-            подтверждёнными выплатами. Показатели прибыли после импорта требуют
-            их проверки.
+            Исторические адреса сохраняются без подтверждённых координат. В профиле LumaClean 2026 явные суммы выплат импортируются как выплаченные; проценты и часы не используются для пересчёта. Резерв и прямые расходы заказа остаются снимком, расходный ledger создаётся только из листа «Расходы».
           </p>
           <form onSubmit={apply}>
             <fieldset className="crm-form-fields" disabled={pending}>
@@ -225,7 +230,7 @@ export function ImportWorkspace({ initial }: { initial?: Preview }) {
                       <input
                         type="checkbox"
                         checked={selected.includes(r.sourceKey)}
-                        disabled={r.duplicate}
+                        disabled={r.duplicate || preview.profile === "lumaclean-2026"}
                         onChange={(e) => {
                           setSelected(
                             e.target.checked
@@ -416,7 +421,7 @@ export function ImportWorkspace({ initial }: { initial?: Preview }) {
               <p>
                 Клиентов: {result.clients}; заказов: {result.orders}; адресов:{" "}
                 {result.addresses}; расходов: {result.expenses}; вложений:{" "}
-                {result.investments}; пропущено: {result.skipped};
+                {result.investments}; выплат: {result.payouts}; пропущено: {result.skipped};
                 предупреждений: {result.warnings.length}.
               </p>
             </div>

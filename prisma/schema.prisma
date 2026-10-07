@@ -229,8 +229,9 @@ model CleanerAvailability {
 model Client {
   id               String          @id @default(cuid())
   name             String
-  phone            String
+  phone            String?
   normalizedPhone  String?
+  legacyImportKey  String? @unique
   telegram         String?
   whatsapp         String?
   viber            String?
@@ -269,6 +270,7 @@ model ClientAddress {
   latitude    Decimal? @db.Decimal(10, 7)
   longitude   Decimal? @db.Decimal(10, 7)
   coordinatesConfirmed Boolean @default(false)
+  coordinatesSource String?
   placeId     String?
   active      Boolean  @default(true)
   orders      Order[]
@@ -385,8 +387,8 @@ model Order {
   leadId                   String?
   lead                     Lead?           @relation(fields: [leadId], references: [id], onDelete: SetNull)
   status                   OrderStatus     @default(DRAFT)
-  serviceId                String
-  service                  Service         @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  serviceId                String?
+  service                  Service?        @relation(fields: [serviceId], references: [id], onDelete: Restrict)
   area                     Decimal         @db.Decimal(10, 2)
   soilLevel                SoilLevel?      @default(NORMAL)
   urgent                   Boolean         @default(false)
@@ -395,6 +397,8 @@ model Order {
   durationSnapshot         Json?
   durationRuleVersion      Int?
   historical               Boolean         @default(false)
+  historicalServiceDate    DateTime?       @db.Date
+  historicalServiceLabel   String?
   legacyId                 String?
   legacyFinance            Json?
   cancellationReason       String?
@@ -674,6 +678,7 @@ model Expense {
   payoutId    String?         @unique
   payout      CleanerPayout?  @relation(fields: [payoutId], references: [id], onDelete: Restrict)
   description String
+  legacyFinance Json?
   deletedAt DateTime? @db.Timestamptz(3)
   deletionReason String?
   createdAt   DateTime        @default(now()) @db.Timestamptz(3)
@@ -685,12 +690,16 @@ model Expense {
 
 model CleanerPayout {
   id             String        @id @default(cuid())
-  cleanerId      String
-  cleaner        Cleaner       @relation(fields: [cleanerId], references: [id], onDelete: Restrict)
+  cleanerId      String?
+  cleaner        Cleaner?      @relation(fields: [cleanerId], references: [id], onDelete: Restrict)
   orderId        String
   order          Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
-  appliedPercent Decimal       @db.Decimal(5, 2)
-  basisAmount    Decimal       @db.Decimal(12, 2)
+  appliedPercent Decimal?      @db.Decimal(5, 2)
+  basisAmount    Decimal?      @db.Decimal(12, 2)
+  historical Boolean @default(false)
+  recipientName String?
+  sourceKey String? @unique
+  legacyFinance Json?
   amount         Decimal       @db.Decimal(12, 2)
   currency       String        @default("RSD") @db.VarChar(3)
   status         PaymentStatus @default(PENDING)

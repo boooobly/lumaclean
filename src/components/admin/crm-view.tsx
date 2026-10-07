@@ -10,12 +10,12 @@ import {
 } from "@/lib/domain/crm-types";
 import { getHistory } from "@/lib/services/crm-queries";
 import { scalar, type Query } from "@/lib/domain/crm-filters";
-export const date = (value: Date | null | undefined) =>
+export const date = (value: Date | null | undefined, dateOnly = false) =>
   value
     ? new Intl.DateTimeFormat("ru-RU", {
-        timeZone: "Europe/Belgrade",
+        timeZone: dateOnly ? "UTC" : "Europe/Belgrade",
         dateStyle: "medium",
-        timeStyle: "short",
+        ...(dateOnly ? {} : { timeStyle: "short" as const }),
       }).format(value)
     : "—";
 export const money = (value: unknown, currency = "RSD") =>

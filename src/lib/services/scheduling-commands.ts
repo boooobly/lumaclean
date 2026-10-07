@@ -253,6 +253,8 @@ export async function runSchedulingCommand(
         );
         const stored = await tx.order.findUnique({ where: { id: input.id } });
         if (!stored) throw new CrmError("NOT_FOUND", "Заказ не найден");
+        if (stored.historical || !stored.serviceId)
+          throw new CrmError("VALIDATION", "Исторический заказ доступен только для просмотра");
         if (closedStatuses.includes(stored.status))
           throw new CrmError(
             "TRANSITION",

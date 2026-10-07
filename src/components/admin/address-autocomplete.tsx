@@ -7,7 +7,7 @@ type Suggestion = { placeId: string; text: string };
 export function AddressAutocomplete({
   name = "fullAddress",
   proofName = "locationProof",
-  label = "Полный адрес",
+  label = "Адрес",
   value = "",
   confirmed = false,
   required = false,
@@ -24,10 +24,11 @@ export function AddressAutocomplete({
   const id = useId(),
     [text, setText] = useState(value ?? ""),
     [proof, setProof] = useState(""),
+    [textOnly, setTextOnly] = useState(false),
     [status, setStatus] = useState(
       confirmed
         ? "Координаты подтверждены; дорога рассчитывается отдельно"
-        : "Подтвердите координаты адреса",
+        : "Координаты не подтверждены. Адрес можно сохранить как введено.",
     ),
     [rows, setRows] = useState<Suggestion[]>([]),
     [search, setSearch] = useState(false),
@@ -44,6 +45,7 @@ export function AddressAutocomplete({
     setLatitude(String(p.latitude));
     setLongitude(String(p.longitude));
     setProof("");
+    setTextOnly(false);
     setReviewed(false);
     setStatus("Проверьте новый маркер и подтвердите координаты");
   }, []);
@@ -64,7 +66,7 @@ export function AddressAutocomplete({
             data.error ??
               (data.suggestions?.length
                 ? "Выберите правильный адрес"
-                : "Результатов нет. Уточните адрес или укажите координаты вручную."),
+                : "Не нашли точное совпадение"),
           );
         })
         .catch(() => {
@@ -100,7 +102,6 @@ export function AddressAutocomplete({
         result.longitude === undefined
       )
         throw Error(result.error ?? "Выберите адрес заново");
-      setText(result.address);
       setRows([]);
       move({ latitude: result.latitude, longitude: result.longitude });
       token.current = null;
@@ -124,6 +125,7 @@ export function AddressAutocomplete({
       );
       setText(result.address);
       setProof(result.proof);
+      setTextOnly(false);
       setStatus(
         "Координаты подтверждены пользователем; дорога рассчитывается отдельно",
       );
@@ -157,12 +159,14 @@ export function AddressAutocomplete({
         onChange={(e) => {
           setText(e.target.value);
           setProof("");
+          setTextOnly(false);
           setRows([]);
           setReviewed(false);
           setStatus("Адрес изменён: подтвердите координаты заново");
         }}
       />
       <input type="hidden" name={proofName} value={proof} />
+      {name === "fullAddress" && <input type="hidden" name="addressTextOnly" value={String(textOnly)} />}
       <div className="inbox-action-row">
         <button
           type="button"
@@ -182,8 +186,9 @@ export function AddressAutocomplete({
           disabled={pending}
           onClick={() => move(pin ?? { latitude: 44.8125, longitude: 20.4612 })}
         >
-          Указать на карте / вручную
+          Указать точку на карте
         </button>
+        {name === "fullAddress" && <button type="button" className="crm-button crm-button-secondary" disabled={pending || text.trim().length < 5} onClick={() => {sequence.current++; setSearch(false); setRows([]); setProof(""); setPin(null); setTextOnly(true); setStatus("Адрес будет сохранён как введено. Координаты не подтверждены.");}}>Сохранить адрес как введено</button>}
       </div>
       <p className="crm-hint" role="status">
         {status}

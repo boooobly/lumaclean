@@ -4,6 +4,7 @@ import { normalizedPhone } from "./crm";
 import { serviceLabels } from "./crm-types";
 import type { Workbook, Cell } from "exceljs";
 import { CrmError } from "./crm";
+import { applyHistoricalProfile, type ImportProfile } from './historical-import-profile';
 export type LegacyCell = { value: unknown; format: string; formula?: boolean };
 export type LegacyRow = {
   kind: "order" | "expense" | "investment";
@@ -17,6 +18,9 @@ export type LegacyRow = {
   telegram?: string | null;
   viber?: string | null;
   clientKey?: string;
+  clientAliases?: string[];
+  confirmedAliasKey?: string;
+  historicalServiceLabel?: string;
   service?: string | null;
   area?: number | null;
   address?: string | null;
@@ -36,6 +40,8 @@ export type LegacyRow = {
   duplicate?: boolean;
 };
 export type LegacyPreview = {
+  profile?: ImportProfile;
+  baselineErrors?: string[];
   fileHash: string;
   rows: LegacyRow[];
   summary: {
@@ -213,6 +219,7 @@ export function groupLegacyContacts(rows: LegacyRow[]) {
     for (const key of [
       r.phone ? "phone:" + r.phone : null,
       r.telegram ? "tg:" + r.telegram.slice(1) : null,
+      r.confirmedAliasKey,
     ]) {
       if (!key) continue;
       const prior = seen.get(key);
@@ -231,8 +238,9 @@ export function groupLegacyContacts(rows: LegacyRow[]) {
     const handles = [
       ...new Set(group.flatMap((r) => (r.telegram ? [r.telegram] : []))),
     ];
-    const conflict = phones.length > 1 || handles.length > 1;
-    const key = phones[0]
+    const aliasesConfirmed = group.every(r=>r.confirmedAliasKey && r.confirmedAliasKey===group[0].confirmedAliasKey && handles.every(h=>r.clientAliases?.includes(h)));
+    const conflict = phones.length > 1 || (handles.length > 1 && !aliasesConfirmed);
+    const key = aliasesConfirmed ? group[0].confirmedAliasKey! : phones[0]
       ? "phone:" + phones[0]
       : handles[0]
         ? "tg:" + handles[0].slice(1)
@@ -254,7 +262,7 @@ export function groupLegacyContacts(rows: LegacyRow[]) {
     }
   }
 }
-export function parseLegacyWorkbook(book: Workbook): LegacyPreview {
+export function parseLegacyWorkbook(book: Workbook, profile: ImportProfile = 'generic'): LegacyPreview {
   const rows: LegacyRow[] = [];
   const specifications = [
     {
@@ -385,7 +393,7 @@ export function parseLegacyWorkbook(book: Workbook): LegacyPreview {
           r.errors.push(
             "Исторический статус требует решения; активный заказ не импортируется в расписание автоматически.",
           );
-        r.description = text(raw[17]);
+        r.description = typeof raw[17].value==='string' ? raw[17].value : '';
         r.district = text(raw[5]);
         const address = r.description
           .match(/(?:^|[.!]\s*|\s{2,})Адрес\s+([^\n]+)$/i)?.[1]
@@ -411,6 +419,20 @@ export function parseLegacyWorkbook(book: Workbook): LegacyPreview {
             "Часы имеют формат даты или неоднозначное значение. Они не используются для actual duration и правил.",
           );
         r.legacyFinance = {
+          sourceRevenue: r.amount,
+          sourceDirectExpenses: money(raw[7]),
+          sourceReservePercent: raw[8].value,
+          sourceReserveAmount: money(raw[9]),
+          sourceLaborFund: money(raw[10]),
+          sourceVladislavHoursRaw: raw[11],
+          sourcePartnerHoursRaw: raw[12],
+          sourceVladislavPayout: money(raw[13]),
+          sourcePartnerPayout: money(raw[14]),
+          sourceComment: raw[17].value,
+          sourceDateRaw: raw[0],
+          sourceIdentityRaw: raw[2].value,
+          sourceServiceLabel: raw[3].value,
+          sourceRow: n,
           directExpenses: money(raw[7]),
           reservePercent: raw[8].value,
           reserveAmount: money(raw[9]),
@@ -429,15 +451,16 @@ export function parseLegacyWorkbook(book: Workbook): LegacyPreview {
         r.category = categoryMap[text(raw[3]).toLowerCase()] ?? null;
         if (!r.category)
           r.errors.push("Категория расхода отсутствует или неизвестна.");
-        r.description = [text(raw[4]), text(raw[8])]
-          .filter(Boolean)
-          .join(" · ");
+        r.description = text(raw[4]);
         if (!r.description) r.errors.push("Нет описания расхода.");
         r.paidBy = text(raw[5]);
         r.legacyFinance = {
           orderLegacyId: text(raw[2]),
           paidBy: r.paidBy,
           reimbursed: text(raw[7]),
+          sourceComment: raw[8].value,
+          sourceDescription: raw[4].value,
+          sourceRow: n,
         };
       } else {
         r.paidBy = text(raw[1]);
@@ -499,6 +522,7 @@ export function parseLegacyWorkbook(book: Workbook): LegacyPreview {
         "Дата расхода отличается от даты связанного заказа более чем на неделю. Проверьте legacy ID; автоматическое перепривязывание выключено.",
       );
   }
+  const baselineErrors = profile==='lumaclean-2026' ? applyHistoricalProfile(rows) : [];
   groupLegacyContacts(rows);
   const named = new Map<string, string>();
   for (const r of rows.filter((r) => r.kind === "order")) {
@@ -516,6 +540,8 @@ export function parseLegacyWorkbook(book: Workbook): LegacyPreview {
     groups.set(r.clientKey!, [...(groups.get(r.clientKey!) ?? []), r]);
   return {
     fileHash: digest(rows.map((r) => [r.sourceKey, r.rowHash])),
+    profile,
+    baselineErrors,
     rows,
     summary: {
       orders: orders.length,

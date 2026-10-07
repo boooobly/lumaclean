@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { financePeriod, economics } from "@/lib/domain/finance";
 import { durationAccuracy } from "@/lib/domain/duration";
 import { soilLabels } from "@/lib/domain/crm-types";
-import { periodTotals } from "./finance-calculation";
+import { periodTotals, completedPeriodWhere } from "./finance-calculation";
 import { durationConfig } from "./duration-engine";
 export async function getDurationSettings() {
   await requireAdmin();
@@ -39,11 +39,7 @@ export async function getFinances(input: {
     page = Math.min(10000, Math.max(1, Math.floor(Number(input.page) || 1)));
   return db.$transaction(
     async (tx) => {
-      const orderWhere = {
-        status: "COMPLETED" as const,
-        currency: "RSD",
-        completedAt: { gte: period.from, lt: period.to },
-      };
+      const orderWhere = completedPeriodWhere(period);
       const expenseWhere = {
         currency: "RSD",
         deletedAt: null,
@@ -81,7 +77,7 @@ export async function getFinances(input: {
         where: { currency: "RSD", order: orderWhere },
       });
       const cleaners = await tx.cleaner.findMany({
-        where: { id: { in: [...new Set(payouts.map((p) => p.cleanerId))] } },
+        where: { id: { in: [...new Set(payouts.map((p) => p.cleanerId).filter((id): id is string => id !== null))] } },
         select: { id: true, name: true },
       });
       const orders = await tx.order.findMany({
@@ -123,7 +119,7 @@ export async function getFinances(input: {
       });
       const months = await tx.$queryRaw<
         { month: string; revenue: string; orders: bigint }[]
-      >`SELECT to_char("completedAt" AT TIME ZONE 'Europe/Belgrade','YYYY-MM') AS month,SUM("finalPrice")::text AS revenue,COUNT(*) AS orders FROM "Order" WHERE status='COMPLETED' AND currency='RSD' AND "completedAt">=${period.from} AND "completedAt"<${period.to} GROUP BY 1 ORDER BY 1`;
+      >`SELECT to_char(COALESCE("historicalServiceDate",("completedAt" AT TIME ZONE 'Europe/Belgrade')::date),'YYYY-MM') AS month,SUM("finalPrice")::text AS revenue,COUNT(*) AS orders FROM "Order" WHERE status='COMPLETED' AND currency='RSD' AND COALESCE("historicalServiceDate",("completedAt" AT TIME ZONE 'Europe/Belgrade')::date)>=${period.fromLabel}::date AND COALESCE("historicalServiceDate",("completedAt" AT TIME ZONE 'Europe/Belgrade')::date)<(${period.toLabel}::date + 1) GROUP BY 1 ORDER BY 1`;
       const rev = totals.revenue,
         exp = totals.expenses,
         pay = totals.accrued;
@@ -145,6 +141,7 @@ export async function getFinances(input: {
         expenseCount: totals.expenseCount,
         expenseRows: expenseRows.map((e) => ({
           ...e,
+          source: e.legacyFinance && typeof e.legacyFinance === "object" && !Array.isArray(e.legacyFinance) ? {paidBy: String(e.legacyFinance.paidBy ?? ""), reimbursed: String(e.legacyFinance.reimbursed ?? ""), comment: String(e.legacyFinance.sourceComment ?? "")} : null,
           amount: Number(e.amount),
           occurredAt: e.occurredAt.toISOString(),
           updatedAt: e.updatedAt.toISOString(),
@@ -155,12 +152,12 @@ export async function getFinances(input: {
         payouts: payouts.map((p) => ({
           ...p,
           amount: Number(p.amount),
-          basisAmount: Number(p.basisAmount),
-          appliedPercent: Number(p.appliedPercent),
+          basisAmount: p.basisAmount === null ? null : Number(p.basisAmount),
+          appliedPercent: p.appliedPercent === null ? null : Number(p.appliedPercent),
           updatedAt: p.updatedAt.toISOString(),
           paidAt: p.paidAt?.toISOString() ?? null,
           createdAt: undefined,
-          cleaner: cleaners.find((c) => c.id === p.cleanerId)?.name ?? "Клинер",
+          cleaner: cleaners.find((c) => c.id === p.cleanerId)?.name ?? p.recipientName ?? "Клинер",
           reference:
             orders.find((o) => o.id === p.orderId)?.reference ?? p.orderId,
           finalPrice: Number(

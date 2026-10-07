@@ -23,6 +23,10 @@ export async function OrderEconomics({
   overrideReason: string | null;
 }) {
   const data = await getOrderEconomics(id);
+  if(historical) {
+    const source = data.legacy as Record<string, unknown> | null;
+    return <section className="crm-section"><h2>Исторические финансы</h2><Facts items={[["Доход", money(data.revenue)], ["Выплаты по источнику", money(data.accrued)], ["Расходы из отдельного ledger", money(data.businessExpenses)], ["Прямые расходы · снимок заказа", money(source?.sourceDirectExpenses ?? source?.directExpenses)], ["Резерв по источнику", money(source?.sourceReserveAmount ?? source?.reserveAmount)], ["Резерв, %", source?.sourceReservePercent == null ? "—" : `${Number(source.sourceReservePercent)*100}%`], ["Фонд оплаты труда", money(source?.sourceLaborFund ?? source?.laborFund)], ["Владислав · выплата", money(source?.sourceVladislavPayout)], ["Партнёр · выплата", money(source?.sourcePartnerPayout)], ["Оплата клиента получена", (source?.paymentReceived === true || source?.paymentReceived === "Да") ? "Да" : "Не подтверждено"], ["Остаток после ledger и выплат", money(data.profit)]]}/><p className="crm-hint">Суммы зафиксированы в источнике. Прямые расходы снимка и резерв не создают повторных операций ledger. Время выплаты и достоверные часы в источнике не указаны.</p><details><summary>Исходные значения и provenance</summary><pre className="finance-legacy">{JSON.stringify(data.legacy, null, 2)}</pre></details></section>;
+  }
   return (
     <section className="crm-section">
       <h2>Экономика заказа</h2>

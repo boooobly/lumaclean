@@ -25,7 +25,7 @@ export default async function EditOrder({
         back={`/admin/orders/${id}`}
         subtitle={`${o.reference} · ${o.client.name} · ${o.address.fullAddress}`}
       />
-      {["COMPLETED", "CANCELLED", "NO_SHOW"].includes(o.status) ? (
+      {o.historical || !o.service || ["COMPLETED", "CANCELLED", "NO_SHOW"].includes(o.status) ? (
         <p>Закрытый заказ доступен только для просмотра.</p>
       ) : (
         <OrderForm

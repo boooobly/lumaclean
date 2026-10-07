@@ -9,8 +9,8 @@ import {
   type OrderState,
 } from "./crm-types";
 export * from "./crm-types";
-export function normalizedPhone(input: string): string | null {
-  const value = input.trim();
+export function normalizedPhone(input: string | null | undefined): string | null {
+  const value = input?.trim() ?? "";
   // National numbers need an explicit Serbian trunk prefix. Bare foreign numbers remain unknown.
   if (
     !value.startsWith("+") &&

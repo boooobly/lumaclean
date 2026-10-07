@@ -6,6 +6,11 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { CrmError } from "@/lib/domain/crm";
 import { routingTelemetry } from "@/lib/infrastructure/google-routing";
+export function adminAddressSearchQueries(input: string) {
+  const original = input.normalize("NFC").trim();
+  const latin = original.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return [...new Set([original, latin.replace(/đ/gi, m => m === "Đ" ? "Dj" : "dj"), latin.replace(/đ/gi, m => m === "Đ" ? "D" : "d")])];
+}
 const location = z
   .object({
     address: z.string().min(5).max(500),
@@ -46,9 +51,10 @@ export function verifyLocation(proof: string) {
   }
 }
 export function normalizeAddress<
-  T extends { fullAddress: string; locationProof?: string | null },
+  T extends { fullAddress: string; locationProof?: string | null; textOnly?: boolean },
 >(input: T, previous?: { fullAddress: string }) {
-  const { locationProof, ...data } = input;
+  const { locationProof, textOnly, ...data } = input;
+  if (textOnly) return {...data, latitude: null, longitude: null, placeId: null, coordinatesConfirmed: false, coordinatesSource: "MANUAL_TEXT"};
   if (locationProof) {
     const place = verifyLocation(locationProof);
     if (place.address !== input.fullAddress)
@@ -62,6 +68,7 @@ export function normalizeAddress<
       latitude: place.latitude,
       longitude: place.longitude,
       placeId: place.placeId,
+      coordinatesSource: place.placeId.startsWith("user-confirmed:") ? "MANUAL_ADMIN_MAP" : "PROVIDER",
     };
   }
   return previous?.fullAddress === input.fullAddress
@@ -72,6 +79,7 @@ export function normalizeAddress<
         longitude: null,
         placeId: null,
         coordinatesConfirmed: false,
+        coordinatesSource: "MANUAL_TEXT",
       };
 }
 export function normalizeHome<
@@ -110,7 +118,11 @@ export async function placesRequest(
   if (motisSelected()) {
     try {
       const provider = routingProvider();
-      const matches = (await provider.searchAddress?.(input.query ?? "")) ?? [];
+      let matches: Awaited<ReturnType<NonNullable<typeof provider.searchAddress>>> = [];
+      for (const query of adminAddressSearchQueries(input.query ?? "")) {
+        matches = (await provider.searchAddress?.(query)) ?? [];
+        if (matches.length) break;
+      }
       if (kind === "autocomplete")
         return {
           available: true,

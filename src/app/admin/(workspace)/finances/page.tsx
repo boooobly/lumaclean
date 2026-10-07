@@ -93,7 +93,7 @@ export default async function Finances({
         <button className="crm-button">Показать</button>
       </form></DisclosureSection>
       <DisclosureSection title="Как считаются показатели"><p className="crm-hint">
-        Выручка и начисления относятся к дате завершения заказа, расходы — к
+        Выручка и начисления относятся к дате завершения заказа или исторической дате уборки, расходы — к
         дате операции. Черновики и отменённые заказы не входят в выручку.
         Связанный Expense выплаты повторно не вычитается.
       </p></DisclosureSection>
@@ -138,6 +138,7 @@ export default async function Finances({
                     </td>
                     <td>
                       {e.description}
+                      {e.source && <small>Исторический расход · оплатил: {e.source.paidBy} · возмещено: {e.source.reimbursed}{e.source.comment && <><br />{e.source.comment}</>}</small>}
                       {e.orderId && (
                         <>
                           <br />
@@ -193,9 +194,7 @@ export default async function Finances({
                 {data.payouts.map((p) => (
                   <tr key={p.id}>
                     <td>
-                      <Link href={"/admin/cleaners/" + p.cleanerId}>
-                        {p.cleaner}
-                      </Link>
+                      {p.cleanerId ? <Link href={"/admin/cleaners/" + p.cleanerId}>{p.cleaner}</Link> : p.cleaner}
                       <br />
                       <Link href={"/admin/orders/" + p.orderId}>
                         {p.reference}
@@ -205,17 +204,17 @@ export default async function Finances({
                       {money(p.finalPrice)}
                       <br />
                       <small>
-                        База {money(p.basisAmount)} · {p.appliedPercent}%
+                        {p.historical ? "Историческая сумма из источника" : <>База {money(p.basisAmount)} · {p.appliedPercent}%</>}
                       </small>
                     </td>
                     <td>{money(p.amount)}</td>
                     <td>
                       {payoutLabels[p.status]}
                       <br />
-                      {p.paidAt ? date(p.paidAt) : "—"}
+                      {p.paidAt ? date(p.paidAt) : p.historical ? "Дата выплаты не указана" : "—"}
                     </td>
                     <td>
-                      {p.status === "PENDING" && (
+                      {!p.historical && p.status === "PENDING" && (
                         <FinanceForm
                           command="payout-pay"
                           payload={{ id: p.id, expectedUpdatedAt: p.updatedAt }}
@@ -223,7 +222,7 @@ export default async function Finances({
                           confirm
                         />
                       )}
-                      <details>
+                      {p.historical ? <span>Историческая выплата</span> : <details>
                         <summary>Осознанная корректировка</summary>
                         <p className="crm-hint">
                           Это отдельная операция; изменение цены или процента
@@ -246,7 +245,7 @@ export default async function Finances({
                           />
                           <Field name="reason" label="Причина" required />
                         </FinanceForm>
-                        {p.status === "PENDING" && (
+                        {!p.historical && p.status === "PENDING" && (
                           <FinanceForm
                             command="payout-recalculate"
                             payload={{
@@ -280,7 +279,7 @@ export default async function Finances({
                             />
                           </FinanceForm>
                         )}
-                      </details>
+                      </details>}
                     </td>
                   </tr>
                 ))}

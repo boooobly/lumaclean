@@ -1,14 +1,18 @@
 import type { Prisma } from "@/generated/prisma/client";
+import { Temporal } from "@js-temporal/polyfill";
+export function completedPeriodWhere(period: {from: Date; to: Date}): Prisma.OrderWhereInput {
+  const dateBound = (d: Date) => new Date(Temporal.Instant.from(d.toISOString()).toZonedDateTimeISO("Europe/Belgrade").toPlainDate().toString() + "T00:00:00Z");
+  return {status: "COMPLETED", currency: "RSD", OR: [
+    {historicalServiceDate: {gte: dateBound(period.from), lt: dateBound(period.to)}},
+    {historicalServiceDate: null, completedAt: {gte: period.from, lt: period.to}},
+  ]};
+}
 // One canonical accrual definition, also used in targeted integration checks.
 export async function periodTotals(
   tx: Prisma.TransactionClient,
   period: { from: Date; to: Date },
 ) {
-  const orderWhere = {
-    status: "COMPLETED" as const,
-    currency: "RSD",
-    completedAt: { gte: period.from, lt: period.to },
-  };
+  const orderWhere = completedPeriodWhere(period);
   const revenue = await tx.order.aggregate({
     where: orderWhere,
     _sum: { finalPrice: true },

@@ -19,7 +19,7 @@ import { completeEconomics } from "./payout-calculation";
 
 type Tx = Prisma.TransactionClient;
 export class DuplicateClientError extends CrmError {
-  constructor(public matches: { id: string; name: string; phone: string }[]) {
+  constructor(public matches: { id: string; name: string; phone: string | null }[]) {
     super("DUPLICATE", "Возможно, клиент уже существует", "phone");
   }
 }
@@ -39,7 +39,7 @@ async function clientExists(tx: Tx, id: string) {
   if (!client) throw new CrmError("NOT_FOUND", "Клиент не найден");
   return client;
 }
-async function duplicates(tx: Tx, phone: string, allow: boolean) {
+async function duplicates(tx: Tx, phone: string | null, allow: boolean) {
   const normalized = normalizedPhone(phone);
   if (normalized) {
     await lock(tx, "phone", normalized);
@@ -503,6 +503,8 @@ export async function runCrmCommand(
         await lock(tx, "order", v.id);
         const storedOrder = await tx.order.findUnique({ where: { id: v.id } });
         if (!storedOrder) throw new CrmError("NOT_FOUND", "Заказ не найден");
+        if (storedOrder.historical || !storedOrder.serviceId)
+          throw new CrmError("VALIDATION", "Исторический заказ доступен только для просмотра");
         // One query at a time on the transaction connection. Prisma relation
         // loading otherwise runs sibling queries concurrently in adapter-pg.
         const extras = await tx.orderExtra.findMany({
@@ -512,7 +514,7 @@ export async function runCrmCommand(
           where: { id: storedOrder.serviceId },
           select: { code: true },
         });
-        const order = { ...storedOrder, extras, service };
+        const order = { ...storedOrder, serviceId: storedOrder.serviceId, extras, service };
         if (command === "order-status") {
           const input = commandSchemas[command].parse(payload);
           assertTransition("Order", order.status, input.status);
