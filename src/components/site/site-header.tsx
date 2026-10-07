@@ -22,6 +22,8 @@ export function SiteHeader({locale, copy, homeHref = "", estimateHref = "#estima
     let frame = 0;
     const update = () => {
       frame = 0;
+      const mobileHero=document.querySelector<HTMLElement>('.site-home .journey-hero');
+      if(mobileHero&&window.innerWidth<=680){setPaper(mobileHero.getBoundingClientRect().bottom<=62);return;}
       const handoff = document.querySelector<HTMLElement>("#handoff");
       if (!handoff) {
         const serviceHero = document.querySelector<HTMLElement>(".service-hero");

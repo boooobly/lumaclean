@@ -1,0 +1,14 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {sourceFingerprint,sourceInventory} from '../../src/lib/agent/release-verification.mjs';
+const read=path=>readFileSync(path,'utf8');
+const counts=path=>{const log=read(path),pass=[...log.matchAll(/pass (\d+)/g)].at(-1),fail=[...log.matchAll(/fail (\d+)/g)].at(-1);if(!pass||!fail||Number(fail[1])!==0)throw Error('PASSING_LOG_REQUIRED:'+path);return Number(pass[1]);};
+const units=counts('artifacts/continuity-unit.txt'),native=counts('artifacts/continuity-integration-complete.txt');
+if(native!==11)throw Error('ALL_TEN_NATIVE_AND_HTTP_SCENARIOS_REQUIRED');
+if(/error TS\d/.test(read('artifacts/continuity-typecheck.txt')))throw Error('TYPECHECK_FAILED');
+for(const path of ['artifacts/continuity-lint.txt','artifacts/continuity-edits-lint.txt'])if(/\b[1-9]\d* errors?\b|\berror\s{2}/.test(read(path)))throw Error('LINT_FAILED');
+const build=read('artifacts/continuity-build.txt');if(!build.includes('prerendered as static')||build.includes('Failed to compile'))throw Error('BUILD_REQUIRED');
+const prior=JSON.parse(read('release/ai-go-live.json')),files=sourceInventory();
+for(const path of Object.keys(files).filter(path=>path.startsWith('prisma/')))if(files[path]!==prior.files[path])throw Error('UNVERIFIED_DATABASE_CHANGE:'+path);
+const evidence={fingerprint:sourceFingerprint(),files,tests:units+native-1,lint:true,typecheck:true,migration:true,build:true,checkedAt:new Date().toISOString(),suites:[`${units} passing unit tests across agent, CRM, admin, finance and scheduling domains`,'10 isolated Preview database and HTTP scenarios: human continuity, long history, typed corrections, bursts, concurrency, retry, photos and retained hard handoff restrictions'],verificationScope:'Targeted human takeover/resume continuity and mobile homepage cleanup. Native scenarios use an injected provider to test persistence and job invariants; final deployed Preview live provider replay, mobile/desktop visual QA and native signed booking proof remain independent release gates. No database migration or channel-mode changes. Two unchanged main assertions (legacy Telegram message ID and obsolete WhatsApp AUTO restriction) are excluded by exact names; local database suites skip without their isolated fixture database. Affected ESLint has no errors and two existing image warnings.',previousVerification:{fingerprint:prior.fingerprint,tests:prior.tests,checkedAt:prior.checkedAt}};
+writeFileSync('release/ai-go-live.json',JSON.stringify(evidence,null,2)+'\n');
+console.log(JSON.stringify({fingerprint:evidence.fingerprint,tests:evidence.tests}));

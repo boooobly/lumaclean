@@ -16,6 +16,7 @@ import {photoQualificationAllowed} from './chat-attachments';
 import { orderNotifications, handoffNotification } from './notifications';
 import {buildAgentTemporalContext,serviceDatePolicy,latestStartForEndBy,incomingDeparturePolicy,type DepartureLegInput} from "./temporal";
 import {applyCustomerFacts,explicitCustomerFacts,supportedFacts} from "./customer-facts";
+import {currentClientTurn,pendingHumanStatements,operationalSummary,conversationMemory} from './conversation-memory';
 import {inputQuestion,inputAlreadyKnown} from "./chat-presentation";
 import {behaviorMetric} from "./behavior-telemetry";
 import {bookingReviewBlocked,windowQuantitiesMissing} from './conversion-facts';
@@ -106,7 +107,7 @@ async function checkedSlot(tx:Tx,c:Conversation,ctx:ToolContext,token:string){
 /** Atomic standard booking boundary; shares production pricing, duration and scheduling services. */
 export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,reschedule:boolean){
   if(ctx.mode!=="AUTO")return{error:"SHADOW_MUTATION_BLOCKED",planned:true,operation:reschedule?"rescheduleOrder":"createOrder"};
-  if(bookingReviewBlocked(ctx.state)||await tx.humanHandoff.count({where:{conversationId:c.id,resolvedAt:null,reason:{startsWith:'SOFT:',not:'SOFT:CONTACT_PREFERENCE'}}}))return{error:'REVIEW_REQUIRED',message:'Owner must resolve pending review before booking.'};
+  if(bookingReviewBlocked(ctx.state)||await tx.humanHandoff.count({where:{conversationId:c.id,resolvedAt:null,reason:{not:'SOFT:CONTACT_PREFERENCE'}}}))return{error:'REVIEW_REQUIRED',message:'Owner must resolve pending review before booking.'};
   const state=ctx.state,pending=state.pending;
   if(!pending){if(state.booking&&!reschedule)return{booked:true,reference:state.booking.reference,recap:state.booking};throw new AgentError("EXPLICIT_CONFIRMATION_REQUIRED");}
   if(!pending.confirmedByMessageId||pending.reschedule!==reschedule)throw new AgentError("EXPLICIT_CONFIRMATION_REQUIRED");
@@ -200,11 +201,32 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   if(name==='recordCustomerFacts'){
     const input=toolSchemas.recordCustomerFacts.parse(payload);
     const job=await tx.agentJob.findUniqueOrThrow({where:{id:ctx.jobId}});
-    const source=await tx.message.findUniqueOrThrow({where:{id:job.messageId}});
+    const turn=await currentClientTurn(tx,c.id,job.messageId);
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
-    const intent=(source.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent;
-    if(source.author!=='CLIENT'||!source.text.includes(input.evidence)||!supportedFacts(input.facts,explicitCustomerFacts(source.text,source.sentAt,settings.timezone,intent,state)))return{error:'CUSTOMER_FACTS_REQUIRED'};
+    const source=turn.find(m=>m.text.includes(input.evidence)&&supportedFacts(input.facts,explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,state)));
+    if(!source)return{error:'CUSTOMER_FACTS_REQUIRED'};
     applyCustomerFacts(state,input.facts,buildAgentTemporalContext(source.sentAt,settings).nowLocalDate);
+    // Evidence from an early message cannot undo a later explicit correction in this same burst.
+    for(const m of turn.slice(turn.indexOf(source)+1))applyCustomerFacts(state,explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,state));
+    return{facts:state.draftFacts};
+  }
+  if(name==='reconcileHumanContext'){
+    const input=toolSchemas.reconcileHumanContext.parse(payload),pending=pendingHumanStatements(c.summary);
+    const ids=[...new Set(input.reviewedMessageIds)];
+    if(!pending.length||ids.length!==pending.length||pending.some(s=>!ids.includes(s.id)))return{error:'HUMAN_CONTEXT_REQUIRED'};
+    if(input.corrections.some(p=>!pending.some(s=>s.id===p.messageId&&s.text.includes(p.evidence)))||new Set(input.corrections.map(p=>p.messageId)).size!==input.corrections.length)return{error:'HUMAN_CONTEXT_REQUIRED'};
+    const rows=await tx.message.findMany({where:{conversationId:c.id,OR:[{id:{in:ids}},{author:'CLIENT',sentAt:{gte:(await tx.message.findFirstOrThrow({where:{id:{in:ids}},orderBy:[{sentAt:'asc'},{id:'asc'}]})).sentAt}}]},orderBy:[{sentAt:'asc'},{id:'asc'}]});
+    const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    const edits=conversationMemory(c.summary).factEdits??[];
+    const timeline=[...rows.map(m=>({at:m.sentAt,id:m.id,message:m,facts:undefined as AgentState['draftFacts']})),...edits.filter(edit=>new Date(edit.at)>=rows[0].sentAt).map(edit=>({at:new Date(edit.at),id:'',message:undefined,facts:edit.facts}))].sort((a,b)=>a.at.getTime()-b.at.getTime()||a.id.localeCompare(b.id));
+    for(const event of timeline){
+      if(event.facts){applyCustomerFacts(state,event.facts);continue;}
+      const m=event.message!;
+      if(m.author==='ADMIN'){const correction=input.corrections.find(p=>p.messageId===m.id);if(correction)applyCustomerFacts(state,correction.facts);}
+      else if(m.author==='CLIENT')applyCustomerFacts(state,explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,state));
+    }
+    if(ctx.mode==='AUTO'&&(c.leadId||state.draftFacts?.service&&state.draftFacts.area))await updateLead(tx,c,ctx,{intent:'cleaning'});
+    if(ctx.mode==='AUTO')await tx.conversation.update({where:{id:c.id},data:{summary:operationalSummary(state,c.summary,{reviewedHumanIds:ids})}});
     return{facts:state.draftFacts};
   }
   if(name==='requestCustomerInput'){
@@ -346,6 +368,8 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   }
   ctx.handoff=true;
   delete state.nextInput;delete state.pending;
+  // Returning control or replying resolves the notification, not the underlying booking restriction.
+  if(input.reason!=='CLIENT_REQUEST')state.review={reasons:[...new Set([...state.review?.reasons??[],`HARD:${input.reason}`])]};
   behaviorMetric('handoffByReason',input.reason);
   if(!state.draftFacts?.service||!state.draftFacts?.area||!state.draftFacts?.soilLevel||!state.draftFacts?.extrasConfirmed)behaviorMetric('handoffBeforeQualificationComplete',input.reason);
   if(ctx.mode==="SHADOW")return{planned:true,error:"SHADOW_MUTATION_BLOCKED",reason:input.reason};
@@ -373,8 +397,12 @@ export async function executeAgentTool(db:PrismaClient,ctx:ToolContext,name:stri
     result=await db.$transaction(async tx=>{
       const c=await assertToolAccess(tx,ctx);
       if(ctx.mode==="AUTO")ctx.state=stateOf(c);
+      if(pendingHumanStatements(c.summary).length&&!['getBusinessInfo','recordCustomerFacts','reconcileHumanContext','requestHumanHandoff','requestReview'].includes(typed))return{error:'HUMAN_CONTEXT_REQUIRED'};
       const output=await dispatch(tx,c,ctx,typed,parsed.data);
-      if(ctx.mode==="AUTO")await tx.conversation.update({where:{id:c.id},data:{state:json(ctx.state),...(typed==="calculatePrice"?{stage:"QUOTING"}:typed==="findAvailableSlots"&&!output.error?{stage:"SCHEDULING"}:{})}});
+      if(ctx.mode==="AUTO"){
+        const live=await tx.conversation.findUniqueOrThrow({where:{id:c.id}});
+        await tx.conversation.update({where:{id:c.id},data:{summary:operationalSummary(ctx.state,live.summary),state:json(ctx.state),...(typed==="calculatePrice"?{stage:"QUOTING"}:typed==="findAvailableSlots"&&!output.error?{stage:"SCHEDULING"}:{})}});
+      }
       return output;
     },{maxWait:10000,timeout:40000});
   }catch(e){

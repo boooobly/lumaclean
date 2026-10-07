@@ -927,7 +927,7 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
           }}
         >
           <MessageCircle size={21} />
-          <span>{words.open}</span>
+          <span className="chat-launcher-full">{words.open}</span>
           {unread > 0 && (
             <b aria-label={`${unread} ${locale === "en" ? "unread" : locale === "sr-Latn" ? "nepročitano" : locale === "sr-Cyrl" ? "непрочитано" : "непрочитанных"}`}>
               {unread > 99 ? "99+" : unread}
