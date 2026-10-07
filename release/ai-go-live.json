@@ -1,5 +1,5 @@
 {
-  "fingerprint": "f63d5700de305b22bd5e6e94748bb16f89afe99ee58fd375d1404eb2d156f70e",
+  "fingerprint": "cc69293ea1a96d1ebcabbefa8ad1343d8369f4a3bf388b84c6034deba98dbe91",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -133,7 +133,7 @@
     "src/i18n/request.ts": "9e8c03ca10ec8022d7c4e46ecf5e25c4d9e723d9f7c9b04fc8a5401d00aead7a",
     "src/i18n/routing.ts": "68dfd0fa0c1ade7562be6a856caf3c410205dd654859cbeb2f7c5066842b4b50",
     "src/lib/agent/behavior-eval.ts": "58875967d9aebc564f9ecc67ec83768c4376a30e2591d735c10c8780b705a097",
-    "src/lib/agent/behavior-telemetry.ts": "70cbebd54663a2993fa6f6d5a76bd7a2d04803f62365491e962a57be72bf51fe",
+    "src/lib/agent/behavior-telemetry.ts": "65b6f66b11127abbf6a29be0c69e56f544779477094dae99603fad5ece1d1242",
     "src/lib/agent/channel-diagnostics.ts": "80421a760418a620432af1c5cceffef3a4317d550f9a92ebefe2c3d1d65d5e01",
     "src/lib/agent/channel-ingress.ts": "ffc8a9a51525612363714bbab59b41c626bc70fcb0fec5541595a3107d7b5ca7",
     "src/lib/agent/channel-media-ticket.ts": "597d55449e847ce97fb51d05287e59364505464262c690153fd38a564bde04d9",
@@ -142,28 +142,30 @@
     "src/lib/agent/channel-webhook.ts": "1802fddbf6d9358592ed56554a4a84adc375b4711d6708e4e988ccbcf497e319",
     "src/lib/agent/channels.ts": "915e690b047a1a8ed2db0098dd3d425590ff85039710f050bde7bc33596d1f9c",
     "src/lib/agent/chat-attachments.ts": "4489b694b8cffe28f25edaee4801be053319e05031ea0a20aa383e584e628daa",
-    "src/lib/agent/chat-presentation.ts": "01a17e79353c75d0b548a0a8400d9550e63c5f7c56533d551881897eada15089",
+    "src/lib/agent/chat-presentation.ts": "94fef44f7e889c001cfd0c0b6454c62025ab2c9a9946c7112999b28f54f3e7aa",
     "src/lib/agent/chat-upload-http.ts": "217ce3fc7f5e3be3c613bfebda0d4316fd222550a0473b02daf023262dd45302",
-    "src/lib/agent/contracts.ts": "26a4ea35976457cc3293f24082bb956b8edcf19aed7d409956f6f7637080c2be",
+    "src/lib/agent/contracts.ts": "8e4bf498bb9ddaeb91d32dcc8ed65560b56c49feac5c3e3cc9056e87af8fcfcd",
+    "src/lib/agent/conversion-facts.ts": "e25429cfebf370457f9ea145ebdfe70138e24b30e8afe13b56e6a2ffa95065bc",
+    "src/lib/agent/conversion-intake.ts": "7257709e1c941ef9e83550d1bc63959f7add2282a0a0101963e11d5df18fa429",
     "src/lib/agent/customer-channels.ts": "b6940d78f33831fb2e257efe57e3b243dc3f06ea1ebe729a2ce27fc22d6df3c5",
-    "src/lib/agent/customer-facts.ts": "e23803a7282975cb88cd40ed8439bfb0adef5d967975f49ce2e36ed038d4087f",
-    "src/lib/agent/inbox.ts": "7fa244fa3327a47391ad58c4efcba38a864c00878d446e08de688f75bf9ac902",
+    "src/lib/agent/customer-facts.ts": "61081dd83d754bb05817fb5212c0f91c2800cbd9edb886af686e8b5fd47ff30f",
+    "src/lib/agent/inbox.ts": "b4d790d6775a0cf80ce937f5597d89f5ef8d2176f9148c5c389ab37201769fec",
     "src/lib/agent/live-proof.ts": "ef6d87668d05e67ac93d9930d7110a2f31be35fe622583096b421b4bb8c566bf",
     "src/lib/agent/live-test.ts": "138a06224dd228015c69de39e8997f1b359db79255e1bf6eeb6f48c0cf513f2b",
-    "src/lib/agent/notifications.ts": "a0e93f2326de0cce416446d27c79dcf0a8eb3684e21390688111840358197d83",
+    "src/lib/agent/notifications.ts": "2d14b7d69c8568be7807d8f5f6c514f85e701ba54964e92b4bc1e536bd0673fc",
     "src/lib/agent/persona.ts": "eed1e3cb5f5e62d6aa043c689d671be79c27d43dc35a88f989bfb87540794af3",
-    "src/lib/agent/policy.ts": "925d42588f4330e1ef364e3fa7aae6ef96e2afefb6c8f17fd6770dd46706a48d",
+    "src/lib/agent/policy.ts": "02493f61207a44f82a727ce70b0021a228f9ddc545cd92a57c53937133ea129e",
     "src/lib/agent/providers.ts": "0718f09a7e9c18ced95a00a503d58b3528675b1d4f41d4729de3e98ef6977f46",
     "src/lib/agent/queries.ts": "c3127834c64ab6d81caa78b675cc7f5cb38873d3b0fa3356a6c485046799da38",
     "src/lib/agent/queue.ts": "7544dba6cb5a7dba2233c7ea74c99fe7271e17163a831898012651c5eb0019df",
     "src/lib/agent/readiness.ts": "8a9bf485356d83a172051fdff7dc50c2849f07490a5c39921358e348c77321e8",
     "src/lib/agent/release-verification.d.mts": "922a8223a92a36f373f1f850962fb8efc441cf9944c7bae83bcda9d0ed631aff",
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
-    "src/lib/agent/runner.ts": "544067592dee5206851cc0c3306e02c8fc6688710ef70187a8f8a60acb60ee23",
+    "src/lib/agent/runner.ts": "9a0901cf1ccd76bcb8c89780bcd1d5b1bf036bd17a06c7a935a6c9fa293874a1",
     "src/lib/agent/settings.ts": "bf18dc0f06eaa3bb5551f2a846bb1fed31966cace4815843a1919b671e550017",
-    "src/lib/agent/telegram-handoff.ts": "6af3f4aa05345a484e9b5b65ef65381de0e67bf79cabef71cb8e99e30920ba44",
-    "src/lib/agent/temporal.ts": "d2d430eecb841db1f436625ee98ececc75d0ff5743fd3bb51659e0d9259d5e9b",
-    "src/lib/agent/tools.ts": "ab0bccd625928ffc877d2ff7d99d08bc08adaed49fcd0025ada608cfc06b288c",
+    "src/lib/agent/telegram-handoff.ts": "c9397fb01f21c3810069bc9710cd16ec98274698d2adb49a9c19036d7dbf6a7e",
+    "src/lib/agent/temporal.ts": "7dff9432c06f3dd3e9da30ece37add57aa50c2f434f5dec434de3769ec39ad05",
+    "src/lib/agent/tools.ts": "76634e2e0df1ea34767a11d51c6baae05aa7eaa3a69acb8aa94d9631e4e845a8",
     "src/lib/analytics.ts": "ac20e7f318855188db315705788fff372d2375f33cb1114b48612fa30f839498",
     "src/lib/articles/airbnb.ts": "6ac8861e9d41cadf626a26d54c10c2da58dd6bcfa376cb5cf40d35fd19952857",
     "src/lib/articles/bathroom.ts": "35e05dd40a50fa6d8b9859ea6237dc5f9e50f51ec8992a38297fb0be3ebdf549",
@@ -269,69 +271,22 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 35,
+  "tests": 219,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-06T19:22:56.714Z",
+  "checkedAt": "2026-10-07T09:02:18.265Z",
   "suites": [
-    "15 admin messenger/component/domain, history navigation and CRM validation checks",
-    "20 customer transport/security/media unit checks"
+    "targeted conversion, behavior, corpus, quick replies, release, persona and temporal unit checks",
+    "native provider and Preview readiness checks",
+    "native isolated Preview incident and existing behavior integration"
   ],
-  "verificationScope": "Admin UX presentation, older-history navigation and validation wording only; rules and modes unchanged. 35 targeted Node checks, affected lint, typecheck and optimized production build passed. 10 isolated Preview integration assertions passed. Protected Preview all nine pages at six viewports and messenger interaction/media/form QA passed; localized validation and older-history latest navigation confirmed in final authenticated Preview. Disposable Preview entities/media cleaned with zero remaining records and unchanged modes. Prior AI evidence retained as baseline and not claimed as rerun.",
+  "verificationScope": "Targeted sales conversion fix. 203 unit assertions and 16 isolated Preview test records passed; no schema/migration, price or routing changes. Affected lint/typecheck and optimized build passed. Existing legacy Telegram-ID assertion excluded by exact name because unchanged main already fails it. Deployed Preview HTTP replay and new-source native booking proof remain release gates. Production modes and the real incident remain unchanged.",
   "previousVerification": {
-    "fingerprint": "6f8655ab88310b09545d23344b14dfcdd9a35ecc6b9cfbafd3683c9a9bb8f722",
-    "tests": 48,
-    "checkedAt": "2026-10-05T22:16:59.702Z",
-    "verificationScope": "Privacy/deletion pages and homepage links only. 48 targeted unit checks passed; 1 isolated database test skipped (no database test requested for static pages). Affected lint and typecheck passed. No agent, database schema, migrations or credentials changed. Previous release evidence retained as baseline, not claimed as rerun. Build and Preview/public-page smoke are release gates. Production build and desktop/mobile protected Preview smoke passed; policy/deletion canonical, contact links and 390px layout verified.",
-    "previousVerification": {
-      "fingerprint": "2bc5bbca741b88d3e1da990fc0c6a76b4975d2eb2b00bf5a1fa3a69de4d148cb",
-      "tests": 45,
-      "checkedAt": "2026-10-04T20:00:37.644Z",
-      "verificationScope": "72 passing targeted tests in the full run (one unchanged internal handoff DB test excluded). Final focused run passed 29 checks after the last transport/outbox changes, adding 3 unique passing checks: 75 distinct passing test records including the integration parent. Selected corpus cases were intentionally not repeated in the focused run. Affected lint and typecheck passed; all 15 additive migrations applied to isolated Preview. Previous 206-check behavior release evidence is retained below, not claimed as rerun. Native Preview booking and production deployment verification are performed separately. Website AUTO must be preserved; external channels and customer notifications remain OFF until explicit owner setup and enable. Production build passed.",
-      "previousVerification": {
-        "fingerprint": "ed1dc7c2e6b84937598bc8d4c591c0206d444f2e357078efa4fed7a47809cd1d",
-        "tests": 206,
-        "checkedAt": "2026-10-04T18:12:54.873Z",
-        "verificationScope": "205 targeted tests passed with isolated Preview database cleanup. Final core/corpus and new native qualification fallback test: 133 passed, yielding 206 maintained targeted checks. Affected lint passed (2 existing image warnings), typecheck and production build passed. Additive migration 20261004180000_agent_behavior_hardening applied to isolated Preview; all 14 migrations available in source. Native provider evaluation, Preview UI examples and fresh booking proof are performed separately before release. Production owner mode must remain unchanged."
-      }
-    }
-  },
-  "previewIntegration": {
-    "checks": 10,
-    "passed": true,
-    "scope": "Disposable Preview conversations only: takeover/reply idempotency/resume; bounded 200-message pagination; customer-visible stream; unread/handoff/unknown-delivery filters. Global modes unchanged."
-  },
-  "previewVisual": {
-    "deploymentId": "dpl_7RFpHTNvvwoVSFP75U5AEtWQcfbp",
-    "sourceSha": "f044746f4af14ecd5cdce1e973660f10d505ce4f",
-    "pageViewportChecks": 54,
-    "unintendedHorizontalOverflow": 0,
-    "viewports": [
-      "1440x900",
-      "1024x768",
-      "768x1024",
-      "430x932",
-      "390x844",
-      "360x800"
-    ],
-    "finalFollowup": {
-      "deploymentId": "dpl_7uTqZcgUZJTi5hKpkV9ujdWS4sKu",
-      "sourceSha": "7aef146971c4ecd25487dda1a23dd7b257608376",
-      "checks": [
-        "localized numeric error and disclosure expansion",
-        "older-history floating latest navigation"
-      ],
-      "passed": true
-    },
-    "physicalMobileKeyboardTested": false
-  },
-  "previewCleanup": {
-    "removedPrimaryEntities": 11,
-    "remainingOwnedRecords": 0,
-    "privateMediaRemoved": true,
-    "modesPreserved": true,
-    "immutableAuditTrailPreserved": true
+    "fingerprint": "f63d5700de305b22bd5e6e94748bb16f89afe99ee58fd375d1404eb2d156f70e",
+    "tests": 35,
+    "checkedAt": "2026-10-06T19:22:56.714Z",
+    "verificationScope": "Admin UX presentation, older-history navigation and validation wording only; rules and modes unchanged. 35 targeted Node checks, affected lint, typecheck and optimized production build passed. 10 isolated Preview integration assertions passed. Protected Preview all nine pages at six viewports and messenger interaction/media/form QA passed; localized validation and older-history latest navigation confirmed in final authenticated Preview. Disposable Preview entities/media cleaned with zero remaining records and unchanged modes. Prior AI evidence retained as baseline and not claimed as rerun."
   }
 }

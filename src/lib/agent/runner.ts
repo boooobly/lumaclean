@@ -15,6 +15,7 @@ import {createReplySet} from './chat-presentation';
 import {behaviorMetric} from './behavior-telemetry';
 import {messageImages} from './chat-attachments';
 import {channelAdapter,type ChannelAdapter} from './channels';
+import {conversionIntake} from './conversion-intake';
 
 export function modelState(state:AgentState){
   return{...state,address:state.address?{fullAddress:state.address.fullAddress,apartment:state.address.apartment}:undefined,pending:state.pending?{recap:state.pending.recap,slotToken:state.pending.slotToken,reschedule:state.pending.reschedule,confirmed:!!state.pending.confirmedByMessageId,confirmedByMessageId:state.pending.confirmedByMessageId?"server-confirmed":undefined}:undefined,booking:state.booking?{...state.booking,orderId:undefined}:undefined};
@@ -86,7 +87,7 @@ async function persistAnswer(db:PrismaClient,ctx:ToolContext,text:string,plan:un
       const replySet=createReplySet(ctx.state,c.locale,c.revision,c.control);
       const structured=recapStructured||replySet?{...recapStructured,...(replySet?{replySet}:{})}:null;
       await tx.message.upsert({where:{responseToMessageId:job.messageId},create:{conversationId:c.id,responseToMessageId:job.messageId,author:"AI",text,structured:structured?json(structured):Prisma.DbNull,externalMessageId:`agent:${ctx.jobId}:${ctx.revision}`,deliveryStatus:c.channel==="WEBSITE"?"DELIVERED":"PENDING"},update:{}});
-      await tx.conversation.update({where:{id:c.id},data:{lastMessageAt:new Date(),needsAttention:ctx.handoff||!!ctx.state.booking}});
+      await tx.conversation.update({where:{id:c.id},data:{state:json(ctx.state),lastMessageAt:new Date(),needsAttention:ctx.handoff||!!ctx.state.booking||!!ctx.state.review?.reasons.length}});
     }
     await tx.agentJob.update({where:{id:ctx.jobId},data:{status:"DONE",completedAt:new Date(),leaseUntil:null,leaseKey:null,errorCode:null}});
   });
@@ -123,6 +124,10 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
     }
     else{
       if(substantiveIntent(current.text))await tool("createOrUpdateLead",{intent:"cleaning"});
+      if(c.leadId||ctx.state.phone)await tool('createOrUpdateLead',{intent:'cleaning',...(ctx.state.phone?{phone:ctx.state.phone}:{})});
+      const intake=await conversionIntake(()=>ctx.state,current.text,c.locale,tool);
+      if(intake)text=intake;
+      else{
       const compact=c.summary??null;
       const messages:AgentMessage[]=[{role:"system",content:conversationPolicy(c.locale,modelState(ctx.state) as AgentState,compact,buildAgentTemporalContext(current.sentAt,limits),c.displayAlias)},...recent.reverse().filter(m=>m.author!=="SYSTEM").map(m=>({role:(m.author==="CLIENT"?"user":"assistant") as "user"|"assistant",content:m.text.slice(0,1500)}))];
       const photos=await loadImages(db,current.id,c.id);
@@ -174,7 +179,9 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
           messages.push({role:"tool",toolCallId:call.id,content:JSON.stringify(result).slice(0,8000)});
           if(['NO_DURATION_RULE','ROUTING_UNRELIABLE','PRICE_REVIEW','NO_SLOTS','PRICE_CHANGED','SERVICE_UNAVAILABLE','EXTRA_UNAVAILABLE','RESCHEDULE_REVIEW_REQUIRED','UNSUPPORTED_SERVICE'].includes(String(result.error))||result.requiresHumanReview){
             const reason=result.error==='NO_DURATION_RULE'?"NO_DURATION_RULE":result.error==='ROUTING_UNRELIABLE'?"ROUTING_UNRELIABLE":result.error==='NO_SLOTS'?"NO_SLOTS":"PRICE_REVIEW";
-            await tool("requestHumanHandoff",{reason});break;
+            const safety=mandatoryHandoff(current.text)||['HEAVY','EXTREME'].includes(ctx.state.draftFacts?.soilLevel??'');
+            if(safety){await tool("requestHumanHandoff",{reason});break;}
+            await tool('requestReview',{reason:result.error==='NO_DURATION_RULE'?'NO_DURATION_RULE':result.error==='NO_SLOTS'?'NO_SLOTS':result.error==='ROUTING_UNRELIABLE'?'ROUTING_UNRELIABLE':'PRICE_REVIEW'});
           }
           if(toolFailures>=2){await tool("requestHumanHandoff",{reason:"TOOL_ERRORS"});break;}
           if(ctx.handoff||ctx.responseText)break;
@@ -184,6 +191,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       }
       if(!text||masculineSelfReference(text,c.locale as keyof typeof handoffText)||!outputAllowed(text,ctx.state,ctx.factAmounts)){
         await tool("requestHumanHandoff",{reason:!text?'TOOL_ERRORS':'UNCERTAINTY'});text=handoffText[c.locale as keyof typeof handoffText]??handoffText.ru;
+      }
       }
     }
     await persistAnswer(db,ctx,text,plan,leaseKey);

@@ -7,6 +7,7 @@ import { channelConfiguration, type CustomerChannel, type DeliveryResult } from 
 import {deliverOutbox} from './inbox';
 import { AgentError } from './contracts';
 import { deliverHandoffNotification, handoffKinds } from './telegram-handoff';
+import type {AgentState} from './contracts';
 type Tx=Prisma.TransactionClient;
 export const notificationWake=z.object({notificationId:z.string().min(1).max(80)}).strict();
 /** Events are committed with domain changes; delivery is always a separate worker. */
@@ -40,14 +41,24 @@ export async function orderNotifications(tx:Tx,orderId:string,kind:'BOOKED'|'CHA
   await tx.notification.createMany({data:records,skipDuplicates:true});
 }
 export async function handoffNotification(tx:Tx,conversationId:string,eventId:string,reason:string){
+  const conversation=await tx.conversation.findUniqueOrThrow({where:{id:conversationId}});
+  const facts=(conversation.state as AgentState).draftFacts;
+  const context=facts?[
+    facts.service, facts.area?facts.area+' m²':null, facts.neighborhoodHint,
+    facts.requestedWeekend?'weekend':facts.requestedDate,
+    ...(facts.extras??[]).map(e=>e.quantity+' '+e.code),...(facts.reviewItems??[]),
+    facts.requestedCrew?facts.requestedCrew+' cleaners requested':null,
+    facts.preferredContactChannel?'contact: '+facts.preferredContactChannel:null,
+  ].filter(Boolean).join(', '):'';
+  const detail=context?'\nЗапрос: '+context:'';
   const owner=await tx.user.findFirst({where:{active:true,role:'ADMIN'},orderBy:{createdAt:'asc'},select:{id:true}});
-  if(owner)await tx.notification.upsert({where:{eventKey:`handoff:${eventId}`},create:{eventKey:`handoff:${eventId}`,conversationId,userId:owner.id,audience:'ADMIN',kind:'HANDOFF',channel:'WEBSITE',text:`AI требуется помощь\nПричина: ${reason}`,scheduledAt:new Date(),deliveryState:'INTERNAL',payload:{reason}},update:{}});
+  if(owner)await tx.notification.upsert({where:{eventKey:`handoff:${eventId}`},create:{eventKey:`handoff:${eventId}`,conversationId,userId:owner.id,audience:'ADMIN',kind:'HANDOFF',channel:'WEBSITE',text:`AI требуется помощь\nПричина: ${reason}${detail}`,scheduledAt:new Date(),deliveryState:'INTERNAL',payload:{reason}},update:{}});
   if(owner){
     const c=await tx.conversation.findUniqueOrThrow({where:{id:conversationId},include:{client:{select:{name:true}},lead:{select:{name:true}},messages:{where:{author:'CLIENT'},orderBy:{sentAt:'desc'},take:1,select:{text:true}}}});
     const state=c.state as {name?:unknown}|null;
     const name=c.client?.name??c.lead?.name??(typeof state?.name==='string'?state.name:'Новый клиент');
     const reasons:Record<string,string>={CLIENT_REQUEST:'Клиент попросил оператора',UNCERTAINTY:'Нужно уточнение оператора',TOOL_ERRORS:'Не удалось выполнить действие',PROVIDERS_UNAVAILABLE:'AI временно недоступен',COMPLAINT:'Жалоба клиента',DISCOUNT:'Нестандартная скидка',HAZARDOUS_CLEANING:'Опасные загрязнения',HEAVY_LIFTING:'Перемещение тяжёлой мебели',CREW_PREFERENCE:'Требования к составу команды',ACCESS_REVIEW:'Условия доступа и ключи',PAYMENT_REVIEW:'Уточнение оплаты',CANCELLATION:'Запрос отмены',ARRIVAL_REVIEW:'Уточнение прибытия',OUTSIDE_SERVICE_AREA:'Адрес вне подтверждённой зоны'};
-    await tx.notification.upsert({where:{eventKey:`handoff:${eventId}:telegram`},create:{eventKey:`handoff:${eventId}:telegram`,conversationId,userId:owner.id,audience:'ADMIN',kind:'HANDOFF_TELEGRAM',channel:'TELEGRAM',text:`🙋 AI передала клиента человеку\nКлиент: ${name.slice(0,80)}\nПричина: ${reasons[reason]??reason}\n${c.messages[0]?.text.slice(0,500)??''}`,scheduledAt:new Date(),deliveryState:'PENDING',payload:{handoffId:eventId,reason}},update:{}});
+    await tx.notification.upsert({where:{eventKey:`handoff:${eventId}:telegram`},create:{eventKey:`handoff:${eventId}:telegram`,conversationId,userId:owner.id,audience:'ADMIN',kind:'HANDOFF_TELEGRAM',channel:'TELEGRAM',text:`🙋 AI требуется помощь команды\nКлиент: ${name.slice(0,80)}\nПричина: ${reasons[reason]??reason}${detail}\n${c.messages[0]?.text.slice(0,500)??''}`,scheduledAt:new Date(),deliveryState:process.env.VERCEL_ENV==='preview'&&conversation.externalThreadId?.startsWith('conversion-test:')?'INTERNAL':'PENDING',payload:{handoffId:eventId,reason}},update:{}});
   }
 }
 /** Repeated publishing is harmless. Long reminders are refreshed by daily recovery. */

@@ -18,6 +18,7 @@ import {buildAgentTemporalContext,serviceDatePolicy,latestStartForEndBy,incoming
 import {applyCustomerFacts,explicitCustomerFacts,supportedFacts} from "./customer-facts";
 import {inputQuestion,inputAlreadyKnown} from "./chat-presentation";
 import {behaviorMetric} from "./behavior-telemetry";
+import {bookingReviewBlocked,windowQuantitiesMissing} from './conversion-facts';
 import { AgentError, toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
 type Tx=Prisma.TransactionClient;
@@ -60,10 +61,12 @@ async function updateLead(tx:Tx,c:Conversation,ctx:ToolContext,input:ReturnType<
   if(input.phone&&input.phone!==ctx.state.phone)delete ctx.state.pending;
   if(input.name)ctx.state.name=input.name;
   if(input.phone)ctx.state.phone=input.phone;
-  const service=input.service?await tx.service.findUnique({where:{code:input.service},select:{id:true,active:true}}):null;
+  const serviceCode=input.service??ctx.state.draftFacts?.service;
+  const service=serviceCode?await tx.service.findUnique({where:{code:serviceCode},select:{id:true,active:true}}):null;
   if(input.service&&!service?.active)return{error:"SERVICE_UNAVAILABLE"};
   if(ctx.mode==="SHADOW")return{planned:true,operation:"createOrUpdateLead",error:"SHADOW_MUTATION_BLOCKED"};
-  const fields={name:ctx.state.name??"Контакт уточняется",phone:ctx.state.phone??"",normalizedPhone:ctx.state.phone?normalizedPhone(ctx.state.phone):null,locale:c.locale,...(service?{serviceId:service.id}:{}),...(input.area?{area:input.area}:{})};
+  const area=input.area??ctx.state.draftFacts?.area;
+  const fields={name:ctx.state.name??"Контакт уточняется",phone:ctx.state.phone??"",normalizedPhone:ctx.state.phone?normalizedPhone(ctx.state.phone):null,locale:c.locale,...(service?{serviceId:service.id}:{}),...(area?{area}:{})};
   const previous=c.leadId?await tx.lead.findUnique({where:{id:c.leadId}}):null;
   if(previous?.status==="CONVERTED")return{ok:true,leadId:previous.id};
   const lead=previous?await tx.lead.update({where:{id:previous.id},data:fields}):await tx.lead.create({data:{...fields,submissionId:`agent:${c.id}`,submissionHash:createHash("sha256").update(`agent:${c.id}`).digest("hex"),channel:c.channel,entrySource:"ai-chat",reference:`LC-AI-${randomUUID().slice(0,8).toUpperCase()}`,clientId:c.identityVerified?c.clientId:null,telegramStatus:"CANCELLED"}});
@@ -103,6 +106,7 @@ async function checkedSlot(tx:Tx,c:Conversation,ctx:ToolContext,token:string){
 /** Atomic standard booking boundary; shares production pricing, duration and scheduling services. */
 export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,reschedule:boolean){
   if(ctx.mode!=="AUTO")return{error:"SHADOW_MUTATION_BLOCKED",planned:true,operation:reschedule?"rescheduleOrder":"createOrder"};
+  if(bookingReviewBlocked(ctx.state)||await tx.humanHandoff.count({where:{conversationId:c.id,resolvedAt:null,reason:{startsWith:'SOFT:',not:'SOFT:CONTACT_PREFERENCE'}}}))return{error:'REVIEW_REQUIRED',message:'Owner must resolve pending review before booking.'};
   const state=ctx.state,pending=state.pending;
   if(!pending){if(state.booking&&!reschedule)return{booked:true,reference:state.booking.reference,recap:state.booking};throw new AgentError("EXPLICIT_CONFIRMATION_REQUIRED");}
   if(!pending.confirmedByMessageId||pending.reschedule!==reschedule)throw new AgentError("EXPLICIT_CONFIRMATION_REQUIRED");
@@ -198,16 +202,23 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const job=await tx.agentJob.findUniqueOrThrow({where:{id:ctx.jobId}});
     const source=await tx.message.findUniqueOrThrow({where:{id:job.messageId}});
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
-    if(source.author!=='CLIENT'||!source.text.includes(input.evidence)||!supportedFacts(input.facts,explicitCustomerFacts(input.evidence,source.sentAt,settings.timezone,state.nextInput)))return{error:'CUSTOMER_FACTS_REQUIRED'};
+    const intent=(source.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent;
+    if(source.author!=='CLIENT'||!source.text.includes(input.evidence)||!supportedFacts(input.facts,explicitCustomerFacts(source.text,source.sentAt,settings.timezone,intent,state)))return{error:'CUSTOMER_FACTS_REQUIRED'};
     applyCustomerFacts(state,input.facts,buildAgentTemporalContext(source.sentAt,settings).nowLocalDate);
     return{facts:state.draftFacts};
   }
   if(name==='requestCustomerInput'){
     const {intent}=toolSchemas.requestCustomerInput.parse(payload);
-    if(inputAlreadyKnown(intent,state)){behaviorMetric('repeatedQuestionDetected');return{error:'FACT_ALREADY_KNOWN',facts:state.draftFacts};}
+    if(inputAlreadyKnown(intent,state)){behaviorMetric('repeatedQuestionDetected');behaviorMetric('repeatedQualificationQuestionCount');return{error:'FACT_ALREADY_KNOWN',facts:state.draftFacts};}
     if(intent==='SLOT_SELECTION'&&!state.slots?.length)return{error:'SLOTS_REQUIRED'};
     if(intent==='POST_BOOKING'&&!state.booking||intent==='BOOKING_CONFIRMATION'&&!state.pending||intent==='YES_NO'&&!state.quote)return{error:'INPUT_CONTEXT_REQUIRED'};
-    const question=inputQuestion(intent,c.locale);
+    let question=inputQuestion(intent,c.locale);
+    if(intent==='SERVICE_CONFIRMATION'){
+      if(state.draftFacts?.service!=='deep')question=inputQuestion('SERVICE_TYPE',c.locale);
+      const content=siteContent[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'];
+      const exclusions=c.locale.startsWith('sr')?'Pranje kreveta i tepiha nije deo generalnog čišćenja stana.':c.locale==='en'?'Washing beds and carpets is not part of apartment deep cleaning.':'Химчистка кроватей и ковров не входит в генеральную уборку квартиры.';
+      question=content.services.filter(s=>s.id==='regular'||s.id==='deep').map(s=>s.name+': '+s.description).join('\n')+'\n'+exclusions+'\n\n'+question;
+    }
     if(!question)return{error:'UNSUPPORTED_INPUT_INTENT'};
     state.nextInput=intent;ctx.responseText=question;
     return{question,intent,finishTurn:true};
@@ -216,6 +227,8 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   if(name==="calculatePrice"){
     const input=toolSchemas[name].parse(payload);
     const facts=state.draftFacts;
+    if(facts?.serviceConfirmationRequired)return{error:'SERVICE_CONFIRMATION_REQUIRED'};
+    if(windowQuantitiesMissing(facts))return{error:'WINDOW_QUANTITIES_REQUIRED'};
     if(!ctx.previewTestId&&!state.quote&&(!facts?.service||!facts.area||!facts.soilLevel||!facts.extrasConfirmed))return{error:'CUSTOMER_FACTS_REQUIRED',facts,message:'Need explicitly confirmed service, area, soil and extras. Ask only for missing facts.'};
     if(facts&&['service','area','soilLevel','extras'].some(key=>facts[key as keyof typeof facts]!==undefined&&canonicalJson(facts[key as keyof typeof facts])!==canonicalJson(input[key as keyof typeof input])))return{error:'CUSTOMER_CORRECTION_REQUIRES_CURRENT_FACTS',facts};
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
@@ -226,11 +239,12 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const pricing=await activePrice(tx,state,c,input);
     state.qualification=input;
     state.draftFacts={...state.draftFacts,service:input.service,area:input.area,soilLevel:input.soilLevel,extras:input.extras,extrasConfirmed:true};
-    state.quote={id:randomUUID(),serviceId:pricing.service.id,input,total:pricing.snapshot.finalPrice,base:pricing.calculated.base,discountPercent:pricing.snapshot.discountPercent,requiresHumanReview:pricing.requiresHumanReview,at:new Date().toISOString()};
+    const pendingReviewItems=[...new Set([...(facts?.reviewItems??[]),...(pricing.requiresHumanReview?['PRICE_REVIEW']:[]),...(state.review?.reasons??[]).filter(r=>r!=='CONTACT_PREFERENCE')])];
+    state.quote={id:randomUUID(),serviceId:pricing.service.id,input,total:pricing.snapshot.finalPrice,base:pricing.calculated.base,discountPercent:pricing.snapshot.discountPercent,requiresHumanReview:pricing.requiresHumanReview,at:new Date().toISOString(),breakdown:pricing.calculated.extras.map(e=>({...e,amount:e.quantity*e.unitPrice})),pendingReviewItems};
     delete state.duration;delete state.slots;delete state.selectedSlotToken;delete state.pending;
     if(ctx.mode==="AUTO"&&c.leadId)await tx.lead.update({where:{id:c.leadId},data:{area:input.area,serviceId:pricing.service.id,urgent:input.urgent,estimatedPrice:state.quote.total}});
     if(ctx.mode==="AUTO")await aiAudit(tx,ctx,"AI_QUOTE_GENERATED","Conversation",c.id);
-    return{quoteId:state.quote.id,base:pricing.calculated.base,extras:pricing.calculated.extras,total:state.quote.total,currency:"RSD",discountPercent:state.quote.discountPercent,requiresHumanReview:pricing.requiresHumanReview,estimate:true};
+    return{quoteId:state.quote.id,base:pricing.calculated.base,extras:state.quote.breakdown,total:state.quote.total,knownSubtotal:state.quote.total,pendingReviewItems,final:!pendingReviewItems.length,currency:"RSD",discountPercent:state.quote.discountPercent,requiresHumanReview:pricing.requiresHumanReview||!!facts?.reviewItems?.length,estimate:true};
   }
   if(name==="estimateDuration"){
     if(!state.quote)return{error:"QUOTE_REQUIRED"};
@@ -315,12 +329,27 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     return{recap:state.pending.recap,requiresExplicitConfirmation:true};
   }
   if(name==="createOrder"||name==="rescheduleOrder")return bookConfirmed(tx,c,ctx,name==="rescheduleOrder");
+  if(name==='requestReview'){
+    const {reason}=toolSchemas.requestReview.parse(payload);
+    if(ctx.mode==='SHADOW')return{planned:true,error:'SHADOW_MUTATION_BLOCKED',reason};
+    state.review={reasons:[...new Set([...(state.review?.reasons??[]),reason])]};
+    delete state.pending;
+    const existing=await tx.humanHandoff.findFirst({where:{conversationId:c.id,resolvedAt:null,reason:'SOFT:'+reason}});
+    const review=existing??await tx.humanHandoff.create({data:{conversationId:c.id,reason:'SOFT:'+reason}});
+    await tx.conversation.update({where:{id:c.id},data:{needsAttention:true,state:json(state)}});
+    if(!existing){await aiAudit(tx,ctx,'AI_REVIEW_REQUESTED','HumanHandoff',review.id);await handoffNotification(tx,c.id,review.id,'SOFT:'+reason);}
+    return{reviewRequired:true,continuesIntake:true,reason,bookingBlocked:reason!=='CONTACT_PREFERENCE'};
+  }
   const input=toolSchemas.requestHumanHandoff.parse(payload);
+  if(['AMBIGUOUS','PRICE_REVIEW','NO_DURATION_RULE','NO_SLOTS','ROUTING_UNRELIABLE'].includes(input.reason)&&!['HEAVY','EXTREME'].includes(state.draftFacts?.soilLevel??'')){
+    return dispatch(tx,c,ctx,'requestReview',{reason:input.reason==='NO_DURATION_RULE'?'NO_DURATION_RULE':input.reason==='NO_SLOTS'?'NO_SLOTS':input.reason==='ROUTING_UNRELIABLE'?'ROUTING_UNRELIABLE':'OPERATIONAL'});
+  }
   ctx.handoff=true;
   delete state.nextInput;delete state.pending;
   behaviorMetric('handoffByReason',input.reason);
+  if(!state.draftFacts?.service||!state.draftFacts?.area||!state.draftFacts?.soilLevel||!state.draftFacts?.extrasConfirmed)behaviorMetric('handoffBeforeQualificationComplete',input.reason);
   if(ctx.mode==="SHADOW")return{planned:true,error:"SHADOW_MUTATION_BLOCKED",reason:input.reason};
-  const existing=await tx.humanHandoff.findFirst({where:{conversationId:c.id,resolvedAt:null}});
+  const existing=await tx.humanHandoff.findFirst({where:{conversationId:c.id,resolvedAt:null,reason:input.reason}});
   const handoff=existing??await tx.humanHandoff.create({data:{conversationId:c.id,reason:input.reason}});
   await tx.conversation.update({where:{id:c.id},data:{control:"HUMAN_CONTROL",stage:"HANDOFF",needsAttention:true,shadowProposal:Prisma.DbNull}});
   if(!existing)await aiAudit(tx,ctx,"AI_HANDOFF_REQUESTED","HumanHandoff",handoff.id);

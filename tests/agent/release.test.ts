@@ -16,7 +16,8 @@ test('source proof ignores platform-owned config but rejects changed application
   const base=resolve(tmpdir()),root=mkdtempSync(join(base,'lumaclean-release-'));
   try{
     mkdirSync(join(root,'src'));mkdirSync(join(root,'prisma/migrations'),{recursive:true});
-    for(const path of ['prisma/schema.prisma','next.config.ts','package.json','package-lock.json'])writeFileSync(join(root,path),'{}');
+    mkdirSync(join(root,'scripts'));mkdirSync(join(root,'infrastructure/routing-gateway'),{recursive:true});
+    for(const path of ['prisma/schema.prisma','next.config.ts','package.json','package-lock.json','.vercelignore','scripts/copy-maplibre-worker.mjs','infrastructure/routing-gateway/routing-policy.json'])writeFileSync(join(root,path),'{}');
     writeFileSync(join(root,'src/a.ts'),'const a=1;');
     const before=sourceFingerprint(root);
     writeFileSync(join(root,'vercel.json'),'platform builder rewrites this');

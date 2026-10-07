@@ -1,5 +1,6 @@
 import { randomInt, randomUUID } from "node:crypto";
 import type { AgentLocale, AgentState } from "./contracts";
+import {windowQuantitiesMissing} from './conversion-facts';
 export const displayAliases = [
   "Anna",
   "Sofia",
@@ -19,14 +20,14 @@ export function chooseAlias(recent: readonly string[] = []) {
 const replies = {
   SERVICE_REGULAR: [
     "Обычная уборка",
-    "Redovno čišćenje",
-    "Редовно чишћење",
+    "Održavajuće čišćenje",
+    "Одржавајуће чишћење",
     "Regular cleaning",
   ],
   SERVICE_DEEP: [
     "Генеральная уборка",
-    "Dubinsko čišćenje",
-    "Дубинско чишћење",
+    "Generalno čišćenje",
+    "Генерално чишћење",
     "Deep cleaning",
   ],
   SERVICE_MOVE: [
@@ -66,7 +67,12 @@ export function replyText(key: ReplyKey, locale: string) {
 export type QuickReply = { key: string; label: string };
 export type ReplySet = { id:string; intent:NonNullable<AgentState['nextInput']>; choices:QuickReply[]; conversationRevision:number; createdAt:string; consumedAt:string|null; expiresAt:string };
 const questions:Record<string,string[]> = {
- SERVICE_TYPE:['Какой клининг нужен: поддерживающий или генеральный?','Da li vam treba redovno ili dubinsko čišćenje?','Да ли вам треба редовно или дубинско чишћење?','Do you need regular or deep cleaning?'],
+ SERVICE_TYPE:['Какой клининг нужен: поддерживающий или генеральный?','Da li želite održavajuće ili generalno čišćenje?','Да ли желите одржавајуће или генерално чишћење?','Do you need regular or deep cleaning?'],
+ SERVICE_CONFIRMATION:['Подтвердите, пожалуйста: генеральная или поддерживающая уборка?','Pošto ste prvobitno naveli generalno čišćenje, samo da potvrdim: želite generalno ili održavajuće?','Само да потврдим: желите генерално или одржавајуће чишћење?','Please confirm: deep or regular cleaning?'],
+ WINDOW_COUNTS:['Сколько стандартных и больших/панорамных окон нужно помыть?','Koliko ima standardnih, a koliko velikih/panoramskih prozora?','Колико има стандардних, а колико великих/панорамских прозора?','How many standard and large/panoramic windows need cleaning?'],
+ WINDOW_TYPE:['Это стандартные или большие/панорамные окна?','Da li su standardni ili veliki/panoramski?','Да ли су стандардни или велики/панорамски?','Are those standard or large/panoramic windows?'],
+ WEEKEND_DAY:['Вам удобнее суббота или воскресенье?','Da li vam više odgovara subota ili nedelja?','Да ли вам више одговара субота или недеља?','Would Saturday or Sunday work better for you?'],
+ PHONE:['Пришлите, пожалуйста, номер телефона.','Pošaljite broj telefona, molim vas.','Пошаљите број телефона, молим вас.','Please send your phone number.'],
  AREA:['Подскажите, пожалуйста, площадь помещения в м².','Kolika je površina prostora u m²?','Колика је површина простора у м²?','What is the floor area in m²?'],
  SOIL_LEVEL:['Подскажите, пожалуйста, загрязнения обычные или сильные?','Da li je zaprljanost uobičajena ili jaka?','Да ли је запрљаност уобичајена или јака?','Is the dirt level normal or heavy?'],
  EXTRAS:['Нужны ли дополнительные услуги — например, уборка внутри духовки или холодильника?','Da li su potrebne dodatne usluge, na primer čišćenje rerne ili frižidera iznutra?','Да ли су потребне додатне услуге, на пример чишћење рерне или фрижидера изнутра?','Do you need any extras, such as cleaning inside the oven or fridge?'],
@@ -78,12 +84,12 @@ const questions:Record<string,string[]> = {
 export function inputQuestion(intent:string,locale:string){return questions[intent]?.[Math.max(0,languages.indexOf(locale as AgentLocale))];}
 export function inputAlreadyKnown(intent:string,state:AgentState){
  const f=state.draftFacts??state.quote?.input;
- return intent==='SERVICE_TYPE'?!!f?.service:intent==='AREA'?!!f?.area:intent==='SOIL_LEVEL'?!!f?.soilLevel:intent==='EXTRAS'?!!state.draftFacts?.extrasConfirmed||!!state.quote:false;
+ return intent==='SERVICE_CONFIRMATION'?!state.draftFacts?.serviceConfirmationRequired:intent==='WINDOW_COUNTS'||intent==='WINDOW_TYPE'?!windowQuantitiesMissing(state.draftFacts):intent==='WEEKEND_DAY'?!!state.draftFacts?.requestedDate:intent==='PHONE'?!!state.phone:intent==='SERVICE_TYPE'?!!f?.service:intent==='AREA'?!!f?.area:intent==='SOIL_LEVEL'?!!f?.soilLevel:intent==='EXTRAS'?!!state.draftFacts?.extrasConfirmed||!!state.quote:false;
 }
 export function createReplySet(state:AgentState,locale:string,revision:number,control:string,now=new Date()):ReplySet|null{
  const intent=state.nextInput;
  if(!intent||control!=='AI_CONTROL'||state.booking&&intent!=='POST_BOOKING'||inputAlreadyKnown(intent,state))return null;
- const keys:ReplyKey[]=intent==='SERVICE_TYPE'?['SERVICE_REGULAR','SERVICE_DEEP','SERVICE_MOVE']:intent==='SOIL_LEVEL'?['SOIL_NORMAL','SOIL_HEAVY']:intent==='EXTRAS'?['NO_EXTRAS']:intent==='YES_NO'?['YES','NO']:intent==='BOOKING_CONFIRMATION'&&state.pending?['CONFIRM_BOOKING']:intent==='POST_BOOKING'&&state.booking?['ASK_QUESTION']:[];
+ const keys:ReplyKey[]=intent==='SERVICE_CONFIRMATION'?['SERVICE_DEEP','SERVICE_REGULAR']:intent==='SERVICE_TYPE'?['SERVICE_REGULAR','SERVICE_DEEP','SERVICE_MOVE']:intent==='SOIL_LEVEL'?['SOIL_NORMAL','SOIL_HEAVY']:intent==='EXTRAS'?['NO_EXTRAS']:intent==='YES_NO'?['YES','NO']:intent==='BOOKING_CONFIRMATION'&&state.pending?['CONFIRM_BOOKING']:intent==='POST_BOOKING'&&state.booking?['ASK_QUESTION']:[];
  const choices:QuickReply[]=keys.map(key=>({key,label:replyText(key,locale)}));
  if(intent==='SLOT_SELECTION'&&!state.pending)choices.push(...(state.slots??[]).slice(0,3).map(slot=>({key:`SLOT:${slot.token}`,label:new Intl.DateTimeFormat(locale==='sr-Cyrl'?'sr-RS':locale==='sr-Latn'?'sr-Latn-RS':locale,{timeZone:'Europe/Belgrade',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(slot.start))})));
  if(!choices.length)return null;
