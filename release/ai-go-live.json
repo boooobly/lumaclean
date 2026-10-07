@@ -1,5 +1,5 @@
 {
-  "fingerprint": "8407f882445143521696b967ee3500df64ac87f4c2857f588b95ce067e26864f",
+  "fingerprint": "a68dae1718d577be3ddc877057ea226cd2e4f22a068fe72390cce7c517bd97df",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -113,7 +113,7 @@
     "src/components/admin/scheduling-forms.tsx": "fe5d5aad22726ad7ff440fc45772e3aa4ec11d152419645299b10fdcea556fdb",
     "src/components/admin/sign-out.tsx": "148444770d32feca7d4a38511db901d4a46680614c4bcca96060a9d4f4cc699a",
     "src/components/apartment-experience.tsx": "68df49fc637ccfca4f5b542c832ea4cec592a103a0b6158a63f496454380ee0c",
-    "src/components/site/analytics.css": "1936696e0ea0336678992ed8c07a1a03e2ab0c82cda48f223251c2c67b1506d6",
+    "src/components/site/analytics.css": "977c1399177c1f1bd42b0b09341ce764cff890127ed238749452195ec85df409",
     "src/components/site/analytics.tsx": "6fc3cb3ed19c3e2c801063837a2c952de280bf64fdc64479e7c549d78d90bbc4",
     "src/components/site/arrow-icon.tsx": "7ae46870e46fbf1252edc983d80c7bda786d2d0b04f5d784560296528aabe735",
     "src/components/site/article-components.tsx": "d97070aeb7b3a2922b045973ee61c991c0018771c2a13828ae4382e0eaaa7974",
@@ -279,7 +279,7 @@
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-07T22:32:26.212Z",
+  "checkedAt": "2026-10-07T22:46:51.414Z",
   "suites": [
     "342 passing unit tests across agent, CRM, admin, finance and scheduling domains",
     "10 isolated Preview database and HTTP scenarios: human continuity, long history, typed corrections, bursts, concurrency, retry, photos and retained hard handoff restrictions",
@@ -287,8 +287,8 @@
   ],
   "verificationScope": "Targeted human takeover/resume continuity and mobile homepage cleanup. Full native suite passed before the final reconciliation repair; the affected scenario was repeated on final source with an injected provider echoing already reviewed notes and corrections. Unchanged burst/HTTP/hazard checks were not redundantly repeated. Final deployed Preview live provider replay, mobile/desktop visual QA and native signed booking proof remain independent release gates. No database migration or channel-mode changes. Two unchanged main assertions (legacy Telegram message ID and obsolete WhatsApp AUTO restriction) are excluded by exact names; local database suites skip without their isolated fixture database. Affected ESLint has no errors and two existing image warnings.",
   "previousVerification": {
-    "fingerprint": "96b09e6aecb4c7d47015174e2b0150e41146712e91969559e36466d3f148d86a",
+    "fingerprint": "8407f882445143521696b967ee3500df64ac87f4c2857f588b95ce067e26864f",
     "tests": 352,
-    "checkedAt": "2026-10-07T22:19:06.802Z"
+    "checkedAt": "2026-10-07T22:32:26.212Z"
   }
 }
