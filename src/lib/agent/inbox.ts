@@ -66,13 +66,13 @@ export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:str
     if(/утром|дн[её]м|вечером|в два|ujutru|popodne|uveče|ујутру|поподне|увече|\b(?:morning|afternoon|evening|at two)\b/iu.test(text)&&!/[0-2]?\d[:–-][0-5]?\d|\b\d{1,2}\s*(?:am|pm|час)/iu.test(text))state.timeClarificationRequired=true;
     else if(/\d{1,2}[:–-]\d{1,2}|\d{1,2}\s*(?:am|pm|час)|(?:в|у|at|u)\s+\d{1,2}(?=\s|$|[,.])/iu.test(text))delete state.timeClarificationRequired;
     const expectedInput=state.nextInput;delete state.nextInput;
-    applyCustomerFacts(state,explicitCustomerFacts(text,receivedAt,settings.timezone,expectedInput),buildAgentTemporalContext(new Date(),settings).nowLocalDate);
+    applyCustomerFacts(state,explicitCustomerFacts(text,receivedAt,settings.timezone,expectedInput,state),buildAgentTemporalContext(new Date(),settings).nowLocalDate);
     const ids=[...new Set(input.attachmentIds??[])];
     if(ids.length>4||ids.length!==input.attachmentIds?.length&&!!input.attachmentIds)throw new AgentError('INVALID_ATTACHMENTS');
     if(ids.length&&await tx.chatAttachment.count({where:{id:{in:ids},conversationId:c.id,messageId:null,uploader:'CLIENT',processingStatus:'READY'}})!==ids.length)throw new AgentError('INVALID_ATTACHMENTS');
     const confirmation=!!state.pending&&(input.confirmationNonce===state.pending.nonce||confirmsRecap(text,state.pending.recap));
   if(input.confirmationNonce&&input.confirmationNonce!==state.pending?.nonce)throw new AgentError("INVALID_CONFIRMATION");
-    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text,sentAt:receivedAt,externalMessageId:`in:${input.id}`,...(input.transport?{inboundKey:input.transport.key,receivedAt,structured:input.transport.metadata}:{})}});
+    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text,sentAt:receivedAt,externalMessageId:`in:${input.id}`,structured:json({...input.transport?.metadata as object,...(expectedInput?{inputIntent:expectedInput}:{})}),...(input.transport?{inboundKey:input.transport.key,receivedAt}:{})}});
     if(ids.length)await tx.chatAttachment.updateMany({where:{id:{in:ids},conversationId:c.id,messageId:null},data:{messageId:message.id}});
     if(confirmation)state.pending!.confirmedByMessageId=message.id;
     else if(state.pending)delete state.pending;

@@ -4,15 +4,26 @@ import { extrasSchema } from "@/lib/validation/crm";
 
 export const locales = ["ru", "sr-Latn", "sr-Cyrl", "en"] as const;
 export type AgentLocale = (typeof locales)[number];
-export const reasons = ["COMPLAINT", "DISCOUNT", "OUT_OF_SCOPE", "MOLD", "RENOVATION", "AMBIGUOUS", "PRICE_REVIEW", "NO_DURATION_RULE", "ROUTING_UNRELIABLE", "NO_SLOTS", "TOOL_ERRORS", "IDENTITY_REQUIRED", "UNCERTAINTY", "HAZARDOUS_CLEANING", "HEAVY_LIFTING", "CREW_PREFERENCE", "ACCESS_REVIEW", "PAYMENT_REVIEW", "CANCELLATION", "ARRIVAL_REVIEW", "OUTSIDE_SERVICE_AREA"] as const;
+export const reasons = ["CLIENT_REQUEST","COMPLAINT", "DISCOUNT", "OUT_OF_SCOPE", "MOLD", "RENOVATION", "AMBIGUOUS", "PRICE_REVIEW", "NO_DURATION_RULE", "ROUTING_UNRELIABLE", "NO_SLOTS", "TOOL_ERRORS", "IDENTITY_REQUIRED", "UNCERTAINTY", "HAZARDOUS_CLEANING", "HEAVY_LIFTING", "CREW_PREFERENCE", "ACCESS_REVIEW", "PAYMENT_REVIEW", "CANCELLATION", "ARRIVAL_REVIEW", "OUTSIDE_SERVICE_AREA"] as const;
 export type HandoffReason = (typeof reasons)[number];
 export const qualificationSchema = z.object({
   service: z.enum(serviceIds), area: z.number().finite().min(1).max(1000),
   extras: extrasSchema, soilLevel: z.enum(["LIGHT","NORMAL","HEAVY","EXTREME"]), urgent: z.boolean(),
 }).strict();
 const empty = z.object({}).strict();
-export const customerFactsSchema = qualificationSchema.omit({urgent:true}).partial().extend({extrasConfirmed:z.literal(true).optional(),requestedDate:z.iso.date().optional(),addressQuery:z.string().trim().min(3).max(200).optional()}).strict();
-export const inputIntents = ['SERVICE_TYPE','AREA','SOIL_LEVEL','EXTRAS','YES_NO','SLOT_SELECTION','BOOKING_CONFIRMATION','POST_BOOKING'] as const;
+export const contactChannels = ['CURRENT_CHAT','SMS','PHONE','WHATSAPP','TELEGRAM'] as const;
+export const customerFactsSchema = qualificationSchema.omit({urgent:true}).partial().extend({
+  extrasConfirmed:z.literal(true).optional(), requestedDate:z.iso.date().optional(), addressQuery:z.string().trim().min(3).max(200).optional(),
+  serviceConfirmationRequired:z.literal(true).optional(),
+  windowCleaning:z.object({requested:z.boolean(),standardCount:z.number().int().min(0).max(100).optional(),largeCount:z.number().int().min(0).max(100).optional(),totalCount:z.number().int().min(1).max(100).optional()}).strict().optional(),
+  declinedExtras:z.array(z.enum(['oven','fridge','standardWindow','largeWindow'])).optional(),
+  reviewItems:z.array(z.enum(['roletne'])).optional(),
+  requestedWeekend:z.object({saturday:z.iso.date(),sunday:z.iso.date()}).strict().optional(),
+  city:z.literal('Belgrade').optional(), neighborhoodHint:z.literal('Banovo brdo').optional(),
+  requestedCrew:z.number().int().min(1).max(10).optional(), bathroomCount:z.number().int().min(0).max(20).optional(),
+  carpetsAbsent:z.literal(true).optional(), preferredContactChannel:z.enum(contactChannels).optional(), phone:z.string().max(40).optional(),
+}).strict();
+export const inputIntents = ['SERVICE_TYPE','SERVICE_CONFIRMATION','WINDOW_COUNTS','WINDOW_TYPE','WEEKEND_DAY','PHONE','AREA','SOIL_LEVEL','EXTRAS','YES_NO','SLOT_SELECTION','BOOKING_CONFIRMATION','POST_BOOKING'] as const;
 export const toolSchemas = {
   getBusinessInfo: empty,
   findClient: empty,
@@ -28,6 +39,7 @@ export const toolSchemas = {
   createOrder: empty,
   rescheduleOrder: empty,
   requestHumanHandoff: z.object({reason:z.enum(reasons)}).strict(),
+  requestReview: z.object({reason:z.enum(['CUSTOM_EXTRA','WINDOW_CONFIGURATION','PRICE_REVIEW','NO_DURATION_RULE','CONTACT_PREFERENCE','NO_SLOTS','ROUTING_UNRELIABLE','OPERATIONAL'])}).strict(),
 };
 export type ToolName = keyof typeof toolSchemas;
 export const toolDescriptions:Record<ToolName,string> = {
@@ -36,7 +48,7 @@ export const toolDescriptions:Record<ToolName,string> = {
   recordCustomerFacts:"Save only allowlisted facts explicitly stated in the current CLIENT message. evidence must be an exact excerpt of that message. No image inference, guesses, internal IDs or generic updates. Last explicit correction wins; server invalidates dependent quotes and slots.",
   requestCustomerInput:"Ask ONE next qualification question using a server-localized template and persisted choices. Use SERVICE_TYPE, AREA, SOIL_LEVEL or EXTRAS only when missing. SLOT_SELECTION uses real returned slots. Ends this turn. Never reconstruct buttons from your prose. Use for these qualification questions instead of writing free text.",
   createOrUpdateLead:"Create/update substantive cleaning inquiry immediately. ONLY intent is required; name/phone are OPTIONAL. Never wait for contact to record intent. Contact may be gathered later, do not invent it. No lead for a greeting or isolated FAQ.",
-  calculatePrice:"Authoritative production price. Needs explicit service, area, soil, extras (empty means customer wants no extras), urgent. Contact is NOT required. Save current quote; invalidates old duration and slot. If requiresHumanReview, handoff.",
+  calculatePrice:"Authoritative production price. Needs explicit service, area, soil and known extras quantities. Contact is NOT required. Pending custom items are excluded: present known subtotal and pending review separately, never a final total. If requiresHumanReview, requestReview and continue safe intake.",
   estimateDuration:"Calculate current quote's duration from active owner rules and choose crew size from applicable rules. Missing rule means handoff, no guessed duration.",
   resolveAddress:"Address search. First call query only; ask customer to choose candidate. Then pass ONLY a returned placeId to confirm coordinates. Unavailable search or ambiguous address: ask or handoff. Apartment may be supplied separately.",
   getClientAddresses:"Read bound verified client's own active addresses, no notes/intercom/internal info. Optional returned addressId selects an address for current request.",
@@ -45,6 +57,7 @@ export const toolDescriptions:Record<ToolName,string> = {
   createOrder:"Create standard confirmed order from CURRENT server recap ONLY when subsequent customer message or confirmation button has explicitly confirmed that recap. Empty args: cannot supply price/team/client/confirmation. Server locks and rechecks all facts and scheduling.",
   rescheduleOrder:"Move ONLY current conversation's existing order, after explicit request to reschedule, verified identity, fresh validated recap and explicit confirmation. No override or completed orders.",
   requestHumanHandoff:"Escalate complaint, discount, mold, renovation, unavailable rules/routes/prices, repeated errors or uncertainty. Never solve exceptional cases or claim a booking that failed.",
+  requestReview:"Flag a specific operational/pricing detail for owner review while continuing intake under AI_CONTROL. No booking or final price until owner resolves it. Custom extras, unusual windows and SMS preference must not terminate sales.",
 };
 // Responses otherwise normalizes optional contact fields into required fields.
 // Argument validation remains strict on the server, including rejection of extra fields.
@@ -52,10 +65,12 @@ export const nativeTools = Object.entries(toolSchemas).map(([name,schema])=>({ty
 export type Qualification = z.infer<typeof qualificationSchema>;
 export type AgentState = {
   draftFacts?:z.infer<typeof customerFactsSchema>;
+  review?:{reasons:string[]};
+  preferredContactChannel?:typeof contactChannels[number];
   nextInput?:typeof inputIntents[number];
   timeClarificationRequired?:boolean;
   name?:string; phone?:string; qualification?:Qualification;
-  quote?:{id:string;serviceId:string;input:Qualification;total:number;base:number;discountPercent:number;requiresHumanReview:boolean;at:string};
+  quote?:{id:string;serviceId:string;input:Qualification;total:number;base:number;discountPercent:number;requiresHumanReview:boolean;at:string;breakdown?:{code:string;quantity:number;unitPrice:number;amount:number}[];pendingReviewItems?:string[]};
   duration?:{minutes:number;reserve:number;requiredCleaners:number;ruleId:string;version:number};
   address?:{fullAddress:string;proof?:string;addressId?:string;apartment?:string};
   addressCandidates?:{placeId:string;text:string;query?:string}[];

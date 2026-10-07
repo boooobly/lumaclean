@@ -24,6 +24,12 @@ const weekdays = [
   /\b(?:saturday|subot[au])\b|суббот|субот[ау]/iu,
   /\b(?:sunday|nedelj[au]|nedjelj[au])\b|воскресень|недељ[ау]/iu,
 ];
+export function resolveCustomerWeekend(text:string,messageReceived:Date,timezone:string) {
+  if(!/ovog vikenda|овог викенда|this weekend|(?:в эти|на этих|этих|эти) выходн/iu.test(text))return undefined;
+  const day=Temporal.Instant.from(messageReceived.toISOString()).toZonedDateTimeISO(timezone).toPlainDate();
+  const saturday=day.add({days:6-day.dayOfWeek});
+  return{saturday:saturday.toString(),sunday:saturday.add({days:1}).toString()};
+}
 /** Interpretation is anchored to the CLIENT message, never to delayed job execution. */
 export function resolveCustomerDate(text: string, messageReceived: Date, timezone: string): string | undefined {
   const day = Temporal.Instant.from(messageReceived.toISOString()).toZonedDateTimeISO(timezone).toPlainDate();

@@ -68,7 +68,7 @@ export async function deliverHandoffNotification(db: PrismaClient, id: string, l
     if (current.leaseKey !== leaseKey || current.deliveryState !== 'SENDING') return { status: 'FAILED' as const, errorCode: 'HANDOFF_CANCELLED' };
     const payload = payloadSchema.parse(current.payload);
     const [handoff, c] = await Promise.all([tx.humanHandoff.findUnique({ where: { id: payload.handoffId } }), tx.conversation.findUnique({ where: { id: row.conversationId! } })]);
-    if (!handoff || handoff.conversationId !== row.conversationId || handoff.resolvedAt || !c || c.control !== 'HUMAN_CONTROL' || c.ownerId) {
+    if (!handoff || handoff.conversationId !== row.conversationId || handoff.resolvedAt || !c || !(c.control==='HUMAN_CONTROL'||c.control==='AI_CONTROL'&&handoff.reason.startsWith('SOFT:')) || c.ownerId) {
       await tx.notification.update({ where: { id }, data: { deliveryState: 'CANCELLED', status: 'CANCELLED', leaseKey: null, leaseUntil: null } });
       return { status: 'FAILED' as const, errorCode: 'HANDOFF_CANCELLED' };
     }
@@ -98,11 +98,11 @@ export async function claimTelegramHandoff(db: PrismaClient, raw: unknown, reque
   return db.$transaction(async tx => {
     await schedulingLock(tx, 'conversation', handoff.conversationId);
     const [current, c, notification] = await Promise.all([tx.humanHandoff.findUniqueOrThrow({ where: { id } }), tx.conversation.findUniqueOrThrow({ where: { id: handoff.conversationId } }), tx.notification.findFirst({ where: { conversationId: handoff.conversationId, audience: 'ADMIN', kind: { in: handoffKinds }, eventKey: { startsWith: `handoff:${id}:telegram` } }, orderBy: { createdAt: 'asc' } })]);
-    if (current.resolvedAt || c.control !== 'HUMAN_CONTROL' || c.ownerId) return 'ALREADY_CLAIMED';
+    if (current.resolvedAt || !(c.control==='HUMAN_CONTROL'||c.control==='AI_CONTROL'&&current.reason.startsWith('SOFT:')) || c.ownerId) return 'ALREADY_CLAIMED';
     const owner = notification?.userId ? await tx.user.findUnique({ where: { id: notification.userId }, select: { id: true, active: true, role: true } }) : null;
     if (!owner?.active || owner.role !== 'ADMIN') throw new AgentError('HANDOFF_OWNER_UNAVAILABLE');
     await resolveHandoffNotifications(tx, c.id, owner.id, 'Клиент забран из Telegram');
-    await tx.conversation.update({ where: { id: c.id }, data: { ownerId: owner.id, needsAttention: false, operatorTypingUntil: null, shadowProposal: Prisma.DbNull, revision: { increment: 1 } } });
+    await tx.conversation.update({ where: { id: c.id }, data: { control:'HUMAN_CONTROL',ownerId: owner.id, needsAttention: false, operatorTypingUntil: null, shadowProposal: Prisma.DbNull, revision: { increment: 1 } } });
     await tx.message.updateMany({ where: { conversationId: c.id, author: 'AI', deliveryStatus: 'PENDING' }, data: { deliveryStatus: 'CANCELLED' } });
     await writeAudit(tx, { type: 'SYSTEM', key: 'telegram:' + createHash('sha256').update(String(query.from.id)).digest('hex').slice(0, 16) }, { action: 'TELEGRAM_HANDOFF_CLAIMED', entityType: 'HumanHandoff', entityId: id });
     return 'CLAIMED';
