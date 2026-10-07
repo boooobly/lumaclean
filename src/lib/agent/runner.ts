@@ -125,7 +125,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
     else{
       if(substantiveIntent(current.text))await tool("createOrUpdateLead",{intent:"cleaning"});
       if(c.leadId||ctx.state.phone)await tool('createOrUpdateLead',{intent:'cleaning',...(ctx.state.phone?{phone:ctx.state.phone}:{})});
-      const intake=await conversionIntake(()=>ctx.state,current.text,c.locale,tool);
+      const intake=await conversionIntake(()=>ctx.state,current.text,c.locale,tool,(current.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent);
       if(intake)text=intake;
       else{
       const compact=c.summary??null;

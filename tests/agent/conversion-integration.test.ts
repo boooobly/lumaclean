@@ -37,7 +37,7 @@ test('real incident: native Preview persistence, soft review, contact and hard s
       const c=await fixture();
       const first=await send(c.id,'Dobar dan, treba mi generalno čišćenje stana od 57 kvadrata, ukoliko je moguce ovog vikenda, pranje prozora, roletni, jedno kupatilo, tepisi ce biti na pranju. Pozdrav mogućnosti da budu dve osobe da bi kraće trajalo. Da li je to moguce kod vas i koja bi bila cena');
       assert(first.live.leadId);assert(first.state.review?.reasons.includes('CUSTOM_EXTRA'));assert.equal(first.state.draftFacts?.service,'deep');assert(first.last.text.includes('rerne'));
-      await send(c.id,'Lokacija je bgd, banovo brdo');
+      const location=await send(c.id,'Lokacija je bgd, banovo brdo');assert.notEqual(location.last.text,first.last.text);assert.equal(location.state.nextInput,'EXTRAS');assert(!location.last.text.includes('rerne'));
       await send(c.id,'Nisu, samo spolja');
       const soil=await send(c.id,'Uobičajena zaprljanost');assert(soil.last.text.includes('prozora'));
       const ambiguous=await send(c.id,'Vrv redovno, ne znam sta vam je dubinsko tačno, al ne treba čišćenje kreveta i tepiha');

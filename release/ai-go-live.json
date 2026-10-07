@@ -1,5 +1,5 @@
 {
-  "fingerprint": "cc69293ea1a96d1ebcabbefa8ad1343d8369f4a3bf388b84c6034deba98dbe91",
+  "fingerprint": "bb925a6b14aee1c5098c040772f742eeaf8220186f523a1990de765927ec3a6b",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -146,7 +146,7 @@
     "src/lib/agent/chat-upload-http.ts": "217ce3fc7f5e3be3c613bfebda0d4316fd222550a0473b02daf023262dd45302",
     "src/lib/agent/contracts.ts": "8e4bf498bb9ddaeb91d32dcc8ed65560b56c49feac5c3e3cc9056e87af8fcfcd",
     "src/lib/agent/conversion-facts.ts": "e25429cfebf370457f9ea145ebdfe70138e24b30e8afe13b56e6a2ffa95065bc",
-    "src/lib/agent/conversion-intake.ts": "7257709e1c941ef9e83550d1bc63959f7add2282a0a0101963e11d5df18fa429",
+    "src/lib/agent/conversion-intake.ts": "386a1442f80c6bf014c20fd81881322d915dd54df581ae9918a198ee15ee2f7d",
     "src/lib/agent/customer-channels.ts": "b6940d78f33831fb2e257efe57e3b243dc3f06ea1ebe729a2ce27fc22d6df3c5",
     "src/lib/agent/customer-facts.ts": "61081dd83d754bb05817fb5212c0f91c2800cbd9edb886af686e8b5fd47ff30f",
     "src/lib/agent/inbox.ts": "b4d790d6775a0cf80ce937f5597d89f5ef8d2176f9148c5c389ab37201769fec",
@@ -161,7 +161,7 @@
     "src/lib/agent/readiness.ts": "8a9bf485356d83a172051fdff7dc50c2849f07490a5c39921358e348c77321e8",
     "src/lib/agent/release-verification.d.mts": "922a8223a92a36f373f1f850962fb8efc441cf9944c7bae83bcda9d0ed631aff",
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
-    "src/lib/agent/runner.ts": "9a0901cf1ccd76bcb8c89780bcd1d5b1bf036bd17a06c7a935a6c9fa293874a1",
+    "src/lib/agent/runner.ts": "6aac7c65361d49b81fa32a176234ee4c4fd1413beb678c71c065401363043b4b",
     "src/lib/agent/settings.ts": "bf18dc0f06eaa3bb5551f2a846bb1fed31966cace4815843a1919b671e550017",
     "src/lib/agent/telegram-handoff.ts": "c9397fb01f21c3810069bc9710cd16ec98274698d2adb49a9c19036d7dbf6a7e",
     "src/lib/agent/temporal.ts": "7dff9432c06f3dd3e9da30ece37add57aa50c2f434f5dec434de3769ec39ad05",
@@ -271,22 +271,22 @@
     ".vercelignore": "fb522d5ca9d5db1abd9d7623248e94c22e262ceac8d3a524d154582c74b1b73c",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 219,
+  "tests": 218,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-07T09:02:18.265Z",
+  "checkedAt": "2026-10-07T13:47:39.483Z",
   "suites": [
     "targeted conversion, behavior, corpus, quick replies, release, persona and temporal unit checks",
     "native provider and Preview readiness checks",
     "native isolated Preview incident and existing behavior integration"
   ],
-  "verificationScope": "Targeted sales conversion fix. 203 unit assertions and 16 isolated Preview test records passed; no schema/migration, price or routing changes. Affected lint/typecheck and optimized build passed. Existing legacy Telegram-ID assertion excluded by exact name because unchanged main already fails it. Deployed Preview HTTP replay and new-source native booking proof remain release gates. Production modes and the real incident remain unchanged.",
+  "verificationScope": "Targeted sales conversion fix; passed checks counted from retained logs. No schema/migration, price or routing changes. Affected lint/typecheck and optimized build passed. Existing legacy Telegram-ID assertion excluded by exact name because unchanged main already fails it. Deployed Preview HTTP replay and new-source native booking proof remain release gates. Production modes and the real incident remain unchanged.",
   "previousVerification": {
-    "fingerprint": "f63d5700de305b22bd5e6e94748bb16f89afe99ee58fd375d1404eb2d156f70e",
-    "tests": 35,
-    "checkedAt": "2026-10-06T19:22:56.714Z",
-    "verificationScope": "Admin UX presentation, older-history navigation and validation wording only; rules and modes unchanged. 35 targeted Node checks, affected lint, typecheck and optimized production build passed. 10 isolated Preview integration assertions passed. Protected Preview all nine pages at six viewports and messenger interaction/media/form QA passed; localized validation and older-history latest navigation confirmed in final authenticated Preview. Disposable Preview entities/media cleaned with zero remaining records and unchanged modes. Prior AI evidence retained as baseline and not claimed as rerun."
+    "fingerprint": "cc69293ea1a96d1ebcabbefa8ad1343d8369f4a3bf388b84c6034deba98dbe91",
+    "tests": 219,
+    "checkedAt": "2026-10-07T09:02:18.265Z",
+    "verificationScope": "Targeted sales conversion fix. 203 unit assertions and 16 isolated Preview test records passed; no schema/migration, price or routing changes. Affected lint/typecheck and optimized build passed. Existing legacy Telegram-ID assertion excluded by exact name because unchanged main already fails it. Deployed Preview HTTP replay and new-source native booking proof remain release gates. Production modes and the real incident remain unchanged."
   }
 }

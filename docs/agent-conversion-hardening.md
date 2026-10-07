@@ -22,6 +22,7 @@ Changes:
 - Known quote lines come from the existing calculator. With 57 m² and 5 large + 2 standard windows: windows 7,800 RSD; general subtotal 18,500 RSD or regular subtotal 12,400 RSD. Roletne is pending, never included as a fabricated price. Ordinary large-window review is still required.
 - Explicit SMS preference and Serbian phone forms are recorded; the phone updates the lead without verifying identity. The reply promises only to pass the preference to the team, never an automatic or guaranteed SMS.
 - Repeated known qualification attempts are rejected and measured. Handoff before complete qualification is measured separately.
+- Hosted replay also found that an unrelated neighborhood reply repeated an unanswered extras question. The deterministic intake now uses the saved inbound question context, acknowledges the new fact and preserves the previous response context without repeating the question.
 
 Verification:
 
@@ -29,6 +30,7 @@ Verification:
 - Preview fixtures assert AI_CONTROL, lead/contact persistence, attention/notification, no repeated known extras request, no clipped uncertain correction, no premature hard handoff, exact quote lines, and REVIEW_REQUIRED before any Order.
 - Fixtures are explicitly restricted to the isolated Preview host and cleaned. No test production Order.
 - One unchanged legacy Telegram provider test expects update_id instead of the transport's existing chat/message ID; excluded by exact test name and documented, not claimed as passed. The release fixture was updated to include the immutable inputs already required by the release verifier.
+- An additional exploratory go-live check still expects WHATSAPP AUTO to be forbidden. Both that test and its settings schema are unchanged from current main, which already supports it; this obsolete assertion is outside the targeted conversion suite and was not claimed as passed.
 - The tested-source release fingerprint must be refreshed before deployment. Native booking proof is tied to the source fingerprint and must also be renewed through the existing Preview live-test/import path; never bypass its guard.
 
 Hosted Preview replay and release details are recorded in the PR and final report.

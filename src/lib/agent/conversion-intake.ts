@@ -39,7 +39,7 @@ export function quoteText(state:AgentState,locale:string){
   return lines.join('\n');
 }
 /** Deterministic high-confidence qualification and partial quotes. Scheduling remains in the existing tools. */
-export async function conversionIntake(state:()=>AgentState,text:string,locale:string,tool:(name:ToolName,args:unknown)=>Promise<ToolResult>):Promise<string|undefined>{
+export async function conversionIntake(state:()=>AgentState,text:string,locale:string,tool:(name:ToolName,args:unknown)=>Promise<ToolResult>,previousInput?:AgentState['nextInput']):Promise<string|undefined>{
   let s=state(),f=s.draftFacts;
   if(!f||s.booking)return;
   if(f.reviewItems?.length&&!s.review?.reasons.includes('CUSTOM_EXTRA'))await tool('requestReview',{reason:'CUSTOM_EXTRA'});
@@ -55,6 +55,12 @@ export async function conversionIntake(state:()=>AgentState,text:string,locale:s
   }
   if(f?.phone&&/^[+0][\d\s()-]{6,30}$/u.test(text.trim()))return locale.startsWith('sr')?'Broj je sačuvan. Prosleđujem timu vašu napomenu o željenom načinu kontakta.':locale==='en'?'Your number is saved. I am passing your contact preference to the team.':'Номер сохранён. Передаю команде пожелание о способе связи.';
   const intent=nextQualification(s);
+  // An unrelated fact can clear nextInput during merging, but it does not answer
+  // the question already shown to the customer. Keep its response context.
+  if(intent&&intent===previousInput&&['AREA','EXTRAS','SOIL_LEVEL','WINDOW_COUNTS','WINDOW_TYPE'].includes(intent)){
+    s.nextInput=intent;
+    return locale.startsWith('sr')?'Zabeleženo. Nastavljamo od prethodnog pitanja.':locale==='en'?'Noted. We can continue from the previous question.':'Записала. Продолжим с предыдущего вопроса.';
+  }
   if(intent){const result=await tool('requestCustomerInput',{intent});if(!result.error)return String(result.question);return;}
   if(f?.service&&f.area&&f.soilLevel&&f.extrasConfirmed&&!s.quote){
     const result=await tool('calculatePrice',{service:f.service,area:f.area,soilLevel:f.soilLevel,extras:f.extras??[],urgent:false});

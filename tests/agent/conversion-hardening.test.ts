@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {explicitCustomerFacts,applyCustomerFacts,supportedFacts} from '../../src/lib/agent/customer-facts';
 import {bookingReviewBlocked,windowQuantitiesMissing} from '../../src/lib/agent/conversion-facts';
-import {nextQualification,quoteText,phoneOffer} from '../../src/lib/agent/conversion-intake';
+import {nextQualification,quoteText,phoneOffer,conversionIntake} from '../../src/lib/agent/conversion-intake';
 import {inputAlreadyKnown,createReplySet} from '../../src/lib/agent/chat-presentation';
 import {quote} from '../../src/lib/domain/crm-pricing';
 import {mandatoryHandoff,outputAllowed} from '../../src/lib/agent/policy';
@@ -54,4 +54,11 @@ test('phone national forms use existing normalization, without verification',()=
 });
 test('hard safety reasons remain mandatory',()=>{
   assert.equal(mandatoryHandoff('There are needles and blood'),'HAZARDOUS_CLEANING');assert.equal(mandatoryHandoff('Your cleaner damaged the table'),'COMPLAINT');assert.equal(mandatoryHandoff('I want to speak with a human'),'CLIENT_REQUEST');
+});
+test('an unrelated location does not repeat an unanswered extras question',async()=>{
+  const s:AgentState={draftFacts:{service:'deep',area:57},nextInput:'EXTRAS'};
+  turn(s,'Lokacija je bgd, banovo brdo');
+  const reply=await conversionIntake(()=>s,'Lokacija je bgd, banovo brdo','sr-Latn',async()=>assert.fail('Do not ask the same qualification question again'),'EXTRAS');
+  assert.equal(s.nextInput,'EXTRAS');assert.equal(s.draftFacts?.neighborhoodHint,'Banovo brdo');assert(reply?.includes('Zabeleženo'));assert(!reply?.includes('?'));
+  turn(s,'Nisu, samo spolja',s.nextInput);assert(s.draftFacts?.extrasConfirmed);assert.equal(nextQualification(s),'SOIL_LEVEL');
 });
