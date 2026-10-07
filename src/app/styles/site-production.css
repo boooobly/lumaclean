@@ -48,6 +48,8 @@
   .site-home .site-header { height: 62px; padding: 0 16px; }
   .site-home .site-header .header-cta { display: none; }
   .site-home .site-locales a { min-width: 40px; min-height: 44px; font-size: 10px; }
+  .site-home .site-locales { margin-right: 56px; }
+  .site-home .website-chat-launcher { top: 9px; right: 16px; bottom: auto; }
   .site-home .journey-track { height: auto; --mobile-hero-height: min(660px, 82svh); }
   .site-home .journey-sticky { position: relative; height: auto; display: grid; overflow: hidden; }
   .site-home .journey-hero { height: var(--mobile-hero-height); bottom: auto; }
@@ -85,7 +87,6 @@
   .site-home .site-extra-counter button { min-width: 44px; min-height: 44px; }
   .site-home .site-extra-counter { grid-template-columns: minmax(0,1fr) auto; column-gap: 8px; }
   .site-home .site-footer-locales a { min-width: 44px; min-height: 44px; }
-  .site-home .site-footer { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 }
 
 .site-page .journey-track { position: relative; z-index: 2; }

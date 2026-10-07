@@ -4,7 +4,7 @@ const read=path=>readFileSync(path,'utf8');
 const counts=path=>{const log=read(path),pass=[...log.matchAll(/pass (\d+)/g)].at(-1),fail=[...log.matchAll(/fail (\d+)/g)].at(-1);if(!pass||!fail||Number(fail[1])!==0)throw Error('PASSING_LOG_REQUIRED:'+path);return Number(pass[1]);};
 const units=counts('artifacts/continuity-unit.txt'),native=counts('artifacts/continuity-integration-complete.txt');
 if(native!==11)throw Error('ALL_TEN_NATIVE_AND_HTTP_SCENARIOS_REQUIRED');
-if(counts('artifacts/continuity-pending-verified.txt')!==2||counts('artifacts/continuity-reconciliation-verified.txt')!==2)throw Error('FINAL_PENDING_AND_REPEATED_RESUME_CHECKS_REQUIRED');
+if(counts('artifacts/continuity-pending-verified.txt')!==2||counts('artifacts/continuity-reconciliation-verified.txt')!==3)throw Error('FINAL_PENDING_AND_REPEATED_RESUME_CHECKS_REQUIRED');
 if(/error TS\d/.test(read('artifacts/continuity-typecheck.txt')))throw Error('TYPECHECK_FAILED');
 for(const path of ['artifacts/continuity-lint.txt','artifacts/continuity-edits-lint.txt'])if(/\b[1-9]\d* errors?\b|\berror\s{2}/.test(read(path)))throw Error('LINT_FAILED');
 const build=read('artifacts/continuity-build.txt');if(!build.includes('prerendered as static')||build.includes('Failed to compile'))throw Error('BUILD_REQUIRED');

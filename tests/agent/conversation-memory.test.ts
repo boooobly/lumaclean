@@ -4,10 +4,10 @@ import {operationalSummary,pendingHumanStatements} from '../../src/lib/agent/con
 import {applyCustomerFacts,explicitCustomerFacts} from '../../src/lib/agent/customer-facts';
 import {toolSchemas,type AgentState} from '../../src/lib/agent/contracts';
 test('operational memory retains old human corrections beyond recent context without secrets or tool internals',()=>{
- const state:AgentState={draftFacts:{service:'deep',area:60,soilLevel:'NORMAL'},address:{fullAddress:'Synthetic address',proof:'private-location-proof'},duration:{ruleId:'internal-rule-id',version:1,minutes:180,reserve:30,requiredCleaners:2}};
+ const state:AgentState={draftFacts:{service:'deep',area:60,soilLevel:'NORMAL'},address:{fullAddress:'Synthetic address',proof:'private-location-proof'},duration:{ruleId:'internal-rule-id',version:1,minutes:180,reserve:30,requiredCleaners:2},slots:[{token:'private-slot-token',start:'2030-01-01T09:00:00Z',duration:180}]};
  let summary=operationalSummary(state,null,{admin:{id:'human-correction',text:'Исправлю: площадь 65 м²'}});
  for(let n=0;n<35;n++)summary=operationalSummary(state,summary,{lifecycle:'client message received'});
- assert.equal(pendingHumanStatements(summary)[0].text,'Исправлю: площадь 65 м²');assert(!summary.includes('private-location-proof'));assert(!summary.includes('internal-rule-id'));
+ assert.equal(pendingHumanStatements(summary)[0].text,'Исправлю: площадь 65 м²');assert(!summary.includes('private-location-proof'));assert(!summary.includes('internal-rule-id'));assert(!summary.includes('private-slot-token'));assert(summary.includes('2030-01-01T09:00:00Z'));
  summary=operationalSummary(state,summary,{admin:{id:'credential',text:'API key: sk-private-do-not-store'}});assert(!summary.includes('sk-private-do-not-store'));
 });
 test('a confirmed correction invalidates dependent quote/slot/recap, unchanged facts preserve them',()=>{

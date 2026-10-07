@@ -1,5 +1,5 @@
 {
-  "fingerprint": "5914ab7e50a4b367f41ab8f1fdc1badf56ec3104d3414f1bee65fdb1659e107d",
+  "fingerprint": "96b09e6aecb4c7d47015174e2b0150e41146712e91969559e36466d3f148d86a",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -67,7 +67,7 @@
     "src/app/sitemap.ts": "07386db89565125f515531f7f7077e0c6f3a5a8a274b2410911a5985fa5b9451",
     "src/app/styles/seo-additions.css": "0277eb68bc6dcee536ec85d74ec752d23e1af5acaf61fa19be7cd461f122a644",
     "src/app/styles/site-base.css": "34c114a0066c2f3bfd9c25e96cbfa6fa0125730c219c2f46d8075d4e00852256",
-    "src/app/styles/site-production.css": "bc0b75c880f7b31f6fb6f08da466851f5290d9241c91cfe5191fe9b6a10337fb",
+    "src/app/styles/site-production.css": "12539e9fb0a9da50dfc13fcb141a8768069f91d95222ad43c3d6c482304a40a1",
     "src/app/styles/tokens.css": "063a64ba9dbcba6fec6298c366b340044cdb2ea7db1c6b48e0ada66bc2fe3f08",
     "src/app/[locale]/articles/articles.css": "57ffe965393896f0bbb5200eb0f63ba9f7a706f85f13aaac39f42fc55e56f30f",
     "src/app/[locale]/articles/layout.tsx": "298f68c0324d3598bd2f0b66d59bd78e03d095ff05f0d6543e413cd94b4539b4",
@@ -145,7 +145,7 @@
     "src/lib/agent/chat-presentation.ts": "94fef44f7e889c001cfd0c0b6454c62025ab2c9a9946c7112999b28f54f3e7aa",
     "src/lib/agent/chat-upload-http.ts": "217ce3fc7f5e3be3c613bfebda0d4316fd222550a0473b02daf023262dd45302",
     "src/lib/agent/contracts.ts": "a1fc06abc23123da8d1a09fc3dd51aa67b54ffd9ecda9fc64fa2ac0cbbddcef0",
-    "src/lib/agent/conversation-memory.ts": "780d60230e5db4f3d5b3a2dfd709a1517e5769234b6768e87502331583ad6d80",
+    "src/lib/agent/conversation-memory.ts": "612e9a816cbfbf894600318831652cf9d96f1f4e2d6196c4a3388b4a5def9328",
     "src/lib/agent/conversion-facts.ts": "e25429cfebf370457f9ea145ebdfe70138e24b30e8afe13b56e6a2ffa95065bc",
     "src/lib/agent/conversion-intake.ts": "9b2570e05db219317b39875d14edd901b6d4ce78eef4f89d67a87e703e49a7c2",
     "src/lib/agent/customer-channels.ts": "b6940d78f33831fb2e257efe57e3b243dc3f06ea1ebe729a2ce27fc22d6df3c5",
@@ -162,7 +162,7 @@
     "src/lib/agent/readiness.ts": "8a9bf485356d83a172051fdff7dc50c2849f07490a5c39921358e348c77321e8",
     "src/lib/agent/release-verification.d.mts": "922a8223a92a36f373f1f850962fb8efc441cf9944c7bae83bcda9d0ed631aff",
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
-    "src/lib/agent/runner.ts": "f4524ceba7be3c3d7d3229dd33b59b5e13a7a9d3df73072f4125327c36a966a2",
+    "src/lib/agent/runner.ts": "6e9f98a6e440a8e68821b2040606f66cae0894920dfbd39c2f540036c90b5183",
     "src/lib/agent/settings.ts": "bf18dc0f06eaa3bb5551f2a846bb1fed31966cace4815843a1919b671e550017",
     "src/lib/agent/telegram-handoff.ts": "c9397fb01f21c3810069bc9710cd16ec98274698d2adb49a9c19036d7dbf6a7e",
     "src/lib/agent/temporal.ts": "7dff9432c06f3dd3e9da30ece37add57aa50c2f434f5dec434de3769ec39ad05",
@@ -279,7 +279,7 @@
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-07T22:03:11.120Z",
+  "checkedAt": "2026-10-07T22:19:06.802Z",
   "suites": [
     "342 passing unit tests across agent, CRM, admin, finance and scheduling domains",
     "10 isolated Preview database and HTTP scenarios: human continuity, long history, typed corrections, bursts, concurrency, retry, photos and retained hard handoff restrictions",
@@ -287,8 +287,8 @@
   ],
   "verificationScope": "Targeted human takeover/resume continuity and mobile homepage cleanup. Full native suite passed before the final reconciliation repair; the affected scenario was repeated on final source with an injected provider echoing already reviewed notes and corrections. Unchanged burst/HTTP/hazard checks were not redundantly repeated. Final deployed Preview live provider replay, mobile/desktop visual QA and native signed booking proof remain independent release gates. No database migration or channel-mode changes. Two unchanged main assertions (legacy Telegram message ID and obsolete WhatsApp AUTO restriction) are excluded by exact names; local database suites skip without their isolated fixture database. Affected ESLint has no errors and two existing image warnings.",
   "previousVerification": {
-    "fingerprint": "0fd6d957d232894d1816b9b445a9f03372244480c23f1b7e70eb38082b7aabce",
+    "fingerprint": "5914ab7e50a4b367f41ab8f1fdc1badf56ec3104d3414f1bee65fdb1659e107d",
     "tests": 352,
-    "checkedAt": "2026-10-07T21:51:21.838Z"
+    "checkedAt": "2026-10-07T22:03:11.120Z"
   }
 }

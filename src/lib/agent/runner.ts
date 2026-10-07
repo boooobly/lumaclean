@@ -185,6 +185,19 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
           try{args=JSON.parse(call.arguments);}catch{args=null;}
           const result=await tool(call.name,args);
           messages.push({role:"tool",toolCallId:call.id,content:JSON.stringify(result).slice(0,8000)});
+          if(call.name==='reconcileHumanContext'&&!result.error&&!hasPhotos&&mode==='AUTO'){
+            // Resume the same deterministic intake used for a normal client turn after
+            // operator corrections are reconciled. Do not spend the model step budget
+            // repeating qualification, quotes and soft-review tools for known facts.
+            const intake=await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent);
+            if(intake){
+              ctx.responseText=intake;
+              if(ctx.state.quote&&!ctx.state.nextInput){
+                if(ctx.state.review?.reasons.includes('NO_DURATION_RULE'))ctx.responseText+='\n\n'+(c.locale==='ru'?'Время сможем подтвердить после уточнения длительности работ.':c.locale==='en'?'We can confirm a time after reviewing the cleaning duration.':c.locale==='sr-Cyrl'?'Време можемо потврдити након провере трајања чишћења.':'Termin možemo potvrditi nakon provere trajanja čišćenja.');
+                if(!ctx.state.address)ctx.responseText+='\n\n'+(c.locale==='ru'?'Пришлите, пожалуйста, улицу и номер дома для проверки адреса.':c.locale==='en'?'Please send the street and house number so we can check the address.':c.locale==='sr-Cyrl'?'Пошаљите улицу и број зграде да проверимо адресу.':'Pošaljite ulicu i broj zgrade da proverimo adresu.');
+              }
+            }
+          }
           if(['NO_DURATION_RULE','ROUTING_UNRELIABLE','PRICE_REVIEW','NO_SLOTS','PRICE_CHANGED','SERVICE_UNAVAILABLE','EXTRA_UNAVAILABLE','RESCHEDULE_REVIEW_REQUIRED','UNSUPPORTED_SERVICE'].includes(String(result.error))||result.requiresHumanReview){
             const reason=result.error==='NO_DURATION_RULE'?"NO_DURATION_RULE":result.error==='ROUTING_UNRELIABLE'?"ROUTING_UNRELIABLE":result.error==='NO_SLOTS'?"NO_SLOTS":"PRICE_REVIEW";
             const safety=forced||['HEAVY','EXTREME'].includes(ctx.state.draftFacts?.soilLevel??'');
