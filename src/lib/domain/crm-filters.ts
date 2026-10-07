@@ -106,6 +106,7 @@ export function orderWhere(query: Query): Prisma.OrderWhereInput {
           OR: [
             { scheduledStart: { [op]: boundary } },
             { scheduleMode: "FLEXIBLE", windowFrom: { [op]: boundary } },
+            {historicalServiceDate: {[op]: new Date(`${key === "to" ? day.add({days: 1}) : day}T00:00:00Z`)}},
           ],
         });
       } catch {

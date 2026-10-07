@@ -215,7 +215,7 @@ export default async function DashboardPage() {
         )}
       </section>
       <div className="admin-dashboard-inbox"><AIInboxSummary /></div>
-      {upcoming.length > 0 && <section className="crm-section admin-dashboard-upcoming"><div className="admin-section-heading"><h2>Ближайшие заказы</h2><Link href="/admin/orders">Все заказы →</Link></div><ul className="crm-linked-list">{upcoming.map(order=><li key={order.id}><Link href={`/admin/orders/${order.id}`}>{date(order.scheduledStart)} · {order.client.name}<small>{order.service.name}</small></Link></li>)}</ul></section>}
+      {upcoming.length > 0 && <section className="crm-section admin-dashboard-upcoming"><div className="admin-section-heading"><h2>Ближайшие заказы</h2><Link href="/admin/orders">Все заказы →</Link></div><ul className="crm-linked-list">{upcoming.map(order=><li key={order.id}><Link href={`/admin/orders/${order.id}`}>{date(order.scheduledStart)} · {order.client.name}<small>{order.service?.name ?? "Услуга не указана"}</small></Link></li>)}</ul></section>}
       <DisclosureSection title="Рабочий порядок"><section className="admin-next">
         <span className="admin-eyebrow">Рабочий порядок</span>
         <h2>

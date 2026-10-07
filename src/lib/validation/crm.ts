@@ -69,7 +69,7 @@ export const extrasSchema = z
 export const clientSchema = z
   .object({
     name: z.string().trim().min(2, "Укажите имя").max(100),
-    phone: z.string().trim().min(6, "Укажите телефон").max(40),
+    phone: text(40).refine(v => v === null || v.length >= 6, "Укажите корректный телефон"),
     telegram: text(200),
     whatsapp: text(200),
     viber: text(200),
@@ -88,6 +88,7 @@ export const addressSchema = z
     intercom: text(100),
     comment: text(),
     locationProof: text(2000),
+    textOnly: z.boolean().optional(),
   })
   .strict();
 export const scheduleSchema = z

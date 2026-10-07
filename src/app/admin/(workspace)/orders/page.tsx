@@ -50,7 +50,7 @@ export default async function OrdersPage({
               <Link className="crm-row-link" href={`/admin/orders/${r.id}`}>
                 {r.reference ?? r.id}
               </Link>
-              <small>{date(r.createdAt)}</small>
+              <small>{r.historical ? "Исторический заказ" : date(r.createdAt)}</small>
             </td>
             <td>
               <Link href={`/admin/clients/${r.client.id}`}>
@@ -59,19 +59,19 @@ export default async function OrdersPage({
               <small>{r.address.fullAddress}</small>
             </td>
             <td>
-              {r.service.name}
+              {(r.historicalServiceLabel ?? r.service?.name ?? "Услуга не указана")}
               <small>{String(r.area)} м²</small>
             </td>
             <td>
-              {date(r.scheduledStart ?? r.windowFrom)}
+              {date(r.historicalServiceDate ?? r.scheduledStart ?? r.windowFrom, !!r.historicalServiceDate)}
               <small>
-                {r.scheduleMode === "FLEXIBLE"
+                {r.historical ? "Время не указано" : r.scheduleMode === "FLEXIBLE"
                   ? `Окно до ${date(r.windowTo)}`
                   : "Точное время"}
               </small>
             </td>
             <td>
-              {r.estimatedDurationMinutes
+              {r.historical ? "Не указана в источнике" : r.estimatedDurationMinutes
                 ? `${r.estimatedDurationMinutes} мин`
                 : "Не рассчитано"}
               {r.manualDurationMinutes && (

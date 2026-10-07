@@ -14,11 +14,12 @@ import {
   type LegacyPreview,
   type LegacyRow,
 } from "@/lib/domain/legacy-import";
-import { CrmError, localInstant } from "@/lib/domain/crm";
+import { CrmError, localInstant, normalizedPhone } from "@/lib/domain/crm";
 import { serviceIds } from "@/lib/pricing";
 import { expenseLabels } from "@/lib/domain/finance";
 import { writeAudit } from "./audit";
 import { entityId } from "@/lib/validation/crm";
+import type { ImportProfile } from '@/lib/domain/historical-import-profile';
 type Tx = PrismaTypes.TransactionClient;
 const resolutionSchema = z
   .object({
@@ -66,7 +67,10 @@ async function match(tx: Tx, preview: LegacyPreview) {
       id: true,
       name: true,
       normalizedPhone: true,
+      phone: true,
       telegram: true,
+      viber: true,
+      legacyImportKey: true,
       updatedAt: true,
     },
     take: 5001,
@@ -87,14 +91,17 @@ async function match(tx: Tx, preview: LegacyPreview) {
       r.existingId = existing.entityId;
       if (!r.duplicate)
         r.errors.push(
-          "Эта legacy строка уже импортирована, но источник изменился. Автоматическая перезапись выключена.",
+          "SOURCE_CHANGED: эта legacy строка уже импортирована, но источник изменился. Автоматическая перезапись выключена.",
         );
     }
     if (r.kind !== "order") continue;
     delete r.clientId;
     const matches = clients.filter((c) =>
       Boolean(
-        (r.phone && c.normalizedPhone === r.phone) ||
+        (r.phone && (c.normalizedPhone ?? normalizedPhone(c.phone)) === r.phone) ||
+        (r.viber && c.viber===r.viber) ||
+        (c.legacyImportKey && c.legacyImportKey===r.clientKey) ||
+        (c.telegram && r.clientAliases?.some(a=>a.toLowerCase()===('@'+c.telegram!.replace(/^@/,'').toLowerCase()))) ||
         (r.telegram &&
           c.telegram?.trim().replace(/^@/, "").toLowerCase() ===
             r.telegram.replace(/^@/, "").toLowerCase()),
@@ -110,6 +117,7 @@ async function match(tx: Tx, preview: LegacyPreview) {
         (r.phone && c.normalizedPhone && r.phone !== c.normalizedPhone) ||
         (r.telegram &&
           c.telegram &&
+          !r.clientAliases?.includes('@'+c.telegram.replace(/^@/,'').toLowerCase()) &&
           r.telegram.toLowerCase() !==
             "@" + c.telegram.replace(/^@/, "").toLowerCase())
       )
@@ -129,6 +137,7 @@ export async function previewLegacy(
   userId: string,
   bytes: Buffer,
   fileName: string,
+  profile: ImportProfile = 'generic',
 ) {
   validateXlsxZip(bytes);
   const book = new Workbook();
@@ -142,7 +151,8 @@ export async function previewLegacy(
       "Не удалось прочитать .xlsx. Сохраните обычный workbook без пароля.",
     );
   }
-  const parsed = parseLegacyWorkbook(book);
+  const parsed = parseLegacyWorkbook(book, profile);
+  for(const r of parsed.rows)r.legacyFinance={...r.legacyFinance,sourceWorkbook:fileName.slice(0,200)};
   return db.$transaction(
     async (tx) => {
       await admin(tx, userId);
@@ -247,6 +257,8 @@ export async function applyLegacy(
           "Preview истёк. Загрузите workbook повторно.",
         );
       const preview = batch.preview as unknown as LegacyPreview;
+      if(preview.baselineErrors?.length)throw new CrmError('VALIDATION',preview.baselineErrors.join(' '));
+      if(preview.profile==='lumaclean-2026' && (v.selected.length!==preview.rows.length || v.resolutions.length))throw new CrmError('VALIDATION','Подтверждённая историческая история применяется целиком, без изменения source snapshots.');
       if (
         v.selected.some((key) => !preview.rows.some((r) => r.sourceKey === key))
       )
@@ -270,7 +282,7 @@ export async function applyLegacy(
         );
       groupLegacyContacts(selected);
       const latest = await match(tx, { ...preview, rows: selected });
-      if (latest.matchVersion !== preview.matchVersion)
+      if (latest.matchVersion !== preview.matchVersion && !selected.every(r=>r.duplicate))
         throw new CrmError(
           "STALE",
           "CRM изменилась после preview. Загрузите файл повторно и проверьте объединения.",
@@ -286,6 +298,8 @@ export async function applyLegacy(
         addresses: 0,
         expenses: 0,
         investments: 0,
+        payouts: 0,
+        existingClients: new Set(selected.filter(r=>r.clientId).map(r=>r.clientId)).size,
         skipped: 0,
         warnings: selected.flatMap((r) =>
           r.warnings.map((w) => `${r.kind} / строка ${r.row}: ${w}`),
@@ -309,9 +323,10 @@ export async function applyLegacy(
             const c = await tx.client.create({
               data: {
                 name: r.name!,
-                phone: r.phone ?? "",
+                phone: r.phone ?? null,
                 normalizedPhone: r.phone,
-                telegram: r.telegram,
+                telegram: r.clientAliases?.length ? null : r.telegram,
+                legacyImportKey: r.clientKey,
                 viber: r.viber,
                 preferredChannel: r.viber
                   ? "VIBER"
@@ -320,8 +335,7 @@ export async function applyLegacy(
                     : r.phone
                       ? "OTHER"
                       : null,
-                notes:
-                  "Excel import · контакт из истории; проверьте перед новым заказом.",
+                notes: r.clientAliases?.length ? 'Исторические Telegram identifiers: '+r.clientAliases.join(', ')+'. Актуальный handle не подтверждён.' : 'Контакт из истории; проверьте перед новым заказом.',
               },
             });
             clientId = c.id;
@@ -339,7 +353,7 @@ export async function applyLegacy(
           }
           const fullAddress =
             r.address ??
-            `Исторический адрес не установлен · ${r.district || "район не указан"}`;
+            (r.district ? r.district+', Beograd' : 'Точный адрес не указан');
           const key = clientId + ":" + fullAddress;
           let addressId = addresses.get(key);
           if (!addressId) {
@@ -355,7 +369,8 @@ export async function applyLegacy(
                     clientId,
                     fullAddress,
                     active: false,
-                    label: "Excel import · historical/manual unresolved",
+                    label: r.address ? 'Исторический адрес' : 'Точный адрес не указан',
+                    coordinatesSource: 'HISTORICAL_UNCONFIRMED',
                     comment:
                       "Из истории. Текст адреса и местоположение требуют подтверждения.",
                   },
@@ -365,9 +380,10 @@ export async function applyLegacy(
             }
             addresses.set(key, addressId);
           }
-          const service = await tx.service.findUniqueOrThrow({
+          const service = r.service ? await tx.service.findUniqueOrThrow({
             where: { code: r.service! },
-          });
+          }) : null;
+          if(!service && !r.historicalServiceLabel)throw new CrmError('VALIDATION','Не указана историческая услуга.');
           const order = await tx.order.create({
             data: {
               reference:
@@ -377,30 +393,36 @@ export async function applyLegacy(
               soilLevel: null,
               clientId,
               addressId,
-              serviceId: service.id,
+              serviceId: service?.id ?? null,
+              historicalServiceLabel: r.historicalServiceLabel ?? null,
+              historicalServiceDate: new Date(r.date!+'T00:00:00Z'),
               area: r.area!,
               status: r.status as "COMPLETED" | "CANCELLED" | "DRAFT",
-              completedAt:
-                r.status === "COMPLETED"
-                  ? localInstant(r.date! + "T12:00")
-                  : null,
+              completedAt: null,
               basePrice: r.amount!,
               finalPrice: r.amount!,
               travelBufferMinutes: 0,
               requiredCleaners: 1,
               legacyFinance: r.legacyFinance as PrismaTypes.InputJsonValue,
-              internalComment: [
-                "Excel import",
-                r.description,
-                "Время начала, команда и фактическая длительность не восстановлены.",
-              ]
-                .filter(Boolean)
-                .join("\n"),
+              internalComment: r.description || null,
             },
           });
           entityId = order.id;
           entityType = "Order";
           result.orders++;
+          if(preview.profile==='lumaclean-2026'){
+            for(const [recipientName,field] of [['Владислав','sourceVladislavPayout'],['Партнёр','sourcePartnerPayout']] as const){
+              const amount=r.legacyFinance?.[field];
+              if(r.legacyId==='8' && field==='sourcePartnerPayout' && amount===null)continue;
+              if(typeof amount!=='number')throw new CrmError('VALIDATION','Historical payout отсутствует.');
+              if(amount===0)continue;
+              const candidates=recipientName==='Владислав' ? await tx.cleaner.findMany({where:{name:recipientName},select:{id:true}}) : [];
+              const sourceKey=r.sourceKey+':payout:'+field;
+              const p=await tx.cleanerPayout.create({data:{orderId:order.id,cleanerId:candidates.length===1?candidates[0].id:null,historical:true,recipientName,sourceKey,amount,status:'PAID',legacyFinance:{sourceAmount:amount,sourceRow:r.row,sourceWorkbook:batch.fileName,sourceParticipant:recipientName},appliedPercent:null,basisAmount:null,paidAt:null}});
+              await tx.importRecord.create({data:{sourceKey,rowHash:r.rowHash,batchId:batch.id,entityType:'CleanerPayout',entityId:p.id}});
+              result.payouts++;
+            }
+          }
         } else if (r.kind === "expense") {
           const orderLegacyId = String(r.legacyFinance?.orderLegacyId ?? "");
           let orderId: string | null = null;
@@ -422,14 +444,9 @@ export async function applyLegacy(
               category: r.category as keyof typeof expenseLabels,
               amount: r.amount!,
               orderId,
-              occurredAt: localInstant(r.date! + "T12:00"),
-              description: [
-                "Excel import",
-                r.description,
-                r.paidBy ? "Оплатил: " + r.paidBy : null,
-              ]
-                .filter(Boolean)
-                .join(" · "),
+              occurredAt: localInstant(r.date! + "T00:00"),
+              description: r.description,
+              legacyFinance: r.legacyFinance as PrismaTypes.InputJsonValue,
             },
           });
           entityId = expense.id;
@@ -439,7 +456,7 @@ export async function applyLegacy(
           entityId = (
             await tx.investment.create({
               data: {
-                occurredAt: localInstant(r.date! + "T12:00"),
+                occurredAt: localInstant(r.date! + "T00:00"),
                 paidBy: r.paidBy!,
                 description: r.description,
                 amount: r.amount!,

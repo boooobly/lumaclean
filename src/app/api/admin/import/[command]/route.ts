@@ -38,6 +38,8 @@ export async function POST(
         headers: { "content-type": request.headers.get("content-type")! },
       }).formData();
       const file = form.get("file");
+      const profile=form.get('profile')??'generic';
+      if(profile!=='generic'&&profile!=='lumaclean-2026')throw new CrmError('VALIDATION','Неизвестный профиль импорта.');
       if (
         !(file instanceof File) ||
         !file.name.toLowerCase().endsWith(".xlsx") ||
@@ -49,6 +51,7 @@ export async function POST(
         user.id,
         Buffer.from(await file.arrayBuffer()),
         file.name,
+        profile,
       );
     } else {
       if (!request.headers.get("content-type")?.startsWith("application/json"))

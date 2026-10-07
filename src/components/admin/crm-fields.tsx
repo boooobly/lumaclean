@@ -38,7 +38,7 @@ export function Options({
 }
 export type ClientValues = {
   name?: string;
-  phone?: string;
+  phone?: string | null;
   telegram?: string | null;
   whatsapp?: string | null;
   viber?: string | null;
@@ -53,10 +53,9 @@ export function ClientFields({ value = {} }: { value?: ClientValues }) {
       <Field name="name" label="Имя клиента" value={value.name} required />
       <Field
         name="phone"
-        label="Телефон"
+        label="Телефон (если известен)"
         value={value.phone}
         type="tel"
-        required
       />
       <DisclosureSection title="Дополнительные контакты и условия"><div className="crm-fields-grid"><Field name="telegram" label="Telegram" value={value.telegram} />
       <Field name="whatsapp" label="WhatsApp" value={value.whatsapp} />
@@ -129,7 +128,7 @@ export function AddressFields({ value = {} }: { value?: AddressValues }) {
 export type ClientOption = {
   id: string;
   name: string;
-  phone: string;
+  phone: string | null;
   discountPercent: number;
   addresses: { id: string; label: string | null; fullAddress: string }[];
 };
@@ -199,7 +198,7 @@ export function ClientPicker({
         <option value="">Новый клиент / не выбран</option>
         {rows.map((row) => (
           <option key={row.id} value={row.id}>
-            {row.name} · {row.phone}
+            {row.name} · {row.phone ?? "Телефон не указан"}
           </option>
         ))}
       </select>

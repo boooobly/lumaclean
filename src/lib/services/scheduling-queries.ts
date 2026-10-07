@@ -56,7 +56,7 @@ function dto(row: Row, issues: CalendarOrder["issues"] = []): CalendarOrder {
     reference: row.reference ?? row.id,
     client: row.client.name,
     address: row.address.fullAddress,
-    service: row.service.name,
+    service: row.service?.name ?? "Историческая услуга",
     status: row.status,
     scheduleMode: row.scheduleMode,
     start: row.scheduledStart?.toISOString() ?? null,

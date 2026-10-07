@@ -8,7 +8,7 @@ export async function completeEconomics(
   userId: string,
 ) {
   const order = await tx.order.findUniqueOrThrow({ where: { id: orderId } });
-  if (order.status !== "COMPLETED") return;
+  if (order.status !== "COMPLETED" || order.historical) return;
   const assignments = await tx.orderCleaner.findMany({
     where: { orderId, removedAt: null },
     include: { cleaner: true },

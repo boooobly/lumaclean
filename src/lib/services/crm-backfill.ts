@@ -11,9 +11,9 @@ export async function backfillPhones(db:PrismaClient) {
       const rows=model==="client" ? await db.client.findMany(args) : await db.lead.findMany(args);
       if(!rows.length)break;
       for(const row of rows) {
-        const normalized=normalizedPhone(row.phone);if(!normalized)continue;
+        if(!row.phone)continue; const normalized=normalizedPhone(row.phone);if(!normalized)continue;
         await db.$transaction(async tx=>{
-          const data={normalizedPhone:normalized},where={id:row.id,phone:row.phone,normalizedPhone:null};
+          const data={normalizedPhone:normalized},where={id:row.id,phone:row.phone!,normalizedPhone:null};
           const result=model==="client" ? await tx.client.updateMany({where,data}) : await tx.lead.updateMany({where,data});
           if(result.count) {await writeAudit(tx,{type:"SYSTEM",key:"crm-phone-backfill"},{action:"PHONE_NORMALIZED",entityType:model==="client" ? "Client" : "Lead",entityId:row.id,changes:{changedFields:{before:null,after:["normalizedPhone"]}}});changed++;}
         });

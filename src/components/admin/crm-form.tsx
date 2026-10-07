@@ -116,6 +116,7 @@ const address = (f: FormData) => ({
   intercom: optional(f, "intercom"),
   comment: optional(f, "addressComment"),
   locationProof: optional(f, "locationProof"),
+  textOnly: str(f, "addressTextOnly") === "true",
 });
 function order(f: FormData) {
   return {
@@ -172,7 +173,7 @@ export function CrmForm({
     [message, setMessage] = useState(""),
     [ok, setOk] = useState(false);
   const [matches, setMatches] = useState<
-      { id: string; name: string; phone: string }[]
+      { id: string; name: string; phone: string | null }[]
     >([]),
     [allowDuplicate, setAllowDuplicate] = useState(false);
   const [issues, setIssues] = useState<SchedulingIssue[]>([]),

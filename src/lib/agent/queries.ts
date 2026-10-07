@@ -19,7 +19,7 @@ export async function inboxData(db:PrismaClient,filter:string="ALL",before?:stri
 }
 export async function conversationData(db:PrismaClient,id:string,before?:string){
   const settings=await db.businessSettings.findUniqueOrThrow({where:{id:'default'}});
-  const c=await db.conversation.findUnique({where:{id},include:{client:{select:{id:true,name:true,phone:true}},lead:{select:{id:true,name:true,status:true}},order:{select:{id:true,reference:true,status:true,scheduledStart:true,finalPrice:true,currency:true,service:{select:{name:true}},address:{select:{fullAddress:true}}}},handoffs:{orderBy:{requestedAt:"desc"},take:5},jobs:{orderBy:{createdAt:"desc"},take:5},toolTraces:{orderBy:{createdAt:"desc"},take:20},invocations:{orderBy:{createdAt:"desc"},take:20}}});
+  const c=await db.conversation.findUnique({where:{id},include:{client:{select:{id:true,name:true,phone:true}},lead:{select:{id:true,name:true,status:true}},order:{select:{id:true,reference:true,status:true,scheduledStart:true,historicalServiceLabel:true,finalPrice:true,currency:true,service:{select:{name:true}},address:{select:{fullAddress:true}}}},handoffs:{orderBy:{requestedAt:"desc"},take:5},jobs:{orderBy:{createdAt:"desc"},take:5},toolTraces:{orderBy:{createdAt:"desc"},take:20},invocations:{orderBy:{createdAt:"desc"},take:20}}});
   if(!c)return null;
   const rows=await db.message.findMany({where:{conversationId:id,...(before&&Number.isFinite(Date.parse(before))?{sentAt:{lt:new Date(before)}}:{})},orderBy:[{sentAt:"desc"},{id:"desc"}],take:201,include:{attachments:{select:attachmentSelect}}});
   const suggestion=await db.shadowSuggestion.findFirst({where:{conversationId:id},orderBy:{createdAt:"desc"},select:{id:true,verdict:true,reason:true}});

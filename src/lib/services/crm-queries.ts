@@ -77,7 +77,7 @@ export async function listClients(query: Query) {
           orders: {
             take: 1,
             orderBy: { createdAt: "desc" },
-            select: { scheduledStart: true, windowFrom: true, createdAt: true },
+            select: { historicalServiceDate: true, scheduledStart: true, windowFrom: true, createdAt: true },
           },
         },
       }),
@@ -126,6 +126,9 @@ export async function listOrders(query: Query) {
           createdAt: true,
           area: true,
           scheduleMode: true,
+          historicalServiceDate: true,
+          historicalServiceLabel: true,
+          historical: true,
           scheduledStart: true,
           windowFrom: true,
           windowTo: true,
@@ -191,6 +194,11 @@ export async function getClient(id: string) {
             id: true,
             reference: true,
             status: true,
+            historicalServiceDate: true,
+            historicalServiceLabel: true,
+            historical: true,
+            service: {select: {name: true}},
+            area: true,
             scheduledStart: true,
             windowFrom: true,
             finalPrice: true,
@@ -202,7 +210,7 @@ export async function getClient(id: string) {
     }),
   );
   if (!client) notFound();
-  const [stats, last] = await read(() =>
+  const [stats, dates] = await read(() =>
     Promise.all([
       db.order.aggregate({
         where: { clientId: id, status: "COMPLETED", currency: "RSD" },
@@ -210,13 +218,14 @@ export async function getClient(id: string) {
         _avg: { finalPrice: true },
         _count: true,
       }),
-      db.order.findFirst({
+      db.order.aggregate({
         where: { clientId: id, status: "COMPLETED" },
-        orderBy: { completedAt: "desc" },
-        select: { completedAt: true },
+        _max: { completedAt: true, historicalServiceDate: true },
       }),
     ]),
   );
+  const latest = dates._max;
+  const last = latest.historicalServiceDate && (!latest.completedAt || latest.historicalServiceDate > latest.completedAt) ? {historicalServiceDate: latest.historicalServiceDate, completedAt: null} : {historicalServiceDate: null, completedAt: latest.completedAt};
   return { client, stats, last };
 }
 export async function getOrder(id: string) {
