@@ -2,6 +2,7 @@ import "server-only";
 import { requireAdmin } from "@/lib/auth/session";
 import { getDatabase } from "@/lib/database/client";
 import { businessPeriods } from "@/lib/domain/time";
+import { completedPeriodWhere } from "./finance-calculation";
 
 export async function getDashboard() {
   await requireAdmin();
@@ -43,8 +44,7 @@ export async function getDashboard() {
       db.cleaner.count({ where: { active: true } }),
       db.order.aggregate({
         where: {
-          status: "COMPLETED",
-          completedAt: { gte: monthFrom, lt: monthTo },
+          ...completedPeriodWhere({ from: monthFrom, to: monthTo }),
           currency: settings.currency,
         },
         _sum: { finalPrice: true },

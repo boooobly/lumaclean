@@ -37,9 +37,11 @@ export default async function ClientPage({
             items={[
               [
                 "Телефон",
-                <a key="tel" href={`tel:${c.normalizedPhone ?? c.phone}`}>
-                  {c.phone ?? "Телефон не указан"}
-                </a>,
+                c.phone ? (
+                  <a key="tel" href={`tel:${c.normalizedPhone ?? c.phone}`}>
+                    {c.phone}
+                  </a>
+                ) : "Телефон не указан",
               ],
               ["Нормализованный", c.normalizedPhone ?? "Не определён"],
               ["Telegram", c.telegram],

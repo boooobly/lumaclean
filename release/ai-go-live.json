@@ -1,5 +1,5 @@
 {
-  "fingerprint": "9617f7b03d930ab41e02478587a75fcdedf66b1089d5d1a133547f3de3a53d85",
+  "fingerprint": "5e328a8acd2dc99ebee14ce62258fadbaaf5bc2fb0e6487b0ee229f851f3e198",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -11,7 +11,7 @@
     "src/app/admin/(workspace)/clients/loading.tsx": "3d00fdd8885c1e5d65205756a4b638718a31744f07d29f6e446b1d8b01be448d",
     "src/app/admin/(workspace)/clients/new/page.tsx": "80139603862967981fd7cb388e6d3b83915cdc607804945fac36d0c2c04bebe5",
     "src/app/admin/(workspace)/clients/page.tsx": "71d42464b6b6dbb9cc52ff0af1e917952f01cb08cb028cc6712f259b15bc6632",
-    "src/app/admin/(workspace)/clients/[id]/page.tsx": "2c474be52acbd289fe2580d9fd123a9b0a1b64da9731644dcf88faafb3481628",
+    "src/app/admin/(workspace)/clients/[id]/page.tsx": "62725bcd59882612ce8bf9fb19492d61afbb65e2b34d67909f9acda9400a50f5",
     "src/app/admin/(workspace)/finances/page.tsx": "8d48db51385b3dadb603dc583b494342b1574a08985e22eb2adbace6fd4d3db4",
     "src/app/admin/(workspace)/layout.tsx": "63fcc3865b07d163bca2c2bb219004301f9ab85b30a2ed25761e9578967a2043",
     "src/app/admin/(workspace)/leads/loading.tsx": "81ce84fd834f41043a08e5a66fe1811f64fbde63e3d84570aaf47e53b936a3f2",
@@ -222,7 +222,7 @@
     "src/lib/seo-services.ts": "97dc340726b15f01ff460ad4432d72327a1ec375d9c0e07b7a89fe3b7e170663",
     "src/lib/seo.ts": "0757f8d416b211cd9dbdf72363343ceff849b9846883a49b9786cb1172f06865",
     "src/lib/service-planning.ts": "de0b537a4eecefc27041012cea5ea86511079304349da998743fd51e91353df1",
-    "src/lib/services/admin-dashboard.ts": "474f4ca2288bd8cbefcc939cf1622d22f56ecfa9dd120feb6f8c485f4b63b5b8",
+    "src/lib/services/admin-dashboard.ts": "c08c6d87f484e0866b9ffa2a19a17042b12bc5c32ec1a36d48a1c3ab140999cb",
     "src/lib/services/admin-http.ts": "74150c1b9b7114448c7bcdfee4c8eaeb127e6cfccb7e011d97d8537d69a191b2",
     "src/lib/services/audit.ts": "554f19b97c77c47a249e6944a9fd2444b5b976676cee81c174287a02d0dd9bd0",
     "src/lib/services/busmaps-store.ts": "508de5e8e8532f4466a8c4a14dea84fab46f47012dec314ee6e0675a855d8d6b",
@@ -278,7 +278,7 @@
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-07T15:18:31.856Z",
+  "checkedAt": "2026-10-07T15:36:50.871Z",
   "suites": [
     "339 passing unit tests across admin, CRM, scheduling, routing, finance and agent domains",
     "real workbook Preview import/reconciliation and zero-duplicate second run",
@@ -286,8 +286,8 @@
   ],
   "verificationScope": "Historical import and Admin address support. Additive Preview migration, real 14-order/4-expense/27-payout import and reconciliation passed. Two unchanged main assertions (legacy Telegram message ID and obsolete WhatsApp AUTO restriction) excluded by exact test names; 21 local-database tests skipped without their isolated local DB. Native final-source booking proof remains an independent release gate. Production channel modes remain unchanged.",
   "previousVerification": {
-    "fingerprint": "e985743ba31ef67e8e7299986716fb83a76b7768a38d6609b0521997e473cd06",
+    "fingerprint": "9617f7b03d930ab41e02478587a75fcdedf66b1089d5d1a133547f3de3a53d85",
     "tests": 339,
-    "checkedAt": "2026-10-07T15:16:11.314Z"
+    "checkedAt": "2026-10-07T15:18:31.856Z"
   }
 }
