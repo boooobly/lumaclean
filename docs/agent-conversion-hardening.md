@@ -23,6 +23,7 @@ Changes:
 - Explicit SMS preference and Serbian phone forms are recorded; the phone updates the lead without verifying identity. The reply promises only to pass the preference to the team, never an automatic or guaranteed SMS.
 - Repeated known qualification attempts are rejected and measured. Handoff before complete qualification is measured separately.
 - Hosted replay also found that an unrelated neighborhood reply repeated an unanswered extras question. The deterministic intake now uses the saved inbound question context, acknowledges the new fact and preserves the previous response context without repeating the question.
+- A thank-you after the partial quote now gets an acknowledgment and a clear continuation toward day/contact while review is pending, without repeating the weekend question or falling silent.
 
 Verification:
 

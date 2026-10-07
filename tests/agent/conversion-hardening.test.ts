@@ -32,7 +32,7 @@ test('total count requires type; word-only type uses known quantity; unknown qua
   const other:AgentState={};turn(other,'7 окон');turn(other,'панорамные','WINDOW_TYPE');assert.equal(other.draftFacts?.windowCleaning?.largeCount,7);
   assert.equal(explicitCustomerFacts('nekoliko prozora',at,zone).windowCleaning?.standardCount,undefined);
 });
-test('exact incident fact replay preserves intake and deterministic quote path',()=>{
+test('exact incident fact replay preserves intake and deterministic quote path',async()=>{
   const s:AgentState={};turn(s,incident);
   assert.equal(s.draftFacts?.service,'deep');assert.equal(s.draftFacts?.area,57);assert(s.draftFacts?.windowCleaning?.requested);assert.deepEqual(s.draftFacts?.reviewItems,['roletne']);assert.equal(s.draftFacts?.bathroomCount,1);assert(s.draftFacts?.carpetsAbsent);assert.equal(s.draftFacts?.requestedCrew,2);assert.deepEqual(s.draftFacts?.requestedWeekend,{saturday:'2026-10-10',sunday:'2026-10-11'});
   turn(s,'Lokacija je bgd, banovo brdo');assert.equal(s.draftFacts?.city,'Belgrade');assert.equal(s.draftFacts?.neighborhoodHint,'Banovo brdo');assert(!s.address);
@@ -46,6 +46,7 @@ test('exact incident fact replay preserves intake and deterministic quote path',
   assert.equal(general.total,18500);assert.equal(regular.total,12400);assert.equal(general.extras.reduce((sum,e)=>sum+e.quantity*e.unitPrice,0),7800);
   s.quote={id:'q',serviceId:'s',input:{service:'deep',area:57,extras:s.draftFacts!.extras!,soilLevel:'NORMAL',urgent:false},total:general.total,base:general.base,discountPercent:0,requiresHumanReview:true,at:at.toISOString(),breakdown:general.extras.map(e=>({...e,amount:e.quantity*e.unitPrice}))};
   const text=quoteText(s,'sr-Latn');assert(text.includes('18.500'));assert(text.includes('6.000'));assert(text.includes('1.800'));assert(text.includes('Roletne'));assert(outputAllowed(text,s));
+  s.review={reasons:['CUSTOM_EXTRA']};const thanks=await conversionIntake(()=>s,'Ok, hvala','sr-Latn',async()=>assert.fail('A thank-you under review must not repeat qualification'));assert(thanks?.includes('Hvala vama'));assert(!thanks?.includes('?'));
   turn(s,'Možete li SMS-om?');assert.equal(s.preferredContactChannel,'SMS');assert(phoneOffer('Da vam pošaljem broj tel'));
   turn(s,'+381 60 123-4567');assert.equal(s.phone,'+381601234567');assert(bookingReviewBlocked(s));
 });

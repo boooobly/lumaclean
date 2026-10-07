@@ -54,6 +54,7 @@ export async function conversionIntake(state:()=>AgentState,text:string,locale:s
     return String(result.question)+' '+suffix;
   }
   if(f?.phone&&/^[+0][\d\s()-]{6,30}$/u.test(text.trim()))return locale.startsWith('sr')?'Broj je sačuvan. Prosleđujem timu vašu napomenu o željenom načinu kontakta.':locale==='en'?'Your number is saved. I am passing your contact preference to the team.':'Номер сохранён. Передаю команде пожелание о способе связи.';
+  if(s.quote&&s.review?.reasons.length&&/^(?:ok[,!.\s]*)?(?:hvala|thanks|thank you|спасибо|хвала)[!.\s]*$/iu.test(text.trim()))return locale.startsWith('sr')?'Hvala vama. Tim proverava detalje za potvrdu; zatim možemo da uskladimo dan i kontakt.':locale==='en'?'Thank you. The team is reviewing the details; we can continue arranging the day and contact.':'Спасибо. Команда уточняет детали; дальше сможем согласовать день и контакт.';
   const intent=nextQualification(s);
   // An unrelated fact can clear nextInput during merging, but it does not answer
   // the question already shown to the customer. Keep its response context.

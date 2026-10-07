@@ -49,6 +49,7 @@ test('real incident: native Preview persistence, soft review, contact and hard s
       const windows=await send(c.id,'5 velikih i dva mala');
       assert.equal(windows.state.quote?.total,18500);assert.equal(windows.state.draftFacts?.windowCleaning?.largeCount,5);assert.equal(windows.state.draftFacts?.windowCleaning?.standardCount,2);
       assert(windows.last.text.includes('18.500'));assert(windows.last.text.includes('6.000'));assert(windows.last.text.includes('1.800'));assert(windows.last.text.includes('Roletne'));assert(windows.last.text.includes('subota ili nedelja'));assert(windows.live.needsAttention);assert(windows.state.draftFacts?.requestedWeekend);assert.equal(windows.state.draftFacts?.neighborhoodHint,'Banovo brdo');
+      const thanks=await send(c.id,'Ok, hvala');assert(thanks.last.text.includes('Hvala vama'));assert(!thanks.last.text.includes('?'));assert.equal(thanks.state.quote?.total,18500);
       const sms=await send(c.id,'Da li možete da mi odgovorite sms porukom');assert(sms.last.text.includes('broj telefona'));assert.equal(sms.state.preferredContactChannel,'SMS');
       const offered=await send(c.id,'Da vam pošaljem broj tel');assert(offered.last.text.includes('broj telefona'));
       const contact=await send(c.id,'060 123-4567');assert.equal(contact.state.phone,'+381601234567');assert.equal(contact.live.identityVerified,false);
