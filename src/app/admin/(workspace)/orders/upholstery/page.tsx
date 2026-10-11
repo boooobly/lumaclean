@@ -45,9 +45,9 @@ export default async function Page({
           },
         })
       : null,
-    leadId ? db.lead.findUnique({ where: { id: leadId } }) : null,
+    leadId ? db.lead.findUnique({ where: { id: leadId },include:{service:{select:{code:true}}} }) : null,
   ]);
-  if ((id && !o) || (leadId && !lead?.upholsteryQuote)) notFound();
+  if ((id && !o) || (leadId && !lead?.upholsteryQuote&&!lead?.upholsteryRequested)) notFound();
   if (lead && !lead.clientId)
     return (
       <>
@@ -65,7 +65,7 @@ export default async function Page({
       </>
     );
   const u = o?.upholstery;
-  const leadInput = lead
+  const leadInput = lead?.upholsteryQuote
     ? upholsteryRequestSchema.parse(
         (lead.upholsteryQuote as { input: unknown }).input,
       )
@@ -177,13 +177,12 @@ export default async function Page({
       patchTestConfirmed: u?.patchTestConfirmed ?? false,
     };
   else if (lead) {
-    const snapshot = lead.upholsteryQuote as { input: unknown };
     initial = {
       leadId: lead.id,
       clientId: lead.clientId!,
       addressId:
         clients.find((c) => c.id === lead.clientId)?.addresses[0]?.id ?? "",
-      request: upholsteryRequestSchema.parse(snapshot.input),
+      ...(leadInput?{request:leadInput}:lead.requestKind==='CLEANING_UPHOLSTERY'&&lead.service&&lead.area?{request:{mode:'ADDON' as const,items:[],urgent:lead.urgent,cleaning:{service:lead.service.code as 'regular'|'deep'|'move'|'airbnb'|'office',area:Number(lead.area)}}}: {request:{mode:'STANDALONE' as const,items:[],urgent:false}}),
     };
   }
   return (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import {leadRequestKind,requestKindLabels} from '@/lib/lead-intent';
 import { listLeads } from "@/lib/services/crm-queries";
 import {
   CrmHeader,
@@ -60,8 +61,10 @@ export default async function LeadsPage({
               <small>{r.phone}</small>
             </td>
             <td>
-              {r.service?.name ?? "—"}
-              <small>{money(r.estimatedPrice)}</small>
+              {requestKindLabels[leadRequestKind(r)]}
+              {leadRequestKind(r)!=='CLEANING'&&r.status!=='CONVERTED'&&<small className="crm-warning">Требуется уточнение химчистки</small>}
+              {r.area&&<small>{r.service?.name} · {String(r.area)} м²</small>}
+              <small>{r.estimatedPrice===null?'Цена после уточнения':`${r.upholsteryQuote?'Предыдущий расчёт услуг: ':leadRequestKind(r)==='CLEANING_UPHOLSTERY'?'Уборка без химчистки: ':''}${money(r.estimatedPrice)}`}</small>
             </td>
             <td>
               <Chip status={r.status} />

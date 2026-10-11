@@ -10,10 +10,12 @@ import { articlePath, getPublishedArticles } from "@/lib/articles";
 import { getServicePath } from "@/lib/seo-services";
 import { serviceIds } from "@/lib/pricing";
 import { routing } from "@/i18n/routing";
+import {upholsteryPath} from '@/lib/upholstery-content';
 export const runtime = "nodejs";
 const paths = new Set(
   routing.locales.flatMap((locale) => [
     `/${locale}`,
+    upholsteryPath(locale),
     `/${locale}/articles`,
     ...serviceIds.map((s) => getServicePath(locale, s)),
     ...getPublishedArticles().map((a) => articlePath(a, locale)),
@@ -44,7 +46,7 @@ export async function POST(request: Request) {
   try {
     const db = getDatabase();
     const lead = await saveWebsiteLead(db, parsed.data);
-    if (lead.created) await notifyWebsiteLead(db, lead, parsed.data);
+    if (lead.created||parsed.data.upholsteryRequested) await notifyWebsiteLead(db, lead, parsed.data);
     return NextResponse.json(
       { ok: true, reference: lead.reference },
       { headers: { "Cache-Control": "no-store" } },

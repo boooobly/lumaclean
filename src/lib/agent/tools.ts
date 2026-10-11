@@ -70,7 +70,7 @@ async function updateLead(tx:Tx,c:Conversation,ctx:ToolContext,input:ReturnType<
   if(input.service&&!service?.active)return{error:"SERVICE_UNAVAILABLE"};
   if(ctx.mode==="SHADOW")return{planned:true,operation:"createOrUpdateLead",error:"SHADOW_MUTATION_BLOCKED"};
   const area=input.area??ctx.state.draftFacts?.area;
-  const fields={name:ctx.state.name??"Контакт уточняется",phone:ctx.state.phone??"",normalizedPhone:ctx.state.phone?normalizedPhone(ctx.state.phone):null,locale:c.locale,...(service?{serviceId:service.id}:{}),...(area?{area}:{})};
+  const fields={name:ctx.state.name??"Контакт уточняется",phone:ctx.state.phone??"",normalizedPhone:ctx.state.phone?normalizedPhone(ctx.state.phone):null,locale:c.locale,...(service?{serviceId:service.id}:{}),...(area?{area}:{}),...(ctx.state.upholsteryInquiry?{upholsteryRequested:true,humanReviewRequired:true,requestKind:service&&area?'CLEANING_UPHOLSTERY':'UPHOLSTERY'}:{})};
   const previous=c.leadId?await tx.lead.findUnique({where:{id:c.leadId}}):null;
   if(previous?.status==="CONVERTED")return{ok:true,leadId:previous.id};
   const lead=previous?await tx.lead.update({where:{id:previous.id},data:fields}):await tx.lead.create({data:{...fields,submissionId:`agent:${c.id}`,submissionHash:createHash("sha256").update(`agent:${c.id}`).digest("hex"),channel:c.channel,entrySource:"ai-chat",reference:`LC-AI-${randomUUID().slice(0,8).toUpperCase()}`,clientId:c.identityVerified?c.clientId:null,telegramStatus:"CANCELLED"}});
@@ -109,7 +109,7 @@ async function checkedSlot(tx:Tx,c:Conversation,ctx:ToolContext,token:string){
 }
 /** Atomic standard booking boundary; shares production pricing, duration and scheduling services. */
 export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,reschedule:boolean){
-  if(ctx.state.upholsteryInquiry||(reschedule&&c.orderId&&await tx.orderUpholstery.count({where:{orderId:c.orderId}})))throw new AgentError('UPHOLSTERY_REVIEW_REQUIRED');
+  if(ctx.state.upholsteryInquiry||(c.leadId&&await tx.lead.count({where:{id:c.leadId,upholsteryRequested:true}}))||(reschedule&&c.orderId&&await tx.orderUpholstery.count({where:{orderId:c.orderId}})))throw new AgentError('UPHOLSTERY_REVIEW_REQUIRED');
   if(ctx.mode!=="AUTO")return{error:"SHADOW_MUTATION_BLOCKED",planned:true,operation:reschedule?"rescheduleOrder":"createOrder"};
   if(bookingReviewBlocked(ctx.state)||await tx.humanHandoff.count({where:{conversationId:c.id,resolvedAt:null,reason:{not:'SOFT:CONTACT_PREFERENCE'}}}))return{error:'REVIEW_REQUIRED',message:'Owner must resolve pending review before booking.'};
   const state=ctx.state,pending=state.pending;
@@ -192,7 +192,10 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   if(name==='markUpholsteryInquiry'){
     const input=toolSchemas[name].parse(payload),turn=await currentClientTurn(tx,c.id);
     if(!upholsteryIntent(input.evidence)||!turn.some(m=>m.text.includes(input.evidence)))throw new AgentError('CUSTOMER_FACTS_REQUIRED');
-    state.upholsteryInquiry=true;state.review={reasons:[...new Set([...(state.review?.reasons??[]),'UPHOLSTERY_BOOKING_PROOF_REQUIRED'])]};delete state.quote;delete state.duration;delete state.pending;delete state.slots;delete state.selectedSlotToken;return{requiresHumanReview:true,autonomousBooking:false};
+    state.upholsteryInquiry=true;state.review={reasons:[...new Set([...(state.review?.reasons??[]),'UPHOLSTERY_BOOKING_PROOF_REQUIRED'])]};delete state.quote;delete state.duration;delete state.pending;delete state.slots;delete state.selectedSlotToken;
+    if(c.leadId&&ctx.mode==='AUTO')await updateLead(tx,c,ctx,{intent:'cleaning'});
+    await dispatch(tx,c,ctx,'requestReview',{reason:'OPERATIONAL'});
+    return{requiresHumanReview:true,autonomousBooking:false,intake:'Contact only. Manager will clarify furniture details; do not run a technical questionnaire.'};
   }
   if(name==='calculateUpholstery'){
     const input=toolSchemas[name].parse(payload);if(!state.upholsteryInquiry)throw new AgentError('CUSTOMER_FACTS_REQUIRED');
@@ -207,8 +210,9 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   if(name==="getBusinessInfo"){
     const content=siteContent[c.locale.startsWith("sr")?"sr":c.locale==="en"?"en":"ru"];
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
-    const upholstery=upholsteryUi[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'];const facts={upholstery:{name:upholstery.name,method:'wet spray extraction',equipment:'Professional Kärcher equipment and products; model not confirmed',faq:upholstery.faq,limits:upholstery.limits,pricing:'Use calculateUpholstery only. Do not sum prices yourself.',autonomousBooking:false},sameDayPolicy:{cutoffMinute:settings.sameDayBookingCutoffMinute,latestDepartureMinute:settings.latestCleanerDepartureMinute,timezone:settings.timezone,requiresRealAvailability:true,surchargePercent:20},city:content.footer.location,services:content.services,scope:content.comparison,assurance:content.assurance,faq:content.faq.items,extras:content.calculator.labels,pricingPolicy:content.calculator.note};
-    ctx.factAmounts=[...JSON.stringify(facts).matchAll(/(\d[\d\s,]*?)\s*RSD/gi)].map(m=>Number(m[1].replace(/[\s,]/g,"")));
+    const catalog=upholsteryCatalogSchema.parse((await tx.upholsterySettings.findUniqueOrThrow({where:{id:'default'}})).catalog);
+    const upholstery=upholsteryUi[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'];const facts={upholstery:{name:upholstery.name,method:'wet spray extraction',equipment:'Professional Kärcher equipment and products; model not confirmed',faq:upholstery.faq,limits:upholstery.limits,publicPrices:Object.entries(catalog).map(([key,amount])=>({item:upholstery.catalogLabels[key as keyof typeof catalog],from:amount,currency:'RSD'})),pricing:'These are public starting prices, not a personal quote. Standalone minimum applies. Use calculateUpholstery for exact sums only when the customer supplies the facts. No mental arithmetic.',autonomousBooking:false},sameDayPolicy:{cutoffMinute:settings.sameDayBookingCutoffMinute,latestDepartureMinute:settings.latestCleanerDepartureMinute,timezone:settings.timezone,requiresRealAvailability:true,surchargePercent:20},city:content.footer.location,services:content.services,scope:content.comparison,assurance:content.assurance,faq:content.faq.items,extras:content.calculator.labels,pricingPolicy:content.calculator.note};
+    ctx.factAmounts=[...Object.values(catalog),...[...JSON.stringify(facts).matchAll(/(\d[\d\s,]*?)\s*RSD/gi)].map(m=>Number(m[1].replace(/[\s,]/g,"")))];
     return facts;
   }
   if(name==="findClient"){
@@ -254,6 +258,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   }
   if(name==='requestCustomerInput'){
     const {intent}=toolSchemas.requestCustomerInput.parse(payload);
+    if(state.upholsteryInquiry&&intent!=='PHONE')return{error:'UPHOLSTERY_MANAGER_INTAKE',message:'Collect only missing name/contact. Manager will clarify furniture and pricing; do not run cleaning or furniture qualification.'};
     if(inputAlreadyKnown(intent,state)){behaviorMetric('repeatedQuestionDetected');behaviorMetric('repeatedQualificationQuestionCount');return{error:'FACT_ALREADY_KNOWN',facts:state.draftFacts};}
     if(intent==='SLOT_SELECTION'&&!state.slots?.length)return{error:'SLOTS_REQUIRED'};
     if(intent==='POST_BOOKING'&&!state.booking||intent==='BOOKING_CONFIRMATION'&&!state.pending||intent==='YES_NO'&&!state.quote)return{error:'INPUT_CONTEXT_REQUIRED'};

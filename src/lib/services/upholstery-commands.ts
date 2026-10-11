@@ -220,7 +220,7 @@ export async function runUpholsteryCommand(
         if (
           lead &&
           (lead.clientId !== v.clientId ||
-            !lead.upholsteryQuote ||
+            (!lead.upholsteryQuote&&!lead.upholsteryRequested) ||
             ["CONVERTED", "LOST"].includes(lead.status))
         )
           throw new CrmError(
@@ -542,8 +542,10 @@ export async function runUpholsteryCommand(
             where: { id: lead.id },
             data: {
               status: "CONVERTED",
+              humanReviewRequired:!v.approve,
               upholsteryQuote: json({
                 ...(lead.upholsteryQuote as Prisma.JsonObject),
+                input:v.request,
                 convertedOrderId: orderId,
               }),
             },

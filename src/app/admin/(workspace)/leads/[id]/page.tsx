@@ -1,4 +1,5 @@
 import Link from "next/link";
+import {leadRequestKind,requestKindLabels} from '@/lib/lead-intent';
 import {UpholsteryLeadDetail} from '@/components/admin/upholstery-detail';
 import { getLead, findClientOptions } from "@/lib/services/crm-queries";
 import {
@@ -38,7 +39,7 @@ export default async function LeadPage({
         back="/admin/leads"
         action={
           !["CONVERTED", "LOST"].includes(lead.status)
-            ? { href: lead.upholsteryQuote?`/admin/orders/upholstery?lead=${id}`:`/admin/orders/new?leadId=${id}`, label: "Создать заказ" }
+            ? { href: lead.upholsteryQuote||lead.upholsteryRequested?`/admin/orders/upholstery?lead=${id}`:`/admin/orders/new?leadId=${id}`, label: "Создать заказ" }
             : undefined
         }
       />
@@ -47,8 +48,10 @@ export default async function LeadPage({
           <h2>
             Исходные данные <Chip status={lead.status} />
           </h2>
-          <Facts secondary={["Язык", "Канал", "Создана"]} technical={["Нормализованный телефон", "Источник", "Страница входа"]}
+          {leadRequestKind(lead)!=='CLEANING'&&lead.status!=='CONVERTED'&&<p className="crm-warning">Требуется уточнение химчистки</p>}
+          <Facts secondary={["Язык", "Канал"]} technical={["Нормализованный телефон"]}
             items={[
+              ["Тип обращения",requestKindLabels[leadRequestKind(lead)]],
               ["Имя", lead.name],
               [
                 "Телефон",
@@ -74,7 +77,7 @@ export default async function LeadPage({
               ],
               ["Услуга", lead.service?.name],
               ["Площадь", lead.area ? `${lead.area} м²` : "—"],
-              ["Оценка", money(lead.estimatedPrice)],
+              [lead.upholsteryQuote?'Предыдущий расчёт услуг':leadRequestKind(lead)==='CLEANING_UPHOLSTERY'?'Уборка без химчистки':'Оценка', lead.estimatedPrice===null?'Цена после уточнения':money(lead.estimatedPrice)],
               ["Срочность", lead.urgent ? "Да" : "Нет"],
               ["Канал", channelLabels[lead.channel]],
               ["Источник", lead.entrySource],

@@ -54,6 +54,15 @@ export async function sendHandoffTelegram(text: string, handoffId: string, reque
   } catch { return { status: 'UNKNOWN', errorCode: 'DELIVERY_OUTCOME_UNKNOWN' }; }
 }
 /** Called under the same conversation lock as Inbox/AI transitions. */
+export async function sendAdminLeadTelegram(text:string,leadId:string,request:typeof fetch=fetch):Promise<DeliveryResult>{
+  if(!process.env.TELEGRAM_BOT_TOKEN||!process.env.TELEGRAM_CHAT_ID)return{status:'FAILED',errorCode:'INTERNAL_TELEGRAM_UNCONFIGURED'};
+  try{const response=await request(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:process.env.TELEGRAM_CHAT_ID,text:text.slice(0,3900),protect_content:true,reply_markup:{inline_keyboard:[[{text:'Открыть заявку',url:new URL(`/admin/leads/${encodeURIComponent(leadId)}`,process.env.NEXT_PUBLIC_SITE_URL??'https://lumacleanrs.com').href}]]}}),signal:AbortSignal.timeout(10000),cache:'no-store'});
+    if(response.status>=500)return{status:'UNKNOWN',errorCode:'DELIVERY_OUTCOME_UNKNOWN'};
+    if(response.status===429)return{status:'FAILED',errorCode:'TELEGRAM_RATE_LIMIT'};
+    const body=z.object({ok:z.boolean(),result:z.object({message_id:z.number().int()}).optional()}).safeParse(await response.json());
+    return response.ok&&body.success&&body.data.ok&&body.data.result?{status:'DELIVERED',externalMessageId:String(body.data.result.message_id)}:{status:'FAILED',errorCode:'TELEGRAM_REJECTED'};
+  }catch{return{status:'UNKNOWN',errorCode:'DELIVERY_OUTCOME_UNKNOWN'};}
+}
 export async function resolveHandoffNotifications(tx: Tx, conversationId: string, userId: string, resolution: string) {
   await tx.humanHandoff.updateMany({ where: { conversationId, resolvedAt: null }, data: { resolvedAt: new Date(), resolvedById: userId, resolution } });
   await tx.notification.updateMany({ where: { conversationId, kind: { in: handoffKinds }, deliveryState: 'PENDING' }, data: { deliveryState: 'CANCELLED', status: 'CANCELLED' } });

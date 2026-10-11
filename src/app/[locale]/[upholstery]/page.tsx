@@ -15,8 +15,7 @@ import { formatRsd } from "@/lib/pricing";
 import { getUpholsteryCatalog } from "@/lib/services/upholstery-catalog";
 import { SiteHeader } from "@/components/site/site-header";
 import { editorialContent } from "@/lib/site-content";
-import { UpholsteryCalculator } from "@/components/site/upholstery-calculator";
-import { UpholsteryPhotoButton } from "@/components/site/upholstery-photo-button";
+import {enquiryCopy,upholsteryEnquiryPath} from '@/lib/lead-intent';
 import { siteUrl } from "@/lib/seo";
 import { articlePath, getPublishedArticles } from "@/lib/articles";
 import "../site.css";
@@ -101,7 +100,7 @@ export default async function Page({ params }: Props) {
         locale={locale}
         copy={editorialContent[locale].nav}
         homeHref={`/${locale}`}
-        estimateHref="#estimate"
+        estimateHref={upholsteryEnquiryPath(locale)}
         localeHrefs={languages}
         initialPaper
       />
@@ -111,10 +110,9 @@ export default async function Page({ params }: Props) {
           <h1>{u.h1}</h1>
           <p className="upholstery-lead">{u.lead}</p>
           <div className="upholstery-actions">
-            <a className="upholstery-cta" href="#estimate">
-              {u.estimate}
+            <a className="upholstery-cta" href={upholsteryEnquiryPath(locale)}>
+              {enquiryCopy[locale].cta}
             </a>
-            <UpholsteryPhotoButton locale={locale} />
           </div>
           <small>
             {u.from} {formatRsd(catalog.sofa3Light, locale)} · {u.minimum}:{" "}
@@ -143,6 +141,7 @@ export default async function Page({ params }: Props) {
             </tbody>
           </table>
           <p>{u.delivery}</p>
+          <p>{enquiryCopy[locale].otherItems}</p>
         </section>
         <section className="upholstery-section">
           <h2>{u.soil}</h2>
@@ -200,8 +199,8 @@ export default async function Page({ params }: Props) {
           )}
         </section>
         <section className="upholstery-section" id="estimate">
-          <h2>{u.estimate}</h2>
-          <UpholsteryCalculator locale={locale} />
+          <p>{enquiryCopy[locale].onlyPrice}</p>
+          <a className="upholstery-cta" href={upholsteryEnquiryPath(locale)}>{enquiryCopy[locale].cta}</a>
         </section>
       </main>
       <footer className="upholstery-footer upholstery-container">

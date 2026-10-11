@@ -376,6 +376,7 @@ export async function runCrmCommand(
             "TRANSITION",
             "Откройте заявку заново перед созданием заказа",
           );
+        if(lead?.upholsteryRequested||lead?.upholsteryQuote)throw new CrmError('VALIDATION','Уточните химчистку в редакторе химчистки перед созданием заказа');
         if (lead && (await tx.order.count({ where: { leadId: lead.id } })))
           throw new CrmError("TRANSITION", "У заявки уже есть заказ");
         const client = v.clientId

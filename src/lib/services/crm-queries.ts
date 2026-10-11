@@ -43,6 +43,7 @@ export async function listLeads(query: Query) {
           status: true,
           channel: true,
           estimatedPrice: true,
+          requestKind:true,upholsteryRequested:true,humanReviewRequired:true,upholsteryQuote:true,area:true,
           service: { select: { name: true, code:true } },
           client: { select: { id: true, name: true } },
         },

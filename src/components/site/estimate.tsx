@@ -10,9 +10,7 @@ import type {EditorialContent} from "@/lib/site-content";
 
 import {leadAttribution, trackEvent} from "@/lib/analytics";
 import {ArrowIcon} from "@/components/site/arrow-icon";
-import {UpholsteryCalculator} from './upholstery-calculator';
-import {upholsteryUi} from '@/lib/upholstery-content';
-import './upholstery.css';
+import {enquiryCopy} from '@/lib/lead-intent';
 
 type CountExtra = "standardWindow" | "largeWindow" | "cabinets" | "ironing";
 type ToggleExtra = "balcony" | "fridge" | "oven" | "steam" | "petHair" | "linen";
@@ -20,9 +18,13 @@ type ToggleExtra = "balcony" | "fridge" | "oven" | "steam" | "petHair" | "linen"
 const countKeys: CountExtra[] = ["standardWindow", "largeWindow", "cabinets", "ironing"];
 const toggleKeys: ToggleExtra[] = ["balcony", "fridge", "oven", "steam", "petHair", "linen"];
 
-type EstimateProps={locale:Locale;copy:EditorialContent['estimate'];content:SiteContent;initialService?:ServiceId};
-export function Estimate(props:EstimateProps){const [upholstery,setUpholstery]=useState(false);return <><div className="upholstery-tabs"><button type="button" aria-pressed={!upholstery} onClick={()=>setUpholstery(false)}>{props.locale==='ru'?'Уборка':props.locale==='sr'?'Čišćenje prostora':'Home cleaning'}</button><button type="button" aria-pressed={upholstery} onClick={()=>setUpholstery(true)}>{upholsteryUi[props.locale].name}</button></div>{upholstery?<UpholsteryCalculator locale={props.locale}/>:<AreaEstimate {...props}/>}</>;}
-function AreaEstimate({locale, copy, content, initialService = "regular"}:EstimateProps) {
+type EstimateProps={locale:Locale;copy:EditorialContent['estimate'];content:SiteContent;initialService?:ServiceId;initialRequest?:'CLEANING'|'UPHOLSTERY'};
+export function Estimate({locale, copy, content, initialService = "regular", initialRequest = 'CLEANING'}:EstimateProps) {
+  const [requestMode,setRequestMode]=useState(initialRequest);
+  const [upholsteryRequested,setUpholsteryRequested]=useState(initialRequest==='UPHOLSTERY');
+  const onlyUpholstery=requestMode==='UPHOLSTERY';
+  const hasUpholstery=onlyUpholstery||upholsteryRequested;
+  const e=enquiryCopy[locale];
   const started = useRef(false);
   const submitting = useRef(false);
   const submission = useRef<{id: string; payload: string} | null>(null);
@@ -63,9 +65,9 @@ function AreaEstimate({locale, copy, content, initialService = "regular"}:Estima
     submitting.current = true;
     setStatus("sending");
     const details = calculation.lines.map((line) => `${line.label}: ${formatRsd(line.value, locale)}`).join("\n");
-    const estimate = `${copy.calculation}\n${details}\n${copy.total}: ${formatRsd(calculation.total, locale)}`;
+    const estimate = `${copy.calculation}\n${details}\n${hasUpholstery?e.cleaningPrice:copy.total}: ${formatRsd(calculation.total, locale)}${hasUpholstery?`\n${e.pending}\n${e.agreed}`:''}`;
     try {
-      const payload = JSON.stringify({name, phone, comment: comment.trim() || undefined, estimate, locale, service, area, urgent, extras:calculation.extras, consent, attribution: leadAttribution()});
+      const payload = JSON.stringify({name, phone, comment: comment.trim() || undefined, locale, requestKind:onlyUpholstery?'UPHOLSTERY':hasUpholstery?'CLEANING_UPHOLSTERY':'CLEANING',upholsteryRequested:hasUpholstery,...(onlyUpholstery?{}:{estimate,service,area,urgent,extras:calculation.extras}), consent, attribution: leadAttribution()});
       if (!submission.current || submission.current.payload !== payload) submission.current = {id:crypto.randomUUID(),payload};
       const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({...JSON.parse(payload),submissionId:submission.current.id})});
       const result = await response.json().catch(() => null);
@@ -79,9 +81,10 @@ function AreaEstimate({locale, copy, content, initialService = "regular"}:Estima
   }
 
   return (
-    <form className="estimate-sheet" onSubmit={submit} onFocusCapture={() => { if (!started.current) { started.current = true; trackEvent("form_start", {locale, service}); } }} noValidate>
+    <form className={`estimate-sheet${onlyUpholstery?' estimate-enquiry-only':''}`} onSubmit={submit} onFocusCapture={() => { if (!started.current) { started.current = true; trackEvent("form_start", {locale, service}); } }} noValidate>
       <div className="estimate-form" onChange={() => trackEvent("calculator_interaction", {locale, service})} onClick={(event) => { if ((event.target as HTMLElement).closest("button")) trackEvent("calculator_interaction", {locale, service}); }}>
-        <fieldset>
+        <label className="estimate-request-kind"><span>{e.kind}</span><select name="requestKind" value={requestMode} onChange={event=>{const kind=event.target.value as 'CLEANING'|'UPHOLSTERY';setRequestMode(kind);if(kind==='UPHOLSTERY')setUpholsteryRequested(true);setStatus('idle');}}><option value="CLEANING">{e.cleaning}</option><option value="UPHOLSTERY">{e.only}</option></select></label>
+        {!onlyUpholstery&&<><fieldset>
           <legend>{copy.service}</legend>
           <div className="service-options">
             {serviceIds.map((id) => <label key={id}><input type="radio" name="service" checked={service === id} onChange={() => setService(id)} /><span>{content.pricing.serviceNames[id]}</span></label>)}
@@ -92,7 +95,7 @@ function AreaEstimate({locale, copy, content, initialService = "regular"}:Estima
           <input className="site-area-range" type="range" min="25" max="180" value={area} onChange={(event) => setArea(Number(event.target.value))} aria-label={copy.area} />
         </fieldset>
         <a className="site-mobile-total" href="#receipt">
-          <span>{copy.total}</span><strong>{formatRsd(calculation.total, locale)}</strong><i>{copy.toReceipt}<ArrowIcon direction="down" /></i>
+          <span>{hasUpholstery?e.cleaningPrice:copy.total}</span><strong>{formatRsd(calculation.total, locale)}</strong><i>{copy.toReceipt}<ArrowIcon direction="down" /></i>
         </a>
         <fieldset>
           <legend>{copy.extras}</legend>
@@ -107,22 +110,24 @@ function AreaEstimate({locale, copy, content, initialService = "regular"}:Estima
             <label className="site-urgent"><input type="checkbox" disabled={!sameDayAllowed} checked={urgent} onChange={(event) => setUrgent(event.target.checked)}/><span>{content.calculator.urgent}</span><small>+20%</small></label>{!sameDayAllowed&&<p role="status">{locale==='ru'?'Выезд сегодня уже недоступен — ближайшая запись с завтра.':locale==='en'?'Same-day departure is unavailable; the next booking date is tomorrow.':'Dolazak danas nije dostupan; najraniji termin je sutra.'}</p>}
           </div>
         </fieldset>
+        <div className="estimate-upholstery-request"><label><input type="checkbox" name="upholsteryRequested" checked={upholsteryRequested} onChange={event=>setUpholsteryRequested(event.target.checked)}/><span>{e.checkbox}</span></label><p>{e.hint}</p></div></>}
       </div>
       <aside className="receipt" id="receipt">
         <div className="receipt-head"><Image src="/brand/logo-light.svg" alt="LumaClean" width={622} height={132}/><span>{copy.reference}</span></div>
         <div className="receipt-body">
-          <div className="receipt-meta"><span>{copy.calculation}</span><span>{copy.city}</span></div>
+          {!onlyUpholstery&&<><div className="receipt-meta"><span>{copy.calculation}</span><span>{copy.city}</span></div>
           <div className="receipt-lines">{calculation.lines.map((line) => <div className="receipt-line" key={line.label}><span>{line.label}</span><span>{formatRsd(line.value, locale)}</span></div>)}</div>
-          <div className="receipt-total"><span>{copy.total}</span><strong>{formatRsd(calculation.total, locale)}</strong></div>
-          <p>{copy.note}</p>
+          <div className="receipt-total"><span>{hasUpholstery?e.cleaningPrice:copy.total}</span><strong>{formatRsd(calculation.total, locale)}</strong></div>
+          <p>{copy.note}</p></>}
+          {hasUpholstery&&<div className="estimate-review-note"><p>{onlyUpholstery?e.onlyPrice:e.pending}</p><small>{e.agreed}</small></div>}
           <div className="site-lead-fields">
             <label><span>{copy.name}</span><input name="name" value={name} onChange={(event) => setName(event.target.value)} placeholder={copy.name} autoComplete="name" required aria-invalid={status === "validation" && name.trim().length < 2}/></label>
             <label><span>{copy.phone}</span><input name="phone" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder={copy.phone} autoComplete="tel" inputMode="tel" required aria-invalid={status === "validation" && phone.trim().length < 6}/></label>
-            <label className="site-comment"><span>{copy.comment}</span><textarea name="comment" value={comment} onChange={(event) => setComment(event.target.value)} placeholder={copy.commentHint} maxLength={1000} rows={4}/></label>
+            <label className="site-comment"><span>{copy.comment}</span><textarea name="comment" value={comment} onChange={(event) => setComment(event.target.value)} placeholder={hasUpholstery?e.placeholder:copy.commentHint} maxLength={1000} rows={2}/></label>
             <label className="site-consent"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} required aria-invalid={status === "validation" && !consent}/><span>{copy.consent}</span></label>
           </div>
-          <button type="submit" disabled={status === "sending"}>{status === "sending" ? copy.sending : copy.send}<span><ArrowIcon /></span></button>
-          {status === "success" && <p className="site-form-status success" role="status">{copy.success}</p>}
+          <button type="submit" disabled={status === "sending" || status === 'success'}>{status === "sending" ? copy.sending : hasUpholstery?e.send:copy.send}<span><ArrowIcon /></span></button>
+          {status === "success" && <p className="site-form-status success" role="status">{hasUpholstery?e.success:copy.success}</p>}
           {status === "validation" && <p className="site-form-status error" role="alert">{copy.validation}</p>}
           {status === "error" && <p className="site-form-status error" role="alert">{copy.error}</p>}
         </div>
