@@ -6,7 +6,7 @@ import { localInput } from '@/lib/domain/crm';
 import { channelConfiguration, type CustomerChannel, type DeliveryResult } from './channels';
 import {deliverOutbox} from './inbox';
 import { AgentError } from './contracts';
-import { deliverHandoffNotification, handoffKinds } from './telegram-handoff';
+import { deliverHandoffNotification, handoffKinds,sendAdminLeadTelegram } from './telegram-handoff';
 import type {AgentState} from './contracts';
 type Tx=Prisma.TransactionClient;
 export const notificationWake=z.object({notificationId:z.string().min(1).max(80)}).strict();
@@ -80,6 +80,7 @@ export async function deliverNotification(db:PrismaClient,id:string,deliver?:(th
   if(row.deliveryState==='SENDING'){
     if(row.leaseUntil&&row.leaseUntil<now)await db.notification.updateMany({where:{id,deliveryState:'SENDING',leaseKey:row.leaseKey},data:{deliveryState:'UNKNOWN',status:'FAILED',lastErrorCode:'DELIVERY_OUTCOME_UNKNOWN'}});
     else throw new AgentError('NOTIFICATION_LEASE_ACTIVE');
+    if(row.kind==='WEBSITE_LEAD'){const {leadId}=z.object({leadId:z.string()}).parse(row.payload);await db.lead.updateMany({where:{id:leadId},data:{telegramStatus:'FAILED'}});}
     return;
   }
   if(row.scheduledAt>now||row.nextAttemptAt&&row.nextAttemptAt>now)throw new AgentError('NOTIFICATION_NOT_DUE');
@@ -95,7 +96,11 @@ export async function deliverNotification(db:PrismaClient,id:string,deliver?:(th
     await db.notification.update({where:{id},data:{deliveryState:'INTERNAL',leaseKey:null,leaseUntil:null}});return;
   }
   const c=row.conversationId?await db.conversation.findUnique({where:{id:row.conversationId}}):null;
-  if(row.audience==='ADMIN'&&handoffKinds.includes(row.kind??'')){
+  if(row.audience==='ADMIN'&&row.kind==='WEBSITE_LEAD'){
+    const leadId=z.object({leadId:z.string().min(1).max(80)}).parse(row.payload).leadId;
+    if(!await db.lead.count({where:{id:leadId}})){await db.notification.update({where:{id},data:{deliveryState:'CANCELLED',status:'CANCELLED',leaseKey:null,leaseUntil:null}});return;}
+    result=deliver?await deliver(process.env.TELEGRAM_CHAT_ID??'',row.text):await sendAdminLeadTelegram(row.text,leadId);
+  }else if(row.audience==='ADMIN'&&handoffKinds.includes(row.kind??'')){
     result=await deliverHandoffNotification(db,id,leaseKey,deliver?async(text)=>deliver(process.env.TELEGRAM_CHAT_ID??'',text):undefined);
     if(result.errorCode==='HANDOFF_CANCELLED')return;
   }
@@ -115,6 +120,7 @@ export async function deliverNotification(db:PrismaClient,id:string,deliver?:(th
   await db.notification.updateMany({where:{id,leaseKey},data:{deliveryState:retry?'PENDING':result.status,status:['SENT','DELIVERED','READ'].includes(result.status)?'SENT':retry?'PENDING':'FAILED',lastErrorCode:result.errorCode??null,sentAt:['SENT','DELIVERED','READ'].includes(result.status)?new Date():null,nextAttemptAt:retry?new Date(Date.now()+Math.min(300000,30000*2**row.attempts)):null,publishedAt:retry?null:row.publishedAt,leaseKey:null,leaseUntil:null}});
   if(['FAILED','UNKNOWN'].includes(result.status)&&c)await db.conversation.updateMany({where:{id:c.id,...(handoffKinds.includes(row.kind??'')?{control:'HUMAN_CONTROL',ownerId:null}:{})},data:{needsAttention:true}});
   if(retry)throw new AgentError('NOTIFICATION_RETRY');
+  if(row.kind==='WEBSITE_LEAD'){const {leadId}=z.object({leadId:z.string()}).parse(row.payload);await db.lead.updateMany({where:{id:leadId},data:{telegramStatus:['SENT','DELIVERED','READ'].includes(result.status)?'SENT':'FAILED'}});}
 }
 export async function recoverNotifications(db:PrismaClient){
   await db.notification.updateMany({where:{deliveryState:'PENDING',publishedAt:{lt:new Date(Date.now()-86400000)},scheduledAt:{lte:new Date(Date.now()+6*86400000)}},data:{publishedAt:null}});

@@ -1,0 +1,16 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {sourceFingerprint,sourceInventory} from '../../src/lib/agent/release-verification.mjs';
+const read=p=>readFileSync(p,'utf8'),units=read('qa-output/simple-units.txt');
+const pass=Number([...units.matchAll(/pass (\d+)/g)].at(-1)?.[1]);
+if(pass<281||!units.includes('fail 0'))throw Error('TARGETED_TESTS_REQUIRED');
+if(read('qa-output/simple-typecheck.txt').trim()||read('qa-output/simple-lint.txt').trim())throw Error('TYPECHECK_AND_LINT_REQUIRED');
+if(!read('qa-output/simple-build.txt').includes('prerendered as static content'))throw Error('BUILD_REQUIRED');
+const db=JSON.parse(read('qa-output/simple-intake-db-proof.json'));
+if(!db.passed||db.checks<83||!db.ordersUnchanged||!db.modesPreserved)throw Error('PREVIEW_TRANSACTION_PROOF_REQUIRED');
+const browser=JSON.parse(read('qa-output/simple-browser-public-local.json'));
+if(browser.length!==48||browser.some(r=>r.overflow)||browser.filter(r=>r.page==='only').some(r=>r.controls!==3))throw Error('LOCALIZED_CHROME_QA_REQUIRED');
+const errors=JSON.parse(read('qa-output/simple-browser-errors-local.json'));
+if(!errors.validation||!errors.serverError||!errors.stableRetryId)throw Error('ERROR_AND_RETRY_QA_REQUIRED');
+const previous=JSON.parse(read('release/ai-go-live.json'));
+const evidence={fingerprint:sourceFingerprint(),files:sourceInventory(),tests:pass+db.checks,lint:true,typecheck:true,migration:true,build:true,checkedAt:new Date().toISOString(),suites:[`${pass} targeted passing agent, CRM, scheduling, upholstery pricing and simple intake tests; isolated-local-DB suites skipped`,`${db.checks} real isolated Preview assertions: three intents, concurrent submission, durable delivery/retry, AI human review, no Orders or mode changes`,'48 Chrome checks: RU/SR/EN home, combined/standalone form, service and article deep links, desktop and 360/390/430px; client validation and server retry'],verificationScope:'Targeted public upholstery enquiry correction. Internal pricing/resources/material checks remain intact. Furniture autonomous booking remains blocked. Deployed Preview QA, native regular-service booking proof and production historical preservation are separate release gates.',previousVerification:{fingerprint:previous.fingerprint,tests:previous.tests,checkedAt:previous.checkedAt}};
+writeFileSync('release/ai-go-live.json',JSON.stringify(evidence,null,2)+'\n');console.log({fingerprint:evidence.fingerprint,tests:evidence.tests});

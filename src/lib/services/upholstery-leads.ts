@@ -5,6 +5,8 @@ import { upholsteryRequestSchema } from "@/lib/upholstery";
 import { publicUpholsteryQuote } from "./upholstery-commands";
 import { CrmError, normalizedPhone } from "@/lib/domain/crm";
 import { writeAudit } from "./audit";
+import {enqueueLeadReview} from './lead-notifications';
+import {quote as cleaningQuote} from '@/lib/domain/crm-pricing';
 export const upholsteryLeadSchema = z
   .object({
     submissionId: z.uuid(),
@@ -60,6 +62,7 @@ export async function saveUpholsteryLead(db: PrismaClient, payload: unknown) {
         phone: v.phone,
         normalizedPhone: normalizedPhone(v.phone),
         locale: v.locale,
+        requestKind:v.request.mode==='STANDALONE'?'UPHOLSTERY':'CLEANING_UPHOLSTERY',upholsteryRequested:true,humanReviewRequired:true,consentAt:new Date(),
         channel: "WEBSITE",
         serviceId: service.id,
         urgent: quote.surcharge > 0,
@@ -74,9 +77,10 @@ export async function saveUpholsteryLead(db: PrismaClient, payload: unknown) {
             requestedDate: v.requestedDate ?? null,
           }),
         ) as Prisma.InputJsonValue,
-        telegramStatus: "CANCELLED",
+        telegramStatus: "PENDING",
       },
     });
+    await enqueueLeadReview(tx,{...lead,requestKind:v.request.mode==='STANDALONE'?'UPHOLSTERY':'CLEANING_UPHOLSTERY',service:v.request.cleaning?.service,area:v.request.cleaning?.area,estimatedPrice:v.request.cleaning?cleaningQuote(v.request.cleaning.service,v.request.cleaning.area,[],quote.surcharge>0).total:null});
     await writeAudit(
       tx,
       { type: "SYSTEM", key: "upholstery-intake" },

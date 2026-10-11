@@ -8,6 +8,7 @@ import {
 } from "@/lib/domain/crm-types";
 import { quantityExtras } from "@/lib/domain/crm-pricing";
 import { entrySources } from "@/lib/analytics";
+import {requestKinds} from '@/lib/lead-intent';
 const keys = <T extends Record<string, string>>(labels: T) =>
   Object.keys(labels) as [
     Extract<keyof T, string>,
@@ -174,17 +175,24 @@ export const websiteLeadSchema = z
     comment: text(1000),
     estimate: text(3000),
     locale: z.enum(["ru", "sr", "en"]),
-    service: z.enum(serviceIds),
-    area: number(25, 180),
-    urgent: z.boolean(),
-    extras: extrasSchema,
+    service: z.enum(serviceIds).optional(),
+    area: number(25, 180).optional(),
+    urgent: z.boolean().default(false),
+    extras: extrasSchema.default([]),
+    requestKind:z.enum(requestKinds).optional(),
+    upholsteryRequested:z.boolean().optional(),
     consent: z.literal(true),
     attribution: z
       .object({ landing: z.string().max(200), source: z.enum(entrySources) })
       .strict()
       .optional(),
   })
-  .strict();
+  .strict().transform(v=>({...v,requestKind:v.requestKind??(v.upholsteryRequested?'CLEANING_UPHOLSTERY':'CLEANING'),upholsteryRequested:v.upholsteryRequested??(v.requestKind==='UPHOLSTERY'||v.requestKind==='CLEANING_UPHOLSTERY')})).superRefine((v,ctx)=>{
+    if(v.requestKind==='UPHOLSTERY'){
+      if(v.service!==undefined||v.area!==undefined||v.extras.length||v.urgent||v.estimate)ctx.addIssue({code:'custom',message:'Standalone enquiry cannot contain a cleaning quote'});
+    }else if(!v.service||v.area===undefined)ctx.addIssue({code:'custom',message:'Cleaning service and area required'});
+    if(v.upholsteryRequested!==(v.requestKind!=='CLEANING'))ctx.addIssue({code:'custom',message:'Inconsistent request intent'});
+  });
 export const commandSchemas = {
   "lead-create": manualLeadSchema,
   "lead-status": z

@@ -282,6 +282,10 @@ model ClientAddress {
 }
 
 model Lead {
+  requestKind String @default("CLEANING")
+  upholsteryRequested Boolean @default(false)
+  humanReviewRequired Boolean @default(false)
+  consentAt DateTime? @db.Timestamptz(3)
   upholsteryQuote          Json?
   id              String             @id @default(cuid())
   reference       String?            @unique

@@ -5,12 +5,16 @@ import { normalizedPhone, CrmError, serviceLabels } from "@/lib/domain/crm";
 import { quote } from "@/lib/domain/crm-pricing";
 import {serviceDatePolicy,buildAgentTemporalContext} from "@/lib/agent/temporal";
 import { writeAudit } from "./audit";
+import {enqueueLeadReview} from './lead-notifications';
+import {publishNotifications} from '@/lib/agent/notifications';
 export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
   const input = websiteLeadSchema.parse(payload);
   input.extras = input.extras
     .filter((e) => e.quantity > 0)
     .sort((a, b) => a.code.localeCompare(b.code));
-  const hash = createHash("sha256").update(JSON.stringify(input)).digest("hex");
+  const {requestKind,upholsteryRequested,...legacy}=input;
+  const hash = createHash("sha256").update(JSON.stringify(requestKind==='CLEANING'?legacy:input)).digest("hex");
+  if(!normalizedPhone(input.phone))throw new CrmError('VALIDATION','INVALID_PHONE');
   return db.$transaction(
     async (tx) => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`website:${input.submissionId}`}))::text`;
@@ -31,15 +35,16 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
         };
       }
       if(input.urgent){const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}}),now=new Date();const date=buildAgentTemporalContext(now,settings,now).nowLocalDate;if('error' in serviceDatePolicy(date,settings,now))throw new CrmError('VALIDATION','SAME_DAY_CUTOFF');}
+      const standalone=requestKind==='UPHOLSTERY';
       const service = await tx.service.findUnique({
-        where: { code: input.service },
+        where: { code: standalone?'upholstery':input.service! },
         select: { id: true, active: true },
       });
       if (!service?.active)
         throw new CrmError("VALIDATION", "Service unavailable");
-      const calculated = quote(
-        input.service,
-        input.area,
+      const calculated = standalone?null:quote(
+        input.service!,
+        input.area!,
         input.extras,
         input.urgent,
       );
@@ -59,9 +64,10 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
           phone: input.phone,
           normalizedPhone: normalizedPhone(input.phone),
           locale: input.locale,
+          requestKind,upholsteryRequested,humanReviewRequired:upholsteryRequested,consentAt:new Date(),
           serviceId: service.id,
-          area: input.area,
-          estimatedPrice: calculated.total,
+          area: standalone?null:input.area,
+          estimatedPrice: calculated?.total??null,
           urgent: input.urgent,
           comment: input.comment,
           estimateText: input.estimate,
@@ -69,7 +75,7 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
           landingPage: input.attribution?.landing,
           channel: "WEBSITE",
           extras: {
-            create: calculated.extras.map((e) => ({
+            create: (calculated?.extras??[]).map((e) => ({
               extraId: catalogue.find((c) => c.code === e.code)!.id,
               quantity: e.quantity,
               unitPrice: e.unitPrice,
@@ -77,6 +83,7 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
           },
         },
       });
+      if(upholsteryRequested)await enqueueLeadReview(tx,{...lead,service:input.service,area:input.area,estimatedPrice:calculated?.total??null});
       await writeAudit(
         tx,
         { type: "SYSTEM", key: "website-intake" },
@@ -93,6 +100,7 @@ export async function notifyWebsiteLead(
   input: ReturnType<typeof websiteLeadSchema.parse>,
   send: typeof fetch = fetch,
 ) {
+  if(input.upholsteryRequested){try{await publishNotifications(db);}catch{/* Durable pending notification is recovered by the existing worker. */}return;}
   let sent = false;
   try {
     const token = process.env.TELEGRAM_BOT_TOKEN,
@@ -104,7 +112,7 @@ export async function notifyWebsiteLead(
       `Имя: ${input.name}`,
       `Телефон: ${input.phone}`,
       `Язык: ${input.locale}`,
-      `Услуга: ${serviceLabels[input.service]}`,
+      `Услуга: ${serviceLabels[input.service!]}`,
       `Площадь: ${input.area} м²`,
       input.attribution
         ? `Источник (по браузеру): ${input.attribution.source}\nСтраница входа: ${input.attribution.landing}`
