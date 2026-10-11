@@ -23,6 +23,9 @@ import { orderLabels } from "@/lib/domain/crm-types";
 import { routeLabels } from "@/lib/domain/routing";
 import { PlanEditor, type PlanDraft } from "./order-planning";
 import { scheduleMutation } from "./scheduling-forms";
+import { RepeatEditor, RepeatActions } from "./calendar-repeat";
+import { calendarShortcutAllowed } from "@/lib/domain/calendar-repeat";
+let calendarClipboard: CalendarOrder | null = null;
 const PIXELS_PER_MINUTE = 1.2;
 const today = () => Temporal.Now.plainDateISO("Europe/Belgrade").toString();
 function belongs(order: CalendarOrder, day: string) {
@@ -46,11 +49,13 @@ function EventCard({
   order,
   onOpen,
   onDrag,
+  onEdit,
   style,
 }: {
   order: CalendarOrder;
   onOpen: () => void;
   onDrag: (e: DragEvent<HTMLButtonElement>) => void;
+  onEdit: () => void;
   style?: CSSProperties;
 }) {
   return (
@@ -61,6 +66,7 @@ function EventCard({
       draggable={!closedStatuses.includes(order.status)}
       onDragStart={onDrag}
       onClick={onOpen}
+      onDoubleClick={onEdit}
       data-order-id={order.id}
       title={[
         wallLabel(order.start),
@@ -120,6 +126,10 @@ function EventCard({
   );
 }
 export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
+  const [selectedOrder,setSelectedOrder]=useState<CalendarOrder|null>(null),
+    [clipboard,setClipboard]=useState<CalendarOrder|null>(calendarClipboard),
+    [repeat,setRepeat]=useState<{order:CalendarOrder;date:string}|null>(null),
+    [menu,setMenu]=useState<{order?:CalendarOrder;day?:string;x:number;y:number}|null>(null);
   const [data, setData] = useState(initial),
     [resource, setResource] = useState(false),
     [selected, setSelected] = useState(initial.date);
@@ -227,7 +237,8 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
       order={order}
       style={style}
       onDrag={(e) => drag(order, e)}
-      onOpen={() => setEditing({ order })}
+      onOpen={() => {setSelectedOrder(order);setMenu(null);}}
+      onEdit={() => setEditing({ order })}
     />
   );
   const dayOrders = (day: string) => placed.filter((o) => belongs(o, day));
@@ -268,7 +279,22 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
     );
   }
   return (
-    <div className="scheduling-calendar" aria-busy={pending}>
+    <div className="scheduling-calendar" aria-busy={pending} tabIndex={-1}
+      onKeyDown={e=>{
+        if(!(e.ctrlKey||e.metaKey)||e.altKey||e.shiftKey||!calendarShortcutAllowed(e.target as Element,window.getSelection()?.toString()??"",window.matchMedia("(pointer: coarse)").matches))return;
+        if(e.key.toLowerCase()==="c"&&selectedOrder){e.preventDefault();calendarClipboard=selectedOrder;setClipboard(selectedOrder);}
+        if(e.key.toLowerCase()==="v"&&clipboard){e.preventDefault();setRepeat({order:clipboard,date:selected});}
+      }}
+      onContextMenu={e=>{
+        const target=e.target as HTMLElement,orderId=target.closest<HTMLElement>('[data-order-id]')?.dataset.orderId,day=target.closest<HTMLElement>('[data-day]')?.dataset.day;
+        if(!orderId&&!day)return;e.preventDefault();
+        const order=data.orders.find(o=>o.id===orderId);setMenu({...order?{order}:{day},x:Math.max(8,Math.min(e.clientX,window.innerWidth-230)),y:Math.max(8,Math.min(e.clientY,window.innerHeight-120))});if(order)setSelectedOrder(order);if(day)setSelected(day);
+      }}>
+      <div className="repeat-calendar-tools" aria-live="polite">
+        {selectedOrder&&<><strong>{selectedOrder.client} · {selectedOrder.localStart.replace("T"," ")}</strong><button type="button" onClick={()=>{calendarClipboard=selectedOrder;setClipboard(selectedOrder);}}>Копировать</button><button type="button" onClick={()=>setEditing({order:selectedOrder})}>Открыть заказ</button><button type="button" onClick={()=>setRepeat({order:selectedOrder,date:selected})}>Повторить уборку</button></>}
+        {clipboard&&<><span>Скопировано: {clipboard.client}. Выберите день.</span><button type="button" onClick={()=>setRepeat({order:clipboard,date:selected})}>Вставить уборку · {dayLabel(selected)}</button></>}
+      </div>
+      {menu&&<div role="menu" className="repeat-context-menu" style={{left:menu.x,top:menu.y}}>{menu.order?<button role="menuitem" type="button" onClick={()=>{calendarClipboard=menu.order!;setClipboard(menu.order!);setMenu(null);}}>Копировать</button>:<button role="menuitem" type="button" disabled={!clipboard} onClick={()=>{if(clipboard)setRepeat({order:clipboard,date:menu.day!});setMenu(null);}}>Вставить уборку</button>}<button role="menuitem" type="button" onClick={()=>setMenu(null)}>Закрыть меню</button></div>}
       <div className="calendar-toolbar">
         <nav aria-label="Период календаря">
           <Link
@@ -415,11 +441,16 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
           {data.days.map((day) => (
             <section
               key={day}
+              data-day={day}
+              tabIndex={0}
+              aria-label={"Выбрать " + day}
+              onClick={e=>{if(!(e.target as Element).closest('[data-order-id],a')){setSelected(day);e.currentTarget.focus();}}}
+              onFocus={()=>setSelected(day)}
               className={
                 "calendar-month-day" +
                 (day.slice(0, 7) !== data.date.slice(0, 7)
                   ? " calendar-outside"
-                  : "")
+                  : "") + (selected===day?" calendar-day-selected":"")
               }
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => void drop(e, day)}
@@ -464,6 +495,9 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
                   className="calendar-time-day"
                   key={day}
                   data-day={day}
+                  tabIndex={0}
+                  onFocus={()=>setSelected(day)}
+                  onClick={()=>setSelected(day)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => {
                     const minute = Math.max(
@@ -526,6 +560,7 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
                     {o.logistics?.filter(l => l.conflict || l.minutes === null).map(l => <small key={l.cleaner}>{l.cleaner}: {l.conflict ? "не успевает к началу" : routeLabels[l.status]}</small>)}
                   </Link>
                   {!closedStatuses.includes(o.status) && <button type="button" className="messenger-takeover" onClick={() => setEditing({order:o})}>Изменить время / команду</button>}
+                  <button type="button" className="messenger-takeover" onClick={()=>setRepeat({order:o,date:selected})}>Повторить уборку</button>
                 </article>
               ))
             ) : (
@@ -569,6 +604,7 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
           </div>
         </details>
       )}
+      {repeat&&<RepeatEditor order={repeat.order} date={repeat.date} cleaners={data.cleaners} onClose={()=>setRepeat(null)} onSaved={reload}/>}
       {editing &&
         (closedStatuses.includes(editing.order.status) ? (
           <div className="calendar-readonly" role="status">
@@ -576,6 +612,7 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
             <Link href={"/admin/orders/" + editing.order.id}>
               Открыть карточку →
             </Link>
+            <RepeatActions order={editing.order} cleaners={data.cleaners}/>
             <button type="button" onClick={() => setEditing(null)}>
               Закрыть
             </button>

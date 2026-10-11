@@ -32,6 +32,7 @@ export type CrewOption = { id: string; name: string; active: boolean };
 export type CalendarOrder = {
   id: string;
   reference: string;
+  repeatSeriesId?: string | null;
   client: string;
   address: string;
   service: string;

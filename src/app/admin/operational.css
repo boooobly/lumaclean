@@ -242,3 +242,19 @@
 .calendar-agenda-item > a.calendar-event { text-decoration: none; }
 .calendar-agenda-item > a.calendar-event strong { white-space: normal; overflow: visible; }
 .finance-current-period { margin: 0 0 14px; }
+/* Calendar repeat preview and mobile actions. */
+.repeat-calendar-tools,.repeat-actions,.repeat-context-menu{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0}
+.repeat-calendar-tools button,.repeat-context-menu button,.repeat-actions button{padding:9px 14px;border:1px solid var(--admin-border,#d6ddd7);border-radius:8px}
+.repeat-context-menu{position:fixed;z-index:50;width:220px;padding:10px;margin:0;background:var(--lc-paper);border:1px solid var(--lc-line);box-shadow:0 5px 22px #11262b22}
+.calendar-month-day.calendar-day-selected{outline:2px solid #476e5a;outline-offset:-2px}
+.repeat-dialog{width:min(700px,calc(100vw - 28px));max-height:88dvh;padding:22px;overflow-y:auto}
+.repeat-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;border:0;padding:0}
+.repeat-fields label{display:flex;flex-direction:column;gap:5px}
+.repeat-fields .crm-check{flex-direction:row}
+.repeat-fields .schedule-crew-picker,.repeat-fields>p{grid-column:1/-1;margin-block:4px}
+.repeat-actions{position:sticky;bottom:-22px;background:var(--lc-paper);padding-block:12px}
+.repeat-fields input,.repeat-fields textarea,.repeat-dialog fieldset input,.repeat-dialog textarea{max-width:100%;padding:9px;border:1px solid #ccd5cf;border-radius:6px}
+.repeat-weekdays{display:flex;flex-wrap:wrap;gap:10px;grid-column:1/-1}
+.repeat-preview{padding-left:24px;max-height:35dvh;overflow:auto}
+.repeat-preview li{padding:8px 0}
+@media(max-width:600px){.repeat-fields{grid-template-columns:1fr}.repeat-actions button{width:100%}.repeat-dialog{padding:16px}.repeat-calendar-tools strong{width:100%}}

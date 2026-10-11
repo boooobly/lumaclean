@@ -9,6 +9,8 @@ public/models/
 scripts/*
 !scripts/copy-maplibre-worker.mjs
 tests/
+qa-output/
+.playwright-cli/
 *.tsbuildinfo
 *.log
 .env*
