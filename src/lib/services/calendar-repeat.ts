@@ -23,9 +23,12 @@ import {
   schedulingLock,
 } from "./scheduling-commands";
 import { writeAudit } from "./audit";
+import {upholsteryIssues} from './upholstery-equipment';
+import {calculateUpholstery,upholsteryCatalogSchema,upholsteryRequestSchema,extractorIntervalsConflict} from '@/lib/upholstery';
 import { z } from "zod";
 type Tx = Prisma.TransactionClient;
 const include = {
+  upholstery:true,
   extras: { include: { extra: true } },
   assignments: { where: { removedAt: null } },
   client: true,
@@ -39,6 +42,7 @@ export function copyTemplate(source: Source) {
     clientId: source.clientId,
     addressId: source.addressId,
     serviceId: source.serviceId!,
+    pricingBasis:source.pricingBasis,
     area: Number(source.area),
     soilLevel: source.soilLevel,
     urgent: source.urgent,
@@ -233,7 +237,7 @@ export async function runCalendarRepeat(
         );
         rows.push({
           start,
-          issues: await check(tx, proposed, plans),
+          issues: [...await check(tx, proposed, plans),...(source.upholstery?await upholsteryIssues(tx,{...proposed,id:source.id}):[])],
           duplicate,
         });
         plans.push(proposed);
@@ -244,7 +248,10 @@ export async function runCalendarRepeat(
           "VALIDATION",
           "В выбранном диапазоне нет новых дат для создания.",
         );
+      if(source.upholstery){for(let i=1;i<plans.length;i++){const a=plans[i-1],b=plans[i],duration=(source.manualDurationMinutes??source.estimatedDurationMinutes??0)+source.cleaningReserveMinutes;if(extractorIntervalsConflict({start:a.scheduledStart!,end:new Date(a.scheduledStart!.getTime()+duration*60000),transferMinutes:source.upholstery.transferMinutes??0},{start:b.scheduledStart!,end:new Date(b.scheduledStart!.getTime()+duration*60000),transferMinutes:source.upholstery.transferMinutes??0}))newRows[i].issues.push({key:'EXTRACTOR_SERIES',code:'EXTRACTOR_CONFLICT',severity:'ERROR',message:'Аппарат не успеет между уборками серии с учётом перевозки.'});}}
+      const upholsterySettings=source.upholstery?await tx.upholsterySettings.findUniqueOrThrow({where:{id:'default'}}):null;
       const preview = {
+        upholsteryReview:!!source.upholstery,
         rows,
         count: newRows.length,
         client: source.client.name,
@@ -257,7 +264,7 @@ export async function runCalendarRepeat(
         })),
         copiedPrice:
           source.finalPrice === null ? null : Number(source.finalPrice),
-        currentPrice: currentPrice(source),
+        currentPrice: source.upholstery?calculateUpholstery(upholsteryRequestSchema.parse(source.upholstery.input),upholsteryCatalogSchema.parse(upholsterySettings!.catalog),upholsterySettings!.version).total+(source.service?.code==='upholstery'?0:currentPrice(source)??0):currentPrice(source),
         price: data.finalPrice,
         duration: data.manualDurationMinutes ?? data.estimatedDurationMinutes,
         requiredCleaners: data.requiredCleaners,
@@ -324,6 +331,7 @@ export async function runCalendarRepeat(
           },
         });
         ids.push(order.id);
+        if(source.upholstery){const u=source.upholstery;await tx.orderUpholstery.create({data:{orderId:order.id,input:u.input as Prisma.InputJsonValue,quote:{...(u.quote as Prisma.JsonObject),agreedTotal:data.finalPrice} as Prisma.InputJsonValue,cleaningBaseline:u.cleaningBaseline??Prisma.JsonNull,reviewStatus:'PENDING',plannedMinutes:u.plannedMinutes,preparationMinutes:u.preparationMinutes,cleanupMinutes:u.cleanupMinutes,transferMinutes:u.transferMinutes,equipmentUnit:u.equipmentUnit,equipmentCleanerId:u.equipmentCleanerId,logisticsNote:'Предварительно скопировано: подтвердите перевозку и оборудование для нового выезда.',reviewNote:null,patchTestConfirmed:false}});}
         await writeAudit(
           tx,
           { type: "USER", userId },

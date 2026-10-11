@@ -1,4 +1,6 @@
 import { DisclosureSection } from "@/components/admin/disclosure";
+import {UpholsterySettingsEditor} from '@/components/admin/upholstery-editor';
+import {getUpholsteryCatalog} from '@/lib/services/upholstery-catalog';
 import {AgentBehaviorSettings} from "@/components/admin/agent-behavior-settings";
 import {CustomerChannels} from '@/components/admin/customer-channels';
 import {customerChannelSummary} from '@/lib/agent/channel-diagnostics';
@@ -22,6 +24,7 @@ import {busMapsUsage} from '@/lib/services/busmaps-store';
 export const metadata = { title: "Настройки бизнеса" };
 export default async function Settings() {
   const data = await getDurationSettings();
+  const upholstery=await getUpholsteryCatalog();
   const ai = await getDatabase().businessSettings.findUniqueOrThrow({where:{id:"default"},});
   const [report,logistics,busmaps]=await Promise.all([readiness(getDatabase(),ai),new MotisRoutingProvider().datasetsStatus(),busMapsUsage()]);
   const latestTest=process.env.VERCEL_ENV==='preview'?await getDatabase().agentLiveTest.findFirst({orderBy:{startedAt:'desc'}}):null;
@@ -52,6 +55,7 @@ export default async function Settings() {
       </section></DisclosureSection>
       <DisclosureSection title="AI"><AgentModeControl mode={ai.aiAgentMode} enabled={process.env.AI_AGENT_ENABLED === "true"} canActivate={report.canActivate} blockers={report.blockers.map(c=>`${c.label}: ${c.detail}`)} /></DisclosureSection>
       <DisclosureSection title="Каналы"><CustomerChannels channels={channels}/></DisclosureSection>
+      <DisclosureSection title="Химчистка мебели · прайс и оборудование"><UpholsterySettingsEditor key={upholstery.version} settings={upholstery}/></DisclosureSection>
       <DisclosureSection title="Расписание"><AgentBehaviorSettings cutoff={ai.sameDayBookingCutoffMinute} departure={ai.latestCleanerDepartureMinute} version={ai.behaviorSettingsVersion}/><DurationRulesEditor rules={data.rules} services={data.services} /></DisclosureSection>
       <DisclosureSection title="Оплата клинеров"><section className="crm-section">
         <h2>Выплаты клинерам</h2>

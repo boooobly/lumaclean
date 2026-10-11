@@ -1,0 +1,9 @@
+-- Additive: historical Order financial and duration snapshots are untouched.
+ALTER TABLE "Lead" ADD COLUMN "upholsteryQuote" JSONB;
+CREATE TABLE "UpholsterySettings" ("id" TEXT PRIMARY KEY DEFAULT 'default', "version" INTEGER NOT NULL DEFAULT 1, "catalog" JSONB NOT NULL, "extractorQuantity" INTEGER NOT NULL DEFAULT 1, "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "extractor_quantity" CHECK ("extractorQuantity" BETWEEN 0 AND 20));
+INSERT INTO "UpholsterySettings" ("catalog") VALUES ('{"sofa3Light":2500,"sofa3Normal":3000,"sofa3Heavy":3800,"sofa2":2400,"armchair":1200,"chair":500,"cornerSeat":900,"spot":1500,"minimumVisit":3000}');
+CREATE TABLE "OrderUpholstery" ("orderId" TEXT PRIMARY KEY REFERENCES "Order"("id") ON DELETE RESTRICT, "input" JSONB NOT NULL, "quote" JSONB NOT NULL, "cleaningBaseline" JSONB, "requestHash" TEXT, "reviewStatus" TEXT NOT NULL DEFAULT 'PENDING', "reviewNote" TEXT, "reviewedBy" TEXT, "photos" JSONB, "plannedMinutes" INTEGER, "preparationMinutes" INTEGER, "cleanupMinutes" INTEGER, "transferMinutes" INTEGER, "equipmentUnit" INTEGER, "equipmentCleanerId" TEXT, "logisticsNote" TEXT, "patchTestConfirmed" BOOLEAN NOT NULL DEFAULT FALSE, "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT "upholstery_review" CHECK ("reviewStatus" IN ('PENDING','APPROVED','REJECTED')),
+ CONSTRAINT "upholstery_intervals" CHECK (("plannedMinutes" IS NULL OR "plannedMinutes">0) AND ("preparationMinutes" IS NULL OR "preparationMinutes">=0) AND ("cleanupMinutes" IS NULL OR "cleanupMinutes">=0) AND ("transferMinutes" IS NULL OR "transferMinutes">=0) AND ("equipmentUnit" IS NULL OR "equipmentUnit">0)));
+CREATE INDEX "OrderUpholstery_equipmentUnit_idx" ON "OrderUpholstery"("equipmentUnit");
+INSERT INTO "Service" (id,code,name,active,"updatedAt") VALUES ('service-upholstery','upholstery','Химчистка мягкой мебели',true,CURRENT_TIMESTAMP) ON CONFLICT (code) DO NOTHING;

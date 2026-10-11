@@ -1,5 +1,6 @@
 import type {Locale} from "@/i18n/routing";
-import type {ServiceId} from "@/lib/pricing";
+import type {ServiceId, CatalogueServiceId} from "@/lib/pricing";
+import {upholsteryPath} from '@/lib/upholstery-content';
 
 export type ServiceSeoContent = {
   slug: string;
@@ -499,7 +500,8 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
   },
 };
 
-export function getServicePath(locale: Locale, service: ServiceId) {
+export function getServicePath(locale: Locale, service: CatalogueServiceId) {
+  if(service==='upholstery')return upholsteryPath(locale);
   return `/${locale}/services/${serviceSeoContent[locale][service].slug}`;
 }
 

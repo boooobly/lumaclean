@@ -30,6 +30,7 @@ export class SchedulingError extends Error {
 }
 export type CrewOption = { id: string; name: string; active: boolean };
 export type CalendarOrder = {
+  operationalNote?: string;
   id: string;
   reference: string;
   repeatSeriesId?: string | null;

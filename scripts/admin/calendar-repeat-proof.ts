@@ -61,7 +61,10 @@ async function main() {
       await tx.clientAddress.deleteMany({ where: { clientId: m.clientId } });
       await tx.client.delete({ where: { id: m.clientId } });
       await tx.cleaner.delete({ where: { id: m.cleanerId } });
-      await tx.user.delete({ where: { id: m.userId } });
+      // AuditLog is append-only; deleting its actor would mutate the audit FK.
+      await tx.session.deleteMany({where:{userId:m.userId}});
+      await tx.account.deleteMany({where:{userId:m.userId}});
+      await tx.user.update({where:{id:m.userId},data:{active:false}});
     });
     console.log({
       cleaned: true,

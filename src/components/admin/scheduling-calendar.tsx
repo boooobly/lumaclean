@@ -101,6 +101,7 @@ function EventCard({
           : order.duration + " мин"}
       </span>
       <span>{order.address}</span>
+      {order.operationalNote&&<small>{order.operationalNote}</small>}
       <span>
         {order.cleaners.map((c) => c.name).join(", ") || "Команда не назначена"}{" "}
         · {order.cleaners.length}/{order.requiredCleaners}
@@ -556,6 +557,7 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
                     <span>{o.service} · {o.duration === null ? "Длительность не задана" : o.duration + " мин"}</span>
                     <span>{o.cleaners.map(c => c.name).join(", ") || "Команда не назначена"} · {o.cleaners.length}/{o.requiredCleaners}</span>
                     <span>{o.address}</span>
+                    {o.operationalNote&&<small>{o.operationalNote}</small>}
                     <small>{orderLabels[o.status]}{o.issues.length > 0 && " · Требует внимания"}</small>
                     {o.logistics?.filter(l => l.conflict || l.minutes === null).map(l => <small key={l.cleaner}>{l.cleaner}: {l.conflict ? "не успевает к началу" : routeLabels[l.status]}</small>)}
                   </Link>

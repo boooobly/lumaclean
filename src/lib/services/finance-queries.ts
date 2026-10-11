@@ -19,6 +19,7 @@ export async function getDurationSettings() {
       })
     ).map(durationConfig),
     services: await db.service.findMany({
+      where:{code:{not:'upholstery'}},
       select: { id: true, code: true, name: true },
     }),
     defaultPercent: settings.defaultCleanerPayoutPercent?.toString() ?? null,
@@ -186,7 +187,7 @@ export async function getFinances(input: {
 export async function getOrderEconomics(id: string) {
   await requireAdmin();
   const db = getDatabase(),
-    o = await db.order.findUniqueOrThrow({ where: { id } });
+    o = await db.order.findUniqueOrThrow({ where: { id }, include:{upholstery:true} });
   const expenses = await db.expense.findMany({
       where: { orderId: id, deletedAt: null, currency: o.currency },
     }),
@@ -219,6 +220,7 @@ export async function getOrderEconomics(id: string) {
       finishedAt: a.finishedAt,
     })),
     legacy: o.legacyFinance,
+    upholstery:o.upholstery,
   };
 }
 export async function getCleanerFinance(id: string) {

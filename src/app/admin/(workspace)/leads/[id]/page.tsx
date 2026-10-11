@@ -1,4 +1,5 @@
 import Link from "next/link";
+import {UpholsteryLeadDetail} from '@/components/admin/upholstery-detail';
 import { getLead, findClientOptions } from "@/lib/services/crm-queries";
 import {
   CrmHeader,
@@ -37,7 +38,7 @@ export default async function LeadPage({
         back="/admin/leads"
         action={
           !["CONVERTED", "LOST"].includes(lead.status)
-            ? { href: `/admin/orders/new?leadId=${id}`, label: "Создать заказ" }
+            ? { href: lead.upholsteryQuote?`/admin/orders/upholstery?lead=${id}`:`/admin/orders/new?leadId=${id}`, label: "Создать заказ" }
             : undefined
         }
       />
@@ -106,6 +107,7 @@ export default async function LeadPage({
             </>
           )}
           <h3>Комментарий клиента</h3>
+          {lead.upholsteryQuote&&<UpholsteryLeadDetail snapshot={lead.upholsteryQuote}/>}
           <p className="crm-preserve">{lead.comment || "—"}</p>
           {lead.estimateText && (
             <details>

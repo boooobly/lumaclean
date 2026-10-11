@@ -1,6 +1,6 @@
 import type {MetadataRoute} from "next";
 import {routing} from "@/i18n/routing";
-import {serviceIds} from "@/lib/pricing";
+import {serviceIds, type CatalogueServiceId} from "@/lib/pricing";
 import {getServicePath} from "@/lib/seo-services";
 
 import {siteUrl} from "@/lib/seo";
@@ -13,7 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl;
   const homeLanguages = {sr: `${base}/sr`, ru: `${base}/ru`, en: `${base}/en`, "x-default": `${base}/ru`};
   const homePages = routing.locales.map((locale) => ({url: `${base}/${locale}`, lastModified: pricingLastModified, changeFrequency: "weekly" as const, priority: 1, alternates: {languages: homeLanguages}}));
-  const servicePages = serviceIds.flatMap((service) => {
+  const servicePages = ([...serviceIds,'upholstery'] as CatalogueServiceId[]).flatMap((service) => {
     const languages = {
       sr: `${base}${getServicePath("sr", service)}`,
       ru: `${base}${getServicePath("ru", service)}`,
@@ -22,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     };
     return routing.locales.map((locale) => ({
       url: `${base}${getServicePath(locale, service)}`,
-      lastModified: pricingLastModified,
+      lastModified: service==='upholstery'?new Date('2026-10-11'):pricingLastModified,
       changeFrequency: "monthly" as const,
       priority: 0.9,
       alternates: {languages},

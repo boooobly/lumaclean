@@ -26,6 +26,7 @@ export default async function OrdersPage({
         action={{ href: "/admin/orders/new", label: "Создать заказ" }}
       />
       <Filters kind="orders" query={query} />
+      <p><Link className="crm-button" href="/admin/orders/upholstery">Создать химчистку мебели</Link></p>
       <Ledger
         secondary={["Длительность"]}
         headers={[
@@ -60,7 +61,7 @@ export default async function OrdersPage({
             </td>
             <td>
               {(r.historicalServiceLabel ?? r.service?.name ?? "Услуга не указана")}
-              <small>{String(r.area)} м²</small>
+              <small>{r.service?.code==='upholstery'?'Расчёт по предметам':`${r.area} м²`}</small>
             </td>
             <td>
               {date(r.historicalServiceDate ?? r.scheduledStart ?? r.windowFrom, !!r.historicalServiceDate)}

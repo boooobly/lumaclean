@@ -43,7 +43,7 @@ export async function listLeads(query: Query) {
           status: true,
           channel: true,
           estimatedPrice: true,
-          service: { select: { name: true } },
+          service: { select: { name: true, code:true } },
           client: { select: { id: true, name: true } },
         },
       }),
@@ -139,7 +139,7 @@ export async function listOrders(query: Query) {
           status: true,
           client: { select: { id: true, name: true, phone: true } },
           address: { select: { fullAddress: true } },
-          service: { select: { name: true } },
+          service: { select: { name: true, code:true } },
         },
       }),
     ]),
@@ -235,6 +235,7 @@ export async function getOrder(id: string) {
     getDatabase().order.findUnique({
       where: { id },
       include: {
+        upholstery:true,
         client: {
           select: {
             id: true,

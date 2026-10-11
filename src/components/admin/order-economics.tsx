@@ -3,6 +3,7 @@ import { money, Facts } from "./crm-view";
 import { Field } from "./crm-form";
 import { FinanceForm } from "./finance-forms";
 import { localInput } from "@/lib/domain/crm";
+import {UpholsteryDetail} from './upholstery-detail';
 export async function OrderEconomics({
   id,
   price,
@@ -30,6 +31,7 @@ export async function OrderEconomics({
   return (
     <section className="crm-section">
       <h2>Экономика заказа</h2>
+      {data.upholstery&&<UpholsteryDetail detail={data.upholstery}/>}
       <Facts
         items={[
           ["Доход", money(data.revenue)],

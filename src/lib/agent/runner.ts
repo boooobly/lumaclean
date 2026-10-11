@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import {upholsteryIntent} from '@/lib/upholstery-intent';
 import { Prisma, type PrismaClient, type AgentMode } from "@/generated/prisma/client";
 import { schedulingLock } from "@/lib/services/scheduling-commands";
 import { writeAudit } from "@/lib/services/audit";
@@ -115,6 +116,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
     const current=claim.turn.at(-1);
     if(!current)throw new AgentError("MESSAGE_NOT_FOUND");
     const turnText=claim.turn.map(m=>m.text).join('\n');
+    const furnitureTurn=claim.turn.find(m=>upholsteryIntent(m.text));if(furnitureTurn)await tool('markUpholsteryInquiry',{evidence:furnitureTurn.text});
     const humanPending=pendingHumanStatements(c.summary).length>0;
     const hasPhotos=await db.chatAttachment.count({where:{messageId:{in:claim.turn.map(m=>m.id)}}})>0;
     ctx.temporal=buildAgentTemporalContext(current.sentAt,limits);
@@ -131,7 +133,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
     }
     else{
       if(!humanPending&&(substantiveIntent(turnText)||c.leadId||ctx.state.phone))await tool('createOrUpdateLead',{intent:'cleaning',...(ctx.state.phone?{phone:ctx.state.phone}:{})});
-      const intake=humanPending||hasPhotos?undefined:await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent);
+      const intake=humanPending||hasPhotos||ctx.state.upholsteryInquiry?undefined:await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent);
       if(intake)text=intake;
       else{
       let compact=c.summary??null;

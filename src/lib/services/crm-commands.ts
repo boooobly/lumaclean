@@ -12,10 +12,11 @@ import {
 } from "@/lib/domain/crm";
 import { quote, priceSnapshot } from "@/lib/domain/crm-pricing";
 import { writeAudit, type AuditChanges } from "./audit";
-import { lockCrew, enforceScheduling } from "./scheduling-commands";
+import { lockCrew, enforceScheduling, assessScheduling } from "./scheduling-commands";
 import { normalizeAddress } from "./google-places";
 import { durationData, overrideReason } from "./duration-engine";
 import { completeEconomics } from "./payout-calculation";
+import {SchedulingError} from '@/lib/domain/scheduling-types';
 
 type Tx = Prisma.TransactionClient;
 export class DuplicateClientError extends CrmError {
@@ -515,9 +516,11 @@ export async function runCrmCommand(
           select: { code: true },
         });
         const order = { ...storedOrder, serviceId: storedOrder.serviceId, extras, service };
+        if(command==='order-update'&&await tx.orderUpholstery.count({where:{orderId:order.id}}))throw new CrmError('VALIDATION','Редактируйте этот заказ через раздел химчистки: он сохраняет детализацию цены и проверяет аппарат.');
         if (command === "order-status") {
           const input = commandSchemas[command].parse(payload);
           assertTransition("Order", order.status, input.status);
+          if(['CONFIRMED','SCHEDULED','EN_ROUTE','IN_PROGRESS','COMPLETED'].includes(input.status)&&await tx.orderUpholstery.count({where:{orderId:order.id}})){const assignments=await tx.orderCleaner.findMany({where:{orderId:order.id,removedAt:null},select:{cleanerId:true}});await lockCrew(tx,assignments.map(a=>a.cleanerId));const issues=await assessScheduling(tx,{...order,status:input.status,cleanerIds:assignments.map(a=>a.cleanerId)});if(issues.length)throw new SchedulingError(issues);}
           if (["CANCELLED", "NO_SHOW"].includes(input.status) && !input.reason)
             throw new CrmError("VALIDATION", "Укажите причину", "reason");
           if (input.status === "COMPLETED" && order.finalPrice === null)

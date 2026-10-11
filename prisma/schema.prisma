@@ -282,6 +282,7 @@ model ClientAddress {
 }
 
 model Lead {
+  upholsteryQuote          Json?
   id              String             @id @default(cuid())
   reference       String?            @unique
   submissionId    String?            @unique
@@ -377,6 +378,8 @@ model ServiceExtra {
 }
 
 model Order {
+  pricingBasis             String          @default("AREA")
+  upholstery               OrderUpholstery?
   id                       String          @id @default(cuid())
   reference                String?         @unique
   requestId                String?         @unique
@@ -456,6 +459,37 @@ model Order {
 }
 
 // A bounded, explicitly confirmed batch. No background generator or notifications.
+model UpholsterySettings {
+  id                String @id @default("default")
+  version           Int @default(1)
+  catalog           Json
+  extractorQuantity Int @default(1)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model OrderUpholstery {
+  orderId           String @id
+  order             Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  input             Json
+  quote             Json
+  cleaningBaseline  Json?
+  requestHash       String?
+  reviewStatus      String @default("PENDING")
+  reviewNote        String?
+  reviewedBy        String?
+  photos            Json?
+  plannedMinutes    Int?
+  preparationMinutes Int?
+  cleanupMinutes    Int?
+  transferMinutes   Int?
+  equipmentUnit     Int?
+  equipmentCleanerId String?
+  logisticsNote     String?
+  patchTestConfirmed Boolean @default(false)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
+  @@index([equipmentUnit])
+}
+
 model OrderRepeatSeries {
   id            String   @id @default(cuid())
   requestId     String   @unique

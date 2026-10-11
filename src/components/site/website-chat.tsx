@@ -289,6 +289,7 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
     [unread, setUnread] = useState(0),
     [newMessages, setNewMessages] = useState(false),
     [online, setOnline] = useState(true);
+  useEffect(()=>{const openChat=(event:Event)=>{setOpen(true);const message=(event as CustomEvent<{text?:string}>).detail?.text;if(message)setText(current=>current.trim()?current:message);};window.addEventListener('lumaclean:open-chat',openChat);return()=>window.removeEventListener('lumaclean:open-chat',openChat);},[]);
   const panel = useRef<HTMLElement>(null),
     launcher = useRef<HTMLButtonElement>(null),
     list = useRef<HTMLDivElement>(null),
