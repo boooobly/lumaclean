@@ -354,7 +354,7 @@ export async function runCalendarRepeat(
     { maxWait: 10000, timeout: 120000 },
   );
 }
-const seriesInput = z
+export const seriesInput = z
   .object({
     seriesId: z.string().min(1).max(100),
     expectedUpdatedAt: z.string().datetime().optional(),
@@ -362,7 +362,11 @@ const seriesInput = z
       .string()
       .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
       .optional(),
-    cleanerIds: z.array(z.string().min(1).max(100)).max(20).optional(),
+    cleanerIds: z
+      .array(z.string().min(1).max(100))
+      .max(20)
+      .refine((ids) => new Set(ids).size === ids.length)
+      .optional(),
     price: z.number().finite().min(0).max(10000000).multipleOf(0.01).optional(),
     comment: z.string().trim().max(2000).optional(),
     confirmCount: z.number().int().min(0).optional(),
@@ -385,7 +389,10 @@ async function manageSeries(
   const orders = await tx.order.findMany({
     where: {
       repeatSeriesId: series.id,
-      scheduledStart: { gt: new Date() },
+      OR: [
+        { scheduledStart: { gt: new Date() } },
+        { scheduledStart: null, windowFrom: { gt: new Date() } },
+      ],
       status: { notIn: ["CANCELLED", "NO_SHOW", "COMPLETED"] },
     },
     include,
@@ -414,7 +421,7 @@ async function manageSeries(
       count: orders.length,
       orders: orders.map((o) => ({
         id: o.id,
-        start: localInput(o.scheduledStart),
+        start: localInput(o.scheduledStart ?? o.windowFrom),
         status: o.status,
       })),
     };
@@ -444,10 +451,16 @@ async function manageSeries(
         "VALIDATION",
         "Серия содержит начатую уборку. Измените её отдельно.",
       );
+    if (action !== "series-stop" && !order.scheduledStart)
+      throw new CrmError(
+        "VALIDATION",
+        "Уборка переведена в гибкое окно. Разместите её отдельно перед изменением всей серии.",
+      );
     const start =
-      localInput(order.scheduledStart).slice(0, 10) +
+      localInput(order.scheduledStart ?? order.windowFrom).slice(0, 10) +
       "T" +
-      (input.time ?? localInput(order.scheduledStart).slice(11, 16));
+      (input.time ??
+        localInput(order.scheduledStart ?? order.windowFrom).slice(11, 16));
     const proposed: PlanningOrder = {
       ...order,
       scheduledStart: localInstant(start),
@@ -493,6 +506,11 @@ async function manageSeries(
         },
       });
     else {
+      if (input.price !== undefined && order.basePrice === null)
+        throw new CrmError(
+          "VALIDATION",
+          "У уборки нет исходного финансового расчёта. Согласуйте его отдельно.",
+        );
       const financial =
         input.price === undefined
           ? {}

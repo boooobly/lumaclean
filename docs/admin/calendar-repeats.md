@@ -12,10 +12,13 @@
 
 ## Проверки 11.10.2026
 
-- 17 targeted unit tests: даты 13→20 октября 14:30, Tue/Fri, DST осень/весна, пределы, financial allowlist, input/text/mobile keyboard guards, прежние scheduling constraints.
+- 18 targeted unit tests: даты 13→20 октября 14:30, Tue/Fri, DST осень/весна, пределы, financial allowlist, input/text/mobile keyboard guards, прежние scheduling constraints и запрет повторного cleanerId в серии.
 - 24 isolated Preview transaction assertions: копия, согласованная цена, чистые financial/lifecycle записи, double-submit/retry, duplicate/conflict, bounded Tue/Fri, одна уборка, будущие цены/время, stale scope, остановка и неизменность исходного заказа и AI channel modes.
+- 4 дополнительные Preview-проверки будущей серии: duplicate crew отклонён; гибкое окно входит в scope остановки; все четыре будущие уборки отменены; исходный заказ сохранён.
 - Local browser: точный Ctrl+C/Ctrl+V с созданием, конфликт при повторной вставке, mobile copy с подтверждением, Tue/Fri preview и четыре подтверждённых Preview заказа; 390/430 px.
 - TypeScript и affected ESLint проходят. Preview миграция additive; reset/db push не использовались. Production Orders для тестирования не создаются.
+- Production migration applied; row digests неизменны: 18 Orders, 4 OrderCleaner, 4 Expense, 27 CleanerPayout. Режимы AI каналов сохранены.
+- Финальный календарный Preview проверен на desktop/mobile: https://lumaclean-j25is55a4-vladislavs-projects-0eae0ea3.vercel.app. Для сохранения существующего AI booking gate выполняется отдельный native Preview proof; в новый календарь никакое расширение AUTO scope не добавлено.
 
 Команда unit tests: `node --conditions=react-server --import tsx --test tests/scheduling/calendar-repeat.test.ts tests/scheduling/domain.test.ts`.
 Preview fixtures: `scripts/admin/calendar-repeat-proof.ts`; guard допускает только существующую изолированную ep-wispy-river Preview-базу. Cleanup удаляет только manifest-owned записи и сохраняет AuditLog.

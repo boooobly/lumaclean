@@ -5,8 +5,23 @@ import {
   repeatInput,
   calendarShortcutAllowed,
 } from "../../src/lib/domain/calendar-repeat";
-import { copyTemplate } from "../../src/lib/services/calendar-repeat";
+import {
+  copyTemplate,
+  seriesInput,
+} from "../../src/lib/services/calendar-repeat";
 import { localInstant, localInput } from "../../src/lib/domain/crm";
+test("future series rejects duplicate crew ids instead of counting one cleaner twice", () => {
+  assert.equal(
+    seriesInput.safeParse({ seriesId: "series", cleanerIds: ["a", "a"] })
+      .success,
+    false,
+  );
+  assert.equal(
+    seriesInput.safeParse({ seriesId: "series", cleanerIds: ["a", "b"] })
+      .success,
+    true,
+  );
+});
 test("13 October 14:30 copied to 20 October retains Belgrade wall time", () => {
   const result = repeatDates({
     date: "2026-10-20",

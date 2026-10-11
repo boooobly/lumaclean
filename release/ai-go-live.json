@@ -1,5 +1,5 @@
 {
-  "fingerprint": "9953fafb7675b382ae0c4a225f7119ae6715a9309c24427eb00cc3bc9d3c4e35",
+  "fingerprint": "9d5864ff08e212f42d6e41ffde8ac3892cb3a3b4a7e8ccef0e6a990330fc5812",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -230,7 +230,7 @@
     "src/lib/services/admin-http.ts": "74150c1b9b7114448c7bcdfee4c8eaeb127e6cfccb7e011d97d8537d69a191b2",
     "src/lib/services/audit.ts": "554f19b97c77c47a249e6944a9fd2444b5b976676cee81c174287a02d0dd9bd0",
     "src/lib/services/busmaps-store.ts": "508de5e8e8532f4466a8c4a14dea84fab46f47012dec314ee6e0675a855d8d6b",
-    "src/lib/services/calendar-repeat.ts": "21bcad69f325a1ae06e2acc445a2d864d70415714b6bd5cc6de917d21c60bd63",
+    "src/lib/services/calendar-repeat.ts": "0d7ce4f9b0a73f41379cf80ebb9c216442b5432e18a3669b128c9f01563e9a7c",
     "src/lib/services/crm-backfill.ts": "3998f2502c2b966d775d6a8c028cef64611cc7f2ea8a2f965d057d0b9706972e",
     "src/lib/services/crm-commands.ts": "862ed998bc385babdaafea906f8cb90d3a659c5d5e71c375a67ead3452fee81c",
     "src/lib/services/crm-queries.ts": "7bb351e39534ca04e1321833c1c61fda547a65c7e600c8417624683d09443ccd",
@@ -279,20 +279,21 @@
     ".vercelignore": "ec7c37c670d85ccbbcdb7fa2a0fb85f361dded7b9844bb5f66c75810b4e80897",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 41,
+  "tests": 46,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-11T13:06:28.589Z",
+  "checkedAt": "2026-10-11T13:21:51.468Z",
   "suites": [
-    "17 targeted calendar/date/scheduling tests",
-    "24 isolated Preview transaction assertions"
+    "18 targeted calendar/date/scheduling tests",
+    "24 isolated Preview transaction assertions",
+    "4 future-series guards: duplicate crew, flexible window cancellation and source preservation"
   ],
   "verificationScope": "Calendar copy/paste and bounded recurring Orders only. Existing AI implementation and channel modes unchanged. Additive migration verified on isolated Preview. Browser copy/create/conflict, weekly Tue/Fri and mobile 390/430 tested. Final deployed Preview booking proof remains an independent release gate.",
   "previousVerification": {
-    "fingerprint": "a68dae1718d577be3ddc877057ea226cd2e4f22a068fe72390cce7c517bd97df",
-    "tests": 352,
-    "checkedAt": "2026-10-07T22:46:51.414Z"
+    "fingerprint": "9953fafb7675b382ae0c4a225f7119ae6715a9309c24427eb00cc3bc9d3c4e35",
+    "tests": 41,
+    "checkedAt": "2026-10-11T13:06:28.589Z"
   }
 }
