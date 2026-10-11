@@ -1,5 +1,5 @@
 {
-  "fingerprint": "d262bf82314c498528bde5658a069463ae5bda60db906b4c881d30f07a2dc229",
+  "fingerprint": "ac23d61326a009bba6f1a74777e84915d9b99b10b4aa0f7af34c28b2e75a64f7",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -141,7 +141,7 @@
     "src/components/site/upholstery-calculator.tsx": "2d8478dd11380967705a91110d045c747b2692812703ecdf167b58bd3ca30f4f",
     "src/components/site/upholstery-fields.tsx": "59f4d5a96276d564c9110af58c6a63f965521a8509430b5913b816b3d41c49a6",
     "src/components/site/upholstery-photo-button.tsx": "314b90e555af082ef005c5bda9ac6c67f70e828794d11a28ebb08930c85357b7",
-    "src/components/site/upholstery-teaser.tsx": "d074d5bae3d392c7f65951b6e09e8c5307eca0be44a720516460d6de538dece8",
+    "src/components/site/upholstery-teaser.tsx": "c559f555a081c7b546c5a8321cbfa9c72272bd96284834b243436980e946cf57",
     "src/components/site/upholstery.css": "29b3c18f684300201c3b42047097e78b127f22ab6db5889c12c0423d41ce4598",
     "src/components/site/website-chat.css": "59470fd58e6c7ffae8bcc78d28d377c196d04a166de64d1a578673fb04da0862",
     "src/components/site/website-chat.tsx": "93241f0983f22151f356f14280500b7f2b97a778c37b8bf9bcb6a0e98d093784",
@@ -262,7 +262,7 @@
     "src/lib/services/upholstery-catalog.ts": "b48d155cbc45e9d7ad1a19ad875f040e799fdd8ffa459a7af083079df32172b5",
     "src/lib/services/upholstery-commands.ts": "1eb5532767a00c2eb1901e19982ea1b39957a9d4680301d598292c7e9b95c6ef",
     "src/lib/services/upholstery-equipment.ts": "1534e22055ac89ed29f5962e232ff78158169dfab1c886e5791af5f535252136",
-    "src/lib/services/upholstery-leads.ts": "c5bf8bb196bdae96565aea96bb9edd2e23ac3a996d2f4fa899926616d3374838",
+    "src/lib/services/upholstery-leads.ts": "91131b93abae818093d1d83fa2eebe6c10d121f50de0cf9ba36aa4edaef3ef9a",
     "src/lib/services/website-leads.ts": "a3d40efce0d5c973ac8f652171cc9976dfb528cee32647287d6ee48e7bfbbd5d",
     "src/lib/site-content.tsx": "a657104896a984a76cb9833abab9593f650c1c0dfc1af17ac69316693eefce2c",
     "src/lib/upholstery-content.ts": "4ecc5637c2520957d8544d2d31d8c8390ddf9f74dad28df4c28aeb28db33cc64",
@@ -302,22 +302,22 @@
     ".vercelignore": "ec7c37c670d85ccbbcdb7fa2a0fb85f361dded7b9844bb5f66c75810b4e80897",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 338,
+  "tests": 339,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-11T14:58:14.402Z",
+  "checkedAt": "2026-10-11T15:02:56.854Z",
   "suites": [
     "269 passing agent, scheduling and upholstery unit assertions; 14 isolated-local-DB tests skipped",
-    "45 real isolated Preview transaction assertions; modes preserved, zero production Orders",
+    "46 real isolated Preview transaction assertions; modes preserved, zero production Orders",
     "24 calendar regression assertions on the expanded schema",
     "RU/SR/EN commercial pages, informational articles, deterministic calculator and photo chat; mobile 390/430 and admin preview"
   ],
   "verificationScope": "Upholstery catalogue, CRM/Finance, shared deterministic urgency pricing, extractor/material/duration review and localized website/SEO. Additive migrations verified on isolated Preview. Furniture AUTO booking remains BLOCKED. A fresh deployed native existing-regular-service booking proof and production historical preservation are independent release gates; no channel modes are changed.",
   "previousVerification": {
-    "fingerprint": "9d5864ff08e212f42d6e41ffde8ac3892cb3a3b4a7e8ccef0e6a990330fc5812",
-    "tests": 46,
-    "checkedAt": "2026-10-11T13:21:51.468Z"
+    "fingerprint": "d262bf82314c498528bde5658a069463ae5bda60db906b4c881d30f07a2dc229",
+    "tests": 338,
+    "checkedAt": "2026-10-11T14:58:14.402Z"
   }
 }

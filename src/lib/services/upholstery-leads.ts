@@ -64,11 +64,14 @@ export async function saveUpholsteryLead(db: PrismaClient, payload: unknown) {
         serviceId: service.id,
         urgent: quote.surcharge > 0,
         estimatedPrice: quote.total,
-        comment: v.comment,
+        comment: v.requestedDate
+          ? `Желаемая дата: ${v.requestedDate} (Europe/Belgrade).\n${v.comment}`
+          : v.comment,
         upholsteryQuote: JSON.parse(
           JSON.stringify({
             input: { ...v.request, urgent: quote.surcharge > 0 },
             quote,
+            requestedDate: v.requestedDate ?? null,
           }),
         ) as Prisma.InputJsonValue,
         telegramStatus: "CANCELLED",

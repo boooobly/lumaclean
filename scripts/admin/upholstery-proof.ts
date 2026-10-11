@@ -535,6 +535,7 @@ async function main() {
       cleaning: { service: "regular", area: 55 },
     },
     comment: "Preview only",
+    requestedDate: "2026-10-30",
   };
   const leadResult = await saveUpholsteryLead(db, leadRequest),
     lead = await db.lead.findUniqueOrThrow({
@@ -543,6 +544,11 @@ async function main() {
   m.leadIds.push(lead.id);
   save();
   ok(Number(lead.estimatedPrice) === 7600);
+  ok(
+    (lead.upholsteryQuote as { requestedDate: string }).requestedDate ===
+      leadRequest.requestedDate &&
+      lead.comment?.includes(leadRequest.requestedDate),
+  );
   ok(
     (await saveUpholsteryLead(db, leadRequest)).reference ===
       leadResult.reference,
