@@ -56,6 +56,7 @@ next-env.d.ts
 /src/generated/prisma/
 /artifacts/admin/
 /qa-output/
+/.playwright-cli/
 
 # Isolated routing service dependencies
 /infrastructure/**/node_modules/

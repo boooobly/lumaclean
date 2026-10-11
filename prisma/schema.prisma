@@ -380,6 +380,12 @@ model Order {
   id                       String          @id @default(cuid())
   reference                String?         @unique
   requestId                String?         @unique
+  copiedFromId             String?
+  copiedFrom               Order?          @relation("OrderCopies", fields: [copiedFromId], references: [id], onDelete: Restrict)
+  copies                   Order[]         @relation("OrderCopies")
+  repeatSeriesId           String?
+  repeatSeries             OrderRepeatSeries? @relation("SeriesMembers", fields: [repeatSeriesId], references: [id], onDelete: Restrict)
+  repeatTemplates          OrderRepeatSeries[] @relation("SeriesSource")
   clientId                 String
   client                   Client          @relation(fields: [clientId], references: [id], onDelete: Restrict)
   addressId                String
@@ -440,11 +446,30 @@ model Order {
   @@index([windowFrom, windowTo])
   @@index([status, completedAt])
   @@index([clientId])
+  @@index([copiedFromId, scheduledStart])
+  @@index([repeatSeriesId, scheduledStart])
   @@index([addressId, clientId])
   @@index([leadId])
   @@index([serviceId])
   @@index([createdAt])
   @@index([reference(ops: raw("gin_trgm_ops"))], type: Gin)
+}
+
+// A bounded, explicitly confirmed batch. No background generator or notifications.
+model OrderRepeatSeries {
+  id            String   @id @default(cuid())
+  requestId     String   @unique
+  requestHash   String
+  sourceOrderId String
+  sourceOrder   Order    @relation("SeriesSource", fields: [sourceOrderId], references: [id], onDelete: Restrict)
+  template      Json
+  weekly        Boolean  @default(false)
+  weekdays      Int[]
+  endsOn        DateTime @db.Date
+  stoppedAt     DateTime? @db.Timestamptz(3)
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(3)
+  orders        Order[] @relation("SeriesMembers")
 }
 
 model OrderCleaner {

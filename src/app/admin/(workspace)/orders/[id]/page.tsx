@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getOrderPlanning } from "@/lib/services/scheduling-queries";
 import { OrderPlanningPanel } from "@/components/admin/order-planning";
+import { RepeatActions } from "@/components/admin/calendar-repeat";
 import { getOrder } from "@/lib/services/crm-queries";
 import {
   CrmHeader,
@@ -223,6 +224,7 @@ export default async function OrderPage({
           )}
         </div>
       </div>
+      {planning && <RepeatActions order={planning.order} cleaners={planning.cleaners}/>}
       {planning && <OrderPlanningPanel
         order={planning.order}
         cleaners={planning.cleaners}

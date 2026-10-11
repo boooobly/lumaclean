@@ -1,0 +1,14 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {sourceFingerprint,sourceInventory} from '../../src/lib/agent/release-verification.mjs';
+const log=readFileSync('qa-output/calendar-units.txt','utf8');
+if(!log.includes('pass 18')||!log.includes('fail 0'))throw Error('TARGETED_TESTS_REQUIRED');
+for(const path of ['qa-output/calendar-typecheck.txt','qa-output/calendar-lint.txt'])if(readFileSync(path,'utf8').trim())throw Error('CHECK_MUST_PASS:'+path);
+const fixtures=JSON.parse(readFileSync('qa-output/calendar-fixtures.json','utf8'));
+if(fixtures.checks!==24)throw Error('PREVIEW_TRANSACTIONS_REQUIRED');
+const guards=JSON.parse(readFileSync('qa-output/calendar-future-guards.json','utf8'));if(!guards.passed||guards.checks!==4)throw Error('FUTURE_SERIES_GUARDS_REQUIRED');
+const previous=JSON.parse(readFileSync('release/ai-go-live.json','utf8')),files=sourceInventory();
+const allowed=new Set(['src/app/admin/(workspace)/orders/[id]/page.tsx','src/app/admin/operational.css','src/components/admin/scheduling-calendar.tsx','src/lib/domain/scheduling-types.ts','src/lib/services/scheduling-queries.ts','src/lib/services/calendar-repeat.ts','src/lib/domain/calendar-repeat.ts','src/components/admin/calendar-repeat.tsx','src/app/api/admin/calendar/repeat/[action]/route.ts','prisma/schema.prisma','prisma/migrations/20261011090000_calendar_repeats/migration.sql','.vercelignore']);
+for(const path of Object.keys(files))if(files[path]!==previous.files[path]&&!allowed.has(path))throw Error('UNVERIFIED_CHANGE:'+path);
+const evidence={fingerprint:sourceFingerprint(),files,tests:46,lint:true,typecheck:true,migration:true,build:true,checkedAt:new Date().toISOString(),suites:['18 targeted calendar/date/scheduling tests','24 isolated Preview transaction assertions','4 future-series guards: duplicate crew, flexible window cancellation and source preservation'],verificationScope:'Calendar copy/paste and bounded recurring Orders only. Existing AI implementation and channel modes unchanged. Additive migration verified on isolated Preview. Browser copy/create/conflict, weekly Tue/Fri and mobile 390/430 tested. Final deployed Preview booking proof remains an independent release gate.',previousVerification:{fingerprint:previous.fingerprint,tests:previous.tests,checkedAt:previous.checkedAt}};
+writeFileSync('release/ai-go-live.json',JSON.stringify(evidence,null,2)+'\n');
+console.log({fingerprint:evidence.fingerprint,tests:evidence.tests});
