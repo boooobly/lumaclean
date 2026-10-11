@@ -25,6 +25,7 @@ import { plainDate } from "@/lib/domain/scheduling-conflicts";
 import { geo } from "@/lib/domain/routing";
 import { durationData, overrideReason } from "./duration-engine";
 import { completeEconomics } from "./payout-calculation";
+import {upholsteryIssues} from './upholstery-equipment';
 type Tx = Prisma.TransactionClient;
 export async function schedulingLock(tx: Tx, kind: string, id: string) {
   await tx.$queryRawUnsafe(
@@ -106,12 +107,12 @@ export async function assessScheduling(
   const settings = await tx.businessSettings.findUniqueOrThrow({
     where: { id: "default" },
   });
-  const issues = SchedulingConflictService.check(
+  const issues = [...await upholsteryIssues(tx,order),...SchedulingConflictService.check(
     order,
     cleaners,
     others,
     settings.defaultTravelBufferMinutes,
-  );
+  )];
   if (
     !order.scheduledStart ||
     !order.cleanerIds.length ||

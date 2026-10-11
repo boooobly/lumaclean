@@ -10,6 +10,7 @@ import {
 } from "@/lib/domain/scheduling-types";
 import type { RepeatInput } from "@/lib/domain/calendar-repeat";
 type Preview = {
+  upholsteryReview?:boolean;
   rows: {
     start: string;
     issues: SchedulingIssue[];
@@ -295,6 +296,7 @@ export function RepeatEditor({
             <br />
             Применить: {preview.price ?? "не задана"} RSD
           </p>
+          {preview.upholsteryReview&&<p className="crm-hint">Химчистка будет скопирована в новый черновик. Перед подтверждением заказа заново проверьте материал, длительность, аппарат и перевозку. Старые согласования и проба ткани не переносятся.</p>}
           {preview.currentPrice !== null && (
             <button
               type="button"

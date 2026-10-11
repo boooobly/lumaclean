@@ -59,5 +59,6 @@ export function windowQuantitiesMissing(f:Facts|undefined){
   return !!w?.requested&&(w.totalCount!==undefined||w.standardCount===undefined&&w.largeCount===undefined);
 }
 export function bookingReviewBlocked(state:AgentState){
+  if(state.upholsteryInquiry)return true;
   return !!state.review?.reasons.some(r=>r!=='CONTACT_PREFERENCE')||!!state.draftFacts?.reviewItems?.length||!!state.draftFacts?.serviceConfirmationRequired||windowQuantitiesMissing(state.draftFacts);
 }

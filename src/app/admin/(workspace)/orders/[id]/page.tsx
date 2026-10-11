@@ -1,4 +1,5 @@
 import Link from "next/link";
+import {UpholsteryDetail} from '@/components/admin/upholstery-detail';
 import { getOrderPlanning } from "@/lib/services/scheduling-queries";
 import { OrderPlanningPanel } from "@/components/admin/order-planning";
 import { RepeatActions } from "@/components/admin/calendar-repeat";
@@ -38,12 +39,14 @@ export default async function OrderPage({
         action={
           editable
             ? {
-                href: `/admin/orders/${id}/edit`,
+                href: o.upholstery?`/admin/orders/upholstery?order=${id}`:`/admin/orders/${id}/edit`,
                 label: "Редактировать / перенести",
               }
             : undefined
         }
       />
+      {editable&&!o.historical&&!o.upholstery&&<p><Link className="crm-button" href={`/admin/orders/upholstery?order=${id}`}>Добавить химчистку мебели</Link></p>}
+      {o.upholstery&&<UpholsteryDetail detail={o.upholstery}/>}
       <div className="crm-detail-grid">
         <section className="crm-section">
           <h2>
@@ -52,7 +55,7 @@ export default async function OrderPage({
           <Facts secondary={["Загрязнение", "Срочность", "Ручная длительность", "Причина ручной длительности", "Режим времени", "Завершён"]} technical={["Версия расчёта", "Происхождение"]}
             items={o.historical ? [["Дата уборки", date(o.historicalServiceDate ?? o.completedAt, !!o.historicalServiceDate)], ["Услуга", o.historicalServiceLabel ?? o.service?.name], ["Площадь", `${o.area} м²`], ["Источник", `Excel · заказ ${o.legacyId}`]] : [
               ["Услуга", (o.historicalServiceLabel ?? o.service?.name ?? "Услуга не указана")],
-              ["Площадь", `${o.area} м²`],
+              [o.pricingBasis==='ITEMS'?"Основа расчёта":"Площадь", o.pricingBasis==='ITEMS'?'По предметам':`${o.area} м²`],
               ["Загрязнение", o.soilLevel ? soilLabels[o.soilLevel] : "—"],
               ["Срочность", o.urgent ? "Да" : "Нет"],
               [

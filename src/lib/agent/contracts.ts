@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { serviceIds } from "@/lib/pricing";
 import { extrasSchema } from "@/lib/validation/crm";
+import {upholsteryRequestSchema} from '@/lib/upholstery';
 
 export const locales = ["ru", "sr-Latn", "sr-Cyrl", "en"] as const;
 export type AgentLocale = (typeof locales)[number];
@@ -25,6 +26,8 @@ export const customerFactsSchema = qualificationSchema.omit({urgent:true}).parti
 }).strict();
 export const inputIntents = ['SERVICE_TYPE','SERVICE_CONFIRMATION','WINDOW_COUNTS','WINDOW_TYPE','WEEKEND_DAY','PHONE','AREA','SOIL_LEVEL','EXTRAS','YES_NO','SLOT_SELECTION','BOOKING_CONFIRMATION','POST_BOOKING'] as const;
 export const toolSchemas = {
+  markUpholsteryInquiry:z.object({evidence:z.string().min(1).max(1500)}).strict(),
+  calculateUpholstery:upholsteryRequestSchema,
   getBusinessInfo: empty,
   findClient: empty,
   recordCustomerFacts: z.object({facts:customerFactsSchema,evidence:z.string().trim().min(1).max(1500)}).strict(),
@@ -44,6 +47,8 @@ export const toolSchemas = {
 };
 export type ToolName = keyof typeof toolSchemas;
 export const toolDescriptions:Record<ToolName,string> = {
+  markUpholsteryInquiry:'Record an explicit upholstery request, supported by exact current customer evidence. Blocks autonomous booking, invalidates old slots and confirmation. Use for furniture extraction, combined cleaning or a sofa stain.',
+  calculateUpholstery:'Deterministic current item prices for Kärcher upholstery cleaning. Clarify standalone vs ADDON, furniture type/quantity/seats, soil and material. UNKNOWN fabric when not confirmed. cleaning optional only for explicit area service+area in a combined enquiry. Never add prices yourself. Return breakdown and minimum adjustment; delivery included, no equipment fee. All booking requires owner material/photo/price, duration, cleaners and extractor review. Heavy soil needs photo. A stain may remain. Use requestReview; never book or promise duration.',
   getBusinessInfo:"Read current public facts and FAQ, services, extras and exclusions. Must use for business questions.",
   findClient:"Read only the server-verified identity bound to this conversation. Phone or display name claims are NOT verification. Never accepts arbitrary client ID.",
   recordCustomerFacts:"Save only allowlisted facts explicitly stated in a CLIENT message of the server-defined current unanswered burst. evidence must be an exact excerpt of that message. No old transcript, image inference, guesses, internal IDs or generic updates. Last explicit correction wins; server invalidates dependent quotes and slots.",
@@ -66,6 +71,8 @@ export const toolDescriptions:Record<ToolName,string> = {
 export const nativeTools = Object.entries(toolSchemas).map(([name,schema])=>({type:"function" as const,function:{name,description:toolDescriptions[name as ToolName],strict:false,parameters:z.toJSONSchema(schema,{target:"draft-7"})}}));
 export type Qualification = z.infer<typeof qualificationSchema>;
 export type AgentState = {
+  upholsteryInquiry?:boolean;
+  upholsteryQuote?:ReturnType<typeof import('@/lib/upholstery').calculateUpholstery>;
   draftFacts?:z.infer<typeof customerFactsSchema>;
   review?:{reasons:string[]};
   preferredContactChannel?:typeof contactChannels[number];

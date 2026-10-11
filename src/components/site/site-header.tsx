@@ -6,6 +6,7 @@ import {useEffect, useState} from "react";
 import {ArrowIcon} from "@/components/site/arrow-icon";
 import type {Locale} from "@/i18n/routing";
 import type {EditorialContent} from "@/lib/site-content";
+import {upholsteryPath,upholsteryUi} from '@/lib/upholstery-content';
 
 export function SiteHeader({locale, copy, homeHref = "", estimateHref = "#estimate", localeHrefs, initialPaper = false, articlesLabel}: {
   locale: Locale;
@@ -63,6 +64,7 @@ export function SiteHeader({locale, copy, homeHref = "", estimateHref = "#estima
       <nav aria-label={copy.navLabel}>
         <a href={`${homeHref}#scope`}>{copy.services}</a>
         <a href={`${homeHref}#rates`}>{copy.prices}</a>
+        <Link href={upholsteryPath(locale)}>{upholsteryUi[locale].short}</Link>
         <a href={`${homeHref}#method`}>{copy.process}</a>
         {articlesLabel && <Link href={`/${locale}/articles`}>{articlesLabel}</Link>}
       </nav>

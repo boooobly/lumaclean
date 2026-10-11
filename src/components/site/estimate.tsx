@@ -10,6 +10,9 @@ import type {EditorialContent} from "@/lib/site-content";
 
 import {leadAttribution, trackEvent} from "@/lib/analytics";
 import {ArrowIcon} from "@/components/site/arrow-icon";
+import {UpholsteryCalculator} from './upholstery-calculator';
+import {upholsteryUi} from '@/lib/upholstery-content';
+import './upholstery.css';
 
 type CountExtra = "standardWindow" | "largeWindow" | "cabinets" | "ironing";
 type ToggleExtra = "balcony" | "fridge" | "oven" | "steam" | "petHair" | "linen";
@@ -17,7 +20,9 @@ type ToggleExtra = "balcony" | "fridge" | "oven" | "steam" | "petHair" | "linen"
 const countKeys: CountExtra[] = ["standardWindow", "largeWindow", "cabinets", "ironing"];
 const toggleKeys: ToggleExtra[] = ["balcony", "fridge", "oven", "steam", "petHair", "linen"];
 
-export function Estimate({locale, copy, content, initialService = "regular"}: {locale: Locale; copy: EditorialContent["estimate"]; content: SiteContent; initialService?: ServiceId}) {
+type EstimateProps={locale:Locale;copy:EditorialContent['estimate'];content:SiteContent;initialService?:ServiceId};
+export function Estimate(props:EstimateProps){const [upholstery,setUpholstery]=useState(false);return <><div className="upholstery-tabs"><button type="button" aria-pressed={!upholstery} onClick={()=>setUpholstery(false)}>{props.locale==='ru'?'Уборка':props.locale==='sr'?'Čišćenje prostora':'Home cleaning'}</button><button type="button" aria-pressed={upholstery} onClick={()=>setUpholstery(true)}>{upholsteryUi[props.locale].name}</button></div>{upholstery?<UpholsteryCalculator locale={props.locale}/>:<AreaEstimate {...props}/>}</>;}
+function AreaEstimate({locale, copy, content, initialService = "regular"}:EstimateProps) {
   const started = useRef(false);
   const submitting = useRef(false);
   const submission = useRef<{id: string; payload: string} | null>(null);

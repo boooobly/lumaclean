@@ -1,5 +1,5 @@
 import type {Locale} from "@/i18n/routing";
-import type {ServiceId} from "@/lib/pricing";
+import type {CatalogueServiceId} from "@/lib/pricing";
 
 export type ArticleTable = {caption: string; headings: string[]; rows: string[][]};
 export type Section = {id: string; title: string; paragraphs: string[]; bullets?: string[]; tip?: string; table?: ArticleTable};
@@ -10,7 +10,7 @@ export type Article = {
   publishedAt?: string;
   updatedAt: string;
   image: string;
-  services: ServiceId[];
+  services: CatalogueServiceId[];
   relatedIds?: string[];
   translations: Record<Locale, Translation>;
 };

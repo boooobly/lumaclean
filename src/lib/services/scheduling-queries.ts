@@ -29,6 +29,7 @@ import {
 import { RoutingService } from "./route-cache";
 import { geo } from "@/lib/domain/routing";
 const calendarSelect = {
+  upholstery:{select:{reviewStatus:true}},
   repeatSeries: {select:{weekly:true}},
   client: { select: { name: true } },
   address: {
@@ -54,6 +55,7 @@ const planning = (row: Row): PlanningOrder => ({
 function dto(row: Row, issues: CalendarOrder["issues"] = []): CalendarOrder {
   return {
     id: row.id,
+    operationalNote:row.upholstery?`Взять экстрактор Kärcher${row.upholstery.reviewStatus==='APPROVED'?'':' · pending review'}`:undefined,
     repeatSeriesId: row.repeatSeries?.weekly ? row.repeatSeriesId : null,
     reference: row.reference ?? row.id,
     client: row.client.name,

@@ -10,6 +10,7 @@ import {Estimate} from "@/components/site/estimate";
 import {JourneyHandoff} from "@/components/site/journey-handoff";
 import {SiteHeader} from "@/components/site/site-header";
 import {Rates} from "@/components/site/rates";
+import {UpholsteryTeaser} from '@/components/site/upholstery-teaser';
 import {routing, type Locale} from "@/i18n/routing";
 import {businessContact, businessContactCopy, getMessengerLinks, googleBusinessProfile, whatsappContact} from "@/lib/contacts";
 import {GoogleProfileLinks} from "@/components/site/google-profile-links";
@@ -122,6 +123,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
                 </Link>
               ))}
             </nav>
+            <UpholsteryTeaser locale={locale}/>
           </div>
         </section>
 
@@ -130,6 +132,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
             <div className="section-number">{v.rates.number}</div>
             <div className="rates-head"><h2>{v.rates.title}</h2><div><p>{v.rates.body}</p><a href="#estimate">{v.rates.link}<ArrowIcon direction="down-right" /></a></div></div>
             <Rates locale={locale} copy={v.rates} pricing={c.pricing}/>
+            <UpholsteryTeaser locale={locale}/>
           </div>
         </section>
 
@@ -143,6 +146,7 @@ export default async function HomePage({params}: {params: Promise<{locale: strin
               <figure><Image src="/media/material-cabinet.webp" alt={v.materials.appliance} fill sizes="(max-width: 900px) 100vw, 38vw"/><figcaption><span>{v.materials.appliance}</span><strong>{c.pricing.from} {formatRsd(extrasPrices.cabinets, locale)}</strong></figcaption></figure>
             </div>
             <div className="extras-ledger">{extraKeys.map((key, index) => <div key={key}><span>{String(index + 1).padStart(2, "0")}</span><strong>{c.calculator.labels[key]}</strong><small>{c.pricing.from} {formatRsd(extrasPrices[key], locale)}</small></div>)}</div>
+            <UpholsteryTeaser locale={locale} extra/>
           </div>
         </section>
 

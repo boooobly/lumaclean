@@ -1,6 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Prisma, type PrismaClient, type Conversation, type AgentMode } from "@/generated/prisma/client";
 import { siteContent } from "@/lib/content";
+import {calculateUpholstery,upholsteryCatalogSchema} from '@/lib/upholstery';
+import {upholsteryIntent} from '@/lib/upholstery-intent';
 import { quote, priceSnapshot } from "@/lib/domain/crm-pricing";
 import { normalizedPhone, localInput, localInstant } from "@/lib/domain/crm";
 import { estimateDuration } from "@/lib/domain/duration";
@@ -16,6 +18,7 @@ import {photoQualificationAllowed} from './chat-attachments';
 import { orderNotifications, handoffNotification } from './notifications';
 import {buildAgentTemporalContext,serviceDatePolicy,latestStartForEndBy,incomingDeparturePolicy,type DepartureLegInput} from "./temporal";
 import {applyCustomerFacts,explicitCustomerFacts,supportedFacts} from "./customer-facts";
+import {upholsteryUi} from '@/lib/upholstery-content';
 import {currentClientTurn,pendingHumanStatements,operationalSummary,conversationMemory} from './conversation-memory';
 import {inputQuestion,inputAlreadyKnown} from "./chat-presentation";
 import {behaviorMetric} from "./behavior-telemetry";
@@ -106,6 +109,7 @@ async function checkedSlot(tx:Tx,c:Conversation,ctx:ToolContext,token:string){
 }
 /** Atomic standard booking boundary; shares production pricing, duration and scheduling services. */
 export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,reschedule:boolean){
+  if(ctx.state.upholsteryInquiry||(reschedule&&c.orderId&&await tx.orderUpholstery.count({where:{orderId:c.orderId}})))throw new AgentError('UPHOLSTERY_REVIEW_REQUIRED');
   if(ctx.mode!=="AUTO")return{error:"SHADOW_MUTATION_BLOCKED",planned:true,operation:reschedule?"rescheduleOrder":"createOrder"};
   if(bookingReviewBlocked(ctx.state)||await tx.humanHandoff.count({where:{conversationId:c.id,resolvedAt:null,reason:{not:'SOFT:CONTACT_PREFERENCE'}}}))return{error:'REVIEW_REQUIRED',message:'Owner must resolve pending review before booking.'};
   const state=ctx.state,pending=state.pending;
@@ -185,10 +189,25 @@ export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,resched
 }
 async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,payload:unknown):Promise<ToolResult>{
   const state=ctx.state;
+  if(name==='markUpholsteryInquiry'){
+    const input=toolSchemas[name].parse(payload),turn=await currentClientTurn(tx,c.id);
+    if(!upholsteryIntent(input.evidence)||!turn.some(m=>m.text.includes(input.evidence)))throw new AgentError('CUSTOMER_FACTS_REQUIRED');
+    state.upholsteryInquiry=true;state.review={reasons:[...new Set([...(state.review?.reasons??[]),'UPHOLSTERY_BOOKING_PROOF_REQUIRED'])]};delete state.quote;delete state.duration;delete state.pending;delete state.slots;delete state.selectedSlotToken;return{requiresHumanReview:true,autonomousBooking:false};
+  }
+  if(name==='calculateUpholstery'){
+    const input=toolSchemas[name].parse(payload);if(!state.upholsteryInquiry)throw new AgentError('CUSTOMER_FACTS_REQUIRED');
+    const settings=await tx.upholsterySettings.findUniqueOrThrow({where:{id:'default'}}),business=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    const date=state.draftFacts?.requestedDate??state.requestedWindow?.date;if(date){const policy=serviceDatePolicy(date,business);if('error'in policy)return policy;input.urgent=policy.urgent;}else input.urgent=false;
+    const result=calculateUpholstery(input,upholsteryCatalogSchema.parse(settings.catalog),settings.version);state.upholsteryQuote=result;
+    ctx.factAmounts=[result.total,result.subtotal,result.surcharge,result.minimumAdjustment,result.cleaningBase,result.itemsSubtotal,...result.lines.flatMap(l=>[l.unitPrice,l.amount])];
+    if(c.leadId&&ctx.mode==='AUTO')await tx.lead.update({where:{id:c.leadId},data:{upholsteryQuote:json({input,quote:result}),estimatedPrice:result.total}});
+    return{...result,duration:'OWNER_REVIEW_REQUIRED',equipment:'EXTRACTOR_REQUIRES_INTERVAL_CUSTODIAN_AND_TRANSPORT_CHECK',booking:'BLOCKED_UNTIL_SEPARATE_FULL_UPHOLSTERY_PREVIEW_PROOF',photoRequired:input.items.some(i=>i.soil==='HEAVY'),recapExplicitConfirmationRequired:true};
+  }
+  if(state.upholsteryInquiry&&['findAvailableSlots','validateSlot','createOrder','rescheduleOrder','estimateDuration'].includes(name))throw new AgentError('UPHOLSTERY_REVIEW_REQUIRED');
   if(name==="getBusinessInfo"){
     const content=siteContent[c.locale.startsWith("sr")?"sr":c.locale==="en"?"en":"ru"];
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
-    const facts={sameDayPolicy:{cutoffMinute:settings.sameDayBookingCutoffMinute,latestDepartureMinute:settings.latestCleanerDepartureMinute,timezone:settings.timezone,requiresRealAvailability:true,surchargePercent:20},city:content.footer.location,services:content.services,scope:content.comparison,assurance:content.assurance,faq:content.faq.items,extras:content.calculator.labels,pricingPolicy:content.calculator.note};
+    const upholstery=upholsteryUi[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'];const facts={upholstery:{name:upholstery.name,method:'wet spray extraction',equipment:'Professional Kärcher equipment and products; model not confirmed',faq:upholstery.faq,limits:upholstery.limits,pricing:'Use calculateUpholstery only. Do not sum prices yourself.',autonomousBooking:false},sameDayPolicy:{cutoffMinute:settings.sameDayBookingCutoffMinute,latestDepartureMinute:settings.latestCleanerDepartureMinute,timezone:settings.timezone,requiresRealAvailability:true,surchargePercent:20},city:content.footer.location,services:content.services,scope:content.comparison,assurance:content.assurance,faq:content.faq.items,extras:content.calculator.labels,pricingPolicy:content.calculator.note};
     ctx.factAmounts=[...JSON.stringify(facts).matchAll(/(\d[\d\s,]*?)\s*RSD/gi)].map(m=>Number(m[1].replace(/[\s,]/g,"")));
     return facts;
   }
@@ -401,7 +420,7 @@ export async function executeAgentTool(db:PrismaClient,ctx:ToolContext,name:stri
     result=await db.$transaction(async tx=>{
       const c=await assertToolAccess(tx,ctx);
       if(ctx.mode==="AUTO")ctx.state=stateOf(c);
-      if(pendingHumanStatements(c.summary).length&&!['getBusinessInfo','recordCustomerFacts','reconcileHumanContext','requestHumanHandoff','requestReview'].includes(typed))return{error:'HUMAN_CONTEXT_REQUIRED'};
+      if(pendingHumanStatements(c.summary).length&&!['getBusinessInfo','markUpholsteryInquiry','recordCustomerFacts','reconcileHumanContext','requestHumanHandoff','requestReview'].includes(typed))return{error:'HUMAN_CONTEXT_REQUIRED'};
       const output=await dispatch(tx,c,ctx,typed,parsed.data);
       if(ctx.mode==="AUTO"){
         const live=await tx.conversation.findUniqueOrThrow({where:{id:c.id}});

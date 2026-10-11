@@ -1,5 +1,8 @@
 export const serviceIds = ["regular", "deep", "move", "airbnb", "office"] as const;
 export type ServiceId = (typeof serviceIds)[number];
+export type AreaServiceId = ServiceId;
+export type ItemServiceId = 'upholstery';
+export type CatalogueServiceId = AreaServiceId | ItemServiceId;
 
 // Shared by the homepage price list and every service's price table.
 export const priceAreaLabels: Record<"ru" | "sr" | "en", [string, string, string, string, string]> = {
@@ -47,6 +50,8 @@ export function calculatePrice(service: ServiceId, area: number, extras: {code: 
   const base = basePrice(service, area);
   const lines = extras.filter(e => e.quantity > 0).map(e => ({...e, unitPrice: extrasPrices[e.code]}));
   const subtotal = base + lines.reduce((sum,e) => sum + e.quantity * e.unitPrice, 0);
-  const surcharge = urgent ? Math.round(subtotal * 0.2 / 100) * 100 : 0;
+  const surcharge = urgentSurcharge(subtotal, urgent);
   return {base, extras:lines, surcharge, total:subtotal+surcharge};
 }
+// Preserve the existing +20% and RSD 100 rounding for every visit type.
+export function urgentSurcharge(subtotal:number,urgent:boolean){return urgent?Math.round(subtotal*0.2/100)*100:0;}
