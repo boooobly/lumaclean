@@ -17,6 +17,7 @@ import { normalizeAddress } from "./google-places";
 import { durationData, overrideReason } from "./duration-engine";
 import { completeEconomics } from "./payout-calculation";
 import {SchedulingError} from '@/lib/domain/scheduling-types';
+import { assertRecordVersion } from '@/lib/domain/crm-lifecycle';
 
 type Tx = Prisma.TransactionClient;
 export class DuplicateClientError extends CrmError {
@@ -227,6 +228,8 @@ export async function runCrmCommand(
         const lead = await leadForChange(tx, id);
         if (command === "lead-status") {
           const v = commandSchemas[command].parse(payload);
+          if (v.status === "LOST" && lead.status === "LOST" && v.reason && v.reason === lead.lostReason) return { id };
+          assertRecordVersion(lead.updatedAt, v.expectedUpdatedAt);
           assertTransition("Lead", lead.status, v.status);
           if (v.status === "LOST" && !v.reason)
             throw new CrmError(
@@ -505,6 +508,11 @@ export async function runCrmCommand(
         await lock(tx, "order", v.id);
         const storedOrder = await tx.order.findUnique({ where: { id: v.id } });
         if (!storedOrder) throw new CrmError("NOT_FOUND", "Заказ не найден");
+        if (command === "order-status") {
+          const input = commandSchemas[command].parse(payload);
+          if (input.status === "CANCELLED" && storedOrder.status === "CANCELLED" && input.reason && input.reason === storedOrder.cancellationReason) return { id: storedOrder.id };
+          assertRecordVersion(storedOrder.updatedAt, input.expectedUpdatedAt);
+        }
         if (storedOrder.historical || !storedOrder.serviceId)
           throw new CrmError("VALIDATION", "Исторический заказ доступен только для просмотра");
         // One query at a time on the transaction connection. Prisma relation

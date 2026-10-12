@@ -11,6 +11,7 @@ import {
   type SchedulingIssue,
 } from "@/lib/domain/scheduling-types";
 import { orderLabels, orderTransitions } from "@/lib/domain/crm-types";
+import { CloseRecordButton } from "./close-record";
 export function ConflictList({
   issues,
   cleaners = [],
@@ -39,6 +40,7 @@ export function ConflictList({
   ) : null;
 }
 export type PlanDraft = {
+  intent?: "RESCHEDULE";
   start?: string;
   cleanerIds?: string[];
   duration?: number;
@@ -141,7 +143,7 @@ export function PlanEditor({
       <div className="schedule-dialog-heading">
         <div>
           <small>LumaClean / Планирование</small>
-          <h2 id={id + "-title"}>{order.reference}</h2>
+          <h2 id={id + "-title"}>{draft.intent === "RESCHEDULE" ? "Перенести уборку" : order.reference}</h2>
         </div>
         <button type="button" onClick={onClose} aria-label="Закрыть панель">
           ×
@@ -152,6 +154,8 @@ export function PlanEditor({
         <br />
         <span className="crm-hint">{order.address}</span>
       </p>
+      {draft.intent === "RESCHEDULE" && <p className="crm-hint">Выберите новую дату и время в часовом поясе Белграда. Сохраняется этот же заказ, цена и история; остальные уборки серии не меняются. При конфликте перенос не сохранится.</p>}
+      <CloseRecordButton kind="Order" id={order.id} status={order.status} updatedAt={order.updatedAt} onSaved={async () => { await onSaved(); onClose(); }} />
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -363,7 +367,7 @@ export function PlanEditor({
         )}
         <div className="schedule-dialog-actions">
           <button className="crm-button" disabled={pending}>
-            {pending ? "Сохраняем…" : "Сохранить планирование"}
+            {pending ? "Сохраняем…" : draft.intent === "RESCHEDULE" ? "Сохранить перенос" : "Сохранить планирование"}
           </button>
           {order.scheduleMode === "FLEXIBLE" && order.start && (
             <button
@@ -397,10 +401,11 @@ export function OrderPlanningPanel({
         <h2>Команда и планирование</h2>
         {!closedStatuses.includes(order.status) && (
           <button className="crm-button" onClick={() => setOpen(true)}>
-            Время / клинеры
+            Перенести уборку / изменить команду
           </button>
         )}
       </div>
+      <CloseRecordButton kind="Order" id={order.id} status={order.status} updatedAt={order.updatedAt} />
       <p>
         Назначено {order.cleaners.length} / требуется {order.requiredCleaners}
       </p>
@@ -437,6 +442,7 @@ export function OrderPlanningPanel({
         <PlanEditor
           key={order.updatedAt}
           order={order}
+          draft={{intent:"RESCHEDULE"}}
           cleaners={cleaners}
           onClose={() => setOpen(false)}
           onSaved={() => router.refresh()}

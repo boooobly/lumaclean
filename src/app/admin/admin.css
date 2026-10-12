@@ -82,6 +82,10 @@
 .crm-chip { display:inline-block; padding:4px 8px; border:1px solid #b8c2bc; font:11px var(--lc-font-text); border-radius:5px; white-space:nowrap; letter-spacing:0; }
 .crm-chip-new,.crm-chip-confirmed,.crm-chip-scheduled,.crm-chip-in_progress { color:#155b58; background:#e3eeea; border-color:#bfd4cc; }
 .crm-chip-lost,.crm-chip-cancelled,.crm-chip-no_show { color:#854733; background:#f1e9e0; }
+.crm-close-button { border:1px solid #c7a38d; border-radius:8px; padding:9px 12px; background:#fff9f4; color:#854733; cursor:pointer; font:inherit; white-space:normal; }
+.crm-close-button:focus-visible { outline:2px solid currentColor; outline-offset:3px; }
+.crm-close-dialog { max-width:560px; }
+.calendar-cancelled-toggle { margin:12px 0; }
 .crm-chip-completed,.crm-chip-converted { background:#e8eadf; }
 .crm-pager { display:flex; justify-content:space-between; gap:20px; padding:22px 0 32px; font-size:12px; }
 .crm-pager > div { display:flex; gap:24px; }

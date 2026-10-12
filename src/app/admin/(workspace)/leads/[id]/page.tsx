@@ -12,6 +12,7 @@ import {
 } from "@/components/admin/crm-view";
 import { CrmForm, Field } from "@/components/admin/crm-form";
 import { ClientPicker } from "@/components/admin/crm-fields";
+import { CloseRecordButton } from "@/components/admin/close-record";
 import {
   leadLabels,
   leadTransitions,
@@ -128,6 +129,8 @@ export default async function LeadPage({
         <div>
           <section className="crm-section">
             <h2>Работа с заявкой</h2>
+            <CloseRecordButton kind="Lead" id={id} status={lead.status} updatedAt={lead.updatedAt.toISOString()}/>
+            {lead.status === "CONVERTED" && <p className="crm-hint">По этой заявке уже создан заказ. Перенос или отмена выполняются в карточке связанного заказа ниже.</p>}
             {leadTransitions[lead.status].length > 0 && (
               <CrmForm
                 key={lead.status}

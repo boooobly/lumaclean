@@ -10,6 +10,7 @@ scripts/*
 !scripts/copy-maplibre-worker.mjs
 tests/
 qa-output/
+output/playwright/
 .playwright-cli/
 *.tsbuildinfo
 *.log
