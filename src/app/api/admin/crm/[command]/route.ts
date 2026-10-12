@@ -103,7 +103,9 @@ export async function POST(
               ? 404
               : error.code === "FORBIDDEN"
                 ? 403
-                : 400,
+                : error.code === "STALE"
+                  ? 409
+                  : 400,
         },
       );
     console.error(

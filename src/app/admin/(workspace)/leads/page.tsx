@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CloseRecordButton } from "@/components/admin/close-record";
 import {leadRequestKind,requestKindLabels} from '@/lib/lead-intent';
 import { listLeads } from "@/lib/services/crm-queries";
 import {
@@ -81,6 +82,7 @@ export default async function LeadsPage({
             </td>
             <td>
               <div className="crm-row-actions">
+                <CloseRecordButton kind="Lead" id={r.id} status={r.status} updatedAt={r.updatedAt.toISOString()}/>
                 <Link href={`/admin/leads/${r.id}`}>Открыть →</Link>
                 {["IN_PROGRESS", "WAITING_CLIENT"]
                   .filter((s) =>

@@ -72,6 +72,7 @@ async function updateLead(tx:Tx,c:Conversation,ctx:ToolContext,input:ReturnType<
   const area=input.area??ctx.state.draftFacts?.area;
   const fields={name:ctx.state.name??"Контакт уточняется",phone:ctx.state.phone??"",normalizedPhone:ctx.state.phone?normalizedPhone(ctx.state.phone):null,locale:c.locale,...(service?{serviceId:service.id}:{}),...(area?{area}:{}),...(ctx.state.upholsteryInquiry?{upholsteryRequested:true,humanReviewRequired:true,requestKind:service&&area?'CLEANING_UPHOLSTERY':'UPHOLSTERY'}:{})};
   const previous=c.leadId?await tx.lead.findUnique({where:{id:c.leadId}}):null;
+  if(previous?.status==="LOST")return{error:"LEAD_CLOSED",message:"Owner closed this enquiry. Do not reopen or book it automatically."};
   if(previous?.status==="CONVERTED")return{ok:true,leadId:previous.id};
   const lead=previous?await tx.lead.update({where:{id:previous.id},data:fields}):await tx.lead.create({data:{...fields,submissionId:`agent:${c.id}`,submissionHash:createHash("sha256").update(`agent:${c.id}`).digest("hex"),channel:c.channel,entrySource:"ai-chat",reference:`LC-AI-${randomUUID().slice(0,8).toUpperCase()}`,clientId:c.identityVerified?c.clientId:null,telegramStatus:"CANCELLED"}});
   await tx.conversation.update({where:{id:c.id},data:{leadId:lead.id,stage:"QUALIFYING"}});
@@ -109,6 +110,7 @@ async function checkedSlot(tx:Tx,c:Conversation,ctx:ToolContext,token:string){
 }
 /** Atomic standard booking boundary; shares production pricing, duration and scheduling services. */
 export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,reschedule:boolean){
+  if(c.leadId){await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`lead:${c.leadId}`}))::text`;if(await tx.lead.count({where:{id:c.leadId,status:'LOST'}}))throw new AgentError('LEAD_CLOSED');}
   if(ctx.state.upholsteryInquiry||(c.leadId&&await tx.lead.count({where:{id:c.leadId,upholsteryRequested:true}}))||(reschedule&&c.orderId&&await tx.orderUpholstery.count({where:{orderId:c.orderId}})))throw new AgentError('UPHOLSTERY_REVIEW_REQUIRED');
   if(ctx.mode!=="AUTO")return{error:"SHADOW_MUTATION_BLOCKED",planned:true,operation:reschedule?"rescheduleOrder":"createOrder"};
   if(bookingReviewBlocked(ctx.state)||await tx.humanHandoff.count({where:{conversationId:c.id,resolvedAt:null,reason:{not:'SOFT:CONTACT_PREFERENCE'}}}))return{error:'REVIEW_REQUIRED',message:'Owner must resolve pending review before booking.'};

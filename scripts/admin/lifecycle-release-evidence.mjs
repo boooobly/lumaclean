@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {sourceFingerprint,sourceInventory} from '../../src/lib/agent/release-verification.mjs';
+const unit=readFileSync('qa-output/lifecycle-units.txt','utf8');assert(unit.includes('pass 302')&&unit.includes('fail 0'));
+const build=readFileSync('qa-output/lifecycle-build.txt','utf8');assert(build.includes('Compiled successfully')&&build.includes('ƒ Proxy'));
+assert(!/error TS\d+/.test(readFileSync('qa-output/lifecycle-typecheck.txt','utf8')));
+assert(!/\d+ problems?/.test(readFileSync('qa-output/lifecycle-lint.txt','utf8')));
+const proof=JSON.parse(readFileSync('qa-output/lifecycle-db-proof.json','utf8'));assert(proof.passed&&proof.checks===26);
+const finance=JSON.parse(readFileSync('qa-output/lifecycle-financial-proof.json','utf8'));assert(finance.passed&&finance.paidPayoutPreserved&&finance.linkedExpensePreserved);
+const visual=JSON.parse(readFileSync('qa-output/lifecycle-browser-visual-local.json','utf8'));assert(visual.length===12&&visual.every(r=>!r.overflow));
+const actions=JSON.parse(readFileSync('qa-output/lifecycle-browser-actions-local.json','utf8'));assert(actions.length===3&&actions[0].cancel&&actions[1].conflictBlocked&&actions[2].mobileLeadClose);
+const previous=JSON.parse(readFileSync('release/ai-go-live.json','utf8')),files=sourceInventory();
+const allowed=new Set(['src/app/admin/(workspace)/leads/page.tsx','src/app/admin/(workspace)/leads/[id]/page.tsx','src/app/admin/admin.css','src/app/api/admin/crm/[command]/route.ts','src/components/admin/close-record.tsx','src/components/admin/order-planning.tsx','src/components/admin/scheduling-calendar.tsx','src/lib/agent/tools.ts','src/lib/domain/crm-lifecycle.ts','src/lib/services/crm-commands.ts','src/lib/services/crm-queries.ts','src/lib/validation/crm.ts','.vercelignore']);
+for(const path of new Set([...Object.keys(files),...Object.keys(previous.files)]))if(files[path]!==previous.files[path]&&!allowed.has(path))throw Error('UNVERIFIED_CHANGE:'+path);
+const evidence={fingerprint:sourceFingerprint(),files,tests:332,lint:true,typecheck:true,migration:true,build:true,checkedAt:new Date().toISOString(),suites:['302 targeted CRM/scheduling/finance/agent tests','26 isolated Preview cancellation/reschedule/lead/concurrency assertions','4 paid payout/expense preservation assertions','12 real Chrome desktop/mobile views and cancellation/conflict/lead-closing UI flow'],verificationScope:'Explicit CRM cancellation and lead closing; existing rescheduling and calendar history visibility. No DB migration, historical changes or AI mode switches. Closed-Lead AI booking guard verified. Final deployed Preview booking proof remains an independent release gate.',previousVerification:{fingerprint:previous.fingerprint,tests:previous.tests,checkedAt:previous.checkedAt}};
+writeFileSync('release/ai-go-live.json',JSON.stringify(evidence,null,2)+'\n');console.log({fingerprint:evidence.fingerprint,tests:evidence.tests});

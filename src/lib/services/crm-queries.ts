@@ -38,6 +38,7 @@ export async function listLeads(query: Query) {
           id: true,
           reference: true,
           createdAt: true,
+          updatedAt: true,
           name: true,
           phone: true,
           status: true,

@@ -200,6 +200,7 @@ export const commandSchemas = {
       id: entityId,
       status: z.enum(keys(leadLabels)),
       reason: text(1000),
+      expectedUpdatedAt: z.string().datetime().optional(),
     })
     .strict(),
   "lead-note": z.object({ id: entityId, note: text() }).strict(),
@@ -236,6 +237,7 @@ export const commandSchemas = {
       id: entityId,
       status: z.enum(keys(orderLabels)),
       reason: text(1000),
+      expectedUpdatedAt: z.string().datetime().optional(),
     })
     .strict(),
 };

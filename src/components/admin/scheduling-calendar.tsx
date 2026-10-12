@@ -25,6 +25,8 @@ import { PlanEditor, type PlanDraft } from "./order-planning";
 import { scheduleMutation } from "./scheduling-forms";
 import { RepeatEditor, RepeatActions } from "./calendar-repeat";
 import { calendarShortcutAllowed } from "@/lib/domain/calendar-repeat";
+import { calendarOrderVisible } from "@/lib/domain/crm-lifecycle";
+import { CloseRecordButton } from "./close-record";
 let calendarClipboard: CalendarOrder | null = null;
 const PIXELS_PER_MINUTE = 1.2;
 const today = () => Temporal.Now.plainDateISO("Europe/Belgrade").toString();
@@ -132,6 +134,7 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
     [repeat,setRepeat]=useState<{order:CalendarOrder;date:string}|null>(null),
     [menu,setMenu]=useState<{order?:CalendarOrder;day?:string;x:number;y:number}|null>(null);
   const [data, setData] = useState(initial),
+    [showCancelled, setShowCancelled] = useState(false),
     [resource, setResource] = useState(false),
     [selected, setSelected] = useState(initial.date);
   const [editing, setEditing] = useState<{
@@ -143,11 +146,12 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
   const dragging = useRef<string | null>(null),
     scroller = useRef<HTMLDivElement>(null),
     busy = useRef(false);
-  const placed = data.orders.filter((o) => o.start),
-    unplaced = data.orders.filter(
+  const visibleOrders = data.orders.filter(o => calendarOrderVisible(o.status, showCancelled));
+  const placed = visibleOrders.filter((o) => o.start),
+    unplaced = visibleOrders.filter(
       (o) => !o.start && !closedStatuses.includes(o.status),
     ),
-    closedWindows = data.orders.filter(
+    closedWindows = visibleOrders.filter(
       (o) => !o.start && closedStatuses.includes(o.status),
     );
   useEffect(() => {
@@ -175,6 +179,7 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
     if (!response.ok) throw new Error("Calendar refresh failed");
     const result = await response.json();
     setData(result.data);
+    setSelectedOrder(null);
   }
   function drag(order: CalendarOrder, e: DragEvent<HTMLButtonElement>) {
     dragging.current = order.id;
@@ -292,9 +297,10 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
         const order=data.orders.find(o=>o.id===orderId);setMenu({...order?{order}:{day},x:Math.max(8,Math.min(e.clientX,window.innerWidth-230)),y:Math.max(8,Math.min(e.clientY,window.innerHeight-120))});if(order)setSelectedOrder(order);if(day)setSelected(day);
       }}>
       <div className="repeat-calendar-tools" aria-live="polite">
-        {selectedOrder&&<><strong>{selectedOrder.client} · {selectedOrder.localStart.replace("T"," ")}</strong><button type="button" onClick={()=>{calendarClipboard=selectedOrder;setClipboard(selectedOrder);}}>Копировать</button><button type="button" onClick={()=>setEditing({order:selectedOrder})}>Открыть заказ</button><button type="button" onClick={()=>setRepeat({order:selectedOrder,date:selected})}>Повторить уборку</button></>}
+        {selectedOrder&&<><strong>{selectedOrder.client} · {selectedOrder.localStart.replace("T"," ")}</strong><button type="button" onClick={()=>{calendarClipboard=selectedOrder;setClipboard(selectedOrder);}}>Копировать</button><button type="button" onClick={()=>setEditing({order:selectedOrder})}>Открыть заказ</button>{!closedStatuses.includes(selectedOrder.status)&&<button type="button" onClick={()=>setEditing({order:selectedOrder,draft:{intent:"RESCHEDULE"}})}>Перенести уборку</button>}<CloseRecordButton kind="Order" id={selectedOrder.id} status={selectedOrder.status} updatedAt={selectedOrder.updatedAt} onSaved={reload}/><button type="button" onClick={()=>setRepeat({order:selectedOrder,date:selected})}>Повторить уборку</button></>}
         {clipboard&&<><span>Скопировано: {clipboard.client}. Выберите день.</span><button type="button" onClick={()=>setRepeat({order:clipboard,date:selected})}>Вставить уборку · {dayLabel(selected)}</button></>}
       </div>
+      <label className="crm-check calendar-cancelled-toggle"><input type="checkbox" checked={showCancelled} onChange={event=>{setShowCancelled(event.target.checked);setSelectedOrder(null);}}/>Показать отменённые и неявки · {data.orders.filter(o=>!calendarOrderVisible(o.status,false)).length}</label>
       {menu&&<div role="menu" className="repeat-context-menu" style={{left:menu.x,top:menu.y}}>{menu.order?<button role="menuitem" type="button" onClick={()=>{calendarClipboard=menu.order!;setClipboard(menu.order!);setMenu(null);}}>Копировать</button>:<button role="menuitem" type="button" disabled={!clipboard} onClick={()=>{if(clipboard)setRepeat({order:clipboard,date:menu.day!});setMenu(null);}}>Вставить уборку</button>}<button role="menuitem" type="button" onClick={()=>setMenu(null)}>Закрыть меню</button></div>}
       <div className="calendar-toolbar">
         <nav aria-label="Период календаря">
@@ -561,7 +567,8 @@ export function SchedulingCalendar({ initial }: { initial: CalendarData }) {
                     <small>{orderLabels[o.status]}{o.issues.length > 0 && " · Требует внимания"}</small>
                     {o.logistics?.filter(l => l.conflict || l.minutes === null).map(l => <small key={l.cleaner}>{l.cleaner}: {l.conflict ? "не успевает к началу" : routeLabels[l.status]}</small>)}
                   </Link>
-                  {!closedStatuses.includes(o.status) && <button type="button" className="messenger-takeover" onClick={() => setEditing({order:o})}>Изменить время / команду</button>}
+                  {!closedStatuses.includes(o.status) && <button type="button" className="messenger-takeover" onClick={() => setEditing({order:o,draft:{intent:"RESCHEDULE"}})}>Перенести уборку / изменить команду</button>}
+                  <CloseRecordButton kind="Order" id={o.id} status={o.status} updatedAt={o.updatedAt} onSaved={reload}/>
                   <button type="button" className="messenger-takeover" onClick={()=>setRepeat({order:o,date:selected})}>Повторить уборку</button>
                 </article>
               ))
