@@ -13,7 +13,21 @@ const chatSchema=z.object({model:z.string().optional(),choices:z.array(z.object(
 // PoYo's native function_call envelope supplies arguments as a JSON object and
 // content:null (observed in isolated Preview). Both native forms stay bounded;
 // plain assistant text is never promoted to a business tool call.
-const nativeArguments=z.union([z.string(),z.record(z.string(),z.unknown())]).transform(v=>typeof v==='string'?v:JSON.stringify(v)).pipe(z.string().max(8000));
+// The observed PoYo envelope also leaks a Go SDK union. Decode a single active
+// member or identical duplicate strings; never select between conflicting data.
+const stringArgumentUnion=z.object({OfString:z.string().max(8000),OfResponseToolSearchCallArguments:z.unknown().optional()}).strict();
+const nativeArguments=z.union([z.string(),z.record(z.string(),z.unknown())]).transform(v=>{
+  if(typeof v==='string')return v;
+  const union=stringArgumentUnion.safeParse(v);
+  if(union.success){
+    const {OfString:primary,OfResponseToolSearchCallArguments:alternate}=union.data;
+    if(typeof alternate==='string'&&(!primary||primary===alternate))return alternate;
+    if(alternate==null||typeof alternate==='object'&&!Array.isArray(alternate)&&!Object.keys(alternate).length)return primary;
+    // Go's any member may hold the object while the string member is zero-valued.
+    if(!primary&&alternate&&typeof alternate==='object'&&!Array.isArray(alternate))return JSON.stringify(alternate);
+  }
+  return JSON.stringify(v); // Unrecognized/conflicting unions fail the business schema.
+}).pipe(z.string().max(8000));
 const responseSchema=z.object({model:z.string().optional(),status:z.string().optional(),output:z.array(z.object({type:z.string(),call_id:z.string().optional(),name:z.string().optional(),arguments:nativeArguments.optional(),content:z.array(z.object({type:z.string(),text:z.string().optional()})).nullish()})).max(30),usage:usageSchema.optional()});
 export function normalizeCompletion(provider:string,model:string,protocol:"chat"|"responses",raw:unknown,latencyMs:number,rates?:{input:number;output:number}):Completion {
   const envelope=z.object({data:z.unknown().optional(),code:z.number().optional()}).passthrough().parse(raw);

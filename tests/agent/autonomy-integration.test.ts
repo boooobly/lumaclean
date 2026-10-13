@@ -10,6 +10,7 @@ import {claimJob,runClaimedJob} from '../../src/lib/agent/runner';
 import {AgentError,type AgentState} from '../../src/lib/agent/contracts';
 import type {AIProvider,Completion} from '../../src/lib/agent/providers';
 import {signLocation} from '../../src/lib/services/google-places';
+import {operationalSummary} from '../../src/lib/agent/conversation-memory';
 const url=process.env.AUTONOMY_TEST_DATABASE_URL;
 test('autonomy domain actions on isolated Preview',{skip:!url},async t=>{
  assert(new URL(url!).hostname.startsWith('ep-wispy-river-b8xwqy9q'));process.env.AI_AGENT_ENABLED='true';
@@ -46,6 +47,16 @@ test('autonomy domain actions on isolated Preview',{skip:!url},async t=>{
    const result=await executeAgentTool(db,ctx,'findAvailableSlots',{date,from:date+'T16:30',to:date+'T17:00'});
    assert.equal(result.error,'NO_SLOTS');assert(!ctx.state.slots);assert(!ctx.state.selectedSlotToken);assert(ctx.state.quote);
    assert.equal(await db.humanHandoff.count({where:{conversationId:c.id}}),0);assert.equal((await db.conversation.findUniqueOrThrow({where:{id:c.id}})).control,'AI_CONTROL');
+  });
+  await check('human correction values must match the attributed statement, not merely a matching excerpt',async()=>{
+   const {c,ctx}=await fixture({draftFacts:{service:'regular',area:60,soilLevel:'NORMAL',extras:[],extrasConfirmed:true}});
+   const admin=await db.message.create({data:{conversationId:c.id,author:'ADMIN',userId:owner.id,text:'Хорошо, окна тогда тоже добавим. Их 3 больших.'}});
+   await db.conversation.update({where:{id:c.id},data:{summary:operationalSummary(ctx.state,null,{admin:{id:admin.id,text:admin.text}})}});
+   const correction=(largeCount:number)=>({reviewedMessageIds:[admin.id],corrections:[{messageId:admin.id,evidence:'3 больших',facts:{windowCleaning:{requested:true,largeCount}}}]});
+   assert.equal((await executeAgentTool(db,ctx,'reconcileHumanContext',correction(30))).error,'HUMAN_CONTEXT_REQUIRED');assert(!ctx.state.draftFacts?.windowCleaning);
+   assert(!(await executeAgentTool(db,ctx,'reconcileHumanContext',correction(3))).error);
+   const after=(await db.conversation.findUniqueOrThrow({where:{id:c.id}})).state as AgentState;
+   assert.equal(after.draftFacts?.windowCleaning?.largeCount,3);assert.equal(after.draftFacts?.area,60);
   });
   await check('furniture FAQ cannot mark booking intent; real booking intent creates Lead and soft review',async()=>{
    const faq=await fixture({},'Сколько стоит химчистка дивана?');assert.equal((await executeAgentTool(db,faq.ctx,'markUpholsteryInquiry',{evidence:'Сколько стоит химчистка дивана?'})).error,'CUSTOMER_FACTS_REQUIRED');assert(!( (await db.conversation.findUniqueOrThrow({where:{id:faq.c.id}})).state as AgentState).upholsteryInquiry);

@@ -19,6 +19,11 @@ const key=process.env[name==='poyo'?'POYO_API_KEY':'OPENROUTER_API_KEY'];
 const path='qa-output/autonomy-native-'+name+'.json';
 if(!key||key==='[SENSITIVE]'){const r={provider:name,status:'INCONCLUSIVE',reason:'NATIVE_CREDENTIAL_UNAVAILABLE',scenarios:0};writeFileSync(path,JSON.stringify(r,null,2));console.log(r);process.exit(0);}
 const model=name==='poyo'?'gpt-6-luna':'openai/gpt-6-luna'; // Verified production AIInvocation models, no business setting change.
+// Match the provider rates already used below, so production's reserve calculation
+// sees the same verified model/rates. Do not change or refund the daily quota.
+process.env.PRIMARY_AGENT_MODEL=model;
+process.env.PRIMARY_AGENT_INPUT_USD_PER_MILLION=String(name==='poyo'?0.08:0.1);
+process.env.PRIMARY_AGENT_OUTPUT_USD_PER_MILLION=String(name==='poyo'?0.4:0.5);
 const selected:AIProvider=name==='poyo'?new PoyoProvider(model,key,fetch,{input:0.08,output:0.4}):new OpenRouterProvider(model,key,fetch,{input:0.1,output:0.5});
 const unavailable:AIProvider={name:'disabled',model,complete:async()=>{throw new AgentError('PROVIDER_UNCONFIGURED');}};
 const db=new PrismaClient({adapter:new PrismaPg({connectionString:pgConnectionString(url),max:3})});

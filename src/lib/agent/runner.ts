@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import {upholsteryBookingIntent} from '@/lib/upholstery-intent';
-import {errorDisposition,reasonLevel,recoveryText,noSlotsText,safeRecovery} from './autonomy';
+import {errorDisposition,reasonLevel,recoveryText,noSlotsText,safeRecovery,repeatedQualification} from './autonomy';
 import { Prisma, type PrismaClient, type AgentMode } from "@/generated/prisma/client";
 import { schedulingLock } from "@/lib/services/scheduling-commands";
 import { writeAudit } from "@/lib/services/audit";
@@ -186,10 +186,12 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
         catch(e){if(!(e instanceof AgentError)||e.code!=='PROVIDERS_UNAVAILABLE'||!messages.some(m=>m.images?.length))throw e;for(const m of messages)delete m.images;imagePolicy+='\nVISION UNAVAILABLE: You have only the attachment count. Never describe or claim to have seen any image. Ask for a description; image unavailability alone does not require handoff.';messages[0].content+=imagePolicy;await db.chatAttachment.updateMany({where:{messageId:{in:claim.turn.map(m=>m.id)}},data:{aiAnalysisStatus:'UNAVAILABLE'}});answer=await completeWithFallback(metered,messages,observe,signal);}
         if(!answer.toolCalls.length){
           const persona=masculineSelfReference(answer.text,c.locale as keyof typeof handoffText);
-          const formatting=answer.text.length>1800||(answer.text.match(/\?/g)?.length??0)>2;
+          const repeated=repeatedQualification(answer.text,ctx.state);
+          if(repeated)behaviorMetric('repeatedQuestionDetected');
+          const formatting=answer.text.length>1800||(answer.text.match(/\?/g)?.length??0)>2||repeated;
           if((persona||formatting)&&!outputRepaired&&outputAllowed(answer.text.slice(0,1800).replace(/\?/g,'.'),ctx.state,ctx.factAmounts,ctx.factPercentages)){
             outputRepaired=true;if(persona)behaviorMetric('personaRepairCount');
-            messages.push({role:'assistant',content:answer.text},{role:'system',content:personaRepairInstruction+' Rewrite briefly, at most 1800 characters and TWO questions. Preserve all facts. No business tools: return text only.'});
+            messages.push({role:'assistant',content:answer.text},{role:'system',content:personaRepairInstruction+' Rewrite briefly, at most 1800 characters and TWO questions. Remove repeated qualification questions; use recorded facts and answer the latest question. Preserve all facts. No business tools: return text only.'});
             const repaired=await completeWithFallback(metered,messages,observe,signal);
             if(repaired.toolCalls.length||masculineSelfReference(repaired.text,c.locale as keyof typeof handoffText)||!repairPreservesFacts(answer.text,repaired.text)||!outputAllowed(repaired.text,ctx.state,ctx.factAmounts,ctx.factPercentages)){text=safeRecovery(ctx.state,c.locale as keyof typeof handoffText);break;}
             answer=repaired;

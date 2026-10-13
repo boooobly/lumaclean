@@ -4,7 +4,7 @@ import {autonomyCorpus} from './fixtures/autonomy-corpus';
 import {mandatoryHandoff,outputAllowed} from '../../src/lib/agent/policy';
 import {reasonLevel,errorDisposition} from '../../src/lib/agent/autonomy';
 import {explicitCustomerFacts} from '../../src/lib/agent/customer-facts';
-import {applyCustomerFacts} from '../../src/lib/agent/customer-facts';
+import {applyCustomerFacts,supportedFacts} from '../../src/lib/agent/customer-facts';
 import type {AgentState} from '../../src/lib/agent/contracts';
 import {conversionFacts} from '../../src/lib/agent/conversion-facts';
 import {upholsteryBookingIntent} from '../../src/lib/upholstery-intent';
@@ -62,4 +62,16 @@ test('single payment/key/discount FAQ uses catalog facts without an exception re
  }
  assert.equal(await routineFaq('Дайте индивидуальную скидку.', 'ru',async()=>{throw Error('must not use FAQ shortcut')}),undefined);
  assert.equal(await routineFaq('Можно картой? Нужна уборка квартиры 80 м².', 'ru',async()=>{throw Error('must not skip intake')}),undefined);
+});
+test('direct model questions cannot repeat known qualification; recaps and alternatives remain possible',()=>{
+ const state:AgentState={draftFacts:{service:'deep',area:80,soilLevel:'NORMAL',bathroomCount:2,requestedDate:'2026-10-20'}};
+ for(const text of ['Какая площадь квартиры?','How big is the apartment?','Kolika je površina stana?','Колика је површина стана?','Сколько санузлов?','На какую дату нужна уборка?'])assert(!outputAllowed(text,state),text);
+ for(const text of ['Какой другой день проверить?','Подтвердите, пожалуйста, ранее согласованные условия?','Какие дополнительные услуги нужны?'])assert(outputAllowed(text,state),text);
+ assert(outputAllowed('Какая площадь квартиры?',{}));
+});
+test('operator source supports exact correction values independent of JSON property order',()=>{
+ const source=explicitCustomerFacts('Хорошо, окна тогда тоже добавим. Их 3 больших.',new Date(),'Europe/Belgrade');
+ assert(supportedFacts({windowCleaning:{largeCount:3,requested:true}},source));
+ assert(!supportedFacts({windowCleaning:{requested:true,largeCount:30}},source));
+ assert(!supportedFacts({area:1},explicitCustomerFacts('Исправлю: площадь 65 м²',new Date(),'Europe/Belgrade')));
 });

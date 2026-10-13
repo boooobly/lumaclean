@@ -77,7 +77,7 @@ requestReview дедуплицируется по conversation/reason. Inbox п�
 
 - Regression corpus: 112 разных RU / SR Latin / SR Cyrillic / EN сценариев, 28 категорий; policy, facts и domain actions проверяются отдельно от native LLM.
 - Одинаковый rule corpus, main → branch: unnecessary hard handoffs **19 → 0** из 96 случаев без ожидаемого hard handoff; 12 обязательных hard cases сохранены, исправлены две ранее пропущенные SR safety cases.
-- Targeted units: 425 PASS, 0 FAIL, 21 DB-only SKIP. TypeScript, affected ESLint и optimized build прошли. Расширенный routing suite: два Google opt-in assertions не проходят и на неизменённом main dc93888; это не регрессия этой ветки и не входит в targeted PASS count.
+- Targeted units: 428 PASS, 0 FAIL, 21 DB-only SKIP. TypeScript, affected ESLint и optimized build прошли. Расширенный routing suite: два Google opt-in assertions не проходят и на неизменённом main dc93888; это не регрессия этой ветки и не входит в targeted PASS count.
 - Preview DB: шесть autonomy domain scenarios, девять continuity scenarios, отдельный HTTP burst/retry и реальный поиск NO_SLOTS прошли. Проверен один ответ, сохранение фото/фактов, repeated takeover/resume, soft review dedup/approval и запреты booking. Existing behavior/conversion suite: 16 PASS.
 - Повтор полного autonomy DB suite после расходования суточной квоты: два provider-dependent synthetic checks остановлены DAILY_BUDGET_LIMIT. Их предыдущий прогон прошёл; повтор не объявлен PASS. Суточный счётчик не сбрасывался.
 - Production modes прочитаны: WEBSITE AUTO, WHATSAPP AUTO, TELEGRAM OFF, VIBER OFF. Они не менялись.
@@ -109,4 +109,8 @@ PoYo Responses фактически возвращает object-valued native ar
 
 Chrome /admin/analytics: desktop/mobile 390px, таблицы 7/30 дней отображаются, horizontal overflow отсутствует, console errors/warnings 0. Synthetic Inbox: NEEDS_INFO и APPROVED сохранены через UI, AI_CONTROL сохранён. Существующие production conversations не изменялись.
 
-Merge/main/production и финальный readiness дополняются по фактическому завершению release gates. Нельзя заявлять готовность primary или production KPI на основании успешного fallback.
+Финальная Preview `h1ed1gek9`, source fingerprint `47c9351f62581d181a6d0d5ae961f4c31f95c1079d0c6eb8a0322840ce6fa8f8`: **PoYo native booking PASS без fallback**, все восемь steps пройдены, batch очищен. Цена 4600 RSD, duration 150 минут, cleaning reserve 30 минут, travel buffer 30 минут, required/assigned cleaners 2/2. Primary и fallback diagnostics READY; маршрутизация с действующим подтверждённым резервом DEGRADED. Signed proof относится к этому fingerprint; secrets и подпись не опубликованы.
+
+Дополнительно: прямая повторная qualification question модели запрещена для известных фактов, разрешена одна text-only repair. Full-source ADMIN corrections проверяются на точные значения, не только на совпадение excerpt; native DB case отклоняет 30 окон при исходных 3 и принимает 3 с сохранением остальных фактов. Конкурирующие значения SDK union не выбираются; цена/площадь в исходной строке остаются неизменными. PoYo upstream SDK representation подтверждена структурными synthetic logs и [типом официального SDK](https://github.com/openai/openai-go/blob/main/responses/response.go).
+
+PR: https://github.com/boooobly/lumaclean/pull/16. Merge/main/production выполняются после этих gates; фактический результат rollout и production readiness фиксируется в итоговом отчёте задачи. Нельзя заявлять production KPI на основании Preview.

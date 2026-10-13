@@ -1,5 +1,5 @@
 {
-  "fingerprint": "bf897eda43d2f81b743f0c0a85e2354fc7a1ff661b380a0dfd1dcc11feeebebd",
+  "fingerprint": "47c9351f62581d181a6d0d5ae961f4c31f95c1079d0c6eb8a0322840ce6fa8f8",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -154,7 +154,7 @@
     "src/lib/agent/autonomy-corpus.ts": "3ff2f9937dc1f6a9da3de5c02ada6d9da87d6155dc96b0aac291f7229e34a46b",
     "src/lib/agent/autonomy-metrics.ts": "f0837699b20605c36e274849d0fe04fa236c314c7cd5d782da7f4b39e947c54e",
     "src/lib/agent/autonomy-preview.ts": "363f016ff480c802d86f83b0d44a535102535b873e8be27e518d5760ebd96f0e",
-    "src/lib/agent/autonomy.ts": "c703a239dd3b4ec57e7cf924c69659ec2599346cf2f093625a0973e8f8fcbbf1",
+    "src/lib/agent/autonomy.ts": "02b3e07223b5501094117067fdaff3714b0d831bff02ae6f1f67188e8bfb241a",
     "src/lib/agent/behavior-eval.ts": "58875967d9aebc564f9ecc67ec83768c4376a30e2591d735c10c8780b705a097",
     "src/lib/agent/behavior-telemetry.ts": "65b6f66b11127abbf6a29be0c69e56f544779477094dae99603fad5ece1d1242",
     "src/lib/agent/channel-diagnostics.ts": "80421a760418a620432af1c5cceffef3a4317d550f9a92ebefe2c3d1d65d5e01",
@@ -172,25 +172,25 @@
     "src/lib/agent/conversion-facts.ts": "864983497fb62eb0529be0a60e4777ec8f6d16067a206c18dffb12b877ab62c5",
     "src/lib/agent/conversion-intake.ts": "1b4f3d92a85678b1998908accc9642cfd8a238ce80e3e751a84e28251bed173d",
     "src/lib/agent/customer-channels.ts": "b6940d78f33831fb2e257efe57e3b243dc3f06ea1ebe729a2ce27fc22d6df3c5",
-    "src/lib/agent/customer-facts.ts": "9db77c8059ea6fa33b46c6094cbb8fa81b57561da4230f5635fdd150cb3570a7",
+    "src/lib/agent/customer-facts.ts": "6f331e56d598fdf1bc77d123fa3950a7a293acb2c255901d42352c04bc3f0998",
     "src/lib/agent/inbox.ts": "3d5796e658d591783dde9cf036d60719deb73be2491aae0cbc7ce556c9499d35",
     "src/lib/agent/live-proof.ts": "ef6d87668d05e67ac93d9930d7110a2f31be35fe622583096b421b4bb8c566bf",
     "src/lib/agent/live-test.ts": "138a06224dd228015c69de39e8997f1b359db79255e1bf6eeb6f48c0cf513f2b",
     "src/lib/agent/notifications.ts": "57f4823e4c0fff5638255a4c13bab56b8a613ac735ff85160106119e4727c03d",
     "src/lib/agent/persona.ts": "eed1e3cb5f5e62d6aa043c689d671be79c27d43dc35a88f989bfb87540794af3",
-    "src/lib/agent/policy.ts": "d38bc4627375663f581d1eb5dd51fb23df559d7a1fddb9edcc6adabd1dd863be",
-    "src/lib/agent/providers.ts": "eb518eb204478d3272bcc964002413df217163a292a75fb43523b050ce4e6869",
+    "src/lib/agent/policy.ts": "a108e0d90694acc303cab821bd8601d039f58132fd2fa96656210df3e2e71919",
+    "src/lib/agent/providers.ts": "c32a77c9c02feae66729756ae12de8e3197e75fc196f03433b78cbda05fbc6c1",
     "src/lib/agent/queries.ts": "2d605f98f29349ea4bc8dc6af4b243cc6b33b9c976b6a89f5d22c36c04c2bc80",
     "src/lib/agent/queue.ts": "7544dba6cb5a7dba2233c7ea74c99fe7271e17163a831898012651c5eb0019df",
-    "src/lib/agent/readiness.ts": "04db17ae7afd0ca710c1bd97f88e037970304078d4a900ba5ca251ea4addf3e4",
+    "src/lib/agent/readiness.ts": "ff86e22baa6312cd6eed3f371fc20403fece6d534844b416cff3c649312c122d",
     "src/lib/agent/release-verification.d.mts": "922a8223a92a36f373f1f850962fb8efc441cf9944c7bae83bcda9d0ed631aff",
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
     "src/lib/agent/routine-faq.ts": "94751b568c5cf36fb11dc1fb7b45b2b9030d82effb2d3c6b5a20c823760e8c44",
-    "src/lib/agent/runner.ts": "62e69cf579f3c2b6d38345c3ae55208d74c1da07551cecceb7dea0cf4ef84adc",
+    "src/lib/agent/runner.ts": "e8effe4ca9abf4db16318d56985e4884668865e8aa2e08992d1be418246f4fd4",
     "src/lib/agent/settings.ts": "bf18dc0f06eaa3bb5551f2a846bb1fed31966cace4815843a1919b671e550017",
     "src/lib/agent/telegram-handoff.ts": "7224d44de2e24a0f79c01327de935cd55910f5d0e731e3a5678a482239c40037",
     "src/lib/agent/temporal.ts": "7dff9432c06f3dd3e9da30ece37add57aa50c2f434f5dec434de3769ec39ad05",
-    "src/lib/agent/tools.ts": "af026df699bdd42f01cf7bba78d22524454d17e5726de5ea0130a6e6639b413f",
+    "src/lib/agent/tools.ts": "d508c151dc0cc6b5f922b18e4a0ba4582e6e6b240161db0337f4249b0436ced8",
     "src/lib/analytics.ts": "ac20e7f318855188db315705788fff372d2375f33cb1114b48612fa30f839498",
     "src/lib/articles/airbnb.ts": "6ac8861e9d41cadf626a26d54c10c2da58dd6bcfa376cb5cf40d35fd19952857",
     "src/lib/articles/bathroom.ts": "35e05dd40a50fa6d8b9859ea6237dc5f9e50f51ec8992a38297fb0be3ebdf549",
@@ -315,22 +315,22 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 462,
+  "tests": 467,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-13T19:01:07.262Z",
+  "checkedAt": "2026-10-13T19:25:04.318Z",
   "suites": [
-    "425 passing agent/admin/CRM/finance/scheduling unit checks; 21 DB-only tests skipped",
+    "428 passing agent/admin/CRM/finance/scheduling unit checks; 21 DB-only tests skipped",
     "112 multilingual classification/fact scenarios; 12 final catalog FAQs on actual Preview database",
     "9 continuity scenarios plus actual concurrent HTTP ingress/retry, one effective reply",
-    "6 autonomy domain scenarios plus actual NO_SLOTS search; existing behavior/conversion database suite"
+    "6 autonomy domain scenarios plus actual NO_SLOTS search; final human correction evidence/value validation; existing behavior/conversion database suite"
   ],
-  "verificationScope": "AI autonomy policy, bounded recovery, targeted reviews, authoritative FAQs, memory and conservative metrics. Real OpenRouter before/after on identical 88 one-turn scenarios, followed by targeted final FAQ replays; two replay results were inconclusive after the unchanged daily quota was exhausted. New PoYo native-envelope compatibility was diagnosed using Preview schema paths/types only and has unit coverage. Native final deployed provider diagnostics and signed booking proof remain independent gates. Wider routing suite has two unchanged Google opt-in failures reproduced on exact main dc93888; these are outside the passing targeted count. No pricing, schedule, DB migration, protective quota or channel-mode changes.",
+  "verificationScope": "AI autonomy policy, bounded recovery, targeted reviews, authoritative FAQs, memory and conservative metrics. Real OpenRouter before/after on identical 88 one-turn scenarios, followed by targeted final FAQ replays; two replay results were inconclusive after the unchanged daily quota was exhausted. PoYo native-envelope/SDK-union compatibility was diagnosed using synthetic Preview schema metadata and has unit coverage. Direct repeated model questions have bounded text repair; unsupported human corrections cannot replace recorded facts. Native final deployed provider diagnostics and signed booking proof remain independent gates. Wider routing suite has two unchanged Google opt-in failures reproduced on exact main dc93888; these are outside the passing targeted count. No pricing, schedule, DB migration, protective quota or channel-mode changes.",
   "previousVerification": {
-    "fingerprint": "dc86ab3d0519866d9595e8768f934d81090dc287d33af136f230e4827ad0826d",
-    "tests": 462,
-    "checkedAt": "2026-10-13T18:54:09.259Z"
+    "fingerprint": "9558f84f01b6b4fe1509f4b8dc93f7d1c83f2a1eafae44d982d4d9d58a5e6bbf",
+    "tests": 463,
+    "checkedAt": "2026-10-13T19:07:16.995Z"
   }
 }

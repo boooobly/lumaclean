@@ -78,5 +78,6 @@ export function applyCustomerFacts(state: AgentState, incoming: CustomerFacts, c
   return true;
 }
 export function supportedFacts(facts: CustomerFacts, evidence: CustomerFacts) {
-  return Object.entries(facts).every(([key, value]) => JSON.stringify(value) === JSON.stringify(evidence[key as keyof CustomerFacts]));
+  const stable=(value:unknown):unknown=>Array.isArray(value)?value.map(stable):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)).map(([key,v])=>[key,stable(v)])):value;
+  return Object.entries(facts).every(([key, value]) => JSON.stringify(stable(value)) === JSON.stringify(stable(evidence[key as keyof CustomerFacts])));
 }

@@ -108,7 +108,10 @@ export async function runDiagnostics(db:DB){
     const call=r.toolCalls.find(t=>t.name==='getBusinessInfo');
     if(!call){if(process.env.VERCEL_ENV==='preview')console.info(JSON.stringify({event:'agent_native_probe',provider:p.name,nativeCalls:r.toolCalls.length,hasText:!!r.text}));throw new AgentError('NATIVE_TOOL_CALL_MISSING');}
     let args:unknown;try{args=JSON.parse(call.arguments);}catch{throw new AgentError('NATIVE_TOOL_ARGUMENTS_INVALID');}
-    if(!toolSchemas.getBusinessInfo.safeParse(args).success){if(process.env.VERCEL_ENV==='preview')console.info(JSON.stringify({event:'agent_native_probe',provider:p.name,argumentType:args===null?'null':Array.isArray(args)?'array':typeof args,argumentKeys:args&&typeof args==='object'?Object.keys(args).slice(0,16).map(k=>k.slice(0,40)):[],wrappedFunction:!!args&&typeof args==='object'&&'name'in args&&'arguments'in args,nativeCalls:r.toolCalls.length}));throw new AgentError('NATIVE_TOOL_ARGUMENTS_INVALID');}
+    if(!toolSchemas.getBusinessInfo.safeParse(args).success){if(process.env.VERCEL_ENV==='preview'){
+      const union=args as {OfString?:unknown;OfResponseToolSearchCallArguments?:unknown}|null;
+      console.info(JSON.stringify({event:'agent_native_probe',provider:p.name,argumentType:args===null?'null':Array.isArray(args)?'array':typeof args,argumentKeys:args&&typeof args==='object'?Object.keys(args).slice(0,16).map(k=>k.slice(0,40)):[],stringMemberType:typeof union?.OfString,alternateMemberType:union?.OfResponseToolSearchCallArguments===null?'null':typeof union?.OfResponseToolSearchCallArguments,alternateKeys:union?.OfResponseToolSearchCallArguments&&typeof union.OfResponseToolSearchCallArguments==='object'?Object.keys(union.OfResponseToolSearchCallArguments).slice(0,16):[],nativeCalls:r.toolCalls.length}));
+    }throw new AgentError('NATIVE_TOOL_ARGUMENTS_INVALID');}
     return true;
   })));}catch{/* Configuration failure. */}
   const places=await probe(async()=>{const r=await placesRequest('autocomplete',{query:'Terazije 1, Beograd',sessionToken:crypto.randomUUID()});return r.available&&'suggestions' in r&&r.suggestions.length>0;});

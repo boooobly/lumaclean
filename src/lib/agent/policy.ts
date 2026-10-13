@@ -1,5 +1,5 @@
 import type {buildAgentTemporalContext} from "./temporal";
-import {contextualReason} from './autonomy';
+import {contextualReason,repeatedQualification} from './autonomy';
 import { type AgentLocale, type AgentState, type HandoffReason, type BookingRecap } from "./contracts";
 
 export function conversationPolicy(locale:string,state:AgentState,summary:string|null,temporal?:ReturnType<typeof buildAgentTemporalContext>,alias="Anna"){
@@ -67,6 +67,7 @@ export function confirmsRecap(text:string,recap:BookingRecap){
 }
 export const handoffText:Record<AgentLocale,string>={ru:"Передаю ваш вопрос администратору. Ответим здесь после уточнения.","sr-Latn":"Prosleđujem vaš upit timu. Odgovorićemo ovde čim proverimo detalje.","sr-Cyrl":"Прослеђујем ваш упит тиму. Одговорићемо овде чим проверимо детаље.",en:"I'm passing this to the LumaClean team. We'll reply here after checking the details."};
 export function outputAllowed(text:string,state:AgentState,factAmounts:number[]=[],factPercentages:number[]=[]){
+  if(repeatedQualification(text,state))return false;
   if(!state.review?.reasons.length&&/(?:передала|передаю).{0,35}(?:команд|менеджер)|(?:forwarded|passed).{0,35}(?:team|manager)|prosledila.{0,35}(?:tim|prover)|проследила.{0,35}(?:тим|провер)/iu.test(text))return false;
   // No confirmed key-custody/card-payment/refund workflow exists in the business catalog.
   for(const sentence of text.split(/(?<=[.!?])\s+|\n+/u)){
