@@ -11,7 +11,7 @@ const at=new Date('2026-10-07T06:28:35Z'),zone='Europe/Belgrade';
 export const incident='Dobar dan, treba mi generalno čišćenje stana od 57 kvadrata, ukoliko je moguce ovog vikenda, pranje prozora, roletni, jedno kupatilo, tepisi ce biti na pranju. Pozdrav mogućnosti da budu dve osobe da bi kraće trajalo. Da li je to moguce kod vas i koja bi bila cena';
 function turn(s:AgentState,text:string,intent?:AgentState['nextInput']){applyCustomerFacts(s,explicitCustomerFacts(text,at,zone,intent,s));}
 for(const text of ['Treba mi generalno čišćenje 57 kvadrata','generalno ciscenje','Generalka za 60m2','генерално чишћење','detaljno čišćenje stana'])test('general service: '+text,()=>assert.equal(explicitCustomerFacts(text,at,zone).service,'deep'));
-for(const text of ['Vrv redovno, ne znam šta generalno uključuje','Vrv redovno, ne znam sta vam je dubinsko tačno, al ne treba čišćenje kreveta i tepiha','Možda redovno','Mislim redovno','Valjda redovno','Nisam sigurna, redovno','What does deep cleaning include?','Наверное поддерживающая, что значит генеральная?'])test('uncertain service never overwrites: '+text,()=>{
+for(const text of ['Vrv redovno, ne znam šta generalno uključuje','Vrv redovno, ne znam sta vam je dubinsko tačno, al ne treba čišćenje kreveta i tepiha','Možda redovno','Mislim redovno','Valjda redovno','Nisam sigurna, redovno','Наверное поддерживающая, что значит генеральная?'])test('uncertain service never overwrites: '+text,()=>{
   const s:AgentState={draftFacts:{service:'deep'}};turn(s,text);assert.equal(s.draftFacts?.service,'deep');assert(s.draftFacts?.serviceConfirmationRequired);assert.equal(nextQualification(s),'SERVICE_CONFIRMATION');
   assert(!supportedFacts({service:'regular'},explicitCustomerFacts(text,at,zone)));
 });

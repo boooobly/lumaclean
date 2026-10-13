@@ -10,7 +10,25 @@ const wireMessage = z.object({content:z.string().nullable().optional(),tool_call
 const tokens=z.number().int().nonnegative().max(1000000);
 const usageSchema=z.object({prompt_tokens:tokens.optional(),input_tokens:tokens.optional(),completion_tokens:tokens.optional(),output_tokens:tokens.optional(),prompt_tokens_details:z.object({cached_tokens:tokens.optional()}).optional(),input_tokens_details:z.object({cached_tokens:tokens.optional()}).optional()});
 const chatSchema=z.object({model:z.string().optional(),choices:z.array(z.object({message:wireMessage,finish_reason:z.string().optional()})).min(1),usage:usageSchema.optional()});
-const responseSchema=z.object({model:z.string().optional(),status:z.string().optional(),output:z.array(z.object({type:z.string(),call_id:z.string().optional(),name:z.string().optional(),arguments:z.string().optional(),content:z.array(z.object({type:z.string(),text:z.string().optional()})).optional()})).max(30),usage:usageSchema.optional()});
+// PoYo's native function_call envelope supplies arguments as a JSON object and
+// content:null (observed in isolated Preview). Both native forms stay bounded;
+// plain assistant text is never promoted to a business tool call.
+// The observed PoYo envelope also leaks a Go SDK union. Decode a single active
+// member or identical duplicate strings; never select between conflicting data.
+const stringArgumentUnion=z.object({OfString:z.string().max(8000),OfResponseToolSearchCallArguments:z.unknown().optional()}).strict();
+const nativeArguments=z.union([z.string(),z.record(z.string(),z.unknown())]).transform(v=>{
+  if(typeof v==='string')return v;
+  const union=stringArgumentUnion.safeParse(v);
+  if(union.success){
+    const {OfString:primary,OfResponseToolSearchCallArguments:alternate}=union.data;
+    if(typeof alternate==='string'&&(!primary||primary===alternate))return alternate;
+    if(alternate==null||typeof alternate==='object'&&!Array.isArray(alternate)&&!Object.keys(alternate).length)return primary;
+    // Go's any member may hold the object while the string member is zero-valued.
+    if(!primary&&alternate&&typeof alternate==='object'&&!Array.isArray(alternate))return JSON.stringify(alternate);
+  }
+  return JSON.stringify(v); // Unrecognized/conflicting unions fail the business schema.
+}).pipe(z.string().max(8000));
+const responseSchema=z.object({model:z.string().optional(),status:z.string().optional(),output:z.array(z.object({type:z.string(),call_id:z.string().optional(),name:z.string().optional(),arguments:nativeArguments.optional(),content:z.array(z.object({type:z.string(),text:z.string().optional()})).nullish()})).max(30),usage:usageSchema.optional()});
 export function normalizeCompletion(provider:string,model:string,protocol:"chat"|"responses",raw:unknown,latencyMs:number,rates?:{input:number;output:number}):Completion {
   const envelope=z.object({data:z.unknown().optional(),code:z.number().optional()}).passthrough().parse(raw);
   if(envelope.code!==undefined&&envelope.code!==200)throw new AgentError("PROVIDER_REJECTED");
@@ -41,7 +59,13 @@ abstract class HTTPProvider implements AIProvider {
       const r=await this.send(url,{method:"POST",headers:{Authorization:"Bearer "+this.key,"Content-Type":"application/json"},body:JSON.stringify(body),signal:signal?AbortSignal.any([signal,AbortSignal.timeout(22000)]):AbortSignal.timeout(22000),cache:"no-store"});
       if(!r.ok)throw new AgentError("PROVIDER_HTTP_"+r.status);
       const payload=await r.text();if(payload.length>200000)throw new AgentError("PROVIDER_TOO_LARGE");
-      return normalizeCompletion(this.name,this.model,protocol,JSON.parse(payload),Date.now()-started,this.rates);
+      const raw=JSON.parse(payload);
+      try{return normalizeCompletion(this.name,this.model,protocol,raw,Date.now()-started,this.rates);}
+      catch(e){
+        // Schema paths only: never log prompts, responses, arguments or reasoning.
+        if(process.env.VERCEL_ENV==='preview')console.info(JSON.stringify({event:'agent_provider_schema',provider:this.name,protocol,code:e instanceof AgentError?e.code:'PROVIDER_MALFORMED',issues:e instanceof z.ZodError?e.issues.slice(0,8).map(i=>{let value:unknown=(raw as {data?:unknown}).data??raw;for(const key of i.path)value=value&&typeof value==='object'?(value as Record<string,unknown>)[String(key)]:undefined;return{path:i.path.join('.'),code:i.code,valueType:value===null?'null':Array.isArray(value)?'array':typeof value};}):[]}));
+        throw e;
+      }
     }catch(e){if(e instanceof AgentError)throw e;throw new AgentError(e instanceof z.ZodError?"PROVIDER_MALFORMED":"PROVIDER_TIMEOUT_OR_NETWORK");}
   }
   abstract complete(messages:AgentMessage[],signal?:AbortSignal):Promise<Completion>;

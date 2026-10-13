@@ -2,7 +2,8 @@ import { createHash, randomUUID } from "node:crypto";
 import { Prisma, type PrismaClient, type Conversation, type AgentMode } from "@/generated/prisma/client";
 import { siteContent } from "@/lib/content";
 import {calculateUpholstery,upholsteryCatalogSchema} from '@/lib/upholstery';
-import {upholsteryIntent} from '@/lib/upholstery-intent';
+import {upholsteryBookingIntent} from '@/lib/upholstery-intent';
+import {reasonLevel,noSlotsText,transientReadFailure} from './autonomy';
 import { quote, priceSnapshot } from "@/lib/domain/crm-pricing";
 import { normalizedPhone, localInput, localInstant } from "@/lib/domain/crm";
 import { estimateDuration } from "@/lib/domain/duration";
@@ -22,11 +23,12 @@ import {upholsteryUi} from '@/lib/upholstery-content';
 import {currentClientTurn,pendingHumanStatements,operationalSummary,conversationMemory} from './conversation-memory';
 import {inputQuestion,inputAlreadyKnown} from "./chat-presentation";
 import {behaviorMetric} from "./behavior-telemetry";
-import {bookingReviewBlocked,windowQuantitiesMissing} from './conversion-facts';
+import {bookingReviewBlocked,windowQuantitiesMissing,catalogQuestion} from './conversion-facts';
+import {mandatoryHandoff} from './policy';
 import { AgentError, toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
 type Tx=Prisma.TransactionClient;
-export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; validatedDepartures?:DepartureLegInput[]};
+export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[];factPercentages?:number[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; validatedDepartures?:DepartureLegInput[]};
 export const json=(value:unknown)=>JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 export const stateOf=(c:Pick<Conversation,"state">)=>structuredClone(c.state) as AgentState;
 // PostgreSQL jsonb reorders object keys. Hash and compare facts, never their insertion order.
@@ -193,8 +195,8 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   const state=ctx.state;
   if(name==='markUpholsteryInquiry'){
     const input=toolSchemas[name].parse(payload),turn=await currentClientTurn(tx,c.id);
-    if(!upholsteryIntent(input.evidence)||!turn.some(m=>m.text.includes(input.evidence)))throw new AgentError('CUSTOMER_FACTS_REQUIRED');
-    state.upholsteryInquiry=true;state.review={reasons:[...new Set([...(state.review?.reasons??[]),'UPHOLSTERY_BOOKING_PROOF_REQUIRED'])]};delete state.quote;delete state.duration;delete state.pending;delete state.slots;delete state.selectedSlotToken;
+    if(!upholsteryBookingIntent(input.evidence)||!turn.some(m=>m.text.includes(input.evidence)))throw new AgentError('CUSTOMER_FACTS_REQUIRED');
+    state.upholsteryInquiry=true;state.review={...state.review,reasons:[...new Set([...(state.review?.reasons??[]),'UPHOLSTERY_BOOKING_PROOF_REQUIRED'])]};delete state.quote;delete state.duration;delete state.pending;delete state.slots;delete state.selectedSlotToken;
     if(c.leadId&&ctx.mode==='AUTO')await updateLead(tx,c,ctx,{intent:'cleaning'});
     await dispatch(tx,c,ctx,'requestReview',{reason:'OPERATIONAL'});
     return{requiresHumanReview:true,autonomousBooking:false,intake:'Contact only. Manager will clarify furniture details; do not run a technical questionnaire.'};
@@ -213,7 +215,8 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const content=siteContent[c.locale.startsWith("sr")?"sr":c.locale==="en"?"en":"ru"];
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
     const catalog=upholsteryCatalogSchema.parse((await tx.upholsterySettings.findUniqueOrThrow({where:{id:'default'}})).catalog);
-    const upholstery=upholsteryUi[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'];const facts={upholstery:{name:upholstery.name,method:'wet spray extraction',equipment:'Professional Kärcher equipment and products; model not confirmed',faq:upholstery.faq,limits:upholstery.limits,publicPrices:Object.entries(catalog).map(([key,amount])=>({item:upholstery.catalogLabels[key as keyof typeof catalog],from:amount,currency:'RSD'})),pricing:'These are public starting prices, not a personal quote. Standalone minimum applies. Use calculateUpholstery for exact sums only when the customer supplies the facts. No mental arithmetic.',autonomousBooking:false},sameDayPolicy:{cutoffMinute:settings.sameDayBookingCutoffMinute,latestDepartureMinute:settings.latestCleanerDepartureMinute,timezone:settings.timezone,requiresRealAvailability:true,surchargePercent:20},city:content.footer.location,services:content.services,scope:content.comparison,assurance:content.assurance,faq:content.faq.items,extras:content.calculator.labels,pricingPolicy:content.calculator.note};
+    const upholstery=upholsteryUi[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'];const facts={upholstery:{name:upholstery.name,method:'wet spray extraction',equipment:'Professional Kärcher equipment and products; model not confirmed',faq:upholstery.faq,limits:upholstery.limits,publicPrices:Object.entries(catalog).map(([key,amount])=>({item:upholstery.catalogLabels[key as keyof typeof catalog],from:amount,currency:'RSD'})),pricing:'These are public starting prices, not a personal quote. Standalone minimum applies. Use calculateUpholstery for exact sums only when the customer supplies the facts. No mental arithmetic.',autonomousBooking:false},sameDayPolicy:{cutoffMinute:settings.sameDayBookingCutoffMinute,latestDepartureMinute:settings.latestCleanerDepartureMinute,timezone:settings.timezone,requiresRealAvailability:true,surchargePercent:20},city:content.footer.location,services:content.services,scope:content.comparison,assurance:content.assurance,faq:content.faq.items,extras:content.calculator.labels,pricingPolicy:content.calculator.note,access:{confirmedHandoverProcess:false,rule:'No public key handover or custody protocol is confirmed. Do not propose drop-off locations, custody, storage or entry codes. For a general FAQ say this detail must be agreed before any actual handover. Only an actual unusual access/key-custody request requires review.'},discounts:{publicPromotionConfirmed:false,rule:'Only an existing server-verified client discount is applied by calculatePrice. A universal returning-customer discount is not published in this catalog. General FAQ does not require review; an actual request for an individual discount does.'}};
+    ctx.factPercentages=[20];
     ctx.factAmounts=[...Object.values(catalog),...[...JSON.stringify(facts).matchAll(/(\d[\d\s,]*?)\s*RSD/gi)].map(m=>Number(m[1].replace(/[\s,]/g,"")))];
     return facts;
   }
@@ -246,6 +249,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     if(input.corrections.some(p=>!memory.reviewedHumanIds.includes(p.messageId)&&!pending.some(s=>s.id===p.messageId&&s.text.includes(p.evidence))))return{error:'HUMAN_CONTEXT_REQUIRED',pendingMessageIds:pendingIds,statements:pending,message:'Each new correction must reference a pending ID and an exact excerpt of its statement; combine factual fields or submit separate corrections for the same statement. Already reviewed corrections are ignored.'};
     const rows=await tx.message.findMany({where:{conversationId:c.id,OR:[{id:{in:ids}},{author:'CLIENT',sentAt:{gte:(await tx.message.findFirstOrThrow({where:{id:{in:ids}},orderBy:[{sentAt:'asc'},{id:'asc'}]})).sentAt}}]},orderBy:[{sentAt:'asc'},{id:'asc'}]});
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    if(input.corrections.some(p=>!memory.reviewedHumanIds.includes(p.messageId)&&!rows.some(m=>m.id===p.messageId&&m.author==='ADMIN'&&supportedFacts(p.facts,explicitCustomerFacts(m.text,m.sentAt,settings.timezone,undefined,state)))))return{error:'HUMAN_CONTEXT_REQUIRED',message:'Correction values must be explicitly supported by the attributed operator statement, not only its excerpt.'};
     const edits=conversationMemory(c.summary).factEdits??[];
     const timeline=[...rows.map(m=>({at:m.sentAt,id:m.id,message:m,facts:undefined as AgentState['draftFacts']})),...edits.filter(edit=>new Date(edit.at)>=rows[0].sentAt).map(edit=>({at:new Date(edit.at),id:'',message:undefined,facts:edit.facts}))].sort((a,b)=>a.at.getTime()-b.at.getTime()||a.id.localeCompare(b.id));
     for(const event of timeline){
@@ -317,7 +321,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const result=await placesRequest(input.placeId?"place":"autocomplete",{query:state.addressCandidates?.find(a=>a.placeId===input.placeId)?.query??input.query,placeId:input.placeId,sessionToken});
     if(!result.available)return{error:"ROUTING_UNRELIABLE"};
     if("proof" in result&&result.proof&&result.address){state.address={fullAddress:result.address,proof:result.proof,apartment:input.apartment};delete state.pending;delete state.slots;delete state.selectedSlotToken;return{verified:true,address:result.address};}
-    if("suggestions" in result){state.addressCandidates=(result.suggestions as {placeId:string;text:string}[]).map(a=>({...a,query:input.query}));return{candidates:state.addressCandidates,needsSelection:true};}
+    if("suggestions" in result){state.addressCandidates=(result.suggestions as {placeId:string;text:string}[]).map(a=>({...a,query:input.query}));if(!state.addressCandidates.length)return{error:'ADDRESS_NOT_FOUND',message:'Ask for spelling, district or landmark; never choose a random house.'};return{candidates:state.addressCandidates,needsSelection:true};}
     return{error:"AMBIGUOUS"};
   }
   if(name==="getClientAddresses"){
@@ -359,7 +363,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const snapshot=await routingSnapshot(tx,window.date);
     const result=await findSlots(tx,{date:window.date,from:window.from,to:window.to,duration:state.duration.minutes,requiredCleaners:state.duration.requiredCleaners,...(state.address.addressId?{addressId:state.address.addressId}:{locationProof:state.address.proof}),...(state.rescheduleRequested?{orderId:c.orderId}:{})},{reserveMinutes:state.duration.reserve,allowReschedule:!!state.rescheduleRequested,...(window.timeIntent==='START_AT'?{selectedStart:rawFrom.toISOString()}:{})});
     if('error' in result&&result.error)return{error:result.error,slots:[]};
-    if(!result.slots.length)return{error:"NO_SLOTS",slots:[],requiresHumanReview:true};
+    if(!result.slots.length){delete state.slots;delete state.pending;delete state.selectedSlotToken;return{error:"NO_SLOTS",slots:[],message:'Ask which other date/window to search. Do not invent alternatives or request review.'};}
     state.slots=[];delete state.selectedSlotToken;
     for(const s of result.slots.slice(0,3)){
       const token=randomUUID();
@@ -383,18 +387,27 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   if(name==="createOrder"||name==="rescheduleOrder")return bookConfirmed(tx,c,ctx,name==="rescheduleOrder");
   if(name==='requestReview'){
     const {reason}=toolSchemas.requestReview.parse(payload);
+    if(['DISCOUNT','PAYMENT_REVIEW','ACCESS_REVIEW','OPERATIONAL'].includes(reason)){
+      const turn=await currentClientTurn(tx,c.id);
+      if(turn.length&&turn.every(m=>catalogQuestion(m.text)&&!mandatoryHandoff(m.text)&&/скид|discount|popust|попуст|карт|card|kartic|картиц|ключ|keys?|ključ|kljuc|кључ/iu.test(m.text)))return{reviewRequired:false,created:false,continuesIntake:true,message:'General FAQ does not request an exception. Answer confirmed catalog facts, mark unknown conditions as unconfirmed. No review was created; do not claim a referral or promise key custody/card payment.'};
+    }
     if(ctx.mode==='SHADOW')return{planned:true,error:'SHADOW_MUTATION_BLOCKED',reason};
-    state.review={reasons:[...new Set([...(state.review?.reasons??[]),reason])]};
-    delete state.pending;
+    state.review={...state.review,reasons:[...new Set([...(state.review?.reasons??[]),reason])]};
+    if(reason!=='CONTACT_PREFERENCE')delete state.pending;
     const existing=await tx.humanHandoff.findFirst({where:{conversationId:c.id,resolvedAt:null,reason:'SOFT:'+reason}});
+    if(!existing&&state.review.resolutions?.some(r=>r.reason===reason&&r.decision==='REJECTED'))return{reviewRequired:true,continuesIntake:true,reason,bookingBlocked:true,decision:'REJECTED'};
     const review=existing??await tx.humanHandoff.create({data:{conversationId:c.id,reason:'SOFT:'+reason}});
     await tx.conversation.update({where:{id:c.id},data:{needsAttention:true,state:json(state)}});
     if(!existing){await aiAudit(tx,ctx,'AI_REVIEW_REQUESTED','HumanHandoff',review.id);await handoffNotification(tx,c.id,review.id,'SOFT:'+reason);}
-    return{reviewRequired:true,continuesIntake:true,reason,bookingBlocked:reason!=='CONTACT_PREFERENCE'};
+    return{reviewRequired:true,created:!existing,continuesIntake:true,reason,bookingBlocked:reason!=='CONTACT_PREFERENCE'};
   }
   const input=toolSchemas.requestHumanHandoff.parse(payload);
-  if(['AMBIGUOUS','PRICE_REVIEW','NO_DURATION_RULE','NO_SLOTS','ROUTING_UNRELIABLE'].includes(input.reason)&&!['HEAVY','EXTREME'].includes(state.draftFacts?.soilLevel??'')){
-    return dispatch(tx,c,ctx,'requestReview',{reason:input.reason==='NO_DURATION_RULE'?'NO_DURATION_RULE':input.reason==='NO_SLOTS'?'NO_SLOTS':input.reason==='ROUTING_UNRELIABLE'?'ROUTING_UNRELIABLE':'OPERATIONAL'});
+  if(reasonLevel(input.reason)==='AI_HANDLES'){
+    if(input.reason==='NO_SLOTS')ctx.responseText=noSlotsText(c.locale as 'ru');
+    return{continuesIntake:true,clarificationRequired:true,reason:input.reason};
+  }
+  if(reasonLevel(input.reason)==='SOFT_REVIEW'){
+    return dispatch(tx,c,ctx,'requestReview',{reason:input.reason});
   }
   ctx.handoff=true;
   delete state.nextInput;delete state.pending;
@@ -438,6 +451,7 @@ export async function executeAgentTool(db:PrismaClient,ctx:ToolContext,name:stri
   }catch(e){
     if(e instanceof AgentError&&["AGENT_CONTROL_CHANGED","JOB_LEASE_LOST"].includes(e.code))throw e;
     if(e instanceof AgentError)result={error:e.code};
+    else if(transientReadFailure(typed,e))result={error:'TOOL_READ_TEMPORARY',message:'Temporary read failure. One bounded retry is safe; no result is confirmed.'};
     else{
       // Unknown commit outcome: stop this turn. A leased retry reconciles durable slot/order IDs first.
       throw new AgentError("TOOL_EXECUTION_UNCERTAIN");

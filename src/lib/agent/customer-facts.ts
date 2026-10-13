@@ -2,7 +2,7 @@ import type { AgentState } from './contracts';
 import { customerFactsSchema } from './contracts';
 import { resolveCustomerDate } from './temporal';
 import { behaviorMetric } from './behavior-telemetry';
-import {conversionFacts,plain,serviceNeedsConfirmation} from './conversion-facts';
+import {conversionFacts,plain,serviceNeedsConfirmation,catalogQuestion} from './conversion-facts';
 
 export type CustomerFacts = NonNullable<AgentState['draftFacts']>;
 /** Deliberately narrow. Unclear quantities, negations and word-only times require clarification. */
@@ -16,9 +16,9 @@ export function explicitCustomerFacts(text: string, sentAt: Date, timezone: stri
   const areas = [...text.matchAll(/(\d{1,4}(?:[.,]\d+)?)\s*(?:м[²2]|m[²2]|квадрат\w*|kvadrat\w*|sq\.?\s*m|square met(?:er|re)s)/giu)];
   if (areas.length) { const area = Number(areas.at(-1)![1].replace(',', '.')); if (area >= 1 && area <= 1000) facts.area = area; }
   const services = [...text.matchAll(/поддерживающ\w*|регулярн\w*|обычн[а-яё]* уборк\w*|генеральн\w*|\bregular(?: cleaning)?\b|\bdeep(?: cleaning)?\b|\bredovn\w*\b|\bdubinsk\w*\b|редовн\w*|дубинск\w*/giu)];
-  if (services.length&&!serviceNeedsConfirmation(text)) facts.service = /генеральн|deep|dubinsk|дубинск/iu.test(services.at(-1)![0]) ? 'deep' : 'regular';
+  if (services.length&&!serviceNeedsConfirmation(text)&&!catalogQuestion(text)) facts.service = /генеральн|deep|dubinsk|дубинск/iu.test(services.at(-1)![0]) ? 'deep' : 'regular';
   const normalized=plain(text);
-  if(!serviceNeedsConfirmation(text)){
+  if(!serviceNeedsConfirmation(text)&&!catalogQuestion(text)){
     if(expectedInput==='SERVICE_CONFIRMATION'&&/^(?:generalno|генерално)[.!\s]*$/iu.test(text.trim()))facts.service='deep';
     if(expectedInput==='SERVICE_CONFIRMATION'&&/^(?:odrzavajuce|redovno|одржавајуће|редовно)[.!\s]*$/iu.test(normalized.trim()))facts.service='regular';
     if(/generalno\s+ciscenje|generalka|генерално чишћење|detaljno ciscenje (?:stana|kuce|prostora)/iu.test(normalized)&&!/ne generalno|bez generalnog/iu.test(normalized))facts.service='deep';
@@ -31,7 +31,7 @@ export function explicitCustomerFacts(text: string, sentAt: Date, timezone: stri
   if (/экстремальн[а-яё]* загрязн|extreme (?:dirt|soil)|екстремн\w*|ekstremn/iu.test(text)) facts.soilLevel = 'EXTREME';
   if (/без (?:дополнительных услуг|допов|дополнений)|ничего дополнительно|no extras|bez dodatnih usluga|без додатних услуга/iu.test(text)) { facts.extras = []; facts.extrasConfirmed = true; }
   const extra = /(?:внутри духовки|духовк[а-яё]* внутри|(?:добав|еще|ещё|нужн[а-яё]*).{0,15}духовк[а-яё]*|inside (?:the )?oven|rerna iznutra|rernu iznutra|рерн\w* изнутра)/iu.test(text) ? 'oven' : /холодильник[а-яё]* внутри|внутри холодильник|inside (?:the )?fridge|frižider iznutra|фрижидер изнутра/iu.test(text) ? 'fridge' : undefined;
-  if (extra && !/не нуж|не надо|don't|do not|bez |без /iu.test(text)) { facts.extras = [{ code: extra, quantity: 1 }]; facts.extrasConfirmed = true; }
+  if (extra && !catalogQuestion(text)&&!/не нуж|не надо|don't|do not|bez |без /iu.test(text)) { facts.extras = [{ code: extra, quantity: 1 }]; facts.extrasConfirmed = true; }
   const address=text.match(/^(?:адрес|address|adresa|адреса)[:\s]+(.{3,200})$/iu)?.[1];
   if(address)facts.addressQuery=address.trim();
   const date = resolveCustomerDate(text, sentAt, timezone);
@@ -78,5 +78,6 @@ export function applyCustomerFacts(state: AgentState, incoming: CustomerFacts, c
   return true;
 }
 export function supportedFacts(facts: CustomerFacts, evidence: CustomerFacts) {
-  return Object.entries(facts).every(([key, value]) => JSON.stringify(value) === JSON.stringify(evidence[key as keyof CustomerFacts]));
+  const stable=(value:unknown):unknown=>Array.isArray(value)?value.map(stable):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)).map(([key,v])=>[key,stable(v)])):value;
+  return Object.entries(facts).every(([key, value]) => JSON.stringify(stable(value)) === JSON.stringify(stable(evidence[key as keyof CustomerFacts])));
 }

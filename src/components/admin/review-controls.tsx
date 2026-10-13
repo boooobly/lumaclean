@@ -1,0 +1,10 @@
+'use client';
+import {useState,useTransition} from 'react';
+import {useRouter} from 'next/navigation';
+import {handoffNames} from '@/lib/domain/messenger';
+const reasonName=(reason:string)=>handoffNames[reason.replace(/^SOFT:/,'')]??reason;
+export function ReviewControls({id,handoffs}:{id:string;handoffs:{id:string;reason:string;resolved:boolean}[]}){
+ const [note,setNote]=useState(''),[error,setError]=useState(''),[pending,start]=useTransition(),router=useRouter();
+ function command(payload:object){start(async()=>{setError('');try{const r=await fetch('/api/admin/inbox',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,...payload})});if(!r.ok)throw Error('Не удалось сохранить решение');router.refresh();}catch(e){setError((e as Error).message);}});}
+ return <section><h3>Review и оценка передачи</h3><p>Review сохраняет контроль AI. Решение по детали не меняет прайс, координаты, подтверждение записи или ограничения химчистки. После hard handoff возврат AI выполняется отдельно.</p><textarea aria-label="Решение менеджера" value={note} onChange={e=>setNote(e.target.value)} maxLength={1000} placeholder="Что проверено и какой следующий шаг"/>{handoffs.map(h=><div key={h.id}><p>{reasonName(h.reason)} · {h.resolved?'решено':'ожидает решения'}</p>{h.reason.startsWith('SOFT:')&&!h.resolved?<>{[['APPROVED','Деталь согласована'],['REJECTED','Не согласована'],['NEEDS_INFO','Нужны сведения']].map(([decision,label])=><button key={decision} className="crm-button secondary" disabled={pending||note.trim().length<3} onClick={()=>command({action:'resolveReview',handoffId:h.id,decision,note})}>{label}</button>)}</>:!h.reason.startsWith('SOFT:')?<><button disabled={pending||note.trim().length<3} onClick={()=>command({action:'auditHandoff',handoffId:h.id,unnecessary:true,note})}>Ложная передача</button><button disabled={pending||note.trim().length<3} onClick={()=>command({action:'auditHandoff',handoffId:h.id,unnecessary:false,note})}>Передача необходима</button></>:null}</div>)}{error&&<p role="alert">{error}</p>}</section>;
+}
