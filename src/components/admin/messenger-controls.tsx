@@ -17,6 +17,7 @@ export function MessengerControls({ id, control, identityVerified, readThrough, 
   const [confirmClose, setConfirmClose] = useState(false), [keyboard, setKeyboard] = useState(false);
   const shell = useRef<HTMLElement>(null), textarea = useRef<HTMLTextAreaElement>(null), typing = useRef(0), replyAttempt = useRef<{ signature: string; id: string } | null>(null);
   const human = control === "HUMAN_CONTROL", closed = control === "CLOSED";
+  const softReview=handoff?.startsWith('SOFT:');
   useEffect(() => {
     const viewport = window.visualViewport;
     const update = () => {
@@ -84,7 +85,7 @@ export function MessengerControls({ id, control, identityVerified, readThrough, 
     } catch { setError("Фото не загружено. Используйте JPEG, PNG или WebP до 8 МБ."); } finally { setUploading(false); }
   }
   return <section ref={shell} className={`messenger-thread ${keyboard ? "keyboard-open" : ""}`} aria-label="Текущий диалог">
-    <header className="messenger-header"><Link href="/admin/messages" className="admin-icon-button messenger-back" aria-label="Все диалоги"><ArrowLeft size={21} /></Link><div className="messenger-heading"><h1>{name}</h1><small>{channelNames[channel] ?? channel} · {closed ? "Закрыт" : human ? "Вы отвечаете" : handoff ? "Handoff" : "AI отвечает"}</small></div>
+    <header className="messenger-header"><Link href="/admin/messages" className="admin-icon-button messenger-back" aria-label="Все диалоги"><ArrowLeft size={21} /></Link><div className="messenger-heading"><h1>{name}</h1><small>{channelNames[channel] ?? channel} · {closed ? "Закрыт" : human ? "Вы отвечаете" : softReview ? "Review · AI продолжает" : handoff ? "Handoff" : "AI отвечает"}</small></div>
       {!closed && <button type="button" className="messenger-takeover" disabled={pending} onClick={() => start(() => command({ action: human ? "resume" : "takeover" }).then(() => {}))}>{human ? "Вернуть AI" : "Забрать"}</button>}
       <Drawer title="Действия диалога" icon={<MoreHorizontal size={22} />}>
         {human&&<details><summary>Уточнить факты уборки</summary><form onSubmit={event=>{event.preventDefault();const form=new FormData(event.currentTarget);const area=form.get('area'),large=form.get('largeWindows');start(()=>command({action:'facts',facts:{...(area?{area:Number(area)}:{}),...(large?{windowCleaning:{requested:true,largeCount:Number(large)}}:{})}}).then(()=>{}));}}><label>Площадь, м²<input name="area" type="number" min="1" max="1000" step="0.1" /></label><label>Большие окна, шт.<input name="largeWindows" type="number" min="0" max="100" /></label><p className="crm-hint">Исправление сохраняет подтверждённые факты и обновляет зависимый расчёт.</p><button className="crm-button" disabled={pending}>Сохранить факты</button></form></details>}
@@ -95,7 +96,7 @@ export function MessengerControls({ id, control, identityVerified, readThrough, 
         </div>
       </Drawer>{context}
     </header>
-    {handoff && !human && !closed && <aside className="messenger-handoff" role="status">Требуется ответ · {handoffNames[handoff] ?? "нужно уточнение оператора"}</aside>}
+    {handoff && !human && !closed && <aside className="messenger-handoff" role="status">{softReview?'Нужно согласовать деталь · AI продолжает':'Требуется ответ'} · {handoffNames[softReview?handoff.slice(5):handoff] ?? "нужно уточнение оператора"}</aside>}
     {orderSummary && <button type="button" className="messenger-order-line" onClick={() => { const dialog = document.getElementById(`context-${id}`); if (dialog instanceof HTMLDialogElement) dialog.showModal(); }}>{orderSummary}</button>}
     {children}
     <div className="messenger-composer-area">

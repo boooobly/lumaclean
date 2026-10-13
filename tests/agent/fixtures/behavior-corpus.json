@@ -389,7 +389,7 @@
     "kind": "handoff",
     "locale": "ru",
     "text": "Можно оплатить картой?",
-    "expected": "PAYMENT_REVIEW"
+    "expected": null
   },
   {
     "id": "payment-2",
@@ -405,7 +405,7 @@
     "kind": "handoff",
     "locale": "sr-Latn",
     "text": "Plaćanje karticom?",
-    "expected": "PAYMENT_REVIEW"
+    "expected": null
   },
   {
     "id": "payment-4",
@@ -421,7 +421,7 @@
     "kind": "handoff",
     "locale": "en",
     "text": "Do you accept card payment?",
-    "expected": "PAYMENT_REVIEW"
+    "expected": null
   },
   {
     "id": "payment-6",
@@ -541,7 +541,7 @@
     "kind": "handoff",
     "locale": "ru",
     "text": "Когда приедут?",
-    "expected": "ARRIVAL_REVIEW"
+    "expected": null
   },
   {
     "id": "arrival-3",

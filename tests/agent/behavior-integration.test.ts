@@ -73,10 +73,10 @@ test('behavior uses durable conversation state and native jobs in isolated Previ
       const c=await fixture({draftFacts:{area:60,service:'regular',soilLevel:'NORMAL',extras:[],extrasConfirmed:true},quote:{id:'q',serviceId:'s',input:{area:60,service:'regular',soilLevel:'NORMAL',extras:[],urgent:false},total:7600,base:7600,discountPercent:0,requiresHumanReview:false,at:new Date().toISOString()},duration:{minutes:150,reserve:30,requiredCleaners:2,ruleId:'r',version:1},slots:[]});
       await acceptMessage(db,c,{id:randomUUID(),text:'Нет, площадь 80 м²'});const state=(await db.conversation.findUniqueOrThrow({where:{id:c.id}})).state as AgentState;assert.equal(state.draftFacts?.area,80);assert(!state.quote);assert(!state.duration);assert(!state.slots);assert(!state.pending);
     });
-    await t.test('strong dirt button hands off normally and generates Telegram outbox without booking',async()=>{
+    await t.test('strong dirt button creates soft review and keeps AI control without booking',async()=>{
       const {c,snapshot}=await soilQuestion(),set=snapshot.quickReplies!;
       await acceptMessage(db,c,{id:randomUUID(),text:'',quickReply:{key:'SOIL_HEAVY',messageId:set.messageId,replySetId:set.replySetId,revision:set.revision}});
-      await drainAgentJobs(db,c.id,[question,question]);assert.equal((await db.conversation.findUniqueOrThrow({where:{id:c.id}})).control,'HUMAN_CONTROL');assert.equal(await db.humanHandoff.count({where:{conversationId:c.id,reason:'PRICE_REVIEW'}}),1);assert.equal(await db.notification.count({where:{conversationId:c.id,kind:'HANDOFF_TELEGRAM'}}),1);assert.equal((await publicConversation(db,c)).quickReplies,null);
+      await drainAgentJobs(db,c.id,[question,question]);assert.equal((await db.conversation.findUniqueOrThrow({where:{id:c.id}})).control,'AI_CONTROL');assert.equal(await db.humanHandoff.count({where:{conversationId:c.id,reason:'SOFT:PRICE_REVIEW'}}),1);assert.equal(await db.notification.count({where:{conversationId:c.id,kind:'HANDOFF_TELEGRAM'}}),1);assert.equal((await db.conversation.findUniqueOrThrow({where:{id:c.id}})).orderId,null);
     });
     await t.test('direct human/bot question is transparent without a model call or lead',async()=>{
       const c=await fixture();await acceptMessage(db,c,{id:randomUUID(),text:'Вы человек?'});
@@ -86,16 +86,16 @@ test('behavior uses durable conversation state and native jobs in isolated Previ
     await t.test('same-day message processed after cutoff never searches, invokes the model or hands off',async()=>{
       const c=await fixture();const message=await db.message.create({data:{conversationId:c.id,author:'CLIENT',text:'Можно сегодня?',sentAt:at('16:59')}});await db.agentJob.create({data:{conversationId:c.id,messageId:message.id}});
       const provider:AIProvider={name:'synthetic',model:'gpt-6-luna',complete:async()=>assert.fail('cutoff is deterministic')};
-      const RealDate=Date,fixed=at('17:01').getTime();globalThis.Date=class extends RealDate{constructor(value?:string|number|Date){super(value??fixed);}static now(){return fixed;}} as typeof Date;
+      const RealDate=Date,fixed=at('17:01').getTime();globalThis.Date=class extends RealDate{constructor(value?:string|number|Date){super(value??fixed);}static now(){return RealDate.now();}} as typeof Date;
       try{await drainAgentJobs(db,c.id,[provider,provider]);const last=await db.message.findFirstOrThrow({where:{conversationId:c.id,author:'AI'}});assert(last.text.includes('начиная с завтра'));assert.equal(await db.agentToolTrace.count({where:{conversationId:c.id,tool:'findAvailableSlots'}}),0);const current=await db.conversation.findUniqueOrThrow({where:{id:c.id}});assert.equal(current.control,'AI_CONTROL');assert.equal(current.orderId,null);assert.equal(current.leadId,null);}finally{globalThis.Date=RealDate;}
     });
     await t.test('16:30 token cannot validate at 17:05 even while unexpired and fingerprint matches',async()=>{
       const state:AgentState={name:'Synthetic',phone:'+381601234567',requestedWindow:{date:'2026-10-04',from:'2026-10-04T16:00',to:'2026-10-04T22:00'},quote:{id:'q',serviceId:'s',input:{area:60,service:'regular',soilLevel:'NORMAL',extras:[],urgent:true},total:9000,base:7500,discountPercent:0,requiresHumanReview:false,at:at('16:30').toISOString()},duration:{minutes:150,reserve:30,requiredCleaners:2,ruleId:'r',version:1},address:{fullAddress:'Synthetic'}};
       const c=await fixture(state),token=randomUUID(),leaseKey=randomUUID();const message=await db.message.create({data:{conversationId:c.id,author:'CLIENT',text:'Synthetic token selection'}});
-      const job=await db.agentJob.create({data:{conversationId:c.id,messageId:message.id,status:'RUNNING',leaseKey,leaseUntil:at('19:00')}});
-      await db.agentSlot.create({data:{id:token,conversationId:c.id,start:at('18:00'),durationMinutes:150,requiredCleaners:2,cleanerIds:[],fingerprint:slotFingerprint(state),scheduleVersion:'synthetic',routingSnapshot:{},expiresAt:at('19:00')}});
+      const job=await db.agentJob.create({data:{conversationId:c.id,messageId:message.id,status:'RUNNING',leaseKey,leaseUntil:new Date(Date.now()+180000)}});
+      await db.agentSlot.create({data:{id:token,conversationId:c.id,start:at('18:00'),durationMinutes:150,requiredCleaners:2,cleanerIds:[],fingerprint:slotFingerprint(state),scheduleVersion:'synthetic',routingSnapshot:{},expiresAt:new Date(Date.now()+180000)}});
       const ctx:ToolContext={conversationId:c.id,jobId:job.id,leaseKey,revision:0,mode:'AUTO',state};
-      const RealDate=Date,fixed=at('17:05').getTime();globalThis.Date=class extends RealDate{constructor(value?:string|number|Date){super(value??fixed);}static now(){return fixed;}} as typeof Date;
+      const RealDate=Date,fixed=at('17:05').getTime();globalThis.Date=class extends RealDate{constructor(value?:string|number|Date){super(value??fixed);}static now(){return RealDate.now();}} as typeof Date;
       try{const result=await executeAgentTool(db,ctx,'validateSlot',{slotToken:token});assert.equal(result.error,'SAME_DAY_CUTOFF');assert.equal((await db.conversation.findUniqueOrThrow({where:{id:c.id}})).orderId,null);}finally{globalThis.Date=RealDate;}
     });
   }finally{

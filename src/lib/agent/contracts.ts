@@ -20,7 +20,7 @@ export const customerFactsSchema = qualificationSchema.omit({urgent:true}).parti
   declinedExtras:z.array(z.enum(['oven','fridge','standardWindow','largeWindow'])).optional(),
   reviewItems:z.array(z.enum(['roletne'])).optional(),
   requestedWeekend:z.object({saturday:z.iso.date(),sunday:z.iso.date()}).strict().optional(),
-  city:z.literal('Belgrade').optional(), neighborhoodHint:z.literal('Banovo brdo').optional(),
+  city:z.literal('Belgrade').optional(), neighborhoodHint:z.string().trim().min(2).max(80).optional(),
   requestedCrew:z.number().int().min(1).max(10).optional(), bathroomCount:z.number().int().min(0).max(20).optional(),
   carpetsAbsent:z.literal(true).optional(), preferredContactChannel:z.enum(contactChannels).optional(), phone:z.string().max(40).optional(),
 }).strict();
@@ -43,7 +43,7 @@ export const toolSchemas = {
   createOrder: empty,
   rescheduleOrder: empty,
   requestHumanHandoff: z.object({reason:z.enum(reasons)}).strict(),
-  requestReview: z.object({reason:z.enum(['CUSTOM_EXTRA','WINDOW_CONFIGURATION','PRICE_REVIEW','NO_DURATION_RULE','CONTACT_PREFERENCE','NO_SLOTS','ROUTING_UNRELIABLE','OPERATIONAL'])}).strict(),
+  requestReview: z.object({reason:z.enum(['CUSTOM_EXTRA','WINDOW_CONFIGURATION','PRICE_REVIEW','NO_DURATION_RULE','CONTACT_PREFERENCE','NO_SLOTS','ROUTING_UNRELIABLE','OPERATIONAL','DISCOUNT','CREW_PREFERENCE','ACCESS_REVIEW','PAYMENT_REVIEW','OUTSIDE_SERVICE_AREA'])}).strict(),
 };
 export type ToolName = keyof typeof toolSchemas;
 export const toolDescriptions:Record<ToolName,string> = {
@@ -56,14 +56,14 @@ export const toolDescriptions:Record<ToolName,string> = {
   requestCustomerInput:"Ask ONE next qualification question using a server-localized template and persisted choices. Use SERVICE_TYPE, AREA, SOIL_LEVEL or EXTRAS only when missing. SLOT_SELECTION uses real returned slots. Ends this turn. Never reconstruct buttons from your prose. Use for these qualification questions instead of writing free text.",
   createOrUpdateLead:"Create/update substantive cleaning inquiry immediately. ONLY intent is required; name/phone are OPTIONAL. Never wait for contact to record intent. Contact may be gathered later, do not invent it. No lead for a greeting or isolated FAQ.",
   calculatePrice:"Authoritative production price. Needs explicit service, area, soil and known extras quantities. Contact is NOT required. Pending custom items are excluded: present known subtotal and pending review separately, never a final total. If requiresHumanReview, requestReview and continue safe intake.",
-  estimateDuration:"Calculate current quote's duration from active owner rules and choose crew size from applicable rules. Missing rule means handoff, no guessed duration.",
-  resolveAddress:"Address search. First call query only; ask customer to choose candidate. Then pass ONLY a returned placeId to confirm coordinates. Unavailable search or ambiguous address: ask or handoff. Apartment may be supplied separately.",
+  estimateDuration:"Calculate current quote's duration from active owner rules and choose crew size from applicable rules. Missing rule needs soft review; continue FAQ/intake, no guessed duration or booking.",
+  resolveAddress:"Address search. First call query only; ask customer to choose candidate. Then pass ONLY a returned placeId to confirm coordinates. Ambiguous/empty search: ask for spelling, neighborhood or landmark. Unavailable reliable coordinates need soft review; continue intake without booking. Apartment may be supplied separately.",
   getClientAddresses:"Read bound verified client's own active addresses, no notes/intercom/internal info. Optional returned addressId selects an address for current request.",
   findAvailableSlots:"Check real calendar, crew and routes using current quote, duration and verified address. date/from/to use Belgrade wall times YYYY-MM-DDTHH:mm. Maximum three slots, never invent a time. For rescheduling requires verified current order.",
   validateSlot:"Select a returned scoped opaque slot, revalidate calendar/routing and produce recap. This is selection, not booking confirmation. Send recap and request explicit customer confirmation. Get name and valid phone before calling.",
   createOrder:"Create standard confirmed order from CURRENT server recap ONLY when subsequent customer message or confirmation button has explicitly confirmed that recap. Empty args: cannot supply price/team/client/confirmation. Server locks and rechecks all facts and scheduling.",
   rescheduleOrder:"Move ONLY current conversation's existing order, after explicit request to reschedule, verified identity, fresh validated recap and explicit confirmation. No override or completed orders.",
-  requestHumanHandoff:"Escalate complaint, discount, mold, renovation, unavailable rules/routes/prices, repeated errors or uncertainty. Never solve exceptional cases or claim a booking that failed.",
+  requestHumanHandoff:"Hard handoff only for explicit human request, complaint/damage/dispute, actual dangerous work, identity/security failure, unsupported existing-order cancellation or unrecoverable critical errors. Pricing, custom discounts, crew/access/payment conditions and unavailable duration/routes need requestReview. NO_SLOTS or missing facts need clarification. Never claim a failed booking.",
   requestReview:"Flag a specific operational/pricing detail for owner review while continuing intake under AI_CONTROL. No booking or final price until owner resolves it. Custom extras, unusual windows and SMS preference must not terminate sales.",
 };
 // Responses otherwise normalizes optional contact fields into required fields.
@@ -74,7 +74,7 @@ export type AgentState = {
   upholsteryInquiry?:boolean;
   upholsteryQuote?:ReturnType<typeof import('@/lib/upholstery').calculateUpholstery>;
   draftFacts?:z.infer<typeof customerFactsSchema>;
-  review?:{reasons:string[]};
+  review?:{reasons:string[];resolutions?:{reason:string;decision:string;note:string;at:string}[]};
   preferredContactChannel?:typeof contactChannels[number];
   nextInput?:typeof inputIntents[number];
   timeClarificationRequired?:boolean;

@@ -6,7 +6,7 @@ import type { inboxData } from "@/lib/agent/queries";
 import { channelNames, initials, matchesConversation } from "@/lib/domain/messenger";
 import { Drawer } from "./drawer";
 
-const filters = { ALL: "Все", UNREAD: "Непрочитанные", HANDOFF: "Нужен ответ", TRANSFERRED: "Handoff", HUMAN: "У оператора", UNREVIEWED: "SHADOW · не оценены", AI: "AI", CLOSED: "Закрытые", WEBSITE: "Сайт", TELEGRAM: "Telegram", WHATSAPP: "WhatsApp", VIBER: "Viber" };
+const filters = { ALL: "Все", UNREAD: "Непрочитанные", HANDOFF: "Нужен ответ", TRANSFERRED: "Передачи и review", HUMAN: "У оператора", UNREVIEWED: "SHADOW · не оценены", AI: "AI", CLOSED: "Закрытые", WEBSITE: "Сайт", TELEGRAM: "Telegram", WHATSAPP: "WhatsApp", VIBER: "Viber" };
 const channelIcons = { WEBSITE: Globe, WHATSAPP: MessageCircle, TELEGRAM: Send, VIBER: Phone };
 export function InboxList({ data, filter = "ALL", selected, compact = false }: { data: Awaited<ReturnType<typeof inboxData>>; filter?: string; selected?: string; compact?: boolean }) {
   const [search, setSearch] = useState(""), [searchOpen, setSearchOpen] = useState(false);

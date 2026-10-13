@@ -1,0 +1,15 @@
+import {execFileSync} from 'node:child_process';
+import ts from 'typescript';
+import {writeFileSync} from 'node:fs';
+import {autonomyCorpus} from '../../tests/agent/fixtures/autonomy-corpus';
+import {mandatoryHandoff} from '../../src/lib/agent/policy';
+import {reasonLevel} from '../../src/lib/agent/autonomy';
+const source=execFileSync('git',['show','dc93888:src/lib/agent/policy.ts'],{encoding:'utf8',windowsHide:true});
+const start=source.indexOf('export function mandatoryHandoff'),end=source.indexOf('export function explicitConfirmation',start);
+const compiled=ts.transpile(source.slice(start,end).replace('export function','function'),{target:ts.ScriptTarget.ES2022});
+const before=new Function(compiled+'; return mandatoryHandoff;')() as typeof mandatoryHandoff;
+const eligible=autonomyCorpus.filter(s=>s.expected!=='HARD_HANDOFF');
+const unnecessaryBefore=eligible.filter(s=>before(s.text)).length;
+const unnecessaryAfter=eligible.filter(s=>{const r=mandatoryHandoff(s.text);return r&&reasonLevel(r)==='HARD_HANDOFF';}).length;
+const report={scope:'Rule classification only, not LLM consultation success or production KPI',baseline:'dc93888',scenarios:autonomyCorpus.length,eligibleForNoHardHandoff:eligible.length,unnecessaryHardHandoff:{before:unnecessaryBefore,after:unnecessaryAfter},safetyHardCases:autonomyCorpus.filter(s=>s.expected==='HARD_HANDOFF'&&s.event!=='HUMAN_CONTROL').map(s=>({id:s.id,before:!!before(s.text),after:!!mandatoryHandoff(s.text)}))};
+writeFileSync('qa-output/autonomy-comparison.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));

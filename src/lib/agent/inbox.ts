@@ -105,6 +105,8 @@ export async function publicConversation(db:PrismaClient,c:Conversation){
   return{notifications,messages:messages.reverse().map(({externalMessageId,...m})=>({...m,...(m.author==='CLIENT'?{requestId:externalMessageId?.startsWith('in:')?externalMessageId.slice(3):null}:{})})),displayAlias:latest.displayAlias,revision:latest.revision,quickReplies:set&&!['BOOKING_CONFIRMATION','POST_BOOKING'].includes(set.intent)?{messageId:last.id,replySetId:set.id,revision:set.conversationRevision,choices:set.choices}:null,typing:latest.control==='HUMAN_CONTROL'?!!latest.operatorTypingUntil&&latest.operatorTypingUntil>new Date():latest.control==='AI_CONTROL'&&jobs.some(j=>j.status==='RUNNING'&&!!j.leaseUntil&&j.leaseUntil>new Date()),control:latest.control,locale:latest.locale,pending:jobs.length>0,confirmation:state.pending?{nonce:state.pending.nonce,recap:state.pending.recap}:null,booking:state.booking?{reference:state.booking.reference,recap:(({orderId,reference,...r})=>{void orderId;void reference;return r;})(state.booking)}:null};
 }
 export const inboxCommandSchema=z.discriminatedUnion("action",[
+  z.object({action:z.literal('resolveReview'),id:z.string().min(1).max(80),handoffId:z.string().min(1).max(80),decision:z.enum(['APPROVED','REJECTED','NEEDS_INFO']),note:z.string().trim().min(3).max(1000)}).strict(),
+  z.object({action:z.literal('auditHandoff'),id:z.string().min(1).max(80),handoffId:z.string().min(1).max(80),unnecessary:z.boolean(),note:z.string().trim().min(3).max(1000)}).strict(),
   z.object({action:z.literal('facts'),id:z.string().min(1).max(80),facts:customerFactsSchema}).strict(),
   z.object({action:z.literal('typing'),id:z.string().min(1).max(80),active:z.boolean()}).strict(),
   z.object({action:z.enum(["takeover","resume","close","retry"]),id:z.string().min(1).max(80)}).strict(),
@@ -136,7 +138,24 @@ export async function runInboxCommand(db:PrismaClient,userId:string,payload:unkn
       await tx.conversation.update({where:{id:c.id},data:{operatorTypingUntil:input.active?new Date(Date.now()+7000):null}});
       return{ok:true};
     }
-    if(input.action==='evaluate'){
+    if(input.action==='auditHandoff'){
+      const h=await tx.humanHandoff.findFirst({where:{id:input.handoffId,conversationId:c.id,reason:{not:{startsWith:'SOFT:'}}}});
+      if(!h)throw new AgentError('HANDOFF_NOT_FOUND');
+      await writeAudit(tx,{type:'USER',userId},{action:input.unnecessary?'AI_HANDOFF_AUDITED_UNNECESSARY':'AI_HANDOFF_AUDITED_NECESSARY',entityType:'HumanHandoff',entityId:h.id,changes:{status:{before:null,after:input.unnecessary?'UNNECESSARY':'NECESSARY'},changedFields:{before:null,after:input.note}}});
+    }else if(input.action==='resolveReview'){
+      const h=await tx.humanHandoff.findFirst({where:{id:input.handoffId,conversationId:c.id,reason:{startsWith:'SOFT:'},resolvedAt:null}});
+      if(!h)throw new AgentError('REVIEW_NOT_FOUND');
+      const state=stateOf(c),reason=h.reason.slice(5);
+      state.review={reasons:state.review?.reasons??[],resolutions:[...(state.review?.resolutions??[]).slice(-15),{reason,decision:input.decision,note:input.note,at:new Date().toISOString()}]};
+      // Owner prose cannot override calculator, upholstery workflow, identity or scheduling.
+      if(input.decision==='APPROVED')state.review.reasons=state.review.reasons.filter(r=>r!==reason);
+      if(input.decision!=='NEEDS_INFO'){
+        await tx.humanHandoff.update({where:{id:h.id},data:{resolvedAt:new Date(),resolvedById:userId,resolution:input.decision+': '+input.note}});
+        await tx.notification.updateMany({where:{conversationId:c.id,eventKey:{startsWith:`handoff:${h.id}`}},data:{status:'CANCELLED',deliveryState:'CANCELLED'}});
+      }
+      await tx.conversation.update({where:{id:c.id},data:{state:json(state),summary:operationalSummary(state,c.summary),revision:{increment:1},needsAttention:c.control==='HUMAN_CONTROL'||!!state.review.reasons.length}});
+      await writeAudit(tx,{type:'USER',userId},{action:'AI_REVIEW_RESOLVED',entityType:'HumanHandoff',entityId:h.id});
+    }else if(input.action==='evaluate'){
       if(input.verdict==='REJECTED'&&!input.reason)throw new AgentError('REJECTION_REASON_REQUIRED');
       const suggestion=await tx.shadowSuggestion.findFirst({where:{id:input.suggestionId,conversationId:c.id}});
       if(!suggestion)throw new AgentError('SUGGESTION_NOT_FOUND');

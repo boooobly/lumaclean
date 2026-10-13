@@ -5,10 +5,10 @@ import {resolveCustomerWeekend} from './temporal';
 type Facts=NonNullable<AgentState['draftFacts']>;
 export const plain=(text:string)=>text.normalize('NFD').replace(/\p{M}/gu,'').toLowerCase();
 const uncertain=/\b(?:vrv|verovatno|mozda|mislim|valjda|probably|maybe|perhaps|i think|not sure|nisam sigur(?:an|na))\b|не уверен|наверно|возможно|думаю/iu;
-const explanation=/ne znam (?:sta|sto)|sta (?:je|vam je|tacno znaci|podrazumeva)|koja je razlika|what (?:is|does)|what.*include|difference|не знаю|что (?:значит|такое|входит)|разниц/iu;
+export function catalogQuestion(text:string){return /^(?:что|чем|как|какие|сколько|вы|можно|можете ли|есть|what|how|do you|can you|can i|are there|sta|šta|koja|kako|koliko|da li|mogu li|mozete li|шта|која|како|колико|да ли|могу ли|можете ли)(?=\s|[?!.,:]|$)/iu.test(plain(text).trim())&&!/(?:хочу|нужна|нужны|нужен|нужно убрать|treba mi|treba nam|zelim|желим|i need|i want|please clean|book)/iu.test(plain(text));}
 export function serviceNeedsConfirmation(text:string){
   const t=plain(text);
-  return /general|redovno|odrzava|dubinsk|deep|regular|генераль|поддержива|уборк|генерал|дубинск/iu.test(t)&&(uncertain.test(t)||explanation.test(t));
+  return /general|redovno|odrzava|dubinsk|deep|regular|генераль|поддержива|уборк|генерал|дубинск/iu.test(t)&&(uncertain.test(t)||/ne znam|не знаю/iu.test(t));
 }
 const numbers:Record<string,number>={jedan:1,jedna:1,jedno:1,dva:2,dve:2,tri:3,cetiri:4,pet:5,sest:6,sedam:7,osam:8,devet:9,deset:10,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,один:1,одно:1,два:2,две:2,три:3,четыре:4,пять:5,шесть:6,семь:7};
 const number='(?:[0-9]{1,3}|'+Object.keys(numbers).join('|')+')';
@@ -22,6 +22,8 @@ export function conversionFacts(text:string,at:Date,timezone:string,expected?:Ag
   const weekend=resolveCustomerWeekend(text,at,timezone);if(weekend)f.requestedWeekend=weekend;
   if(/\bbgd\b|beograd|belgrade|белград|београд/iu.test(t))f.city='Belgrade';
   if(/banovo brdo|баново брдо/iu.test(t)){f.city='Belgrade';f.neighborhoodHint='Banovo brdo';}
+  const district=text.match(/^(?:район|neighborhood|district|naselje|општина|opština|opstina)\s*[:—-]?\s+(.{2,80})$/iu)?.[1];
+  if(district)f.neighborhoodHint=district.trim(); // A customer hint, never coordinate or coverage proof.
   if(/roletn|ролетн|roller shutters|window shutters|рольстав/iu.test(t)&&!/bez rolet|ne treba.*rolet|without.*shutter|без.*рольстав/iu.test(t))f.reviewItems=['roletne'];
   if(/(?:tepisi|теписи|ковр[а-я]*|carpets?).{0,35}(?:na pranju|nece biti|неће бити|отсутств|не будет|будут на|away|absent|not be)|не (?:треба|нужно).{0,25}(?:tepi|тепи|ковр)|(?:don't|do not) need.{0,25}carpet/iu.test(t))f.carpetsAbsent=true;
   const crew=t.match(new RegExp('('+number+')\\s*(?:osob[a-z]*|cleaners?|people|клинер[а-я]*|человек|особ[а-я]*)','iu'));
@@ -35,8 +37,8 @@ export function conversionFacts(text:string,at:Date,timezone:string,expected?:Ag
   else if(/(?:reply here|odgovorite ovde|ответьте здесь)/iu.test(t))f.preferredContactChannel='CURRENT_CHAT';
   const phone=text.trim().replace(/^(?:telefon|tel|phone|телефон)\s*[:=]?\s*/iu,'');
   if(/^[+0][\d\s()-]{6,30}$/u.test(phone)){const normalized=normalizedPhone(phone);if(normalized)f.phone=normalized;}
-  const windowContext=windowWord.test(t)||expected==='WINDOW_COUNTS'||expected==='WINDOW_TYPE'||!!state?.draftFacts?.windowCleaning?.requested;
-  if(/bez prozor|prozore necemo|ne treba.{0,20}(?:pranje )?prozor|without windows|no window cleaning|без окон|окна не (?:нужны|надо)|не нужно.{0,15}мыть окна/iu.test(t)) {
+  const windowContext=!catalogQuestion(text)&&(windowWord.test(t)||expected==='WINDOW_COUNTS'||expected==='WINDOW_TYPE'||!!state?.draftFacts?.windowCleaning?.requested);
+  if(!catalogQuestion(text)&&/bez prozor|prozore necemo|ne treba.{0,20}(?:pranje )?prozor|without windows|no window cleaning|без окон|окна не (?:нужны|надо)|не нужно.{0,15}мыть окна/iu.test(t)) {
     f.windowCleaning={requested:false};f.declinedExtras=['standardWindow','largeWindow'];
   }else if(windowContext){
     const lc=t.match(new RegExp('('+number+')\\s*'+large,'iu')),sc=t.match(new RegExp('('+number+')\\s*'+standard,'iu'));

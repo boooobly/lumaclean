@@ -8,7 +8,7 @@ import { routingProvider,motisSelected } from '@/lib/infrastructure/routing-prov
 import {MotisRoutingProvider} from '@/lib/infrastructure/motis-routing';
 import {busMapsAccess} from '@/lib/infrastructure/busmaps-status';
 import { configuredProviders } from './providers';
-import { AgentError } from './contracts';
+import { AgentError,toolSchemas } from './contracts';
 import {liveConfigFingerprint,validLiveProof} from './live-proof';
 import {channelReady,customerChannels} from './channel-diagnostics';
 
@@ -103,7 +103,14 @@ export async function assertAutoReady(db:DB,settings?:BusinessSettings){
 export async function runDiagnostics(db:DB){
   const probe=async(fn:()=>Promise<boolean>):Promise<Probe>=>{try{return await fn()?{ok:true,code:'Работает'}:{ok:false,code:'Нет подтверждённого ответа'};}catch(e){return {ok:false,code:e instanceof AgentError?e.code:'PROVIDER_UNAVAILABLE'};}};
   let primary:Probe={ok:false,code:'PROVIDER_UNCONFIGURED'},fallback={...primary};
-  try{const providers=configuredProviders();[primary,fallback]=await Promise.all(providers.map(p=>probe(async()=>{const r=await p.complete([{role:'system',content:'Synthetic connectivity check. No customer data or CRM actions. Call getBusinessInfo with {} using native tool calling.'},{role:'user',content:'Call getBusinessInfo now.'}]);return r.toolCalls.some(t=>t.name==='getBusinessInfo'&&t.arguments.trim()==='{}');})));}catch{/* Configuration failure. */}
+  try{const providers=configuredProviders();[primary,fallback]=await Promise.all(providers.map(p=>probe(async()=>{
+    const r=await p.complete([{role:'system',content:'Synthetic connectivity check. No customer data or CRM actions. Call getBusinessInfo with {} using native tool calling.'},{role:'user',content:'Call getBusinessInfo now.'}]);
+    const call=r.toolCalls.find(t=>t.name==='getBusinessInfo');
+    if(!call){if(process.env.VERCEL_ENV==='preview')console.info(JSON.stringify({event:'agent_native_probe',provider:p.name,nativeCalls:r.toolCalls.length,hasText:!!r.text}));throw new AgentError('NATIVE_TOOL_CALL_MISSING');}
+    let args:unknown;try{args=JSON.parse(call.arguments);}catch{throw new AgentError('NATIVE_TOOL_ARGUMENTS_INVALID');}
+    if(!toolSchemas.getBusinessInfo.safeParse(args).success){if(process.env.VERCEL_ENV==='preview')console.info(JSON.stringify({event:'agent_native_probe',provider:p.name,argumentType:args===null?'null':Array.isArray(args)?'array':typeof args,argumentKeys:args&&typeof args==='object'?Object.keys(args).slice(0,16).map(k=>k.slice(0,40)):[],wrappedFunction:!!args&&typeof args==='object'&&'name'in args&&'arguments'in args,nativeCalls:r.toolCalls.length}));throw new AgentError('NATIVE_TOOL_ARGUMENTS_INVALID');}
+    return true;
+  })));}catch{/* Configuration failure. */}
   const places=await probe(async()=>{const r=await placesRequest('autocomplete',{query:'Terazije 1, Beograd',sessionToken:crypto.randomUUID()});return r.available&&'suggestions' in r&&r.suggestions.length>0;});
   let routeQuality:string|undefined;
   const transit=await probe(async()=>{const provider=routingProvider();if(motisSelected()){const h=await new MotisRoutingProvider().datasetsStatus();if(!h.engine.healthy)return false;}const r=await provider.getTravelTime({origin:{latitude:44.8125,longitude:20.4612},destination:{latitude:44.8168,longitude:20.4156},mode:'TRANSIT',at:new Date(Date.now()+86400000).toISOString()});routeQuality=r.quality;return r.status==='VERIFIED'&&r.durationSeconds!==null;});

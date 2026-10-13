@@ -7,6 +7,8 @@ import { getDatabase } from "@/lib/database/client";
 import { conversationData, inboxData } from "@/lib/agent/queries";
 import { InboxList } from "@/components/admin/inbox-list";
 import { InboxControls } from "@/components/admin/inbox-controls";
+import {ReviewControls} from '@/components/admin/review-controls';
+import {AgentKnownFacts} from '@/components/admin/agent-known-facts';
 import { MessengerHistory } from "@/components/admin/messenger-history";
 import { MessengerBubble } from "@/components/admin/messenger-bubble";
 import { ShadowEvaluation } from "@/components/admin/ai-launch";
@@ -20,13 +22,14 @@ export default async function ConversationPage({ params, searchParams }: { param
   const [data, list] = await Promise.all([conversationData(getDatabase(), id, before), inboxData(getDatabase())]);
   if (!data) notFound();
   const messages = data.messages.filter(message => message.customerVisible && message.deliveryStatus !== "CANCELLED");
-  const handoff = data.handoffs.find(item => !item.resolved)?.reason;
+  const handoff = (data.handoffs.find(item => !item.resolved&&!item.reason.startsWith('SOFT:'))??data.handoffs.find(item=>!item.resolved))?.reason;
   const context = <Drawer id={`context-${id}`} title="Клиент и заказ" icon={<Info size={21} />}>
     <section className="messenger-context"><h3>{data.name}</h3>{data.phone && <a href={`tel:${data.phone}`}>{data.phone}</a>}<p>{channelNames[data.channel]}</p>
       {data.client && <Link href={`/admin/clients/${data.client.id}`}>Карточка клиента и предыдущие заказы →</Link>}
       {data.order && <div className="messenger-order-context"><h3>{(data.order.historicalServiceLabel ?? data.order.service?.name ?? "Услуга не указана")}</h3><p>{date(data.order.scheduledStart)}</p><strong>{money(data.order.finalPrice, data.order.currency)}</strong><p>{data.order.address.fullAddress}</p><Link href={`/admin/orders/${data.order.id}`}>{data.order.reference} →</Link></div>}
       {data.lead && <details><summary>Заявка</summary><Link href={`/admin/leads/${data.lead.id}`}>Открыть заявку →</Link></details>}
-      {data.handoffs.length > 0 && <details><summary>История передачи человеку</summary>{data.handoffs.map((item, index) => <p key={index}>{item.reason} · {item.resolved ? "решено" : "требует ответа"} · {date(new Date(item.date))}</p>)}</details>}
+      <AgentKnownFacts facts={data.facts} quote={data.quote}/>
+      {data.handoffs.length > 0 && <details><summary>Review и история передач</summary><ReviewControls id={id} handoffs={data.handoffs}/>{data.review?.resolutions?.map((r,i)=><p key={i}>{r.reason}: {r.decision} · {r.note}</p>)}</details>}
       <details><summary>Технические детали</summary><p>ID диалога: <code>{id}</code></p><p>{data.identityVerified ? "Личность подтверждена" : "Личность не подтверждена"} · {data.locale} · {data.stage} · {data.mode}</p>
         <details><summary>Доставка и вложения</summary>{data.messages.map(message => <div key={message.id}><p>{date(new Date(message.sentAt))} · {message.author} · {message.deliveryStatus}</p><p>ID: {message.id} · Provider ID: {message.providerId ?? "нет"}</p><p>Получено: {message.receivedAt ?? "нет"} · Отправлено: {message.providerSentAt ?? "нет"} · Обновлено: {message.deliveryUpdatedAt ?? "нет"}</p>{message.deliveredAt && <p>Доставлено: {message.deliveredAt}</p>}{message.readAt && <p>Прочитано: {message.readAt}</p>}{message.deliveryError && <code>{message.deliveryError}</code>}{message.replyTo && <p>Ответ на: {message.replyTo}</p>}{message.rejectedAttachments.map((item, index) => <p key={index}>{item.kind}: {item.status}</p>)}</div>)}</details>
         <details><summary>Системные события</summary>{data.messages.filter(message => message.author === "SYSTEM").map(message => <p key={message.id}>{message.text} · {message.deliveryStatus}</p>)}</details>
