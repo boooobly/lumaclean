@@ -89,7 +89,7 @@ export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:str
     const confirmation=!!state.pending&&(input.confirmationNonce===state.pending.nonce||confirmsRecap(text,state.pending.recap));
   if(input.confirmationNonce&&input.confirmationNonce!==state.pending?.nonce)throw new AgentError("INVALID_CONFIRMATION");
     const sourceFacts=Object.fromEntries(Object.entries(extracted).filter(([key])=>!['name','phone','addressQuery','neighborhoodHint'].includes(key)));
-    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text,sentAt:receivedAt,externalMessageId:`in:${input.id}`,structured:json({...input.transport?.metadata as object,...(expectedInput?{inputIntent:expectedInput}:{}),factExtraction:{version:1,accepted:sourceFacts}}),...(input.transport?{inboundKey:input.transport.key,receivedAt}:{})}});
+    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text,sentAt:receivedAt,externalMessageId:`in:${input.id}`,structured:json({...input.transport?.metadata as object,quickReplyConfirmed:!!input.quickReply,...(expectedInput?{inputIntent:expectedInput}:{}),factExtraction:{version:1,accepted:sourceFacts}}),...(input.transport?{inboundKey:input.transport.key,receivedAt}:{})}});
     if(ids.length)await tx.chatAttachment.updateMany({where:{id:{in:ids},conversationId:c.id,messageId:null},data:{messageId:message.id}});
     if(confirmation)state.pending!.confirmedByMessageId=message.id;
     else if(state.pending)delete state.pending;

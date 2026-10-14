@@ -25,7 +25,9 @@ import {inputQuestion,inputAlreadyKnown} from "./chat-presentation";
 import {behaviorMetric} from "./behavior-telemetry";
 import {reliabilityCount} from './reliability-telemetry';
 import {bookingReviewBlocked,windowQuantitiesMissing,catalogQuestion} from './conversion-facts';
-import {mandatoryHandoff} from './policy';
+import {mandatoryHandoff,outputAllowed} from './policy';
+import {naturalQuestionMatches,type ConversationStrategy} from './conversation-strategy';
+import {masculineSelfReference} from './persona';
 import {supportedProposal,proposalQuestion} from './fact-proposals';
 import {extrasPrices} from '@/lib/pricing';
 import {applianceLabels,applianceScope} from '@/lib/appliance-catalog';
@@ -34,7 +36,7 @@ import {alternativePriceRequest} from './alternative-price';
 import { AgentError, customerFactsSchema,toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
 type Tx=Prisma.TransactionClient;
-export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[];factPercentages?:number[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; questionAsked?:boolean; extractionIncomplete?:AgentState['nextInput']; validatedDepartures?:DepartureLegInput[]};
+export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[];factPercentages?:number[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; questionAsked?:boolean; extractionIncomplete?:AgentState['nextInput']; validatedDepartures?:DepartureLegInput[];conversationStrategy?:ConversationStrategy;conversationDiagnostics?:Pick<NonNullable<AgentState['lastDecision']>,'strategy'|'answerOrigin'|'modelCalls'>};
 export const json=(value:unknown)=>JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 export const stateOf=(c:Pick<Conversation,"state">)=>structuredClone(c.state) as AgentState;
 // PostgreSQL jsonb reorders object keys. Hash and compare facts, never their insertion order.
@@ -328,7 +330,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     return{facts:state.draftFacts};
   }
   if(name==='requestCustomerInput'){
-    const {intent}=toolSchemas.requestCustomerInput.parse(payload);
+    const {intent,question:proposedQuestion}=toolSchemas.requestCustomerInput.parse(payload);
     if(ctx.extractionIncomplete===intent){reliabilityCount(state,'factExtractionFailure');state.unresolvedInput=intent;delete ctx.extractionIncomplete;delete state.pending;delete state.slots;delete state.selectedSlotToken;}
     if(state.upholsteryInquiry&&intent!=='PHONE')return{error:'UPHOLSTERY_MANAGER_INTAKE',message:'Collect only missing name/contact. Manager will clarify furniture and pricing; do not run cleaning or furniture qualification.'};
     if(inputAlreadyKnown(intent,state)){behaviorMetric('repeatedQuestionDetected');behaviorMetric('repeatedQualificationQuestionCount');return{error:'FACT_ALREADY_KNOWN',facts:state.draftFacts};}
@@ -343,8 +345,10 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
       question=content.services.filter(s=>s.id==='regular'||s.id==='deep').map(s=>s.name+': '+s.description).join('\n')+'\n'+exclusions+'\n\n'+question;
     }
     if(!question)return{error:'UNSUPPORTED_INPUT_INTENT'};
+    const modelComposed=ctx.conversationStrategy==='LLM_FIRST'&&!!proposedQuestion&&naturalQuestionMatches(intent,proposedQuestion)&&!masculineSelfReference(proposedQuestion,c.locale as 'ru')&&outputAllowed(proposedQuestion,state,ctx.factAmounts,ctx.factPercentages);
+    if(modelComposed)question=proposedQuestion!;
     state.nextInput=intent;ctx.responseText=question;ctx.questionAsked=true;
-    return{question,intent,finishTurn:true};
+    return{question,intent,finishTurn:true,...(modelComposed?{modelComposed:true}:{})};
   }
   if(name==="createOrUpdateLead")return updateLead(tx,c,ctx,toolSchemas[name].parse(payload));
   if(name==='calculateAlternativePrice'){
