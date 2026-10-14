@@ -80,7 +80,7 @@ test('real incident: native Preview persistence, soft review, contact and hard s
     await db.businessSettings.update({where:{id:'default'},data:{aiAgentMode:baseline.aiAgentMode,aiChannelModes:baseline.aiChannelModes!}});
     for(const id of owned){
       const c=await db.conversation.findUniqueOrThrow({where:{id}});assert.equal(c.orderId,null);
-      await db.notification.deleteMany({where:{conversationId:id}});await db.shadowSuggestion.deleteMany({where:{conversationId:id}});await db.agentSlot.deleteMany({where:{conversationId:id}});await db.agentToolTrace.deleteMany({where:{conversationId:id}});await db.aIInvocation.deleteMany({where:{conversationId:id}});await db.humanHandoff.deleteMany({where:{conversationId:id}});await db.agentJob.deleteMany({where:{conversationId:id}});await db.message.deleteMany({where:{conversationId:id}});await db.conversation.update({where:{id},data:{leadId:null}});if(c.leadId)await db.lead.delete({where:{id:c.leadId}});await db.conversation.delete({where:{id}});
+      await db.notification.deleteMany({where:{conversationId:id}});await db.shadowSuggestion.deleteMany({where:{conversationId:id}});await db.agentSlot.deleteMany({where:{conversationId:id}});await db.agentToolTrace.deleteMany({where:{conversationId:id}});await db.aIInvocation.deleteMany({where:{conversationId:id}});await db.humanHandoff.deleteMany({where:{conversationId:id}});await db.agentJob.deleteMany({where:{conversationId:id}});await db.message.deleteMany({where:{conversationId:id}});await db.conversation.update({where:{id},data:{leadId:null}});if(c.leadId){await db.leadExtra.deleteMany({where:{leadId:c.leadId}});await db.lead.delete({where:{id:c.leadId}});}await db.conversation.delete({where:{id}});
     }
     await db.$disconnect();
   }

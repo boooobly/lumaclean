@@ -12,11 +12,11 @@ import {leadAttribution, trackEvent} from "@/lib/analytics";
 import {ArrowIcon} from "@/components/site/arrow-icon";
 import {enquiryCopy} from '@/lib/lead-intent';
 
-type CountExtra = "standardWindow" | "largeWindow" | "cabinets" | "ironing";
-type ToggleExtra = "balcony" | "fridge" | "oven" | "steam" | "petHair" | "linen";
+type CountExtra = "standardWindow" | "largeWindow" | "cabinets" | "ironing" | "fridge" | "oven" | "microwave" | "hood" | "dishwasher" | "washingMachine";
+type ToggleExtra = "balcony" | "steam" | "petHair" | "linen";
 
-const countKeys: CountExtra[] = ["standardWindow", "largeWindow", "cabinets", "ironing"];
-const toggleKeys: ToggleExtra[] = ["balcony", "fridge", "oven", "steam", "petHair", "linen"];
+const countKeys: CountExtra[] = ["standardWindow", "largeWindow", "cabinets", "ironing", "fridge", "oven", "microwave", "hood", "dishwasher", "washingMachine"];
+const toggleKeys: ToggleExtra[] = ["balcony", "steam", "petHair", "linen"];
 
 type EstimateProps={locale:Locale;copy:EditorialContent['estimate'];content:SiteContent;initialService?:ServiceId;initialRequest?:'CLEANING'|'UPHOLSTERY'};
 export function Estimate({locale, copy, content, initialService = "regular", initialRequest = 'CLEANING'}:EstimateProps) {
@@ -30,8 +30,8 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
   const submission = useRef<{id: string; payload: string} | null>(null);
   const [service, setService] = useState<ServiceId>(initialService);
   const [area, setArea] = useState(55);
-  const [counts, setCounts] = useState<Record<CountExtra, number>>({standardWindow: 0, largeWindow: 0, cabinets: 0, ironing: 0});
-  const [toggles, setToggles] = useState<Record<ToggleExtra, boolean>>({balcony: false, fridge: false, oven: false, steam: false, petHair: false, linen: false});
+  const [counts, setCounts] = useState<Record<CountExtra, number>>({standardWindow: 0, largeWindow: 0, cabinets: 0, ironing: 0,fridge:0,oven:0,microwave:0,hood:0,dishwasher:0,washingMachine:0});
+  const [toggles, setToggles] = useState<Record<ToggleExtra, boolean>>({balcony: false, steam: false, petHair: false, linen: false});
   const [urgent, setUrgent] = useState(false);
   const [sameDayAllowed,setSameDayAllowed]=useState(false);
   useEffect(()=>{

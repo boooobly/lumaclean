@@ -5,6 +5,12 @@ export const quantityExtras = [
   "largeWindow",
   "cabinets",
   "ironing",
+  "fridge",
+  "oven",
+  "microwave",
+  "hood",
+  "dishwasher",
+  "washingMachine",
 ] as const;
 export type ExtraCode = keyof typeof extrasPrices;
 export type ExtraQuantity = { code: ExtraCode; quantity: number };

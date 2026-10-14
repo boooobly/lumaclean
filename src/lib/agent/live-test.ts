@@ -37,7 +37,7 @@ export async function cleanupLiveTest(db:PrismaClient,batchId:string){
     await tx.notification.deleteMany({where:{conversationId:c.id}});
     if(c.orderId){await tx.orderCleaner.deleteMany({where:{orderId:c.orderId}});await tx.orderExtra.deleteMany({where:{orderId:c.orderId}});await tx.order.delete({where:{id:c.orderId}});}
     if(c.clientId){await tx.clientAddress.deleteMany({where:{clientId:c.clientId}});await tx.client.delete({where:{id:c.clientId}});}
-    if(c.leadId){const lead=await tx.lead.findUniqueOrThrow({where:{id:c.leadId}});if(lead.submissionId!==`agent:${c.id}`)throw new AgentError('LIVE_TEST_CLEANUP_UNSAFE');await tx.lead.delete({where:{id:c.leadId}});}
+    if(c.leadId){const lead=await tx.lead.findUniqueOrThrow({where:{id:c.leadId}});if(lead.submissionId!==`agent:${c.id}`)throw new AgentError('LIVE_TEST_CLEANUP_UNSAFE');await tx.leadExtra.deleteMany({where:{leadId:c.leadId}});await tx.lead.delete({where:{id:c.leadId}});}
     await tx.agentSlot.deleteMany({where:{conversationId:c.id}});await tx.agentToolTrace.deleteMany({where:{conversationId:c.id}});await tx.aIInvocation.deleteMany({where:{conversationId:c.id}});await tx.shadowSuggestion.deleteMany({where:{conversationId:c.id}});await tx.humanHandoff.deleteMany({where:{conversationId:c.id}});await tx.agentJob.deleteMany({where:{conversationId:c.id}});await tx.message.deleteMany({where:{conversationId:c.id}});
     // Append-only audit is retained without contacts/messages; delete only synthetic operational records.
     await tx.rateLimit.deleteMany({where:{key:{in:[`message:${c.id}`,`daily:${c.id}`]}}});

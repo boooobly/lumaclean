@@ -73,9 +73,11 @@ const questions:Record<string,string[]> = {
  WINDOW_TYPE:['Это стандартные или большие/панорамные окна?','Da li su standardni ili veliki/panoramski?','Да ли су стандардни или велики/панорамски?','Are those standard or large/panoramic windows?'],
  WEEKEND_DAY:['Вам удобнее суббота или воскресенье?','Da li vam više odgovara subota ili nedelja?','Да ли вам више одговара субота или недеља?','Would Saturday or Sunday work better for you?'],
  PHONE:['Пришлите, пожалуйста, номер телефона.','Pošaljite broj telefona, molim vas.','Пошаљите број телефона, молим вас.','Please send your phone number.'],
+ NAME:['Как вас зовут?','Kako se zovete?','Како се зовете?','What is your name?'],
  AREA:['Подскажите, пожалуйста, площадь помещения в м².','Kolika je površina prostora u m²?','Колика је површина простора у м²?','What is the floor area in m²?'],
  SOIL_LEVEL:['Подскажите, пожалуйста, загрязнения обычные или сильные?','Da li je zaprljanost uobičajena ili jaka?','Да ли је запрљаност уобичајена или јака?','Is the dirt level normal or heavy?'],
  EXTRAS:['Нужны ли дополнительные услуги — например, уборка внутри духовки или холодильника?','Da li su potrebne dodatne usluge, na primer čišćenje rerne ili frižidera iznutra?','Да ли су потребне додатне услуге, на пример чишћење рерне или фрижидера изнутра?','Do you need any extras, such as cleaning inside the oven or fridge?'],
+ APPLIANCE_SCOPE:['Вы имеете в виду мойку названной техники изнутри?','Da li mislite na čišćenje navedenih uređaja iznutra?','Да ли мислите на чишћење наведених уређаја изнутра?','Do you mean cleaning inside the appliances you named?'],
  YES_NO:['Проверить свободное время?','Da proverim termine?','Да проверим термине?','Shall I check availability?'],
  POST_BOOKING:['Остались вопросы по записи?','Imate li još pitanja o terminu?','Имате ли још питања о термину?','Do you have any questions about your booking?'],
  BOOKING_CONFIRMATION:['Проверьте детали записи и подтвердите их, пожалуйста.','Proverite i potvrdite detalje termina.','Проверите и потврдите детаље термина.','Please review and confirm the booking details.'],
@@ -83,8 +85,11 @@ const questions:Record<string,string[]> = {
 };
 export function inputQuestion(intent:string,locale:string){return questions[intent]?.[Math.max(0,languages.indexOf(locale as AgentLocale))];}
 export function inputAlreadyKnown(intent:string,state:AgentState){
+ if(state.unresolvedInput===intent)return false;
+ if(intent==='NAME')return !!state.name;
+ if(intent==='FACT_CONFIRMATION')return !state.pendingFactProposal;
  const f=state.draftFacts??state.quote?.input;
- return intent==='SERVICE_CONFIRMATION'?!state.draftFacts?.serviceConfirmationRequired:intent==='WINDOW_COUNTS'||intent==='WINDOW_TYPE'?!windowQuantitiesMissing(state.draftFacts):intent==='WEEKEND_DAY'?!!state.draftFacts?.requestedDate:intent==='PHONE'?!!state.phone:intent==='SERVICE_TYPE'?!!f?.service:intent==='AREA'?!!f?.area:intent==='SOIL_LEVEL'?!!f?.soilLevel:intent==='EXTRAS'?!!state.draftFacts?.extrasConfirmed||!!state.quote:false;
+ return intent==='APPLIANCE_SCOPE'?!state.draftFacts?.applianceScopePending?.length:intent==='SERVICE_CONFIRMATION'?!state.draftFacts?.serviceConfirmationRequired:intent==='WINDOW_COUNTS'||intent==='WINDOW_TYPE'?!windowQuantitiesMissing(state.draftFacts):intent==='WEEKEND_DAY'?!!state.draftFacts?.requestedDate:intent==='PHONE'?!!state.phone:intent==='SERVICE_TYPE'?!!f?.service:intent==='AREA'?!!f?.area:intent==='SOIL_LEVEL'?!!f?.soilLevel:intent==='EXTRAS'?!!state.draftFacts?.extrasConfirmed||!!state.quote:false;
 }
 export function createReplySet(state:AgentState,locale:string,revision:number,control:string,now=new Date()):ReplySet|null{
  const intent=state.nextInput;

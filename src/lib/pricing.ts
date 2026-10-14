@@ -1,3 +1,4 @@
+import {applianceUnitPrice} from './appliance-catalog';
 export const serviceIds = ["regular", "deep", "move", "airbnb", "office"] as const;
 export type ServiceId = (typeof serviceIds)[number];
 export type AreaServiceId = ServiceId;
@@ -23,8 +24,12 @@ export const extrasPrices = {
   standardWindow: 900,
   largeWindow: 1200,
   balcony: 1100,
-  fridge: 900,
-  oven: 1100,
+  fridge: applianceUnitPrice,
+  oven: applianceUnitPrice,
+  microwave: applianceUnitPrice,
+  hood: applianceUnitPrice,
+  dishwasher: applianceUnitPrice,
+  washingMachine: applianceUnitPrice,
   cabinets: 900,
   ironing: 900,
   steam: 2800,

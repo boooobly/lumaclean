@@ -38,7 +38,7 @@ export async function autonomyPreview(db:PrismaClient,scenarioId:string,provider
   await db.$transaction(async tx=>{
    await tx.notification.deleteMany({where:{conversationId:c.id}});await tx.agentToolTrace.deleteMany({where:{conversationId:c.id}});await tx.aIInvocation.deleteMany({where:{conversationId:c.id}});await tx.shadowSuggestion.deleteMany({where:{conversationId:c.id}});await tx.agentSlot.deleteMany({where:{conversationId:c.id}});await tx.humanHandoff.deleteMany({where:{conversationId:c.id}});await tx.agentJob.deleteMany({where:{conversationId:c.id}});
    await tx.message.updateMany({where:{conversationId:c.id},data:{responseToMessageId:null}});await tx.message.deleteMany({where:{conversationId:c.id}});await tx.conversation.delete({where:{id:c.id}});
-   if(own.leadId)await tx.lead.delete({where:{id:own.leadId}});
+   if(own.leadId){await tx.leadExtra.deleteMany({where:{leadId:own.leadId}});await tx.lead.delete({where:{id:own.leadId}});}
   });
  }
  return {...report!,cleaned:true};

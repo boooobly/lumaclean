@@ -29,7 +29,7 @@ export function detectLocale(text:string,current:string):AgentLocale{
   return previous;
 }
 export function substantiveIntent(text:string){
-  return /(?:хочу|нужн[аоы]|заказ|запис|уберите|прибрать|треба|желим|закаж|очисти|treba|želim|zelim|zakaz|I (?:need|want)|please (?:clean|book)|book (?:a|the)).{0,90}(?:уборк|убрать|квартир|дом|чист|чиш|стан|кућ|čiš|cis|stan|clean|apartment)/iu.test(text)||/(?:уборк|чишћење|čišćenje|cleaning).{0,60}\d{1,4}\s*(?:м|m|квад)/iu.test(text);
+  return /(?:хочу|нужн[аоы]|заказ|запис|уберите|прибрать|треба|желим|закаж|очисти|treba|želim|zelim|zakaz|I (?:need|want)|please (?:clean|book)|book (?:a|the)).{0,90}(?:клинин|уборк|убрать|квартир|дом|чист|чиш|стан|кућ|čiš|cis|stan|clean|apartment)/iu.test(text)||/(?:уборк|чишћење|čišćenje|cleaning).{0,60}\d{1,4}\s*(?:м|m|квад)/iu.test(text);
 }
 export function mandatoryHandoff(text:string):HandoffReason|null{return contextualReason(text,detectedReason(text));}
 function detectedReason(text:string):HandoffReason|null{
@@ -42,7 +42,7 @@ function detectedReason(text:string):HandoffReason|null{
   if(/скидк|(?:дайте|можно|хочу).{0,20}дешев|popust|попуст|discount/i.test(text))return "DISCOUNT";
   if(/кровь|биоотход|игл[аыу]|шприц|опасн\w* хим|канализац|затоплен|нашестви\w* (?:таракан|клоп)|\b(?:blood|biohazard|needles|sharps|dangerous chemicals|sewage|flooding|infestation)\b|krv|igle|šprice|opasne hemikalije|kanalizacij|poplav|крв|игле|шприц|опасне хемикалије|канализациј|поплав/iu.test(text))return 'HAZARDOUS_CLEANING';
   if(/(?:сломал|разбил|повредил|ужасн|жалоб|верните деньги|пропал[а-яё]* вещ|пропал[а-яё]* украш|не приехал|не приш|плохо убрал|refund|broke|damaged|complaint|missing item|didn.t (?:arrive|show)|did not (?:arrive|show)|poor cleaning|reklamacij|жалб|поквари|loše (?:očiš|ocis)|нису (?:дош|стиг)|нестал)/iu.test(text))return 'COMPLAINT';
-  if(/(?:передвин|двиг|перенос|перенест).{0,35}(?:шкаф|диван|холодильник|тяжел|тяжёл)|(?:move|lift|carry).{0,35}(?:cabinet|wardrobe|sofa|fridge|heavy furniture)|(?:pomer|pomjer|nos).{0,35}(?:ormar|frižider|sofu)|(?:помер|нос).{0,35}(?:ормар|фрижидер|соф)/iu.test(text))return 'HEAVY_LIFTING';
+  if(/(?:передвин|двиг|перенос|перенест).{0,35}(?:шкаф|диван|холодильник|тяжел|тяжёл)|\b(?:move|lift|carry)\b.{0,35}(?:cabinet|wardrobe|sofa|fridge|heavy furniture)|\bremove\b.{0,20}(?:cabinet|wardrobe|sofa|fridge).{0,20}(?:from the room|out of|upstairs|downstairs)|(?:pomer|pomjer|nos).{0,35}(?:ormar|frižider|sofu)|(?:помер|нос).{0,35}(?:ормар|фрижидер|соф)/iu.test(text))return 'HEAVY_LIFTING';
   if(/(?:только|обязательно|нужн\w* именно).{0,20}(?:женщин|девуш|мужчин)|(?:only|must be|require).{0,20}(?:female|women|male|men)|(?:samo|isključivo).{0,20}(?:žene|muškar|zene|muskar)|(?:само|искључиво).{0,20}(?:жене|мушкар)/iu.test(text))return 'CREW_PREFERENCE';
   if(/(?:хран|остав|переда).{0,25}ключ|(?:keep|store|collect).{0,25}keys|(?:čuv|ostav|cuv).{0,25}ključ|(?:чув|остав).{0,25}кључ/iu.test(text))return 'ACCESS_REVIEW';
   if(/картой|сч[её]т.{0,20}(?:компан|фирм)|безнал|\b(?:card|invoice|corporate invoice)\b|kartic|faktur|картиц|фактур/iu.test(text))return 'PAYMENT_REVIEW';

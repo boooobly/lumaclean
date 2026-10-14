@@ -15,6 +15,10 @@ import { assertAutoReady, effectiveMode } from './readiness';
 import { resolveHandoffNotifications } from './telegram-handoff';
 import {chooseAlias,activeReplySet,replyText,isReplyKey,replyFacts} from './chat-presentation';
 import {applyCustomerFacts,explicitCustomerFacts} from './customer-facts';
+import {resolveOpenQuestion,customerPriceRequest} from './question-planning';
+import {confirmedProposal} from './fact-proposals';
+import {needsStructuredExtraction} from './extraction-planning';
+import {reliabilityCount} from './reliability-telemetry';
 import {buildAgentTemporalContext} from './temporal';
 import {behaviorMetric} from './behavior-telemetry';
 import {attachmentSelect} from './chat-attachments';
@@ -67,14 +71,25 @@ export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:str
     if(/утром|дн[её]м|вечером|в два|ujutru|popodne|uveče|ујутру|поподне|увече|\b(?:morning|afternoon|evening|at two)\b/iu.test(text)&&!/[0-2]?\d[:–-][0-5]?\d|\b\d{1,2}\s*(?:am|pm|час)/iu.test(text))state.timeClarificationRequired=true;
     else if(/\d{1,2}[:–-]\d{1,2}|\d{1,2}\s*(?:am|pm|час)|(?:в|у|at|u)\s+\d{1,2}(?=\s|$|[,.])/iu.test(text))delete state.timeClarificationRequired;
     const unanswered=await currentClientTurn(tx,c.id);
-    const expectedInput=state.nextInput??(unanswered[0]?.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent;delete state.nextInput;
-    applyCustomerFacts(state,explicitCustomerFacts(text,receivedAt,settings.timezone,expectedInput,state),buildAgentTemporalContext(new Date(),settings).nowLocalDate);
+    const expectedInput=state.questionContext?.status==='OPEN'?state.questionContext.questionKey:state.nextInput??(unanswered[0]?.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent;delete state.nextInput;
+    const proposed=confirmedProposal(text,state);
+    if(proposed)applyCustomerFacts(state,proposed,buildAgentTemporalContext(new Date(),settings).nowLocalDate);
+    const extracted=explicitCustomerFacts(text,receivedAt,settings.timezone,expectedInput,state);
+    if((extracted.extras?.length??0)>1)reliabilityCount(state,'multipleExtrasExtraction');
+    applyCustomerFacts(state,extracted,buildAgentTemporalContext(new Date(),settings).nowLocalDate);
+    if(state.unresolvedInput){
+      const key=state.unresolvedInput,field=key==='AREA'?'area':key==='SOIL_LEVEL'?'soilLevel':key==='SERVICE_TYPE'||key==='SERVICE_CONFIRMATION'?'service':key==='EXTRAS'?'extrasConfirmed':key==='WINDOW_COUNTS'||key==='WINDOW_TYPE'?'windowCleaning':undefined;
+      if(field&&({...proposed,...extracted} as Record<string,unknown>)[field]!==undefined&&!needsStructuredExtraction(text,key,{...proposed,...extracted}))delete state.unresolvedInput;
+    }
+    resolveOpenQuestion(state);
+    if(customerPriceRequest(text))state.priceRequestPending=true;
     const ids=[...new Set(input.attachmentIds??[])];
     if(ids.length>4||ids.length!==input.attachmentIds?.length&&!!input.attachmentIds)throw new AgentError('INVALID_ATTACHMENTS');
     if(ids.length&&await tx.chatAttachment.count({where:{id:{in:ids},conversationId:c.id,messageId:null,uploader:'CLIENT',processingStatus:'READY'}})!==ids.length)throw new AgentError('INVALID_ATTACHMENTS');
     const confirmation=!!state.pending&&(input.confirmationNonce===state.pending.nonce||confirmsRecap(text,state.pending.recap));
   if(input.confirmationNonce&&input.confirmationNonce!==state.pending?.nonce)throw new AgentError("INVALID_CONFIRMATION");
-    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text,sentAt:receivedAt,externalMessageId:`in:${input.id}`,structured:json({...input.transport?.metadata as object,...(expectedInput?{inputIntent:expectedInput}:{})}),...(input.transport?{inboundKey:input.transport.key,receivedAt}:{})}});
+    const sourceFacts=Object.fromEntries(Object.entries(extracted).filter(([key])=>!['name','phone','addressQuery','neighborhoodHint'].includes(key)));
+    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text,sentAt:receivedAt,externalMessageId:`in:${input.id}`,structured:json({...input.transport?.metadata as object,...(expectedInput?{inputIntent:expectedInput}:{}),factExtraction:{version:1,accepted:sourceFacts}}),...(input.transport?{inboundKey:input.transport.key,receivedAt}:{})}});
     if(ids.length)await tx.chatAttachment.updateMany({where:{id:{in:ids},conversationId:c.id,messageId:null},data:{messageId:message.id}});
     if(confirmation)state.pending!.confirmedByMessageId=message.id;
     else if(state.pending)delete state.pending;
@@ -96,13 +111,18 @@ export async function acceptChannelMessage(db:PrismaClient,event:InboundEvent,me
   try{return await acceptMessage(db,c,{id:event.externalMessageId,text:event.text,locale:c.locale,attachmentIds:media.ids,transport:{key,receivedAt:event.receivedAt??new Date(),metadata}});}
   catch(e){if(e instanceof Prisma.PrismaClientKnownRequestError&&e.code==='P2002'){const duplicate=await db.message.findUnique({where:{inboundKey:key}});if(duplicate?.conversationId===c.id)return{messageId:duplicate.id,created:false};}throw e;}
 }
+export function publicMessageStructure(value:unknown){
+  if(!value||typeof value!=='object')return null;
+  const data=value as Record<string,unknown>;
+  return Object.fromEntries(['type','reference','recap','replySet'].filter(key=>data[key]!==undefined).map(key=>[key,data[key]]));
+}
 export async function publicConversation(db:PrismaClient,c:Conversation){
   const latest=await db.conversation.findUniqueOrThrow({where:{id:c.id}}),state=stateOf(latest);
   const messages=await db.message.findMany({where:{conversationId:c.id,deliveryStatus:"DELIVERED",author:{in:["CLIENT","AI","ADMIN","SYSTEM"]}},orderBy:[{sentAt:"desc"},{id:'desc'}],take:50,select:{id:true,author:true,text:true,sentAt:true,readAt:true,structured:true,externalMessageId:true,attachments:{select:attachmentSelect}}});
   const jobs=await db.agentJob.findMany({where:{conversationId:c.id,status:{in:["PENDING","RUNNING"]}},select:{status:true,leaseUntil:true}});
   const notifications=await db.notification.findMany({where:{conversationId:c.id,audience:"CLIENT",clientId:latest.clientId,deliveryState:"INTERNAL",scheduledAt:{lte:new Date()}},orderBy:{scheduledAt:"desc"},take:10,select:{id:true,text:true,kind:true,scheduledAt:true}});
   const last=messages[0],set=last?.author==='AI'?activeReplySet(last.structured,latest.revision,latest.control):null;
-  return{notifications,messages:messages.reverse().map(({externalMessageId,...m})=>({...m,...(m.author==='CLIENT'?{requestId:externalMessageId?.startsWith('in:')?externalMessageId.slice(3):null}:{})})),displayAlias:latest.displayAlias,revision:latest.revision,quickReplies:set&&!['BOOKING_CONFIRMATION','POST_BOOKING'].includes(set.intent)?{messageId:last.id,replySetId:set.id,revision:set.conversationRevision,choices:set.choices}:null,typing:latest.control==='HUMAN_CONTROL'?!!latest.operatorTypingUntil&&latest.operatorTypingUntil>new Date():latest.control==='AI_CONTROL'&&jobs.some(j=>j.status==='RUNNING'&&!!j.leaseUntil&&j.leaseUntil>new Date()),control:latest.control,locale:latest.locale,pending:jobs.length>0,confirmation:state.pending?{nonce:state.pending.nonce,recap:state.pending.recap}:null,booking:state.booking?{reference:state.booking.reference,recap:(({orderId,reference,...r})=>{void orderId;void reference;return r;})(state.booking)}:null};
+  return{notifications,messages:messages.reverse().map(({externalMessageId,structured,...m})=>({...m,structured:publicMessageStructure(structured),...(m.author==='CLIENT'?{requestId:externalMessageId?.startsWith('in:')?externalMessageId.slice(3):null}:{})})),displayAlias:latest.displayAlias,revision:latest.revision,quickReplies:set&&!['BOOKING_CONFIRMATION','POST_BOOKING'].includes(set.intent)?{messageId:last.id,replySetId:set.id,revision:set.conversationRevision,choices:set.choices}:null,typing:latest.control==='HUMAN_CONTROL'?!!latest.operatorTypingUntil&&latest.operatorTypingUntil>new Date():latest.control==='AI_CONTROL'&&jobs.some(j=>j.status==='RUNNING'&&!!j.leaseUntil&&j.leaseUntil>new Date()),control:latest.control,locale:latest.locale,pending:jobs.length>0,confirmation:state.pending?{nonce:state.pending.nonce,recap:state.pending.recap}:null,booking:state.booking?{reference:state.booking.reference,recap:(({orderId,reference,...r})=>{void orderId;void reference;return r;})(state.booking)}:null};
 }
 export const inboxCommandSchema=z.discriminatedUnion("action",[
   z.object({action:z.literal('resolveReview'),id:z.string().min(1).max(80),handoffId:z.string().min(1).max(80),decision:z.enum(['APPROVED','REJECTED','NEEDS_INFO']),note:z.string().trim().min(3).max(1000)}).strict(),
