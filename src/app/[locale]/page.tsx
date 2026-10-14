@@ -53,7 +53,7 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
   const c = siteContent[locale];
   const v = editorialContent[locale];
   const messengerLinks = getMessengerLinks(locale);
-  const extraKeys = ["standardWindow", "largeWindow", "balcony", "fridge", "oven", "cabinets", "ironing", "steam", "petHair", "linen"] as const;
+  const extraKeys = ["standardWindow", "largeWindow", "balcony", "fridge", "oven", "microwave", "hood", "dishwasher", "washingMachine", "cabinets", "ironing", "steam", "petHair", "linen"] as const;
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@graph": [

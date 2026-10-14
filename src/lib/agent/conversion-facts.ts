@@ -1,16 +1,17 @@
 import type {AgentState} from './contracts';
 import {normalizedPhone} from '@/lib/domain/crm';
 import {resolveCustomerWeekend} from './temporal';
+import {normalizeCustomerText} from './customer-text';
 
 type Facts=NonNullable<AgentState['draftFacts']>;
-export const plain=(text:string)=>text.normalize('NFD').replace(/\p{M}/gu,'').toLowerCase();
+export const plain=normalizeCustomerText;
 const uncertain=/\b(?:vrv|verovatno|mozda|mislim|valjda|probably|maybe|perhaps|i think|not sure|nisam sigur(?:an|na))\b|не уверен|наверно|возможно|думаю/iu;
 export function catalogQuestion(text:string){return /^(?:что|чем|как|какие|сколько|вы|можно|можете ли|есть|what|how|do you|can you|can i|are there|sta|šta|koja|kako|koliko|da li|mogu li|mozete li|шта|која|како|колико|да ли|могу ли|можете ли)(?=\s|[?!.,:]|$)/iu.test(plain(text).trim())&&!/(?:хочу|нужна|нужны|нужен|нужно убрать|treba mi|treba nam|zelim|желим|i need|i want|please clean|book)/iu.test(plain(text));}
 export function serviceNeedsConfirmation(text:string){
   const t=plain(text);
   return /general|redovno|odrzava|dubinsk|deep|regular|генераль|поддержива|уборк|генерал|дубинск/iu.test(t)&&(uncertain.test(t)||/ne znam|не знаю/iu.test(t));
 }
-const numbers:Record<string,number>={jedan:1,jedna:1,jedno:1,dva:2,dve:2,tri:3,cetiri:4,pet:5,sest:6,sedam:7,osam:8,devet:9,deset:10,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,один:1,одно:1,два:2,две:2,три:3,четыре:4,пять:5,шесть:6,семь:7};
+const numbers:Record<string,number>={jedan:1,jedna:1,jedno:1,dva:2,dve:2,tri:3,cetiri:4,pet:5,sest:6,sedam:7,osam:8,devet:9,deset:10,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,один:1,одна:1,одно:1,два:2,две:2,три:3,четыре:4,пять:5,шесть:6,семь:7,восемь:8,девять:9,десять:10,један:1,једна:1,једно:1,четири:4,пет:5,шест:6,седам:7,осам:8,девет:9,десет:10};
 const number='(?:[0-9]{1,3}|'+Object.keys(numbers).join('|')+')';
 function count(value:string){return /^\d+$/u.test(value)?Number(value):numbers[value];}
 const large='(?:velik[a-z]*|panoramsk[a-z]*|large|big|panoramic|больш[а-я]*|панорамн[а-я]*|велик[а-я]*)';
@@ -30,6 +31,11 @@ export function conversionFacts(text:string,at:Date,timezone:string,expected?:Ag
   if(crew){const n=count(crew[1]);if(n>=1&&n<=10)f.requestedCrew=n;}
   const bath=t.match(new RegExp('('+number+')\\s*(?:kupatil[a-z]*|bathrooms?|сануз[а-я]*|купатил[а-я]*)','iu'));
   if(bath){const n=count(bath[1]);if(n>=0&&n<=20)f.bathroomCount=n;}
+  const toilets=t.match(new RegExp('('+number+')\\s*(?:туалет[а-я]*|toilets?|toalet[a-z]*|тоалет[а-я]*)','iu'));
+  const bathrooms=t.match(new RegExp('('+number+')\\s*(?:ванн[а-я]*|bathrooms?|kupatil[a-z]*|купатил[а-я]*)','iu'));
+  if(toilets&&bathrooms&&!/или|\bor\b|\bili\b/iu.test(t)){
+    const n=count(toilets[1])+count(bathrooms[1]);if(n>=1&&n<=20)f.bathroomCount=n;
+  }else if(toilets&&!bath&&!bathrooms){const n=count(toilets[1]);if(n>=1&&n<=20)f.bathroomCount=n;}
   if(/\bsms\b|смс/iu.test(t)&&!/bez sms|ne (?:zelim|treba).*sms|no sms|don't want.*sms|не (?:надо|нужно).*смс|sms nije potreban/iu.test(t))f.preferredContactChannel='SMS';
   else if(/(?:reply|respond|odgovor|ответ).{0,25}whatsapp/iu.test(t))f.preferredContactChannel='WHATSAPP';
   else if(/(?:reply|respond|odgovor|ответ).{0,25}telegram/iu.test(t))f.preferredContactChannel='TELEGRAM';
@@ -61,6 +67,9 @@ export function windowQuantitiesMissing(f:Facts|undefined){
   return !!w?.requested&&(w.totalCount!==undefined||w.standardCount===undefined&&w.largeCount===undefined);
 }
 export function bookingReviewBlocked(state:AgentState){
+  if(state.unresolvedInput)return true;
+  if(state.pendingFactProposal)return true;
+  if(state.draftFacts?.applianceScopePending?.length)return true;
   if(state.upholsteryInquiry)return true;
   return !!state.review?.reasons.some(r=>r!=='CONTACT_PREFERENCE')||!!state.draftFacts?.reviewItems?.length||!!state.draftFacts?.serviceConfirmationRequired||windowQuantitiesMissing(state.draftFacts);
 }

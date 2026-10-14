@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { extrasPrices, priceMatrix, serviceIds } from "../src/lib/pricing";
 import { pgConnectionString } from "../src/lib/database/connection";
+import {applianceLabels,applianceCodes} from '../src/lib/appliance-catalog';
 
 loadEnvConfig(process.cwd());
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required");
@@ -17,6 +18,7 @@ const names = {
   office: "Уборка офиса",
 };
 const extraNames = {
+  ...applianceLabels.ru,
   standardWindow: "Стандартное окно",
   largeWindow: "Большое окно",
   balcony: "Балкон",
@@ -66,7 +68,7 @@ async function seed() {
         create: {
           code,
           name: extraNames[code as keyof typeof extraNames],
-          unit: ["standardWindow", "largeWindow", "cabinets"].includes(code)
+          unit: ["standardWindow", "largeWindow", "cabinets",...applianceCodes].includes(code)
             ? "item"
             : code === "ironing"
               ? "hour"

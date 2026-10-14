@@ -50,10 +50,11 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
       );
       const catalogue = await tx.serviceExtra.findMany({
         where: { code: { in: input.extras.map((e) => e.code) }, active: true },
-        select: { id: true, code: true },
+        select: { id: true, code: true,unitPrice:true },
       });
       if (catalogue.length !== input.extras.length)
         throw new CrmError("VALIDATION", "Extra unavailable");
+      if(calculated?.extras.some(e=>!catalogue.some(item=>item.code===e.code&&Number(item.unitPrice)===e.unitPrice)))throw new CrmError('VALIDATION','Price catalog requires verification');
       const reference = `LC-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${randomUUID().slice(0, 8).toUpperCase()}`;
       const lead = await tx.lead.create({
         data: {

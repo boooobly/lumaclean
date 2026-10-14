@@ -38,6 +38,10 @@ export const serviceLabels = {
   office: "Уборка офиса",
 } as const;
 export const extraLabels = {
+  microwave: "Микроволновка внутри",
+  hood: "Вытяжка внутри",
+  dishwasher: "Посудомоечная машина внутри",
+  washingMachine: "Стиральная машина внутри",
   standardWindow: "Стандартное окно",
   largeWindow: "Большое окно",
   balcony: "Балкон",

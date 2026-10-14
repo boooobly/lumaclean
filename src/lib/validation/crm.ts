@@ -53,7 +53,7 @@ export const extrasSchema = z
       })
       .strict(),
   )
-  .max(10)
+  .max(14)
   .refine(
     (items) => new Set(items.map((e) => e.code)).size === items.length,
     "Услуги не должны повторяться",

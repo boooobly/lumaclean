@@ -18,17 +18,23 @@ import {assertPreviewBatch} from './live-proof';
 import {photoQualificationAllowed} from './chat-attachments';
 import { orderNotifications, handoffNotification } from './notifications';
 import {buildAgentTemporalContext,serviceDatePolicy,latestStartForEndBy,incomingDeparturePolicy,type DepartureLegInput} from "./temporal";
-import {applyCustomerFacts,explicitCustomerFacts,supportedFacts} from "./customer-facts";
+import {applyCustomerFacts,explicitCustomerFacts,supportedFacts,equivalentCustomerFact} from "./customer-facts";
 import {upholsteryUi} from '@/lib/upholstery-content';
 import {currentClientTurn,pendingHumanStatements,operationalSummary,conversationMemory} from './conversation-memory';
 import {inputQuestion,inputAlreadyKnown} from "./chat-presentation";
 import {behaviorMetric} from "./behavior-telemetry";
+import {reliabilityCount} from './reliability-telemetry';
 import {bookingReviewBlocked,windowQuantitiesMissing,catalogQuestion} from './conversion-facts';
 import {mandatoryHandoff} from './policy';
-import { AgentError, toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
+import {supportedProposal,proposalQuestion} from './fact-proposals';
+import {extrasPrices} from '@/lib/pricing';
+import {applianceLabels,applianceScope} from '@/lib/appliance-catalog';
+import {recoverMissingFacts,loopClarificationText} from './conversation-recovery';
+import {alternativePriceRequest} from './alternative-price';
+import { AgentError, customerFactsSchema,toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
 type Tx=Prisma.TransactionClient;
-export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[];factPercentages?:number[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; validatedDepartures?:DepartureLegInput[]};
+export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[];factPercentages?:number[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; questionAsked?:boolean; extractionIncomplete?:AgentState['nextInput']; validatedDepartures?:DepartureLegInput[]};
 export const json=(value:unknown)=>JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 export const stateOf=(c:Pick<Conversation,"state">)=>structuredClone(c.state) as AgentState;
 // PostgreSQL jsonb reorders object keys. Hash and compare facts, never their insertion order.
@@ -52,17 +58,26 @@ async function activePrice(tx:Tx,state:AgentState,c:Conversation,input:ReturnTyp
   if(!scope.aiAllowedServices.includes(input.service))throw new AgentError('UNSUPPORTED_SERVICE');
   if(!service?.active)throw new AgentError("SERVICE_UNAVAILABLE");
   const selected=input.extras.filter(e=>e.quantity>0);
-  if(await tx.serviceExtra.count({where:{code:{in:selected.map(e=>e.code)},active:true}})!==selected.length)throw new AgentError("EXTRA_UNAVAILABLE");
+  const catalog=await tx.serviceExtra.findMany({where:{code:{in:selected.map(e=>e.code)},active:true},select:{code:true,unitPrice:true}});
+  if(catalog.length!==selected.length)throw new AgentError("EXTRA_UNAVAILABLE");
   const client=c.identityVerified&&c.clientId?await tx.client.findUnique({where:{id:c.clientId},select:{discountPercent:true}}):null;
   const calculated=quote(input.service,input.area,selected,input.urgent),discount=Number(client?.discountPercent??0);
+  if(calculated.extras.some(e=>!catalog.some(item=>item.code===e.code&&Number(item.unitPrice)===e.unitPrice)))throw new AgentError('PRICE_CATALOG_MISMATCH');
   const snapshot=priceSnapshot(calculated.total,discount,null,null);
   const requiresHumanReview=["HEAVY","EXTREME"].includes(input.soilLevel)||selected.some(e=>e.code==="largeWindow");
   void state;
   return{service,calculated,snapshot,requiresHumanReview};
 }
 async function updateLead(tx:Tx,c:Conversation,ctx:ToolContext,input:ReturnType<typeof toolSchemas.createOrUpdateLead.parse>){
+  if(!ctx.previewTestId&&(input.service&&input.service!==ctx.state.draftFacts?.service||input.area&&input.area!==ctx.state.draftFacts?.area))return{error:'CUSTOMER_FACTS_REQUIRED',message:'Record and confirm operational facts before updating the Lead. Lead fields cannot override current confirmed facts.'};
   if([input.name,input.phone].some(v=>v&&/^(?:не указано|неизвестно|уточняется|unknown|not provided|n\/a|null)$/i.test(v)))return{error:"CONTACT_REQUIRED",message:"Omit missing name/phone entirely. Never send a placeholder. Contact is not required to record cleaning intent or quote."};
   if(input.phone&&!normalizedPhone(input.phone))return{error:"INVALID_PHONE",message:"Ask for a valid customer phone or omit phone. Do not invent contact details."};
+  if(!ctx.previewTestId&&(input.name&&input.name!==ctx.state.name||input.phone&&normalizedPhone(input.phone)!==ctx.state.phone)){
+    const job=await tx.agentJob.findUniqueOrThrow({where:{id:ctx.jobId}}),turn=await currentClientTurn(tx,c.id,job.messageId);
+    const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    const evidence=turn.map(m=>explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,ctx.state));
+    if(input.name&&input.name!==ctx.state.name&&!evidence.some(f=>f.name===input.name)||input.phone&&normalizedPhone(input.phone)!==ctx.state.phone&&!evidence.some(f=>f.phone===normalizedPhone(input.phone!)))return{error:'CUSTOMER_FACTS_REQUIRED',message:'Contact must match an explicit current customer statement or already recorded contact. Omit unknown fields; never use the assistant alias.'};
+  }
   if(input.name&&input.name!==ctx.state.name)delete ctx.state.pending;
   if(input.phone&&input.phone!==ctx.state.phone)delete ctx.state.pending;
   if(input.name)ctx.state.name=input.name;
@@ -77,7 +92,22 @@ async function updateLead(tx:Tx,c:Conversation,ctx:ToolContext,input:ReturnType<
   if(previous?.status==="LOST")return{error:"LEAD_CLOSED",message:"Owner closed this enquiry. Do not reopen or book it automatically."};
   if(previous?.status==="CONVERTED")return{ok:true,leadId:previous.id};
   const lead=previous?await tx.lead.update({where:{id:previous.id},data:fields}):await tx.lead.create({data:{...fields,submissionId:`agent:${c.id}`,submissionHash:createHash("sha256").update(`agent:${c.id}`).digest("hex"),channel:c.channel,entrySource:"ai-chat",reference:`LC-AI-${randomUUID().slice(0,8).toUpperCase()}`,clientId:c.identityVerified?c.clientId:null,telegramStatus:"CANCELLED"}});
-  await tx.conversation.update({where:{id:c.id},data:{leadId:lead.id,stage:"QUALIFYING"}});
+  const confirmed=ctx.state.draftFacts;
+  if(confirmed?.extras!==undefined||confirmed?.extrasConfirmed){
+    const selected=(confirmed.extras??[]).filter(e=>e.quantity>0);
+    const catalogue=await tx.serviceExtra.findMany({where:{code:{in:selected.map(e=>e.code)},active:true},select:{id:true,code:true,unitPrice:true}});
+    if(catalogue.length!==selected.length)throw new AgentError('EXTRA_UNAVAILABLE');
+    if(selected.some(e=>!catalogue.some(item=>item.code===e.code&&Number(item.unitPrice)===quote(serviceCode??'regular',area??1,[e],false).extras[0].unitPrice)))throw new AgentError('PRICE_CATALOG_MISMATCH');
+    await tx.leadExtra.deleteMany({where:{leadId:lead.id}});
+    if(selected.length)await tx.leadExtra.createMany({data:selected.map(e=>({leadId:lead.id,extraId:catalogue.find(x=>x.code===e.code)!.id,quantity:e.quantity,unitPrice:quote(serviceCode??'regular',area??1,[e],false).extras[0].unitPrice}))});
+  }
+  if(confirmed){
+    const currentFacts={service:confirmed.service,area:confirmed.area,soilLevel:confirmed.soilLevel,bathroomCount:confirmed.bathroomCount,windows:confirmed.windowCleaning,requestedDate:confirmed.requestedDate,requestedCrew:confirmed.requestedCrew};
+    const oldNote=(previous?.internalNote??'').replace(/\n?\[\[AI_FACTS\]\][\s\S]*?\[\[\/AI_FACTS\]\]/gu,'').trim();
+    await tx.lead.update({where:{id:lead.id},data:{estimatedPrice:ctx.state.quote?.total??ctx.state.upholsteryQuote?.total??null,internalNote:(oldNote?oldNote+'\n':'')+'[[AI_FACTS]]'+JSON.stringify(currentFacts)+'[[/AI_FACTS]]'}});
+  }
+  const nextStage=ctx.state.pending?'AWAITING_CONFIRMATION':ctx.state.slots?.length?'SCHEDULING':ctx.state.quote?'QUOTING':'QUALIFYING';
+  await tx.conversation.update({where:{id:c.id},data:{leadId:lead.id,stage:nextStage}});
   await aiAudit(tx,ctx,previous?"AI_LEAD_UPDATED":"AI_LEAD_CREATED","Lead",lead.id);
   return{ok:true,leadId:lead.id};
 }
@@ -126,7 +156,7 @@ export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,resched
   if(!state.quote||state.quote.requiresHumanReview||Date.now()-Date.parse(state.quote.at)>30*60000||!state.duration||!state.address||!state.name||!state.phone||!normalizedPhone(state.phone))throw new AgentError("INCOMPLETE_BOOKING");
   if(canonicalJson(recap(state,slot.start.toISOString()))!==canonicalJson(pending.recap))throw new AgentError("EXPLICIT_CONFIRMATION_REQUIRED");
   const pricing=await activePrice(tx,state,c,state.quote.input);
-  if(pricing.requiresHumanReview||pricing.snapshot.finalPrice!==state.quote.total)throw new AgentError("PRICE_CHANGED");
+  if(pricing.requiresHumanReview||pricing.snapshot.finalPrice!==state.quote.total||pricing.calculated.extras.some(e=>!state.quote?.breakdown?.some(b=>b.code===e.code&&b.quantity===e.quantity&&b.unitPrice===e.unitPrice)))throw new AgentError("PRICE_CHANGED");
   const duration=await durationData(tx,{...state.quote.input,serviceId:pricing.service.id,requiredCleaners:state.duration.requiredCleaners});
   if(duration.estimatedDurationMinutes!==state.duration.minutes||duration.durationRuleVersion!==state.duration.version)throw new AgentError("SLOT_NO_LONGER_AVAILABLE");
   // Serialize the side-effect boundary with emergency OFF/SHADOW and re-read control after all checks.
@@ -212,13 +242,16 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   }
   if(state.upholsteryInquiry&&['findAvailableSlots','validateSlot','createOrder','rescheduleOrder','estimateDuration'].includes(name))throw new AgentError('UPHOLSTERY_REVIEW_REQUIRED');
   if(name==="getBusinessInfo"){
+    const activeExtras=await tx.serviceExtra.findMany({where:{active:true},select:{code:true,unitPrice:true}});
+    const lang=c.locale==='sr-Cyrl'?'sr-Cyrl':c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru';
+    const priceCatalog=Object.entries(extrasPrices).map(([code,amount])=>({code,amount,label:applianceLabels[lang][code as keyof typeof applianceLabels.ru]??siteContent[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'].calculator.labels[code],currency:'RSD',confirmed:activeExtras.some(e=>e.code===code&&Number(e.unitPrice)===amount)}));
     const content=siteContent[c.locale.startsWith("sr")?"sr":c.locale==="en"?"en":"ru"];
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
     const catalog=upholsteryCatalogSchema.parse((await tx.upholsterySettings.findUniqueOrThrow({where:{id:'default'}})).catalog);
     const upholstery=upholsteryUi[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'];const facts={upholstery:{name:upholstery.name,method:'wet spray extraction',equipment:'Professional Kärcher equipment and products; model not confirmed',faq:upholstery.faq,limits:upholstery.limits,publicPrices:Object.entries(catalog).map(([key,amount])=>({item:upholstery.catalogLabels[key as keyof typeof catalog],from:amount,currency:'RSD'})),pricing:'These are public starting prices, not a personal quote. Standalone minimum applies. Use calculateUpholstery for exact sums only when the customer supplies the facts. No mental arithmetic.',autonomousBooking:false},sameDayPolicy:{cutoffMinute:settings.sameDayBookingCutoffMinute,latestDepartureMinute:settings.latestCleanerDepartureMinute,timezone:settings.timezone,requiresRealAvailability:true,surchargePercent:20},city:content.footer.location,services:content.services,scope:content.comparison,assurance:content.assurance,faq:content.faq.items,extras:content.calculator.labels,pricingPolicy:content.calculator.note,access:{confirmedHandoverProcess:false,rule:'No public key handover or custody protocol is confirmed. Do not propose drop-off locations, custody, storage or entry codes. For a general FAQ say this detail must be agreed before any actual handover. Only an actual unusual access/key-custody request requires review.'},discounts:{publicPromotionConfirmed:false,rule:'Only an existing server-verified client discount is applied by calculatePrice. A universal returning-customer discount is not published in this catalog. General FAQ does not require review; an actual request for an individual discount does.'}};
     ctx.factPercentages=[20];
-    ctx.factAmounts=[...Object.values(catalog),...[...JSON.stringify(facts).matchAll(/(\d[\d\s,]*?)\s*RSD/gi)].map(m=>Number(m[1].replace(/[\s,]/g,"")))];
-    return facts;
+    ctx.factAmounts=[...priceCatalog.filter(e=>e.confirmed).map(e=>e.amount),...Object.values(catalog),...[...JSON.stringify(facts).matchAll(/(\d[\d\s,]*?)\s*RSD/gi)].map(m=>Number(m[1].replace(/[\s,]/g,"")))];
+    return {...facts,priceCatalog,applianceScope:applianceScope[lang],presence:{confirmedRequirement:'UNKNOWN',rule:'A requirement to stay home or permission to be absent is not published. Agree access before service; do not invent key collection/custody. General FAQ alone does not require handoff.'}};
   }
   if(name==="findClient"){
     if(!c.identityVerified||!c.clientId)return{verified:false,error:"IDENTITY_REQUIRED"};
@@ -231,12 +264,40 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const job=await tx.agentJob.findUniqueOrThrow({where:{id:ctx.jobId}});
     const turn=await currentClientTurn(tx,c.id,job.messageId);
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
-    const source=turn.find(m=>m.text.includes(input.evidence)&&supportedFacts(input.facts,explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,state)));
-    if(!source)return{error:'CUSTOMER_FACTS_REQUIRED'};
-    applyCustomerFacts(state,input.facts,buildAgentTemporalContext(source.sentAt,settings).nowLocalDate);
+    const source=turn.find(m=>{
+      const snapshot=customerFactsSchema.safeParse((m.structured as {factExtraction?:{accepted?:unknown}}|null)?.factExtraction?.accepted);
+      const parsed=explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,state);
+      return m.text.includes(input.evidence)&&supportedFacts(input.facts,{...parsed,...(snapshot.success?snapshot.data:{})});
+    });
+    if(!source){
+      const candidate=input.fieldEvidence&&turn.find(m=>m.text.includes(input.evidence)&&supportedProposal(input.facts,m.text,input.fieldEvidence!));
+      if(!candidate)return{error:'CUSTOMER_FACTS_REQUIRED',message:'Provide exact fieldEvidence for unsupported natural wording; guessed quantities and non-current evidence are rejected. Ask a specific clarification instead of repeating a general question.'};
+      state.pendingFactProposal={facts:input.facts,sourceMessageId:candidate.id};
+      if(Object.keys(input.facts).some(k=>['service','area','soilLevel','extras','windowCleaning'].includes(k))){delete state.quote;delete state.duration;}
+      delete state.pending;delete state.slots;delete state.selectedSlotToken;
+      state.nextInput='FACT_CONFIRMATION';ctx.responseText=proposalQuestion(input.facts,c.locale);ctx.questionAsked=true;
+      return{question:ctx.responseText,needsCustomerConfirmation:true,finishTurn:true};
+    }
+    const replay=structuredClone(state);
+    applyCustomerFacts(replay,input.facts,buildAgentTemporalContext(source.sentAt,settings).nowLocalDate);
     // Evidence from an early message cannot undo a later explicit correction in this same burst.
-    for(const m of turn.slice(turn.indexOf(source)+1))applyCustomerFacts(state,explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,state));
+    for(const m of turn.slice(turn.indexOf(source)+1)){
+      const snapshot=customerFactsSchema.safeParse((m.structured as {factExtraction?:{accepted?:unknown}}|null)?.factExtraction?.accepted);
+      applyCustomerFacts(replay,{...explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,replay),...(snapshot.success?snapshot.data:{})});
+    }
+    applyCustomerFacts(state,replay.draftFacts??{},buildAgentTemporalContext(source.sentAt,settings).nowLocalDate);
     return{facts:state.draftFacts};
+  }
+  if(name==='recoverConversationFacts'){
+    reliabilityCount(state,'conversationLoop');
+    if(state.booking||state.pendingFactProposal)return{recovered:false,reason:'CURRENT_STATE_PRESERVED'};
+    const rows=await tx.message.findMany({where:{conversationId:c.id,author:'CLIENT'},orderBy:[{sentAt:'desc'},{id:'desc'}],take:16,select:{text:true,sentAt:true,structured:true}});
+    const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    const changedFields=recoverMissingFacts(state,rows.reverse(),settings.timezone,buildAgentTemporalContext(new Date(),settings).nowLocalDate);
+    if(changedFields.length)reliabilityCount(state,'safeRecovery');
+    state.planningRecovery={changedFields,unresolvedQuestionKey:changedFields.length?undefined:state.questionContext?.questionKey};
+    if(changedFields.length&&ctx.mode==='AUTO')await updateLead(tx,c,ctx,{intent:'cleaning'});
+    return{recovered:changedFields.length>0,changedFields};
   }
   if(name==='reconcileHumanContext'){
     const input=toolSchemas.reconcileHumanContext.parse(payload),pending=pendingHumanStatements(c.summary);
@@ -256,7 +317,11 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
       if(event.facts){applyCustomerFacts(state,event.facts);continue;}
       const m=event.message!;
       if(m.author==='ADMIN'){for(const correction of input.corrections.filter(p=>p.messageId===m.id))applyCustomerFacts(state,correction.facts);}
-      else if(m.author==='CLIENT')applyCustomerFacts(state,explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,state));
+      else if(m.author==='CLIENT'){
+        const metadata=m.structured as {inputIntent?:AgentState['nextInput'];factExtraction?:{accepted?:unknown}}|null;
+        const accepted=customerFactsSchema.safeParse(metadata?.factExtraction?.accepted);
+        applyCustomerFacts(state,{...explicitCustomerFacts(m.text,m.sentAt,settings.timezone,metadata?.inputIntent,state),...(accepted.success?accepted.data:{})});
+      }
     }
     if(ctx.mode==='AUTO'&&(c.leadId||state.draftFacts?.service&&state.draftFacts.area))await updateLead(tx,c,ctx,{intent:'cleaning'});
     if(ctx.mode==='AUTO')await tx.conversation.update({where:{id:c.id},data:{summary:operationalSummary(state,c.summary,{reviewedHumanIds:ids})}});
@@ -264,11 +329,13 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   }
   if(name==='requestCustomerInput'){
     const {intent}=toolSchemas.requestCustomerInput.parse(payload);
+    if(ctx.extractionIncomplete===intent){reliabilityCount(state,'factExtractionFailure');state.unresolvedInput=intent;delete ctx.extractionIncomplete;delete state.pending;delete state.slots;delete state.selectedSlotToken;}
     if(state.upholsteryInquiry&&intent!=='PHONE')return{error:'UPHOLSTERY_MANAGER_INTAKE',message:'Collect only missing name/contact. Manager will clarify furniture and pricing; do not run cleaning or furniture qualification.'};
     if(inputAlreadyKnown(intent,state)){behaviorMetric('repeatedQuestionDetected');behaviorMetric('repeatedQualificationQuestionCount');return{error:'FACT_ALREADY_KNOWN',facts:state.draftFacts};}
     if(intent==='SLOT_SELECTION'&&!state.slots?.length)return{error:'SLOTS_REQUIRED'};
     if(intent==='POST_BOOKING'&&!state.booking||intent==='BOOKING_CONFIRMATION'&&!state.pending||intent==='YES_NO'&&!state.quote)return{error:'INPUT_CONTEXT_REQUIRED'};
-    let question=inputQuestion(intent,c.locale);
+    let question=intent==='FACT_CONFIRMATION'&&state.pendingFactProposal?proposalQuestion(state.pendingFactProposal.facts,c.locale):inputQuestion(intent,c.locale);
+    if(state.planningRecovery?.unresolvedQuestionKey===intent||state.unresolvedInput===intent)question=loopClarificationText(intent,c.locale)??question;
     if(intent==='SERVICE_CONFIRMATION'){
       if(state.draftFacts?.service!=='deep')question=inputQuestion('SERVICE_TYPE',c.locale);
       const content=siteContent[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'];
@@ -276,17 +343,34 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
       question=content.services.filter(s=>s.id==='regular'||s.id==='deep').map(s=>s.name+': '+s.description).join('\n')+'\n'+exclusions+'\n\n'+question;
     }
     if(!question)return{error:'UNSUPPORTED_INPUT_INTENT'};
-    state.nextInput=intent;ctx.responseText=question;
+    state.nextInput=intent;ctx.responseText=question;ctx.questionAsked=true;
     return{question,intent,finishTurn:true};
   }
   if(name==="createOrUpdateLead")return updateLead(tx,c,ctx,toolSchemas[name].parse(payload));
+  if(name==='calculateAlternativePrice'){
+    const input=toolSchemas.calculateAlternativePrice.parse(payload);
+    if(!state.quote)return{error:'QUOTE_REQUIRED'};
+    if(state.pendingFactProposal||state.unresolvedInput||state.draftFacts?.applianceScopePending?.length)return{error:'FACT_CONFIRMATION_REQUIRED'};
+    const job=await tx.agentJob.findUniqueOrThrow({where:{id:ctx.jobId}}),turn=await currentClientTurn(tx,c.id,job.messageId);
+    const source=turn.find(m=>m.text.includes(input.evidence)&&JSON.stringify([...(alternativePriceRequest(m.text)??[])].sort())===JSON.stringify([...input.exclude].sort()));
+    if(!source)return{error:'CUSTOMER_FACTS_REQUIRED'};
+    const alternative={...state.quote.input,extras:state.quote.input.extras.filter(e=>!input.exclude.includes(e.code as typeof input.exclude[number]))};
+    const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}}),date=state.draftFacts?.requestedDate??state.requestedWindow?.date;
+    if(date){const policy=serviceDatePolicy(date,settings);if('error' in policy)return policy;alternative.urgent=policy.urgent;}else alternative.urgent=false;
+    const pricing=await activePrice(tx,state,c,alternative);
+    const q={...state.quote,input:alternative,base:pricing.calculated.base,total:pricing.snapshot.finalPrice,discountPercent:pricing.snapshot.discountPercent,requiresHumanReview:state.quote.requiresHumanReview||!!state.quote.pendingReviewItems?.length,breakdown:pricing.calculated.extras.map(e=>({...e,amount:e.quantity*e.unitPrice}))};
+    ctx.factAmounts=[q.base,q.total,...q.breakdown.flatMap(e=>[e.unitPrice,e.amount])];
+    return{quote:q,hypothetical:true,changedSelections:false};
+  }
   if(name==="calculatePrice"){
+    if(state.unresolvedInput||state.pendingFactProposal||state.draftFacts?.applianceScopePending?.length)return{error:'FACT_CONFIRMATION_REQUIRED'};
     const input=toolSchemas[name].parse(payload);
+    input.extras=input.extras.filter(e=>e.quantity>0);
     const facts=state.draftFacts;
     if(facts?.serviceConfirmationRequired)return{error:'SERVICE_CONFIRMATION_REQUIRED'};
     if(windowQuantitiesMissing(facts))return{error:'WINDOW_QUANTITIES_REQUIRED'};
     if(!ctx.previewTestId&&!state.quote&&(!facts?.service||!facts.area||!facts.soilLevel||!facts.extrasConfirmed))return{error:'CUSTOMER_FACTS_REQUIRED',facts,message:'Need explicitly confirmed service, area, soil and extras. Ask only for missing facts.'};
-    if(facts&&['service','area','soilLevel','extras'].some(key=>facts[key as keyof typeof facts]!==undefined&&canonicalJson(facts[key as keyof typeof facts])!==canonicalJson(input[key as keyof typeof input])))return{error:'CUSTOMER_CORRECTION_REQUIRES_CURRENT_FACTS',facts};
+    if(facts&&['service','area','soilLevel','extras'].some(key=>facts[key as keyof typeof facts]!==undefined&&!equivalentCustomerFact(key,facts[key as keyof typeof facts],input[key as keyof typeof input])))return{error:'CUSTOMER_CORRECTION_REQUIRES_CURRENT_FACTS',facts};
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
     const date=facts?.requestedDate??state.requestedWindow?.date;
     if(date){const policy=serviceDatePolicy(date,settings);if('error' in policy){if(policy.error==='SAME_DAY_CUTOFF')behaviorMetric('sameDayCutoffRejected');return policy;}input.urgent=policy.urgent;}
@@ -297,6 +381,9 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     state.draftFacts={...state.draftFacts,service:input.service,area:input.area,soilLevel:input.soilLevel,extras:input.extras,extrasConfirmed:true};
     const pendingReviewItems=[...new Set([...(facts?.reviewItems??[]),...(pricing.requiresHumanReview?['PRICE_REVIEW']:[]),...(state.review?.reasons??[]).filter(r=>r!=='CONTACT_PREFERENCE')])];
     state.quote={id:randomUUID(),serviceId:pricing.service.id,input,total:pricing.snapshot.finalPrice,base:pricing.calculated.base,discountPercent:pricing.snapshot.discountPercent,requiresHumanReview:pricing.requiresHumanReview,at:new Date().toISOString(),breakdown:pricing.calculated.extras.map(e=>({...e,amount:e.quantity*e.unitPrice})),pendingReviewItems};
+    if(state.priceRequestPending)reliabilityCount(state,'quoteAfterCustomerPriceRequest');
+    delete state.priceRequestPending;
+    if(ctx.mode==='AUTO')await updateLead(tx,c,ctx,{intent:'cleaning'});
     delete state.duration;delete state.slots;delete state.selectedSlotToken;delete state.pending;
     if(ctx.mode==="AUTO"&&c.leadId)await tx.lead.update({where:{id:c.leadId},data:{area:input.area,serviceId:pricing.service.id,urgent:input.urgent,estimatedPrice:state.quote.total}});
     if(ctx.mode==="AUTO")await aiAudit(tx,ctx,"AI_QUOTE_GENERATED","Conversation",c.id);
@@ -444,7 +531,7 @@ export async function executeAgentTool(db:PrismaClient,ctx:ToolContext,name:stri
       const output=await dispatch(tx,c,ctx,typed,parsed.data);
       if(ctx.mode==="AUTO"){
         const live=await tx.conversation.findUniqueOrThrow({where:{id:c.id}});
-        await tx.conversation.update({where:{id:c.id},data:{summary:operationalSummary(ctx.state,live.summary),state:json(ctx.state),...(typed==="calculatePrice"?{stage:"QUOTING"}:typed==="findAvailableSlots"&&!output.error?{stage:"SCHEDULING"}:{})}});
+        await tx.conversation.update({where:{id:c.id},data:{summary:operationalSummary(ctx.state,live.summary),state:json(ctx.state),...(typed==="calculatePrice"&&!output.error?{stage:"QUOTING"}:typed==="findAvailableSlots"&&!output.error?{stage:"SCHEDULING"}:{})}});
       }
       return output;
     },{maxWait:10000,timeout:40000});
