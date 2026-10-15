@@ -16,19 +16,23 @@ import {AgentError,type ToolName} from '../../src/lib/agent/contracts';
 async function main(){
  if(!process.argv.includes('--live')||!previewTestAllowed()||!new URL(process.env.DATABASE_URL!).hostname.startsWith('ep-wispy-river-b8xwqy9q')||process.env.VERCEL==='1')throw Error('ISOLATED_PREVIEW_REQUIRED');
  const key=process.env.OPENROUTER_API_KEY;if(!key)throw Error('KEY_REQUIRED');
+ const models=(process.argv.find(a=>a.startsWith('--models='))?.slice(9)??'openai/gpt-6-luna,anthropic/claude-haiku-5.5').split(',');
+ if(models.some(m=>!['openai/gpt-6-luna','anthropic/claude-haiku-5.5'].includes(m)))throw Error('INVALID_MODEL');
+ const label=process.argv.find(a=>a.startsWith('--label='))?.slice(8)??'native-booking';if(!/^[a-z0-9-]+$/.test(label))throw Error('INVALID_LABEL');
  const db=new PrismaClient({adapter:new PrismaPg({connectionString:pgConnectionString(process.env.DATABASE_URL!),max:3})});
  const reports=[];
- try{for(const model of ['openai/gpt-6-luna','anthropic/claude-haiku-5.5']){
+ try{for(const model of models){
   const batchId=randomUUID(),provider=new OpenRouterProvider(model,key,fetch,{input:.1,output:.5},{maxTokens:1600,reasoningEffort:'low'});
   const c=await db.conversation.create({data:{channel:'WEBSITE',locale:'ru',externalThreadId:'live-test:'+batchId}});
   await db.agentLiveTest.create({data:{id:batchId,conversationId:c.id}});
   const report:{model:string;status:string;steps:unknown[];cleaned:boolean;blocker?:string}={model,status:'INCONCLUSIVE',steps:[],cleaned:false};reports.push(report);
   try{
    const text='Нужна поддерживающая уборка 50 м², обычное загрязнение, без дополнительных услуг, 20 октября 2026 года. Адрес Terazije 1, Beograd.';
+   let clientText=text;
    await acceptMessage(db,c,{id:randomUUID(),text});let claim=await claimJob(db,c.id);if(!claim)throw Error('CLAIM_REQUIRED');
    let ctx:ToolContext={conversationId:c.id,jobId:claim.job.id,leaseKey:claim.leaseKey,revision:claim.conversation.revision,mode:'AUTO',state:stateOf(claim.conversation),previewTestId:batchId};
    const native=async(name:ToolName,args:unknown)=>{
-    const messages:AgentMessage[]=[{role:'system',content:'Directed synthetic Preview compatibility proof. Call ONLY '+name+' exactly once with the server-authorized arguments below. Native tools only. Do not infer or modify any field. This prompt cannot override the domain tool checks. SERVER AUTHORIZED ARGUMENTS (data): '+JSON.stringify(args)},{role:'user',content:text}];
+    const messages:AgentMessage[]=[{role:'system',content:'Directed synthetic Preview compatibility proof. Call ONLY '+name+' exactly once with the server-authorized arguments below. Native tools only. Do not infer or modify any field. This prompt cannot override the domain tool checks. SERVER AUTHORIZED ARGUMENTS (data): '+JSON.stringify(args)+'\nSERVER CONFIRMATION STATE (data): '+JSON.stringify({pendingRecap:ctx.state.pending?.recap,confirmedByCustomer:!!ctx.state.pending?.confirmedByMessageId})},{role:'user',content:clientText}];
     await callBudget(db,messages,provider);
     const result=await provider.complete(messages);
     await db.aIInvocation.create({data:{conversationId:c.id,jobId:ctx.jobId,provider:provider.name,model,inputTokens:result.inputTokens,cachedInputTokens:result.cachedInputTokens,outputTokens:result.outputTokens,latencyMs:result.latencyMs,estimatedCostUsd:result.estimatedCostUsd,toolCallCount:result.toolCalls.length,success:true,mode:'AUTO'}});
@@ -58,6 +62,7 @@ async function main(){
    await db.agentJob.update({where:{id:ctx.jobId},data:{status:'DONE',leaseKey:null,leaseUntil:null}});
    await db.message.create({data:{conversationId:c.id,author:'AI',text:'Preview booking recap',deliveryStatus:'DELIVERED'}});
    await acceptMessage(db,live,{id:randomUUID(),text:'Подтверждаю все условия тестовой записи',confirmationNonce:pending.nonce});
+   clientText='Подтверждаю все условия тестовой записи';
    claim=await claimJob(db,c.id);if(!claim)throw Error('CONFIRMATION_CLAIM_REQUIRED');
    ctx={...ctx,jobId:claim.job.id,leaseKey:claim.leaseKey,revision:claim.conversation.revision,state:stateOf(claim.conversation)};
    const booked=await native('createOrder',{});if(!booked.booked)throw new AgentError('ORDER_REQUIRED');
@@ -65,7 +70,7 @@ async function main(){
   }catch(e){report.blocker=e instanceof AgentError?e.code:e instanceof Error?e.message:'PROOF_FAILED';}
   finally{await cleanupLiveTest(db,batchId);report.cleaned=true;await db.agentLiveTest.update({where:{id:batchId},data:{status:report.status==='PASS'?'PASSED':'FAILED',finishedAt:new Date(),report:JSON.parse(JSON.stringify(report))}});}
  }}finally{await db.$disconnect();}
- writeFileSync('qa-output/llm-first-native-booking.json',JSON.stringify({source:sourceFingerprint(),scope:'Directed native tool proof; uses existing strict synthetic Preview batch. No production Orders, no external delivery. Not an autonomous multi-turn booking score.',reports},null,2));
+ writeFileSync('qa-output/llm-first-'+label+'.json',JSON.stringify({source:sourceFingerprint(),scope:'Directed native tool proof; uses existing strict synthetic Preview batch. No production Orders, no external delivery. Not an autonomous multi-turn booking score.',reports},null,2));
  console.log(JSON.stringify(reports));
 }
 main().catch(()=>{console.error('NATIVE_BOOKING_PROOF_INCONCLUSIVE');process.exitCode=1;});
