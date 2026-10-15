@@ -1,0 +1,1305 @@
+{
+  "base": "9516f2922f2a86b2d5829c26d548046614e37aad",
+  "source": "0b440392343bc0a84a40d11b57050b5a94cd4ed3e3a8f8436efabcc0e6bbebaf",
+  "fixtureHash": "e303a977c46ca4d46b881d65053756d6114998f36383d7c893567629de055042",
+  "corpusHash": "02b1bf111649c2b15f97e472d6967c66ceec710426458c69c6def7b2cfe3fc75",
+  "split": "holdout",
+  "models": [
+    "openai/gpt-6-luna",
+    "anthropic/claude-haiku-5.5"
+  ],
+  "strategies": [
+    "HYBRID",
+    "LLM_FIRST"
+  ],
+  "settings": {
+    "maxTokens": 1600,
+    "reasoningEffort": "low",
+    "requireParameters": true
+  },
+  "maxCost": 2,
+  "maxCalls": 1500,
+  "startedAt": "2026-10-14T18:02:30.835Z",
+  "catalog": [
+    {
+      "id": "openai/gpt-6-luna",
+      "canonical_slug": "openai/gpt-6-luna-20260922",
+      "created": 1790100786,
+      "context_length": 1050000,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": [
+          "file",
+          "image",
+          "text"
+        ],
+        "output_modalities": [
+          "text"
+        ],
+        "tokenizer": "GPT",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.0000001",
+        "completion": "0.0000005",
+        "web_search": "0.01",
+        "input_cache_read": "0.00000001",
+        "input_cache_write": "0.000000125",
+        "overrides": [
+          {
+            "min_prompt_tokens": 272000,
+            "prompt": "0.0000002",
+            "completion": "0.00000075",
+            "input_cache_read": "0.00000002",
+            "input_cache_write": "0.00000025"
+          }
+        ]
+      },
+      "top_provider": {
+        "context_length": 1050000,
+        "max_completion_tokens": 128000,
+        "is_moderated": true
+      },
+      "supported_parameters": [
+        "include_reasoning",
+        "max_completion_tokens",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+        "verbosity"
+      ],
+      "reasoning": {
+        "mandatory": false,
+        "default_enabled": true,
+        "supported_efforts": [
+          "max",
+          "xhigh",
+          "high",
+          "medium",
+          "low",
+          "none"
+        ],
+        "default_effort": "medium"
+      }
+    },
+    {
+      "id": "anthropic/claude-haiku-5.5",
+      "canonical_slug": "anthropic/claude-haiku-5.5-20261007",
+      "created": 1791397883,
+      "context_length": 1000000,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": [
+          "text",
+          "image",
+          "file"
+        ],
+        "output_modalities": [
+          "text"
+        ],
+        "tokenizer": "Claude",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.0000001",
+        "completion": "0.0000005",
+        "web_search": "0.01",
+        "input_cache_read": "0.00000001",
+        "input_cache_write": "0.000000125",
+        "input_cache_write_1h": "0.0000002",
+        "overrides": [
+          {
+            "min_prompt_tokens": 100000,
+            "prompt": "0.0000005",
+            "completion": "0.0000025",
+            "input_cache_read": "0.00000005",
+            "input_cache_write": "0.000000625",
+            "input_cache_write_1h": "0.000001"
+          }
+        ]
+      },
+      "top_provider": {
+        "context_length": 1000000,
+        "max_completion_tokens": 128000,
+        "is_moderated": true
+      },
+      "supported_parameters": [
+        "include_reasoning",
+        "max_completion_tokens",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+        "verbosity"
+      ],
+      "reasoning": {
+        "mandatory": false,
+        "supported_efforts": [
+          "max",
+          "xhigh",
+          "high",
+          "medium",
+          "low"
+        ],
+        "default_effort": "medium"
+      }
+    }
+  ],
+  "measuredSourceNote": "All four configurations use the same measured prototype source. After evaluation started, HYBRID original tool wire was restored for default compatibility; final-source full holdout remains a gate. No model-specific prompt tuning.",
+  "coverage": {
+    "corpus": 48,
+    "developmentDefined": 16,
+    "holdoutDefined": 32,
+    "developmentNativeUnique": 8,
+    "holdoutStarted": 31,
+    "pairedConclusive": 28,
+    "pairedBlindScenarios": 19
+  },
+  "holdoutStopped": "Three consecutive INCONCLUSIVE; exact invocation causes were not retained by v1. No quota counters were reset.",
+  "dailyGuardRead": {
+    "at": "2026-10-14T19:12:13.873Z",
+    "key": "agent:budget:2026-10-14",
+    "reservedMicros": 1060000,
+    "configuredDailyLimitUsd": "5",
+    "settings": {
+      "aiMaxModelCalls": 8,
+      "aiMaxToolSteps": 6,
+      "aiMaxConversationCostUsd": "0.1"
+    },
+    "keys": [
+      {
+        "key": "agent:budget:2026-10-14",
+        "count": 1060000
+      }
+    ]
+  },
+  "quality": {
+    "model": "google/gemini-3.8-flash",
+    "canonical": "google/gemini-3.8-flash-20260902",
+    "ratings": 100,
+    "packets": 112,
+    "errors": [
+      {
+        "index": 54,
+        "error": "JUDGE_SCHEMA_ERROR"
+      },
+      {
+        "index": 84,
+        "error": "JUDGE_SCHEMA_ERROR"
+      }
+    ],
+    "cost": 0.15434175,
+    "initialUnmappedAttemptCost": 0.170784,
+    "initialAttemptExcluded": true,
+    "humanReview": {
+      "status": "OWNER_DEFERRED_TO_AGENT",
+      "choice": "B",
+      "independentHumanVotes": 0,
+      "note": "A excerpt was shortened; editorial sample only, not a release vote."
+    }
+  },
+  "baseline": {
+    "source": "8a070404b4dd383687118450419b5f216f4de7617277cc9f3bf49145b3788b90",
+    "rows": 5,
+    "turns": 15,
+    "routes": {
+      "deterministic-only": 13,
+      "LLM-generated": 0,
+      "deterministic quote + LLM response": 0,
+      "fallback/recovery": 2,
+      "handoff": 0
+    },
+    "scope": "Small Preview response-composition baseline; not a production traffic estimate. Baseline result status was affected by a report-only undefined-value hashing bug; no success-rate inference from it.",
+    "turnsWithModelCalls": 8,
+    "modelCalls": 17
+  },
+  "metrics": [
+    {
+      "key": "A",
+      "model": "openai/gpt-6-luna",
+      "strategy": "HYBRID",
+      "successful": 11,
+      "paired": 28,
+      "planned": 32,
+      "started": 31,
+      "inconclusive": 2,
+      "factCorrect": 78,
+      "factTotal": 100,
+      "factAccuracy": 0.78,
+      "repeatedPrompts": 8,
+      "incorrectToolCalls": 43,
+      "rejectedToolsAll": 45,
+      "hardHandoffs": 1,
+      "softReviews": 12,
+      "bookingSafetyFailures": 0,
+      "p50Ms": 15560,
+      "p95Ms": 24271,
+      "providerP50Ms": 1985,
+      "providerP95Ms": 3599,
+      "averageTokens": 25649.5,
+      "modelCalls": 106,
+      "reasoningTokens": 268,
+      "cachedInputTokens": 0,
+      "averageCostCompleted": 0.005278715909090908,
+      "totalCost": 0.10057642500000001,
+      "amortizedCostPerSuccess": 0.009143311363636365,
+      "invocationFailures": 1,
+      "providerErrorCauses": "NOT_RETAINED_IN_MEASURED_HARNESS",
+      "averageMessagesToQuote": 2.1666666666666665,
+      "messagesToBooking": null,
+      "answerOrigins": {
+        "deterministic-only": 89,
+        "LLM-generated": 21,
+        "deterministic quote + LLM response": 1
+      },
+      "blind": {
+        "pairedDialogues": 19,
+        "naturalness": 1.3157894736842106,
+        "relevance": 1.0526315789473684,
+        "clarity": 1.736842105263158,
+        "noUnnecessaryQuestions": 1.2105263157894737,
+        "usefulness": 1.0526315789473684,
+        "femalePersona": 3.5789473684210527,
+        "serbianNaturalness": 1
+      }
+    },
+    {
+      "key": "B",
+      "model": "anthropic/claude-haiku-5.5",
+      "strategy": "HYBRID",
+      "successful": 9,
+      "paired": 28,
+      "planned": 32,
+      "started": 31,
+      "inconclusive": 2,
+      "factCorrect": 78,
+      "factTotal": 100,
+      "factAccuracy": 0.78,
+      "repeatedPrompts": 6,
+      "incorrectToolCalls": 27,
+      "rejectedToolsAll": 32,
+      "hardHandoffs": 1,
+      "softReviews": 11,
+      "bookingSafetyFailures": 0,
+      "p50Ms": 16369,
+      "p95Ms": 24784,
+      "providerP50Ms": 4371,
+      "providerP95Ms": 6585,
+      "averageTokens": 42464.03571428572,
+      "modelCalls": 85,
+      "reasoningTokens": 22050,
+      "cachedInputTokens": 0,
+      "averageCostCompleted": 0.006682422222222224,
+      "totalCost": 0.14766869999999999,
+      "amortizedCostPerSuccess": 0.01640763333333333,
+      "invocationFailures": 1,
+      "providerErrorCauses": "NOT_RETAINED_IN_MEASURED_HARNESS",
+      "averageMessagesToQuote": 2.1666666666666665,
+      "messagesToBooking": null,
+      "answerOrigins": {
+        "deterministic-only": 86,
+        "LLM-generated": 24,
+        "deterministic quote + LLM response": 1
+      },
+      "blind": {
+        "pairedDialogues": 19,
+        "naturalness": 1.263157894736842,
+        "relevance": 1.2105263157894737,
+        "clarity": 1.7894736842105263,
+        "noUnnecessaryQuestions": 1.105263157894737,
+        "usefulness": 1,
+        "femalePersona": 3.8421052631578947,
+        "serbianNaturalness": 1.2
+      }
+    },
+    {
+      "key": "C",
+      "model": "openai/gpt-6-luna",
+      "strategy": "LLM_FIRST",
+      "successful": 10,
+      "paired": 28,
+      "planned": 32,
+      "started": 31,
+      "inconclusive": 4,
+      "factCorrect": 78,
+      "factTotal": 100,
+      "factAccuracy": 0.78,
+      "repeatedPrompts": 11,
+      "incorrectToolCalls": 90,
+      "rejectedToolsAll": 91,
+      "hardHandoffs": 2,
+      "softReviews": 12,
+      "bookingSafetyFailures": 0,
+      "p50Ms": 21611,
+      "p95Ms": 38377,
+      "providerP50Ms": 2344,
+      "providerP95Ms": 5430,
+      "averageTokens": 77430.5,
+      "modelCalls": 269,
+      "reasoningTokens": 6075,
+      "cachedInputTokens": 0,
+      "averageCostCompleted": 0.009683707499999996,
+      "totalCost": 0.28611252,
+      "amortizedCostPerSuccess": 0.028611251999999997,
+      "invocationFailures": 3,
+      "providerErrorCauses": "NOT_RETAINED_IN_MEASURED_HARNESS",
+      "averageMessagesToQuote": 2.5714285714285716,
+      "messagesToBooking": null,
+      "answerOrigins": {
+        "LLM-generated": 68,
+        "deterministic-only": 32,
+        "deterministic quote + LLM response": 7,
+        "fallback/recovery": 4
+      },
+      "blind": {
+        "pairedDialogues": 19,
+        "naturalness": 2,
+        "relevance": 2,
+        "clarity": 2.473684210526316,
+        "noUnnecessaryQuestions": 1.6842105263157894,
+        "usefulness": 1.8421052631578947,
+        "femalePersona": 3.6842105263157894,
+        "serbianNaturalness": 1.5
+      }
+    },
+    {
+      "key": "D",
+      "model": "anthropic/claude-haiku-5.5",
+      "strategy": "LLM_FIRST",
+      "successful": 10,
+      "paired": 28,
+      "planned": 32,
+      "started": 31,
+      "inconclusive": 3,
+      "factCorrect": 78,
+      "factTotal": 100,
+      "factAccuracy": 0.78,
+      "repeatedPrompts": 17,
+      "incorrectToolCalls": 110,
+      "rejectedToolsAll": 137,
+      "hardHandoffs": 2,
+      "softReviews": 12,
+      "bookingSafetyFailures": 0,
+      "p50Ms": 23499,
+      "p95Ms": 43272,
+      "providerP50Ms": 4308,
+      "providerP95Ms": 6206,
+      "averageTokens": 149401.25,
+      "modelCalls": 249,
+      "reasoningTokens": 54034,
+      "cachedInputTokens": 0,
+      "averageCostCompleted": 0.013636040000000002,
+      "totalCost": 0.47885889999999975,
+      "amortizedCostPerSuccess": 0.04788588999999997,
+      "invocationFailures": 2,
+      "providerErrorCauses": "NOT_RETAINED_IN_MEASURED_HARNESS",
+      "averageMessagesToQuote": 2.375,
+      "messagesToBooking": null,
+      "answerOrigins": {
+        "LLM-generated": 56,
+        "fallback/recovery": 7,
+        "deterministic-only": 43,
+        "deterministic quote + LLM response": 5
+      },
+      "blind": {
+        "pairedDialogues": 19,
+        "naturalness": 2,
+        "relevance": 1.7894736842105263,
+        "clarity": 2.3684210526315788,
+        "noUnnecessaryQuestions": 1.7894736842105263,
+        "usefulness": 1.736842105263158,
+        "femalePersona": 3.5789473684210527,
+        "serbianNaturalness": 1.3
+      }
+    }
+  ],
+  "productionReadOnly": {
+    "at": "2026-10-15T14:00:11.430Z",
+    "settings": {
+      "aiAgentMode": "AUTO",
+      "aiChannelModes": {
+        "VIBER": "OFF",
+        "WEBSITE": "AUTO",
+        "TELEGRAM": "OFF",
+        "WHATSAPP": "AUTO"
+      }
+    },
+    "recentModels": [
+      "openrouter/openai/gpt-6-luna",
+      "poyo/gpt-6-luna"
+    ],
+    "latestInvocationAt": "2026-10-14T12:02:01.897Z",
+    "scope": "Read-only; no production conversation or mode changes"
+  },
+  "productionHttpReadOnly": {
+    "at": "2026-10-15T14:00:37.069Z",
+    "scope": "Read-only public GET; no conversations or Orders",
+    "rows": [
+      {
+        "lang": "ru",
+        "status": 200,
+        "url": "https://lumacleanrs.com/ru",
+        "bytes": 106863
+      },
+      {
+        "lang": "sr",
+        "status": 200,
+        "url": "https://lumacleanrs.com/sr",
+        "bytes": 105813
+      },
+      {
+        "lang": "en",
+        "status": 200,
+        "url": "https://lumacleanrs.com/en",
+        "bytes": 106337
+      }
+    ]
+  },
+  "finalSourceFingerprint": "32bcbefed12215666466e3e5fd259b8226989fff5f26af00c0ed0ccbdcf3ac5f",
+  "compatibilitySmoke": {
+    "at": "2026-10-14T17:44:44.364Z",
+    "rows": [
+      {
+        "id": "openai/gpt-6-luna",
+        "canonical": "openai/gpt-6-luna-20260922",
+        "settings": {
+          "max_tokens": 1600,
+          "reasoning": {
+            "effort": "low",
+            "exclude": true
+          },
+          "provider": {
+            "require_parameters": true
+          }
+        },
+        "status": "PASS",
+        "calls": [
+          {
+            "tools": [
+              {
+                "name": "getBusinessInfo",
+                "args": "{}"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 4496,
+              "completion_tokens": 15,
+              "total_tokens": 4511,
+              "cost": 0.000569425,
+              "is_byok": false,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 4493,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 0.000569425,
+                "upstream_inference_prompt_cost": 0.000561925,
+                "upstream_inference_completions_cost": 0.0000075
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 0,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "latencyMs": 2481,
+            "finishReason": "tool_calls"
+          },
+          {
+            "tools": [],
+            "usage": {
+              "prompt_tokens": 4530,
+              "completion_tokens": 17,
+              "total_tokens": 4547,
+              "cost": 0.00005798,
+              "is_byok": false,
+              "prompt_tokens_details": {
+                "cached_tokens": 4493,
+                "cache_write_tokens": 34,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 0.00005798,
+                "upstream_inference_prompt_cost": 0.00004948,
+                "upstream_inference_completions_cost": 0.0000085
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 0,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "latencyMs": 2316,
+            "finishReason": "stop"
+          }
+        ]
+      },
+      {
+        "id": "anthropic/claude-haiku-5.5",
+        "canonical": "anthropic/claude-haiku-5.5-20261007",
+        "settings": {
+          "max_tokens": 1600,
+          "reasoning": {
+            "effort": "low",
+            "exclude": true
+          },
+          "provider": {
+            "require_parameters": true
+          }
+        },
+        "status": "PASS",
+        "calls": [
+          {
+            "tools": [
+              {
+                "name": "getBusinessInfo",
+                "args": "{}"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 10216,
+              "completion_tokens": 31,
+              "total_tokens": 10247,
+              "cost": 0.0010371,
+              "is_byok": false,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 0.0010371,
+                "upstream_inference_prompt_cost": 0.0010216,
+                "upstream_inference_completions_cost": 0.0000155
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 0,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "latencyMs": 1415,
+            "finishReason": "tool_calls"
+          },
+          {
+            "tools": [],
+            "usage": {
+              "prompt_tokens": 10265,
+              "completion_tokens": 49,
+              "total_tokens": 10314,
+              "cost": 0.001051,
+              "is_byok": false,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 0.001051,
+                "upstream_inference_prompt_cost": 0.0010265,
+                "upstream_inference_completions_cost": 0.0000245
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 0,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "latencyMs": 1451,
+            "finishReason": "stop"
+          }
+        ]
+      }
+    ]
+  },
+  "previewHttp": {
+    "base": "https://lumaclean-p0neh2zth-vladislavs-projects-0eae0ea3.vercel.app",
+    "status": "PASS",
+    "rows": [
+      {
+        "step": 1,
+        "provider": "poyo",
+        "nativeComplete": true,
+        "inconclusive": false,
+        "facts": {},
+        "quote": null,
+        "nextInput": "SERVICE_TYPE",
+        "proposal": false,
+        "review": [],
+        "control": "AI_CONTROL",
+        "booking": false,
+        "revision": 1,
+        "tools": [
+          {
+            "tool": "createOrUpdateLead",
+            "outcome": "OK"
+          },
+          {
+            "tool": "createOrUpdateLead",
+            "outcome": "OK"
+          },
+          {
+            "tool": "requestCustomerInput",
+            "outcome": "OK"
+          }
+        ],
+        "invocations": [
+          {
+            "provider": "poyo",
+            "success": true,
+            "errorCode": null
+          },
+          {
+            "provider": "poyo",
+            "success": true,
+            "errorCode": null
+          }
+        ],
+        "response": "Какой клининг нужен: поддерживающий или генеральный?",
+        "recovery": false,
+        "lead": {
+          "estimate": null,
+          "extras": []
+        }
+      },
+      {
+        "step": 2,
+        "provider": "poyo",
+        "nativeComplete": false,
+        "inconclusive": false,
+        "facts": {
+          "service": "regular"
+        },
+        "quote": null,
+        "nextInput": "AREA",
+        "proposal": false,
+        "review": [],
+        "control": "AI_CONTROL",
+        "booking": false,
+        "revision": 2,
+        "tools": [
+          {
+            "tool": "createOrUpdateLead",
+            "outcome": "OK"
+          },
+          {
+            "tool": "requestCustomerInput",
+            "outcome": "OK"
+          }
+        ],
+        "invocations": [],
+        "response": "Подскажите, пожалуйста, площадь помещения в м².",
+        "recovery": false,
+        "lead": {
+          "estimate": null,
+          "extras": []
+        }
+      }
+    ],
+    "cleaned": true,
+    "sessionRevoked": true
+  },
+  "nativeBookingAttempts": [
+    {
+      "file": "llm-first-native-booking-initial-inconclusive.json",
+      "source": "32bcbefed12215666466e3e5fd259b8226989fff5f26af00c0ed0ccbdcf3ac5f",
+      "scope": "Directed native tool proof; uses existing strict synthetic Preview batch. No production Orders, no external delivery. Not an autonomous multi-turn booking score.",
+      "reports": [
+        {
+          "model": "openai/gpt-6-luna",
+          "status": "INCONCLUSIVE",
+          "steps": [
+            {
+              "tool": "getBusinessInfo",
+              "outcome": "OK",
+              "usage": {
+                "input": 4551,
+                "output": 15,
+                "reasoning": 0,
+                "cost": 0.0005763
+              },
+              "native": true
+            },
+            {
+              "tool": "recordCustomerFacts",
+              "outcome": "OK",
+              "usage": {
+                "input": 4619,
+                "output": 83,
+                "reasoning": 0,
+                "cost": 0.0006188
+              },
+              "native": true
+            },
+            {
+              "tool": "createOrUpdateLead",
+              "outcome": "OK",
+              "usage": {
+                "input": 4557,
+                "output": 21,
+                "reasoning": 0,
+                "cost": 0.00058005
+              },
+              "native": true
+            },
+            {
+              "tool": "calculatePrice",
+              "outcome": "OK",
+              "usage": {
+                "input": 4570,
+                "output": 34,
+                "reasoning": 0,
+                "cost": 0.000588175
+              },
+              "native": true
+            },
+            {
+              "tool": "estimateDuration",
+              "outcome": "OK",
+              "usage": {
+                "input": 4550,
+                "output": 15,
+                "reasoning": 0,
+                "cost": 0.000576175
+              },
+              "native": true
+            },
+            {
+              "tool": "resolveAddress",
+              "outcome": "OK",
+              "usage": {
+                "input": 4561,
+                "output": 25,
+                "reasoning": 0,
+                "cost": 0.00058255
+              },
+              "native": true
+            }
+          ],
+          "cleaned": true,
+          "blocker": "TEST_ADDRESS_AMBIGUOUS"
+        },
+        {
+          "model": "anthropic/claude-haiku-5.5",
+          "status": "INCONCLUSIVE",
+          "steps": [
+            {
+              "tool": "getBusinessInfo",
+              "outcome": "OK",
+              "usage": {
+                "input": 10318,
+                "output": 89,
+                "reasoning": 57,
+                "cost": 0.0010763
+              },
+              "native": true
+            },
+            {
+              "tool": "recordCustomerFacts",
+              "outcome": "OK",
+              "usage": {
+                "input": 10436,
+                "output": 501,
+                "reasoning": 318,
+                "cost": 0.0012941
+              },
+              "native": true
+            },
+            {
+              "tool": "createOrUpdateLead",
+              "outcome": "OK",
+              "usage": {
+                "input": 10329,
+                "output": 162,
+                "reasoning": 104,
+                "cost": 0.0011139
+              },
+              "native": true
+            },
+            {
+              "tool": "calculatePrice",
+              "outcome": "OK",
+              "usage": {
+                "input": 10352,
+                "output": 246,
+                "reasoning": 98,
+                "cost": 0.0011582
+              },
+              "native": true
+            },
+            {
+              "tool": "estimateDuration",
+              "outcome": "OK",
+              "usage": {
+                "input": 10316,
+                "output": 131,
+                "reasoning": 101,
+                "cost": 0.0010971
+              },
+              "native": true
+            },
+            {
+              "tool": "resolveAddress",
+              "outcome": "OK",
+              "usage": {
+                "input": 10332,
+                "output": 60,
+                "reasoning": 0,
+                "cost": 0.0010632
+              },
+              "native": true
+            }
+          ],
+          "cleaned": true,
+          "blocker": "TEST_ADDRESS_AMBIGUOUS"
+        }
+      ]
+    },
+    {
+      "file": "llm-first-native-booking.json",
+      "source": "32bcbefed12215666466e3e5fd259b8226989fff5f26af00c0ed0ccbdcf3ac5f",
+      "scope": "Directed native tool proof; uses existing strict synthetic Preview batch. No production Orders, no external delivery. Not an autonomous multi-turn booking score.",
+      "reports": [
+        {
+          "model": "openai/gpt-6-luna",
+          "status": "PASS",
+          "steps": [
+            {
+              "tool": "getBusinessInfo",
+              "outcome": "OK",
+              "usage": {
+                "input": 4551,
+                "output": 15,
+                "reasoning": 0,
+                "cost": 0.00005328
+              },
+              "native": true
+            },
+            {
+              "tool": "recordCustomerFacts",
+              "outcome": "OK",
+              "usage": {
+                "input": 4619,
+                "output": 83,
+                "reasoning": 0,
+                "cost": 0.00008796
+              },
+              "native": true
+            },
+            {
+              "tool": "createOrUpdateLead",
+              "outcome": "OK",
+              "usage": {
+                "input": 4557,
+                "output": 21,
+                "reasoning": 0,
+                "cost": 0.00005634
+              },
+              "native": true
+            },
+            {
+              "tool": "calculatePrice",
+              "outcome": "OK",
+              "usage": {
+                "input": 4570,
+                "output": 34,
+                "reasoning": 0,
+                "cost": 0.00006297
+              },
+              "native": true
+            },
+            {
+              "tool": "estimateDuration",
+              "outcome": "OK",
+              "usage": {
+                "input": 4550,
+                "output": 15,
+                "reasoning": 0,
+                "cost": 0.00005327
+              },
+              "native": true
+            },
+            {
+              "tool": "resolveAddress",
+              "outcome": "OK",
+              "usage": {
+                "input": 4559,
+                "output": 23,
+                "reasoning": 0,
+                "cost": 0.0005813
+              },
+              "native": true
+            },
+            {
+              "tool": "resolveAddress",
+              "outcome": "OK",
+              "usage": {
+                "input": 4650,
+                "output": 114,
+                "reasoning": 0,
+                "cost": 0.000638175
+              },
+              "native": true
+            },
+            {
+              "tool": "findAvailableSlots",
+              "outcome": "OK",
+              "usage": {
+                "input": 4586,
+                "output": 50,
+                "reasoning": 0,
+                "cost": 0.000598175
+              },
+              "native": true
+            },
+            {
+              "tool": "createOrUpdateLead",
+              "outcome": "OK",
+              "usage": {
+                "input": 4594,
+                "output": 58,
+                "reasoning": 0,
+                "cost": 0.000603175
+              },
+              "native": true
+            },
+            {
+              "tool": "validateSlot",
+              "outcome": "OK",
+              "usage": {
+                "input": 4575,
+                "output": 39,
+                "reasoning": 0,
+                "cost": 0.0005913
+              },
+              "native": true
+            },
+            {
+              "tool": "createOrder",
+              "outcome": "OK",
+              "usage": {
+                "input": 4550,
+                "output": 14,
+                "reasoning": 0,
+                "cost": 0.000575675
+              },
+              "native": true
+            }
+          ],
+          "cleaned": true
+        },
+        {
+          "model": "anthropic/claude-haiku-5.5",
+          "status": "INCONCLUSIVE",
+          "steps": [
+            {
+              "tool": "getBusinessInfo",
+              "outcome": "OK",
+              "usage": {
+                "input": 10318,
+                "output": 131,
+                "reasoning": 99,
+                "cost": 0.0010973
+              },
+              "native": true
+            },
+            {
+              "tool": "recordCustomerFacts",
+              "outcome": "OK",
+              "usage": {
+                "input": 10436,
+                "output": 375,
+                "reasoning": 192,
+                "cost": 0.0012311
+              },
+              "native": true
+            },
+            {
+              "tool": "createOrUpdateLead",
+              "outcome": "OK",
+              "usage": {
+                "input": 10329,
+                "output": 159,
+                "reasoning": 101,
+                "cost": 0.0011124
+              },
+              "native": true
+            },
+            {
+              "tool": "calculatePrice",
+              "outcome": "OK",
+              "usage": {
+                "input": 10352,
+                "output": 252,
+                "reasoning": 104,
+                "cost": 0.0011612
+              },
+              "native": true
+            },
+            {
+              "tool": "estimateDuration",
+              "outcome": "OK",
+              "usage": {
+                "input": 10316,
+                "output": 129,
+                "reasoning": 99,
+                "cost": 0.0010961
+              },
+              "native": true
+            },
+            {
+              "tool": "resolveAddress",
+              "outcome": "OK",
+              "usage": {
+                "input": 10327,
+                "output": 138,
+                "reasoning": 82,
+                "cost": 0.0011017
+              },
+              "native": true
+            },
+            {
+              "tool": "resolveAddress",
+              "outcome": "OK",
+              "usage": {
+                "input": 10429,
+                "output": 234,
+                "reasoning": 60,
+                "cost": 0.0011599
+              },
+              "native": true
+            },
+            {
+              "tool": "findAvailableSlots",
+              "outcome": "OK",
+              "usage": {
+                "input": 10357,
+                "output": 316,
+                "reasoning": 198,
+                "cost": 0.0011937
+              },
+              "native": true
+            },
+            {
+              "tool": "createOrUpdateLead",
+              "outcome": "OK",
+              "usage": {
+                "input": 10373,
+                "output": 238,
+                "reasoning": 104,
+                "cost": 0.0011563
+              },
+              "native": true
+            },
+            {
+              "tool": "validateSlot",
+              "outcome": "OK",
+              "usage": {
+                "input": 10346,
+                "output": 165,
+                "reasoning": 90,
+                "cost": 0.0011171
+              },
+              "native": true
+            }
+          ],
+          "cleaned": true,
+          "blocker": "NATIVE_ACTION_MISMATCH"
+        }
+      ]
+    },
+    {
+      "file": "llm-first-native-booking-haiku-confirmed.json",
+      "source": "32bcbefed12215666466e3e5fd259b8226989fff5f26af00c0ed0ccbdcf3ac5f",
+      "scope": "Directed native tool proof; uses existing strict synthetic Preview batch. No production Orders, no external delivery. Not an autonomous multi-turn booking score.",
+      "reports": [
+        {
+          "model": "anthropic/claude-haiku-5.5",
+          "status": "PASS",
+          "steps": [
+            {
+              "tool": "getBusinessInfo",
+              "outcome": "OK",
+              "usage": {
+                "input": 10351,
+                "output": 121,
+                "reasoning": 89,
+                "cost": 0.0010956
+              },
+              "native": true
+            },
+            {
+              "tool": "recordCustomerFacts",
+              "outcome": "OK",
+              "usage": {
+                "input": 10469,
+                "output": 282,
+                "reasoning": 99,
+                "cost": 0.0011879
+              },
+              "native": true
+            },
+            {
+              "tool": "createOrUpdateLead",
+              "outcome": "OK",
+              "usage": {
+                "input": 10362,
+                "output": 162,
+                "reasoning": 104,
+                "cost": 0.0011172
+              },
+              "native": true
+            },
+            {
+              "tool": "calculatePrice",
+              "outcome": "OK",
+              "usage": {
+                "input": 10385,
+                "output": 147,
+                "reasoning": 0,
+                "cost": 0.001112
+              },
+              "native": true
+            },
+            {
+              "tool": "estimateDuration",
+              "outcome": "OK",
+              "usage": {
+                "input": 10349,
+                "output": 104,
+                "reasoning": 74,
+                "cost": 0.0010869
+              },
+              "native": true
+            },
+            {
+              "tool": "resolveAddress",
+              "outcome": "OK",
+              "usage": {
+                "input": 10360,
+                "output": 55,
+                "reasoning": 0,
+                "cost": 0.0010635
+              },
+              "native": true
+            },
+            {
+              "tool": "resolveAddress",
+              "outcome": "OK",
+              "usage": {
+                "input": 10462,
+                "output": 383,
+                "reasoning": 209,
+                "cost": 0.0012377
+              },
+              "native": true
+            },
+            {
+              "tool": "findAvailableSlots",
+              "outcome": "OK",
+              "usage": {
+                "input": 10390,
+                "output": 182,
+                "reasoning": 64,
+                "cost": 0.00113
+              },
+              "native": true
+            },
+            {
+              "tool": "createOrUpdateLead",
+              "outcome": "OK",
+              "usage": {
+                "input": 10409,
+                "output": 285,
+                "reasoning": 148,
+                "cost": 0.0011834
+              },
+              "native": true
+            },
+            {
+              "tool": "validateSlot",
+              "outcome": "OK",
+              "usage": {
+                "input": 10380,
+                "output": 180,
+                "reasoning": 104,
+                "cost": 0.001128
+              },
+              "native": true
+            },
+            {
+              "tool": "createOrder",
+              "outcome": "OK",
+              "usage": {
+                "input": 10430,
+                "output": 27,
+                "reasoning": 0,
+                "cost": 0.0010565
+              },
+              "native": true
+            }
+          ],
+          "cleaned": true
+        }
+      ]
+    }
+  ],
+  "costLedger": [
+    {
+      "file": "qa-output/llm-first-baseline-1792000149506.json",
+      "cost": 0.0191162
+    },
+    {
+      "file": "qa-output/llm-first-llm-first-development-1792000468201.json",
+      "cost": 0.031580025
+    },
+    {
+      "file": "qa-output/llm-first-development-v2-1792000705885.json",
+      "cost": 0.20477730000000005
+    },
+    {
+      "file": "qa-output/llm-first-locked-holdout-1792000948880.json",
+      "cost": 1.0132165449999988
+    },
+    {
+      "file": "llm-first-native-booking-initial-inconclusive.json",
+      "cost": 0.010324850000000002
+    },
+    {
+      "file": "llm-first-native-booking.json",
+      "cost": 0.01532842
+    },
+    {
+      "file": "llm-first-native-booking-haiku-confirmed.json",
+      "cost": 0.012398699999999999
+    },
+    {
+      "file": "llm-first-blind-quality-initial-unmapped.json",
+      "cost": 0.170784
+    },
+    {
+      "file": "llm-first-blind-quality.json",
+      "cost": 0.15434175
+    },
+    {
+      "file": "llm-first-model-smoke.json",
+      "cost": 0.002715505
+    }
+  ],
+  "costScope": "Actual recorded baseline/development/holdout/native-booking/judge/adapter-smoke costs, including inconclusive attempts. Deployed PoYo HTTP smoke and persisted controlled-provider regression runs are separate; not an account invoice.",
+  "recordedCostTotalUsd": 1.6345832949999988
+}
