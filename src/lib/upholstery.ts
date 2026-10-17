@@ -12,16 +12,23 @@ export const upholsteryPriceKeys = [
   "minimumVisit",
 ] as const;
 export const upholsteryDefaults = {
-  sofa3Light: 2500,
-  sofa3Normal: 3000,
-  sofa3Heavy: 3800,
-  sofa2: 2400,
-  armchair: 1200,
-  chair: 500,
-  cornerSeat: 900,
-  spot: 1500,
-  minimumVisit: 3000,
+  sofa3Light: 4600,
+  sofa3Normal: 4600,
+  sofa3Heavy: 4600,
+  sofa2: 4000,
+  armchair: 2200,
+  chair: 600,
+  cornerSeat: 2000,
+  spot: 1000,
+  minimumVisit: 4000,
 };
+// Existing CORNER requests retain their seat counts; this is the whole-item
+// starting price, not the per-seat tariff stored under the stable cornerSeat key.
+export const cornerSofaBasePrice = 5600;
+export const upholsteryPublicPriceKeys = ["sofa3Normal", "sofa2", "armchair", "chair", "cornerSeat", "spot", "minimumVisit"] as const;
+export function upholsteryPublicPrice(catalog: UpholsteryCatalog, key: (typeof upholsteryPublicPriceKeys)[number]) {
+  return key === "cornerSeat" ? cornerSofaBasePrice : catalog[key];
+}
 export const upholsteryCatalogSchema = z
   .object(
     Object.fromEntries(
@@ -113,13 +120,7 @@ export function calculateUpholstery(
   const lines = v.items.map((item, index) => {
     const key =
       item.type === "SOFA3"
-        ? (
-            {
-              LIGHT: "sofa3Light",
-              NORMAL: "sofa3Normal",
-              HEAVY: "sofa3Heavy",
-            } as const
-          )[item.soil]
+        ? "sofa3Normal"
         : (
             {
               SOFA2: "sofa2",
@@ -129,15 +130,18 @@ export function calculateUpholstery(
               SPOT: "spot",
             } as const
           )[item.type];
-    const units = item.quantity * (item.type === "CORNER" ? item.seats! : 1);
+    const units = item.quantity;
+    const unitPrice = item.type === "CORNER"
+      ? cornerSofaBasePrice + Math.max(0, item.seats! - 4) * p.cornerSeat
+      : p[key];
     return {
       index,
       type: item.type,
       soil: item.soil,
       quantity: item.quantity,
       units,
-      unitPrice: p[key],
-      amount: p[key] * units,
+      unitPrice,
+      amount: unitPrice * units,
       from: item.soil === "HEAVY" || item.type === "SPOT",
     };
   });

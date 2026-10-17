@@ -1,7 +1,9 @@
 /** Owner-authorized prospective tariff. Existing order/finance snapshots are immutable. */
 export const applianceCodes = ['fridge','oven','microwave','hood','dishwasher','washingMachine'] as const;
 export type ApplianceCode = typeof applianceCodes[number];
-export const applianceUnitPrice = 1000;
+export const appliancePrices: Record<ApplianceCode, number> = {
+ fridge:1000, oven:1400, microwave:700, hood:1000, dishwasher:1000, washingMachine:1000,
+};
 export const applianceLabels: Record<'ru'|'sr'|'sr-Cyrl'|'en',Record<ApplianceCode,string>> = {
  ru:{fridge:'Холодильник изнутри',oven:'Духовка изнутри',microwave:'Микроволновка изнутри',hood:'Вытяжка внутри',dishwasher:'Посудомоечная машина внутри',washingMachine:'Стиральная машина внутри'},
  sr:{fridge:'Frižider iznutra',oven:'Rerna iznutra',microwave:'Mikrotalasna iznutra',hood:'Aspirator iznutra',dishwasher:'Mašina za sudove iznutra',washingMachine:'Mašina za veš iznutra'},

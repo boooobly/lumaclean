@@ -1,6 +1,6 @@
 import type { Locale } from "@/i18n/routing";
 import { getUpholsteryCatalog } from "@/lib/services/upholstery-catalog";
-import { calculateUpholstery, upholsteryPriceKeys } from "@/lib/upholstery";
+import { calculateUpholstery, upholsteryPublicPriceKeys, upholsteryPublicPrice } from "@/lib/upholstery";
 import { upholsteryUi } from "@/lib/upholstery-content";
 import { formatRsd } from "@/lib/pricing";
 import { ArticleDataTable } from "./article-data-table";
@@ -51,9 +51,9 @@ export async function UpholsteryArticlePrices({ locale }: { locale: Locale }) {
         table={{
           caption: u.prices,
           headings: [u.item, "RSD"],
-          rows: upholsteryPriceKeys.map((k) => [
-            u.catalogLabels[k],
-            `${k === "spot" || k === "sofa3Heavy" ? `${u.from} ` : ""}${formatRsd(catalog[k], locale)}`,
+          rows: upholsteryPublicPriceKeys.map((k) => [
+            k === "cornerSeat" ? u.cornerBaseLabel : u.catalogLabels[k],
+            `${k !== "minimumVisit" ? `${u.from} ` : ""}${formatRsd(upholsteryPublicPrice(catalog, k), locale)}`,
           ]),
         }}
       />

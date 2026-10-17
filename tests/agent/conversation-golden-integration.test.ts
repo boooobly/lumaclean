@@ -38,12 +38,12 @@ test('exact golden replay through persistence, jobs, domain tools, Lead and calc
    assert.equal(current.control,'AI_CONTROL');assert.equal(current.orderId,null);assert.equal(current.revision,i+1);
    if(i>=1)assert.equal(state.draftFacts?.service,'regular');if(i>=2)assert.equal(state.draftFacts?.area,88);
    if(i>=3){assert.deepEqual([...(state.draftFacts?.extras??[])].sort((a,b)=>a.code.localeCompare(b.code)),[{code:'fridge',quantity:1},{code:'oven',quantity:1}]);assert.equal(state.draftFacts?.extrasConfirmed,true);assert.notEqual(state.nextInput,'EXTRAS');}
-   if(i>=4){assert.equal(state.draftFacts?.soilLevel,'NORMAL');assert.equal(state.quote?.total,9200);assert.equal(state.quote.base,7200);assert.deepEqual(state.quote.breakdown?.map(e=>e.unitPrice),[1000,1000]);assert(reply.text.includes('RSD'));assert(!/1 fridge|1 oven/iu.test(reply.text));}
+   if(i>=4){assert.equal(state.draftFacts?.soilLevel,'NORMAL');assert.equal(state.quote?.total,12200);assert.equal(state.quote.base,9800);assert.deepEqual(state.quote.breakdown?.map(e=>e.unitPrice),[1000,1400]);assert(reply.text.includes('RSD'));assert(!/1 fridge|1 oven/iu.test(reply.text));}
    const duplicate=await acceptMessage(db,current,{id:requestId,text});assert.equal(duplicate.created,false);assert.equal(await db.message.count({where:{responseToMessageId:accepted.messageId}}),1);
   }
   const current=await db.conversation.findUniqueOrThrow({where:{id:c.id}});assert(current.leadId);
   const lead=await db.lead.findUniqueOrThrow({where:{id:current.leadId},include:{extras:{include:{extra:true}}}});
-  assert.equal(Number(lead.area),88);assert.equal(Number(lead.estimatedPrice),9200);assert.equal(lead.phone,'');
+  assert.equal(Number(lead.area),88);assert.equal(Number(lead.estimatedPrice),12200);assert.equal(lead.phone,'');
   assert.deepEqual(lead.extras.map(e=>({code:e.extra.code,quantity:Number(e.quantity),unitPrice:Number(e.unitPrice)})).sort((a,b)=>a.code.localeCompare(b.code)),[{code:'fridge',quantity:1,unitPrice:1000},{code:'oven',quantity:1,unitPrice:1000}]);
   assert.equal(await db.humanHandoff.count({where:{conversationId:c.id,reason:{not:{startsWith:'SOFT:'}}}}),0);
   const asks=await db.message.count({where:{conversationId:c.id,author:'AI',text:{contains:'Нужны ли дополнительные услуги'}}});assert.equal(asks,1);

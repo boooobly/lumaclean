@@ -41,7 +41,7 @@ export const upholsteryUi = {
     cleaning: "Основная уборка",
     surcharge: "Срочная запись +20%",
     delivery:
-      "Доставка и подготовка оборудования включены. Второй платы за аппарат нет.",
+      "Доставка и подготовка оборудования включены. Угловой диван: база до 4 мест, каждое дополнительное место — 2 000 RSD. Сильное загрязнение оцениваем отдельно после фото.",
     review:
       "Перед записью подтвердим материал, объём работы, цену, длительность и доступность аппарата. Это расчёт, а не подтверждённая запись.",
     quote: "Рассчитать стоимость",
@@ -54,14 +54,15 @@ export const upholsteryUi = {
     error:
       "Не удалось выполнить расчёт. Проверьте данные или напишите администратору.",
     readArticle: "Как устроена чистка и от чего зависит цена",
+    cornerBaseLabel: "Угловой диван · до 4 мест",
     catalogLabels: {
       sofa3Light: "Трёхместный диван · лёгкое загрязнение",
-      sofa3Normal: "Трёхместный диван · обычное загрязнение",
+      sofa3Normal: "Трёхместный диван",
       sofa3Heavy: "Трёхместный диван · сильное загрязнение",
       sofa2: "Двухместный диван · обычное загрязнение",
       armchair: "Кресло · обычное загрязнение",
       chair: "Стул · сиденье и спинка",
-      cornerSeat: "Угловой диван · за посадочное место",
+      cornerSeat: "Дополнительное место углового дивана сверх 4",
       spot: "Одно небольшое локальное пятно при уборке",
       minimumVisit: "Минимум отдельного выезда",
     },
@@ -178,7 +179,7 @@ export const upholsteryUi = {
     cleaning: "Čišćenje prostora",
     surcharge: "Hitan termin +20%",
     delivery:
-      "Dostava i priprema opreme su uključene. Oprema se ne naplaćuje dva puta.",
+      "Dostava i priprema su uključene. Ugaona garnitura: osnova do 4 mesta, svako dodatno mesto 2.000 RSD. Jaka zaprljanja procenjujemo posebno nakon fotografija.",
     review:
       "Pre rezervacije potvrđujemo materijal, obim, cenu, trajanje i dostupnost opreme. Ovo je procena, a ne potvrđen termin.",
     quote: "Izračunajte cenu",
@@ -191,14 +192,15 @@ export const upholsteryUi = {
     error:
       "Obračun nije dostupan. Proverite podatke ili se javite administratoru.",
     readArticle: "Kako izgleda pranje i od čega zavisi cena",
+    cornerBaseLabel: "Ugaona garnitura · do 4 mesta",
     catalogLabels: {
       sofa3Light: "Trosed · blago zaprljan",
-      sofa3Normal: "Trosed · uobičajena zaprljanost",
+      sofa3Normal: "Trosed",
       sofa3Heavy: "Trosed · jako zaprljan",
       sofa2: "Dvosed · uobičajena zaprljanost",
       armchair: "Fotelja · uobičajena zaprljanost",
       chair: "Stolica · sedište i naslon",
-      cornerSeat: "Ugaona garnitura · po sedećem mestu",
+      cornerSeat: "Dodatno mesto ugaone garniture preko 4",
       spot: "Jedna mala lokalna fleka uz čišćenje",
       minimumVisit: "Minimum za zaseban dolazak",
     },
@@ -312,7 +314,7 @@ export const upholsteryUi = {
     cleaning: "Home cleaning",
     surcharge: "Urgent booking +20%",
     delivery:
-      "Equipment delivery and preparation are included. There is no second equipment fee.",
+      "Delivery and preparation are included. Corner sofa: base price covers up to 4 seats; each additional seat is 2,000 RSD. Heavy soiling requires a separate photo assessment.",
     review:
       "Before booking we confirm fabric, scope, price, duration and equipment availability. This is an estimate, not a confirmed booking.",
     quote: "Calculate price",
@@ -325,14 +327,15 @@ export const upholsteryUi = {
     error:
       "The estimate is unavailable. Check your details or contact the administrator.",
     readArticle: "How extraction works and what affects the price",
+    cornerBaseLabel: "Corner sofa · up to 4 seats",
     catalogLabels: {
       sofa3Light: "Three-seat sofa · light soiling",
-      sofa3Normal: "Three-seat sofa · normal soiling",
+      sofa3Normal: "Three-seat sofa",
       sofa3Heavy: "Three-seat sofa · heavy soiling",
       sofa2: "Two-seat sofa · normal soiling",
       armchair: "Armchair · normal soiling",
       chair: "Chair · seat and back",
-      cornerSeat: "Corner sofa · per seating place",
+      cornerSeat: "Additional corner sofa seat beyond 4",
       spot: "One small local stain with home cleaning",
       minimumVisit: "Minimum for a standalone visit",
     },
