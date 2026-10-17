@@ -49,4 +49,3 @@ test('unmapped mattress sides and carpet piles remain manual enquiries',()=>{
   assert(websiteLeadSchema.safeParse({...enquiry,requestKind:'UPHOLSTERY',upholsteryRequested:true}).success);
   assert(websiteLeadSchema.safeParse({...enquiry,requestKind:'CLEANING_UPHOLSTERY',upholsteryRequested:true,service:'regular',area:39}).success);
 });
-
