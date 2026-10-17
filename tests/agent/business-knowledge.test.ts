@@ -109,6 +109,8 @@ test('golden C extraction remains informational, minimum is not a fee and bookin
 test('golden D/E are ordinary questions, genuine danger/damage still requires a person',()=>{
  assert.equal(mandatoryHandoff('Чистите квартиры после ремонта?'),null);
  assert.equal(mandatoryHandoff('Do you remove mold?'),null);
+ assert.equal(mandatoryHandoff('А плесень удаляете?'),null);
+ assert.equal(mandatoryHandoff('Can you clean after renovation?'),null);
  assert.equal(mandatoryHandoff('Можно оплатить картой?'),null);
  assert.equal(mandatoryHandoff('У меня плесень, мне нужно убрать её'), 'MOLD');
  assert.equal(mandatoryHandoff('Your cleaner damaged my furniture'), 'COMPLAINT');
@@ -128,4 +130,6 @@ test('knowledge facts allow explained units/deadlines/hours, never invented tota
  assert(!outputAllowed('Холодильник — 1400 RSD.',{},[],[],appliances));
  assert(outputAllowed('Холодильник — 1000 RSD, духовка — 1400 RSD.',{},[],[],appliances));
  assert(!outputAllowed('Мы возместим весь ущерб.',{},[],[],entries));
+ assert(!outputAllowed('Гарантируем полное удаление всех пятен.',{},[],[],entries));
+ assert(!outputAllowed('We guarantee all stains will be removed.',{},[],[],entries));
 });

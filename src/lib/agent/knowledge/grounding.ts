@@ -13,6 +13,9 @@ export function knowledgeTimeExplanation(sentence:string,entries:KnowledgeEntry[
 }
 export function unsupportedKnowledgeClaim(text:string,entries:KnowledgeEntry[],hasQuote:boolean){
  if(/себестоим|маржиналь|зарплат|выплат.{0,12}клинер|profit margin|cleaner payout|cost of supplies|troškovi poslovanja/iu.test(text))return true;
+ for(const clause of text.split(/(?<=[.!?])\s+|\n|\bbut\b|\bali\b|\sно\s/iu)){
+  if(/гарантируем.{0,35}(?:все|полное|любые).{0,20}пят|guarantee.{0,35}(?:all|every|complete).{0,20}stain|garantuj.{0,35}(?:sve|potpuno).{0,20}(?:fle|mrlj)|гарантуј.{0,35}(?:све|потпуно).{0,20}(?:фле|мрљ)/iu.test(clause)&&!/не гарант|not guarantee|cannot guarantee|can't guarantee|ne garant|не гарант/iu.test(clause))return true;
+ }
  if(!hasQuote&&/(?:итого|итоговая (?:цена|стоимость)|всего к оплате|order total|total (?:cost|price|is)|ukupno za (?:sve|narudžbinu)|укупно за све)\D{0,30}\d[\d ,.]*\s*(?:RSD|динар|dinara)/iu.test(text))return true;
  const bindings:[RegExp,string][]=[[/холодиль|fridge|refrigerator|frižider|frizider|фрижидер/iu,'fridge'],[/духов|oven|rerna|рерн/iu,'oven'],[/свч|микроволн|microwave|mikrotalas|микроталас/iu,'microwave'],[/вытяж|extractor hood|aspirator|аспиратор/iu,'hood'],[/посудомо|dishwasher|sudov|судов/iu,'dishwasher'],[/стиральн|washing machine|veš mašin|ves masin|веш машин/iu,'washingMachine']];
  for(const clause of text.split(/[;\n]|,(?!\d)/u)){
@@ -29,7 +32,7 @@ export function unsupportedKnowledgeClaim(text:string,entries:KnowledgeEntry[],h
  }
  for(const e of entries){
   if(e.status!=='UNAVAILABLE')continue;
-  if(/(?:выполним|оказываем|можем (?:сделать|убрать|почистить)|we (?:offer|can clean|provide)|radimo|nudimo|радимо|нудимо)/iu.test(text)&&!/не (?:выполняем|оказываем|делаем|предоставляем)|не можем|do not|don't|cannot|not offer|ne radimo|ne nudimo|не радимо|не нудимо/iu.test(text))return true;
+  if(text.split(/(?<=[.!?])\s+|\n|\bbut\b|\bali\b|\sно\s/iu).some(clause=>/(?:выполним|оказываем|можем (?:сделать|убрать|почистить)|we (?:offer|can clean|provide)|radimo|nudimo|радимо|нудимо)/iu.test(clause)&&!/не (?:выполняем|оказываем|делаем|предоставляем)|не можем|do not|don't|cannot|not offer|ne radimo|ne nudimo|не радимо|не нудимо/iu.test(clause)))return true;
  }
  return false;
 }

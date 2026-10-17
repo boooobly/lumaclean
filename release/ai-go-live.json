@@ -1,5 +1,5 @@
 {
-  "fingerprint": "fe1d9deb308cbf2de7137e08f40da52bf16361cf2538093510d449b548cb4d1f",
+  "fingerprint": "ce63ad3ce535ca48ec083c14c598699ae226cce0c0493b93d5e7ae88d738d8a9",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -159,7 +159,7 @@
     "src/lib/agent/autonomy-corpus.ts": "3ff2f9937dc1f6a9da3de5c02ada6d9da87d6155dc96b0aac291f7229e34a46b",
     "src/lib/agent/autonomy-metrics.ts": "f0837699b20605c36e274849d0fe04fa236c314c7cd5d782da7f4b39e947c54e",
     "src/lib/agent/autonomy-preview.ts": "418219bde2344a57896a296b104fd361a6fb8a801ac230392da1d7d1ae37da2f",
-    "src/lib/agent/autonomy.ts": "e0e39d29e430a15b9a7a08d117021a50902a13ec3810cad753513da0f5f2aad7",
+    "src/lib/agent/autonomy.ts": "d498ffe6984ef0c56188d56dd51cf28b8a898556226fc3a366fda766e99b29da",
     "src/lib/agent/behavior-eval.ts": "58875967d9aebc564f9ecc67ec83768c4376a30e2591d735c10c8780b705a097",
     "src/lib/agent/behavior-telemetry.ts": "65b6f66b11127abbf6a29be0c69e56f544779477094dae99603fad5ece1d1242",
     "src/lib/agent/business-labels.ts": "aa9313bd859d8f565df06ecd3d16a0a559594a337a29d3bc75c250a88dce6f17",
@@ -185,7 +185,7 @@
     "src/lib/agent/extraction-planning.ts": "776dffdd77f7169006642810fa8e900b469790c10bc2ca323a83f2f0c97e703c",
     "src/lib/agent/fact-proposals.ts": "92a9332da6103ae72167048690c69c92997ad7d33e26f8b0cfdb83f93c082e61",
     "src/lib/agent/inbox.ts": "e60def787797139b82df7ad7cceb1ed7550a65539ed794cd1d9ec0cdb7b317d5",
-    "src/lib/agent/knowledge/grounding.ts": "60d495567f12cfbd918c928e3572d595578b26a048881cb272943c94157239b8",
+    "src/lib/agent/knowledge/grounding.ts": "8f0af727fdcf60b1c13c92a10724471b0bda3db73f4cfc664d97b436fb979704",
     "src/lib/agent/knowledge/preview-whatsapp.ts": "9e78a9587f9db12582f49f0d60d82870bf3bd0a5b9d308048f28af76ea7c669e",
     "src/lib/agent/knowledge/schema.ts": "5884ed407ca1060ad5e7b4376ffdf842f523ee1234ac58a74b72be95ba13cdc5",
     "src/lib/agent/knowledge/search.ts": "cca27bae260abe0c642d53002aca09967dd593b3694b990c87eee37d6f9c41af",
@@ -343,7 +343,7 @@
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-17T22:28:26.561Z",
+  "checkedAt": "2026-10-17T22:34:46.525Z",
   "suites": [
     "885 passing agent/admin/CRM/finance/scheduling checks; 25 environment-dependent checks skipped",
     "74 actual knowledge/pricing tool checks on the existing isolated Neon test branch; no Orders or mode changes",
@@ -352,8 +352,8 @@
   "lintWarnings": "Two pre-existing next/no-img-element warnings in unchanged website-chat.tsx",
   "verificationScope": "Versioned public business knowledge from approved tabs 01–06. Shared Website/WhatsApp agent tools; explicit manual-service review, additional-bathroom guard and upholstery-only Lead persistence. No schema, public prices/UI, provider/model or persistent channel-mode changes. Native provider consultation measurements and source-bound live booking proof are separate evidence; neither is inferred from unit tests.",
   "previousVerification": {
-    "fingerprint": "e49637a1de5dadfa8cc665f0a27c69ef1889955ccc69d568f68f1d5cc5a1eea9",
-    "tests": 806,
-    "checkedAt": "2026-10-17T20:27:05.523Z"
+    "fingerprint": "fe1d9deb308cbf2de7137e08f40da52bf16361cf2538093510d449b548cb4d1f",
+    "tests": 959,
+    "checkedAt": "2026-10-17T22:28:26.561Z"
   }
 }

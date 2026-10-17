@@ -18,7 +18,7 @@ export function contextualReason(text:string,reason:HandoffReason|null):HandoffR
  if(reason==='ACCESS_REVIEW'&&question&&!/хран|хранить|keep|store|čuv|cuv|чув|остав.{0,25}(?:навсегда|недел)|leave.{0,25}week/iu.test(text))return null;
  if(reason==='ARRIVAL_REVIEW'&&!/где|where|gde|где|опазд|late|kasn|касн|\beta\b/iu.test(text))return null;
  if(['MOLD','RENOVATION','HAZARDOUS_CLEANING','HEAVY_LIFTING'].includes(reason)){
-  const serviceQuestion=/^(?:(?:вы|а вы|do you|does lumaclean|da li|да ли).{0,70}|(?=чистите|убираете|делаете|моете))(?:делаете|убираете|моете|чистите|clean|remove|offer|carry|move|čist|cist|uklanj|pomer|чист|уклањ|помер)/iu.test(text.trim());
+  const serviceQuestion=/^(?:(?:вы|а вы|do you|does lumaclean|da li|да ли).{0,70}|(?=чистите|убираете|делаете|моете))(?:делаете|убираете|моете|чистите|clean|remove|offer|carry|move|čist|cist|uklanj|pomer|чист|уклањ|помер)/iu.test(text.trim())||['MOLD','RENOVATION'].includes(reason)&&question&&/удаляете|чистите|убираете|делаете|do you|can you|čistite li|cistite li|uklanjate|да ли|да ли перете/iu.test(text);
   const actual=/у меня|у нас|мой|мою|нам нужно|мне нужно|помогите|нужно.{0,25}(?:убрать|переставить)|my |our |please |help |treba mi|kod mene|треба ми|код мене/iu.test(text);
   if(serviceQuestion&&!actual)return null;
  }
