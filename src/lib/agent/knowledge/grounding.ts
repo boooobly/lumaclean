@@ -1,4 +1,7 @@
 import type {KnowledgeEntry} from './schema';
+export function minimumExplanation(text:string,amount:number,entries:KnowledgeEntry[]){
+ return entries.some(e=>['UPH-RULE-001','ADD-LOGISTICS-002'].includes(e.code)&&e.price?.amount===amount)&&/минимальн|минимум|не менее|minimum|minimaln|najmanje|минимал|најмање/iu.test(text);
+}
 export function knowledgeAmounts(entries:KnowledgeEntry[]){
  return [...new Set(entries.flatMap(e=>[...(e.price&&e.price.kind!=='percent'?[e.price.amount]:[]),...e.tariffs.map(t=>t.amount),...[e.description,e.includes,e.excludes,e.restrictions].join(' ').matchAll(/(\d[\d ]*)\s*RSD/gu)].map(v=>typeof v==='number'?v:Number(v[1].replace(/ /g,'')))))];
 }
@@ -16,7 +19,6 @@ export function unsupportedKnowledgeClaim(text:string,entries:KnowledgeEntry[],h
  for(const clause of text.split(/(?<=[.!?])\s+|\n|\bbut\b|\bali\b|\sно\s/iu)){
   if(/гарантируем.{0,35}(?:все|полное|любые).{0,20}пят|guarantee.{0,35}(?:all|every|complete).{0,20}stain|garantuj.{0,35}(?:sve|potpuno).{0,20}(?:fle|mrlj)|гарантуј.{0,35}(?:све|потпуно).{0,20}(?:фле|мрљ)/iu.test(clause)&&!/не гарант|not guarantee|cannot guarantee|can't guarantee|ne garant|не гарант/iu.test(clause))return true;
  }
- if(!hasQuote&&/(?:итого|итоговая (?:цена|стоимость)|всего к оплате|order total|total (?:cost|price|is)|ukupno za (?:sve|narudžbinu)|укупно за све)\D{0,30}\d[\d ,.]*\s*(?:RSD|динар|dinara)/iu.test(text))return true;
  const bindings:[RegExp,string][]=[[/холодиль|fridge|refrigerator|frižider|frizider|фрижидер/iu,'fridge'],[/духов|oven|rerna|рерн/iu,'oven'],[/свч|микроволн|microwave|mikrotalas|микроталас/iu,'microwave'],[/вытяж|extractor hood|aspirator|аспиратор/iu,'hood'],[/посудомо|dishwasher|sudov|судов/iu,'dishwasher'],[/стиральн|washing machine|veš mašin|ves masin|веш машин/iu,'washingMachine']];
  for(const clause of text.split(/[;\n]|,(?!\d)/u)){
   const amounts=[...clause.matchAll(/(\d[\d\s.,]*?)\s*(?:RSD|динар(?:ов|а)?|дин\.?|dinara|din\.?)/giu)].map(m=>Number(m[1].replace(/[\s,.]/g,'')));

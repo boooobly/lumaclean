@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2026-10-17.30dbc2a1b50a",
+  "version": "2026-10-17.4ede733b908e",
   "sourceId": "1Xua3GrAYAgYfcbYUEWrU6I6cMZEA0IULLdSuKrbW4DY",
   "sourceHash": "a0fac96ee0e6f864d36fe099f04c1cecb7e03231b12a11e1af5a1b1074428781",
   "entries": [
@@ -2044,7 +2044,7 @@
       "excludes": "",
       "restrictions": "До 3 створок, проем>2 и≤3 м²; обе стороны, рамы/пазы/подоконник включены.",
       "standalone": "BY_AGREEMENT",
-      "managerReview": false,
+      "managerReview": true,
       "autoCalculate": true,
       "autoBook": false,
       "runtimeCode": "largeWindow",
@@ -8956,7 +8956,11 @@
     {
       "code": "ADD-LOGISTICS-014",
       "name": "Парковка платная",
-      "aliases": [],
+      "aliases": [
+        "payment",
+        "plaćanje",
+        "плаћање"
+      ],
       "category": "extra",
       "status": "OFFERED",
       "description": "Парковка платная",
@@ -8987,7 +8991,11 @@
     {
       "code": "ADD-LOGISTICS-015",
       "name": "Платный проезд / парковочная зона",
-      "aliases": [],
+      "aliases": [
+        "payment",
+        "plaćanje",
+        "плаћање"
+      ],
       "category": "extra",
       "status": "OFFERED",
       "description": "Платный проезд / парковочная зона",
@@ -16403,7 +16411,11 @@
     {
       "code": "RULE-GENERAL-013",
       "name": "Бесплатная консультация/оценка",
-      "aliases": [],
+      "aliases": [
+        "payment",
+        "plaćanje",
+        "плаћање"
+      ],
       "category": "rule",
       "status": "OFFERED",
       "description": "Консультация и предварительная оценка по описанию или фото бесплатны; это не подтверждение записи или гарантированной цены.",
@@ -16836,7 +16848,10 @@
         "service area",
         "Belgrade",
         "Beograd",
-        "Београд"
+        "Београд",
+        "payment",
+        "plaćanje",
+        "плаћање"
       ],
       "category": "rule",
       "status": "OFFERED",
@@ -16982,8 +16997,16 @@
       "code": "RULE-PAY-001",
       "name": "Предоплата обязательна",
       "aliases": [
+        "оплата",
+        "платить",
         "payment",
+        "pay",
+        "paying",
+        "platiti",
+        "platim",
         "plaćanje",
+        "платити",
+        "платим",
         "плаћање"
       ],
       "category": "rule",
@@ -17015,7 +17038,18 @@
         "cash",
         "euros",
         "gotovina",
-        "готовина"
+        "готовина",
+        "оплата",
+        "платить",
+        "payment",
+        "pay",
+        "paying",
+        "platiti",
+        "platim",
+        "plaćanje",
+        "платити",
+        "платим",
+        "плаћање"
       ],
       "category": "rule",
       "status": "OFFERED",
@@ -17045,7 +17079,18 @@
         "bank transfer",
         "rubles",
         "рубли",
-        "bankovni transfer"
+        "bankovni transfer",
+        "оплата",
+        "платить",
+        "payment",
+        "pay",
+        "paying",
+        "platiti",
+        "platim",
+        "plaćanje",
+        "платити",
+        "платим",
+        "плаћање"
       ],
       "category": "rule",
       "status": "OFFERED",
@@ -17075,8 +17120,16 @@
         "card payment",
         "kartica",
         "картица",
+        "оплата",
+        "платить",
         "payment",
+        "pay",
+        "paying",
+        "platiti",
+        "platim",
         "plaćanje",
+        "платити",
+        "платим",
         "плаћање"
       ],
       "category": "rule",
@@ -17106,7 +17159,17 @@
         "фискальный чек",
         "fiscal receipt",
         "fiskalni račun",
-        "фискални рачун"
+        "фискални рачун",
+        "оплата",
+        "платить",
+        "payment",
+        "pay",
+        "paying",
+        "platiti",
+        "platim",
+        "plaćanje",
+        "платити",
+        "платим"
       ],
       "category": "rule",
       "status": "BY_AGREEMENT",
@@ -17132,6 +17195,9 @@
       "code": "RULE-PAY-007",
       "name": "Бесплатная отмена до N часов",
       "aliases": [
+        "payment",
+        "plaćanje",
+        "плаћање",
         "cancellation",
         "otkazivanje",
         "отказивање"

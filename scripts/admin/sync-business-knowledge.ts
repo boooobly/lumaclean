@@ -34,6 +34,7 @@ for(const tab of [2,3])for(const r of rows(tab)){
  e.managerReview=e.status!=='OFFERED'||!e.runtimeCode;
  e.autoCalculate=!!e.runtimeCode&&e.status==='OFFERED';
  e.autoBook=e.autoCalculate&&!['largeWindow','steam'].includes(e.runtimeCode!);
+ if(!e.autoBook)e.managerReview=true;
  if(e.status!=='UNAVAILABLE'&&typeof c[5]==='number')e.price={amount:c[5],currency:'RSD',kind:c[5]===0?'included':e.unit==='%'?'percent':tab===3||/от|согласован/iu.test(value(c[4]))?'from':'fixed',unit:e.unit};
  if(e.price?.kind==='included')e.restrictions=clean(e.restrictions+' Входит только в соответствующую согласованную работу, не бесплатный самостоятельный выезд.');
  if(e.code==='UPH-SOFA-004')e.restrictions='Угловой диван до 4 посадочных мест. Каждое место сверх четырёх — 2 000 RSD по UPH-SOFA-006; окончательная цена после проверки ткани и состояния.';

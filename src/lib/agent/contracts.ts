@@ -84,6 +84,7 @@ export const toolDescriptions:Record<ToolName,string> = {
 export const nativeTools = Object.entries(toolSchemas).map(([name,schema])=>({type:"function" as const,function:{name,description:toolDescriptions[name as ToolName],strict:false,parameters:z.toJSONSchema(schema,{target:"draft-7"})}}));
 export type Qualification = z.infer<typeof qualificationSchema>;
 export type AgentState = {
+  knowledgeContext?:{version:string;codes:string[]};
   knowledgeRequests?:{code:string;evidence:string}[];
   reliability?:Partial<Record<import('./reliability-telemetry').ReliabilityMetric,number>>;
   lastDecision?:{knownFields:string[];nextInput?:typeof inputIntents[number];questionAttempts:number;tools:{tool:string;outcome:string}[]};

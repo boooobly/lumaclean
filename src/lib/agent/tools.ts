@@ -36,7 +36,7 @@ import {normalizeKnowledge} from './knowledge/vocabulary';
 import { AgentError, customerFactsSchema,toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
 type Tx=Prisma.TransactionClient;
-export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[];factPercentages?:number[];knowledgeEvidence?:KnowledgeEntry[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; questionAsked?:boolean; extractionIncomplete?:AgentState['nextInput']; validatedDepartures?:DepartureLegInput[]};
+export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;allowedTools?:readonly ToolName[];handoff?:boolean;factAmounts?:number[];factPercentages?:number[];knowledgeEvidence?:KnowledgeEntry[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; questionAsked?:boolean; extractionIncomplete?:AgentState['nextInput']; validatedDepartures?:DepartureLegInput[]};
 export const json=(value:unknown)=>JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 export const stateOf=(c:Pick<Conversation,"state">)=>structuredClone(c.state) as AgentState;
 // PostgreSQL jsonb reorders object keys. Hash and compare facts, never their insertion order.
@@ -226,13 +226,30 @@ export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,resched
 async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,payload:unknown):Promise<ToolResult>{
   const state=ctx.state;
   if(name==='searchBusinessKnowledge'){
-    const result=searchBusinessKnowledge(toolSchemas[name].parse(payload));
+    const input=toolSchemas[name].parse(payload),result=searchBusinessKnowledge(input);
+    // Persist only bounded public record pointers, never prices. A minimum-visit
+    // explanation may refer to the item discussed previously; re-read its price
+    // from this version and validate it against runtime below.
+    if(businessKnowledgeEnabled()&&/миним|minimum|minimal|минимал/iu.test(input.query)&&(input.limit??4)>1){
+      const codes=[...(state.knowledgeRequests??[]).map(e=>e.code),...(state.knowledgeContext?.codes??[])];
+      const previous=codes.find(code=>code.startsWith('UPH-')&&!code.startsWith('UPH-RULE-'));
+      const context=previous?searchBusinessKnowledge({query:previous,limit:1}).matches[0]:null;
+      if(context&&!result.matches.some(e=>e.code===context.code)){
+        result.matches=[...result.matches.slice(0,(input.limit??4)-1),context];
+        while(JSON.stringify(result).length>7000&&result.matches.length>1)result.matches.splice(result.matches.length-2,1);
+      }
+    }
+    const business=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    for(const entry of result.matches)if(entry.category==='cleaning'&&entry.runtimeCode&&!business.aiAllowedServices.includes(entry.runtimeCode)){
+      entry.autoCalculate=false;entry.autoBook=false;entry.managerReview=true;
+    }
     const codes=result.matches.flatMap(e=>e.runtimeCode&&e.category==='extra'?[e.runtimeCode]:[]);
     const active=await tx.serviceExtra.findMany({where:{code:{in:codes},active:true},select:{code:true,unitPrice:true}});
     const upholstery=upholsteryCatalogSchema.parse((await tx.upholsterySettings.findUniqueOrThrow({where:{id:'default'}})).catalog);
     const upholsteryMap:Record<string,keyof typeof upholstery>={'UPH-SOFA-001':'sofa2','UPH-SOFA-002':'sofa3Normal','UPH-CHAIR-001':'armchair','UPH-CHAIR-007':'chair','UPH-SOFA-006':'cornerSeat','UPH-SPOT-001':'spot','UPH-RULE-001':'minimumVisit'};
     if(result.matches.some(e=>e.category==='extra'&&e.runtimeCode&&!active.some(a=>a.code===e.runtimeCode&&Number(a.unitPrice)===e.price?.amount)||upholsteryMap[e.code]&&upholstery[upholsteryMap[e.code]]!==e.price?.amount))return{error:'PRICE_CATALOG_MISMATCH',matches:[],version:result.version};
     ctx.knowledgeEvidence=[...new Map([...(ctx.knowledgeEvidence??[]),...result.matches].map(e=>[e.code,e])).values()].slice(-12);
+    state.knowledgeContext={version:result.version,codes:result.matches.map(e=>e.code).slice(0,5)};
     ctx.factAmounts=[...new Set([...(ctx.factAmounts??[]),...result.matches.flatMap(e=>e.price&&e.price.kind!=='percent'?[e.price.amount]:[])])];
     if(result.matches.some(e=>/20%/.test(e.description)))ctx.factPercentages=[...new Set([...(ctx.factPercentages??[]),20])];
     return result;
@@ -571,6 +588,7 @@ export async function executeAgentTool(db:PrismaClient,ctx:ToolContext,name:stri
   try{
     result=await db.$transaction(async tx=>{
       const c=await assertToolAccess(tx,ctx);
+      if(ctx.allowedTools&&!ctx.allowedTools.includes(typed))return{error:'ANSWER_DIRECT_QUESTION_FIRST',message:'Answer the current business question from verified knowledge. Qualification and booking are not permitted during this consultation turn.'};
       if(ctx.mode==="AUTO")ctx.state=stateOf(c);
       if(pendingHumanStatements(c.summary).length&&!['getBusinessInfo','markUpholsteryInquiry','recordCustomerFacts','reconcileHumanContext','requestHumanHandoff','requestReview'].includes(typed))return{error:'HUMAN_CONTEXT_REQUIRED'};
       const output=await dispatch(tx,c,ctx,typed,parsed.data);

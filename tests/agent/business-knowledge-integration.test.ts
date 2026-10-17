@@ -25,6 +25,24 @@ test('actual knowledge tools, Lead persistence and booking boundaries on the dis
    assert.equal(result.error,undefined);const match=(result.matches as {code:string;price:{amount:number}}[]).find(e=>e.code===code);assert.equal(match?.price.amount,amount);
    assert.equal((await db.conversation.findUniqueOrThrow({where:{id:ctx.conversationId}})).leadId,null);
   });
+  await t.test('knowledge capabilities respect existing runtime service scope without changing settings',async()=>{
+   const ctx=await context('Что входит в офисную уборку?'),result=await executeAgentTool(db,ctx,'searchBusinessKnowledge',{query:'PACKAGE-OFFICE'});
+   const entry=(result.matches as {code:string;autoCalculate:boolean;autoBook:boolean;managerReview:boolean}[]).find(e=>e.code==='PACKAGE-OFFICE')!;
+   const settings=await db.businessSettings.findUniqueOrThrow({where:{id:'default'}}),enabled=settings.aiAllowedServices.includes('office');
+   assert.equal(entry.autoCalculate,enabled);assert.equal(entry.autoBook,enabled);assert.equal(entry.managerReview,!enabled);
+  });
+  await t.test('minimum-visit follow-up rehydrates the discussed item from current catalog, not cached numbers',async()=>{
+   const ctx=await context('Сколько стоит трёхместный диван?');
+   await executeAgentTool(db,ctx,'searchBusinessKnowledge',{query:'UPH-SOFA-002'});
+   const result=await executeAgentTool(db,ctx,'searchBusinessKnowledge',{query:'Как работает минимальный выезд?'});
+   assert((result.matches as {code:string}[]).some(e=>e.code==='UPH-SOFA-002'));assert(ctx.factAmounts?.includes(4600));
+   assert(ctx.state.knowledgeContext?.version);assert(!JSON.stringify(ctx.state.knowledgeContext).includes('4600'));
+  });
+  await t.test('consultation admission also rejects unadvertised terminal tools on the server',async()=>{
+   const ctx=await context('Что входит в генеральную уборку?');ctx.allowedTools=['searchBusinessKnowledge','getBusinessInfo'];
+   const result=await executeAgentTool(db,ctx,'requestCustomerInput',{intent:'AREA'});
+   assert.equal(result.error,'ANSWER_DIRECT_QUESTION_FIRST');assert.equal(ctx.responseText,undefined);assert.equal(ctx.state.nextInput,undefined);
+  });
   await t.test('unsupported extra request is saved once, remains AI_CONTROL and cannot be booked',async()=>{
    const evidence='Хочу помыть ролеты на всех окнах',ctx=await context(evidence);
    for(let i=0;i<2;i++)assert.equal((await executeAgentTool(db,ctx,'recordKnowledgeRequest',{codes:['ADD-WINDOW-017'],evidence,action:'ADD'})).saved,true);

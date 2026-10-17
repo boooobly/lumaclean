@@ -12,6 +12,8 @@ The strict snapshot contains five packages, 280 extras, 94 upholstery rows, 108 
 
 Read-only `searchBusinessKnowledge` normalizes Cyrillic/Latin Serbian, accents and RU/SR/EN synonyms, ranks stable codes, and returns at most five records within 6,500 characters of records. It never downloads Sheets at runtime. Relevant records only are added to the current turn. Current order tools take priority over runtime prices/rules, then knowledge, then public copy. A direct business question bypasses qualification and receives the relevant catalog facts first.
 
+Consultation turns advertise a bounded tool subset to both existing providers and enforce that subset server-side. A terminal qualification tool cannot replace the requested answer. Normal quote and booking turns keep their existing workflow. Follow-ups retain only versioned record codes, not cached prices; a minimum-visit explanation re-reads the discussed item from the current snapshot and active runtime catalog. An unknown stable code returns no substitute.
+
 `recordKnowledgeRequest` validates current attributed CLIENT evidence and relevant approved codes, stores requested non-calculator work in the existing Lead/state, and requires specific review. It cannot create ServiceExtra or a price. Knowledge status never grants booking permission. Multiple bathrooms invalidate old quote/slots and block booking. Upholstery stays a Lead with review; no autonomous Order. Existing Website/WhatsApp runner, identity, controls and idempotency remain shared.
 
 ## Price conflicts resolved by precedence
@@ -24,6 +26,8 @@ Read-only `searchBusinessKnowledge` normalizes Cyrillic/Latin Serbian, accents a
 - Card and fiscal receipt remain unconfirmed. Current rules confirm cash RSD/EUR and bank transfer RUB at the owner's 1:1 payment rule. No unsupported cryptocurrency promise is added.
 
 Existing calculator extras and existing upholstery keys are checked against runtime defaults, then active database tariffs at retrieval time. An existing-code mismatch returns `PRICE_CATALOG_MISMATCH`, not a stale price. All five area bands are validated. Order totals still require the shared deterministic server tool; knowledge cannot synthesize new quote lines. Output guards bind informational amounts to retrieved facts and keep slot/confirmation/refund restrictions.
+
+Production currently allows autonomous area-service tools only for `regular` and `deep`. Retrieval overlays calculation/booking capabilities from that current server setting. All five packages remain available for consultation; moving, Airbnb and office enquiries require the existing manual workflow. This release does not widen the allowed-service list.
 
 ## Controlled refresh and rollback
 

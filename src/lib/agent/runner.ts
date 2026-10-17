@@ -26,6 +26,7 @@ import {persistOpenQuestion,loopSignal} from './question-planning';
 import {needsStructuredExtraction} from './extraction-planning';
 import {customerFactsSchema} from './contracts';
 import {reliabilityCount} from './reliability-telemetry';
+const consultationTools=['searchBusinessKnowledge','getBusinessInfo','findClient','calculateAlternativePrice','recordKnowledgeRequest','createOrUpdateLead','reconcileHumanContext','requestReview','requestHumanHandoff'] as const;
 
 export function modelState(state:AgentState){
   const {reliability,lastDecision,...facts}=state;void reliability;void lastDecision;
@@ -218,9 +219,10 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       if(catalogRequest)imagePolicy+='\nCURRENT TURN: a catalog-service enquiry outside the automatic area calculator. Explain the requested work and verified unit/from price if available. Save an explicit supported request via recordKnowledgeRequest; do not turn mere inventory or a question into a selection. If the exact variant is ambiguous, ask ONE narrow question, never substitute the cheapest similar service. Use a Lead and soft review; no final total or autonomous booking. If upholsteryInquiry is already saved, the Lead and review already exist: do not repeat marking/review or start a technical questionnaire.';
       if(photos.count&&!photos.images.length)imagePolicy+='\nImages are unavailable to you. Do not make ANY visual claims. Ask the customer to describe them. An unavailable image alone is not a handoff.';
       for(let step=0;step<Math.min(8,Math.max(1,limits.aiMaxToolSteps))&&!signal.aborted;step++){
+        ctx.allowedTools=consultation?consultationTools:undefined;
         // Reconcile critical state before every provider retry/fallback; providers never execute tools.
         if(mode==="AUTO"){const live=await db.conversation.findUniqueOrThrow({where:{id:c.id}});ctx.state=stateOf(live);compact=live.summary;}
-        messages[0]={role:"system",content:conversationPolicy(c.locale,modelState(ctx.state) as AgentState,compact,buildAgentTemporalContext(current.sentAt,limits),c.displayAlias)+imagePolicy};
+        messages[0]={role:"system",content:conversationPolicy(c.locale,modelState(ctx.state) as AgentState,compact,buildAgentTemporalContext(current.sentAt,limits),c.displayAlias)+imagePolicy,...(consultation?{allowedTools:consultationTools}:{})};
         let answer:Completion;
         try{answer=await modelComplete(messages);if(messages.some(m=>m.images?.length)){await db.chatAttachment.updateMany({where:{messageId:{in:claim.turn.map(m=>m.id)}},data:{aiAnalysisStatus:'ANALYZED'}});}}
         catch(e){if(!(e instanceof AgentError)||e.code!=='PROVIDERS_UNAVAILABLE'||!messages.some(m=>m.images?.length))throw e;for(const m of messages)delete m.images;imagePolicy+='\nVISION UNAVAILABLE: You have only the attachment count. Never describe or claim to have seen any image. Ask for a description; image unavailability alone does not require handoff.';messages[0].content+=imagePolicy;await db.chatAttachment.updateMany({where:{messageId:{in:claim.turn.map(m=>m.id)}},data:{aiAnalysisStatus:'UNAVAILABLE'}});answer=await modelComplete(messages);}

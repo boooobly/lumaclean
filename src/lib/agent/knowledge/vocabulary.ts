@@ -66,7 +66,7 @@ export const topics:[RegExp,string[]][]=[
  [/стул|chair|stolic|столиц/iu,['chair','stolica','столица']],
  [/матрас|mattress|dušek|dusek|душек/iu,['mattress','dušek','душек']],
  [/ков[её]р|ковр|carpet|rug|tepih|тепих/iu,['carpet','rug','tepih','тепих']],
- [/оплат|карт|pay|cash|bank|plać|plac|kartic|плаћ|картиц/iu,['payment','plaćanje','плаћање']],
+ [/оплат|плат[иё]|налич|банков|рубл|евро|карт|pay|cash|bank|plać|plac|plat|kartic|плаћ|плат|картиц/iu,['payment','plaćanje','плаћање']],
  [/скид|discount|popust|попуст|регуляр|regular customer|redovn/iu,['discount','regular customers','popust','попуст']],
  [/срочн|сегодня|urgent|today|hitno|danas|хитно|данас/iu,['urgent today','hitno danas','хитно данас']],
  [/отмен|cancel|otkaz|отказ/iu,['cancellation','otkazivanje','отказивање']],
@@ -102,7 +102,8 @@ const specific:Record<string,string[]>={
 };
 export function knowledgeAliases(code:string,name:string){
  // Topic aliases are for search only. They do not grant service equivalence or automation.
- return [...new Set([...(specific[code]??[]),...topics.filter(([r])=>r.test(name)).flatMap(([,a])=>a)])].slice(0,35);
+ const payment=['RULE-PAY-001','RULE-PAY-003','RULE-PAY-004','RULE-PAY-005','RULE-PAY-006'].includes(code)?['оплата','платить','payment','pay','paying','platiti','platim','plaćanje','платити','платим']:[];
+ return [...new Set([...(specific[code]??[]),...payment,...topics.filter(([r])=>r.test(name)).flatMap(([,a])=>a)])].slice(0,35);
 }
 const translit:Record<string,string>={а:'a',б:'b',в:'v',г:'g',д:'d',ђ:'dj',е:'e',ж:'z',з:'z',и:'i',ј:'j',к:'k',л:'l',љ:'lj',м:'m',н:'n',њ:'nj',о:'o',п:'p',р:'r',с:'s',т:'t',ћ:'c',у:'u',ф:'f',х:'h',ц:'c',ч:'c',џ:'dz',ш:'s',ы:'y',э:'e',ю:'ju',я:'ja',ь:'',ъ:'',щ:'sc',ё:'e'};
 export function normalizeKnowledge(text:string){return text.toLowerCase().normalize('NFD').replace(/\p{M}/gu,'').replace(/đ/g,'dj').replace(/[а-яђјљњћџ]/gu,c=>translit[c]??c).replace(/[^\p{L}\p{N}]+/gu,' ').trim();}

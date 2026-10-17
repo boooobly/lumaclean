@@ -4,7 +4,7 @@ import {knowledgeScenarios} from './knowledge-scenarios';
 import {randomUUID} from 'node:crypto';
 import type {PrismaClient} from '@/generated/prisma/client';
 import {AgentError,type AgentState} from './contracts';
-import {configuredProviders} from './providers';
+import {configuredProviders,type AIProvider} from './providers';
 import {previewTestAllowed} from './live-proof';
 import {acceptMessage,acceptChannelMessage} from './inbox';
 import {claimJob,runClaimedJob} from './runner';
@@ -48,13 +48,17 @@ export async function conversationPreview(db:PrismaClient,userId:string,input:In
  if(index>=scenario.texts.length)throw new AgentError('SCENARIO_FINISHED');
  if(c.control!=='AI_CONTROL')throw new AgentError('UNEXPECTED_HUMAN_CONTROL');
  const providers=configuredProviders(),selected=input.provider==='primary'?providers:[providers[1],providers[0]] as typeof providers;
+ const proposedTexts:string[]=[];
+ const observed=selected.map(provider=>({name:provider.name,model:provider.model,complete:async(...args:Parameters<AIProvider['complete']>)=>{
+  const result=await provider.complete(...args);if(result.text&&!result.toolCalls.length)proposedTexts.push(result.text.slice(0,1800));return result;
+ }})) as [AIProvider,AIProvider];
  const started=Date.now();
  const incomingId=randomUUID(),incoming={channel:'WHATSAPP' as const,externalThreadId:c.externalThreadId!,externalUserId:c.externalThreadId!,externalMessageId:incomingId,text:scenario.texts[index],locale:scenario.locale,receivedAt:new Date()};
  const accepted=channel==='WHATSAPP'?await acceptChannelMessage(db,incoming):await acceptMessage(db,c,{id:incomingId,text:scenario.texts[index]});
  if(channel==='WHATSAPP'&&(await acceptChannelMessage(db,incoming)).messageId!==accepted.messageId)throw new AgentError('PREVIEW_IDEMPOTENCY_FAILED');
  const claim=await claimJob(db,c.id);if(!claim)throw new AgentError('JOB_NOT_CLAIMED');
  let capturedSends=0;
- await runClaimedJob(db,claim,selected,async()=>({images:[],count:0}),()=>({send:async()=>{capturedSends++;return{status:'SENT',externalMessageId:'synthetic-only:'+randomUUID()};}}));
+ await runClaimedJob(db,claim,observed,async()=>({images:[],count:0}),()=>({send:async()=>{capturedSends++;return{status:'SENT',externalMessageId:'synthetic-only:'+randomUUID()};}}));
  const live=await db.conversation.findUniqueOrThrow({where:{id:c.id}}),state=live.state as AgentState;
  const [response,tools,invocations,lead]=await Promise.all([
   db.message.findUniqueOrThrow({where:{responseToMessageId:accepted.messageId},select:{id:true,text:true,structured:true}}),
@@ -70,5 +74,5 @@ export async function conversationPreview(db:PrismaClient,userId:string,input:In
   await applyChannelStatus(db,{channel:'WHATSAPP',externalThreadId:c.externalThreadId!,externalMessageId,status:'DELIVERED',at:new Date()});
  }
  const {name,phone,addressQuery,neighborhoodHint,...safeFacts}=state.draftFacts??{};void name;void phone;void addressQuery;void neighborhoodHint;
- return{channel,capturedSends,externalDelivery:false,elapsedMs:Date.now()-started,step:index+1,provider:selected[0].name,nativeComplete:invocations.length>0&&invocations.every(i=>i.success&&i.provider===selected[0].name),inconclusive:invocations.some(i=>!i.success||i.provider!==selected[0].name),facts:safeFacts,quote:state.quote?{total:state.quote.total,base:state.quote.base,breakdown:state.quote.breakdown}:null,nextInput:state.nextInput,unresolvedInput:state.unresolvedInput,proposal:!!state.pendingFactProposal,review:state.review?.reasons??[],control:live.control,booking:!!state.booking,revision:live.revision,reliability:state.reliability,tools,invocations,response:response.text,recovery:(response.structured as {autonomy?:{recovery?:boolean}}|null)?.autonomy?.recovery??false,lead:lead?{estimate:lead.estimatedPrice?Number(lead.estimatedPrice):null,extras:lead.extras.map(e=>({code:e.extra.code,quantity:Number(e.quantity),unitPrice:Number(e.unitPrice)}))}:null};
+ return{channel,capturedSends,externalDelivery:false,elapsedMs:Date.now()-started,step:index+1,provider:selected[0].name,nativeComplete:invocations.length>0&&invocations.every(i=>i.success&&i.provider===selected[0].name),inconclusive:invocations.some(i=>!i.success||i.provider!==selected[0].name),facts:safeFacts,quote:state.quote?{total:state.quote.total,base:state.quote.base,breakdown:state.quote.breakdown}:null,nextInput:state.nextInput,unresolvedInput:state.unresolvedInput,proposal:!!state.pendingFactProposal,review:state.review?.reasons??[],control:live.control,booking:!!state.booking,revision:live.revision,reliability:state.reliability,tools,invocations,response:response.text,guardedProposal:(response.structured as {autonomy?:{recovery?:boolean}}|null)?.autonomy?.recovery?proposedTexts.at(-1):undefined,recovery:(response.structured as {autonomy?:{recovery?:boolean}}|null)?.autonomy?.recovery??false,lead:lead?{estimate:lead.estimatedPrice?Number(lead.estimatedPrice):null,extras:lead.extras.map(e=>({code:e.extra.code,quantity:Number(e.quantity),unitPrice:Number(e.unitPrice)}))}:null};
 }

@@ -28,9 +28,11 @@ export function searchBusinessKnowledge(input:unknown){
 }
 function lookup(input:unknown){
  const {query,limit=4}=knowledgeQuerySchema.parse(input),q=normalizeKnowledge(query),tokens=words(query);
+ const codeQuery=/^(?:PACKAGE|ADD|UPH|SCOPE|RULE)-[A-Z0-9-]+$/iu.test(query);
  const queryTopics=topics.filter(([r])=>r.test(query)).map(([,a])=>a.map(normalizeKnowledge));
  const selected=indexed.map(({entry,name,aliases,words:terms})=>{
-  let score=tokens.reduce((sum,w)=>sum+(terms.some(t=>t===w)?3:terms.some(t=>w.length>3&&t.length>3&&(t.startsWith(w.slice(0,-1))||w.startsWith(t.slice(0,-1))))?1:0),0);
+  if(codeQuery)return{entry,score:entry.code===query.toUpperCase()?1000:0};
+  let score=tokens.reduce((sum,w)=>sum+(terms.some(t=>t===w)?3:terms.some(t=>w.length>3&&t.length>3&&(t.startsWith(w.slice(0,-1))||w.startsWith(t.slice(0,-1))))?2:0),0);
   if(q===normalizeKnowledge(entry.code))score+=1000;
   const phrase=aliases.filter(a=>a.length>=4&&q.includes(a)).reduce((n,a)=>Math.max(n,a.length),0);
   score+=phrase*2+(q.includes(name)?30:0);
@@ -76,13 +78,14 @@ function lookup(input:unknown){
 export function catalogConsultationRequest(text:string){
  if(!/(?:хочу|нужн|добав|помой|почист|отмыть|есть.{0,20}ролет|treba|želim|zelim|треба|желим|i need|i want|please|add)/iu.test(text))return false;
  const first=searchBusinessKnowledge({query:text.slice(0,400),limit:1}).matches[0];
- return !!first&&(first.category==='upholstery'||first.category==='extra'&&!first.autoCalculate);
+ const standalone=/только|only|samo|само/iu.test(text);
+ return !!first&&(first.category==='upholstery'||first.category==='extra'&&(!first.autoCalculate||standalone&&first.standalone==='BY_AGREEMENT'));
 }
 export function directBusinessQuestion(text:string){
  const question=/\?|(?:^|[.!]\s*|\sа\s)(?:что|чем|как|какие|входит|входят|можно|моете|чистите|делаете|сколько стоит|what|how|do you|does|can i|is|are|da li|šta|sta|kako|koliko|да ли|шта|како|колико)(?=\s|$|[?!.,:])/iu.test(text);
  if(!question)return false;
- if(/сколько.{0,30}(?:всего|всё|все вместе)|итого|how much.{0,20}(?:all|total)|koliko.{0,20}(?:sve|ukupno)|колико.{0,20}(?:све|укупно)/iu.test(text))return false;
- if(/сколько.{0,50}(?:вс[её]|стоить|вместе)|итого|how much.{0,30}(?:all|total)|koliko.{0,30}(?:sve|ukupno)/iu.test(text)&&/(?:хочу|мне нуж|нам нуж|treba mi|желим|треба ми|i need|i want|please clean)/iu.test(text)&&!/входит|входят|includ|uključ|ukljuc|укључ/iu.test(text))return false;
+ if(/сколько.{0,30}(?:всего|всё|вместе)|итого|how much.{0,20}(?:all|total|both|together)|koliko.{0,20}(?:sve|ukupno)|колико.{0,20}(?:све|укупно)/iu.test(text))return false;
+ if(/сколько.{0,50}(?:вс[её]|стоить|вместе)|итого|how much.{0,30}(?:all|total|both|together)|koliko.{0,30}(?:sve|ukupno)/iu.test(text)&&/(?:хочу|мне нуж|нам нуж|treba mi|желим|треба ми|i need|i want|please clean)/iu.test(text)&&!/входит|входят|includ|uključ|ukljuc|укључ/iu.test(text))return false;
  // Personalized total remains the server quote path. Unit-price questions stay knowledge questions.
  if(/сколько(?:.{0,25}(?:вс[её]|будет|итого))?|стоим|цен|price|cost|итого|how much|total|koliko.{0,30}(?:sve|ukupno)|колико.{0,30}(?:све|укупно)/iu.test(text)&&/\d+\s*(?:м²|m²|квадрат|kvadrat|square)|\b(?:уборка|cleaning|čišćenje|чишћење)\b.{0,15}\d+/iu.test(text)&&!/входит|входят|includ|uključ|ukljuc|укључ/iu.test(text))return false;
  return searchBusinessKnowledge({query:text.slice(0,400),limit:1}).matches.length>0;
