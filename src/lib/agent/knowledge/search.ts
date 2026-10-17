@@ -5,6 +5,7 @@ import {extrasPrices,priceMatrix} from '@/lib/pricing';
 import {upholsteryDefaults} from '@/lib/upholstery';
 
 export const businessKnowledge=knowledgeSnapshotSchema.parse(raw);
+export const businessKnowledgeEnabled=()=>process.env.AGENT_BUSINESS_KNOWLEDGE_ENABLED!=='false';
 const stop=new Set(['a','the','is','do','you','of','and','in','to','can','i','mi','da','li','je','u','za','na','i','что','это','ли','в','и','а','можно','сколько','как','у','вы','мне','не','мы']);
 function words(s:string){return normalizeKnowledge(s).split(' ').filter(w=>w.length>2&&!stop.has(w));}
 const indexed=businessKnowledge.entries.map(entry=>({entry,name:normalizeKnowledge(entry.name),aliases:entry.aliases.map(normalizeKnowledge),words:words([entry.name,...entry.aliases,entry.description].join(' '))}));
@@ -20,6 +21,7 @@ export function knowledgeConsistency(){
 }
 const resultCache=new Map<string,{at:number;result:ReturnType<typeof lookup>}>();
 export function searchBusinessKnowledge(input:unknown){
+ if(!businessKnowledgeEnabled()){knowledgeQuerySchema.parse(input);return knowledgeResultSchema.parse({version:businessKnowledge.version+':disabled',matches:[],truncated:false,orderTotals:'calculatePrice only',availability:'slot tools only'});}
  const parsed=knowledgeQuerySchema.parse(input),key=businessKnowledge.version+':'+normalizeKnowledge(parsed.query)+':'+(parsed.limit??4);
  const saved=resultCache.get(key);if(saved&&Date.now()-saved.at<600000)return structuredClone(saved.result);
  const result=lookup(parsed);if(resultCache.size>=64)resultCache.delete(resultCache.keys().next().value!);resultCache.set(key,{at:Date.now(),result});return structuredClone(result);
@@ -71,12 +73,17 @@ function lookup(input:unknown){
 }
 
 /** A direct business question interrupts qualification, including a mixed facts + question turn. */
+export function catalogConsultationRequest(text:string){
+ if(!/(?:хочу|нужн|добав|помой|почист|отмыть|есть.{0,20}ролет|treba|želim|zelim|треба|желим|i need|i want|please|add)/iu.test(text))return false;
+ const first=searchBusinessKnowledge({query:text.slice(0,400),limit:1}).matches[0];
+ return !!first&&(first.category==='upholstery'||first.category==='extra'&&!first.autoCalculate);
+}
 export function directBusinessQuestion(text:string){
  const question=/\?|(?:^|[.!]\s*|\sа\s)(?:что|чем|как|какие|входит|входят|можно|моете|чистите|делаете|сколько стоит|what|how|do you|does|can i|is|are|da li|šta|sta|kako|koliko|да ли|шта|како|колико)(?=\s|$|[?!.,:])/iu.test(text);
  if(!question)return false;
  if(/сколько.{0,30}(?:всего|всё|все вместе)|итого|how much.{0,20}(?:all|total)|koliko.{0,20}(?:sve|ukupno)|колико.{0,20}(?:све|укупно)/iu.test(text))return false;
  if(/сколько.{0,50}(?:вс[её]|стоить|вместе)|итого|how much.{0,30}(?:all|total)|koliko.{0,30}(?:sve|ukupno)/iu.test(text)&&/(?:хочу|мне нуж|нам нуж|treba mi|желим|треба ми|i need|i want|please clean)/iu.test(text)&&!/входит|входят|includ|uključ|ukljuc|укључ/iu.test(text))return false;
  // Personalized total remains the server quote path. Unit-price questions stay knowledge questions.
- if(/сколько(?:.{0,25}(?:вс[её]|будет|итого))?|итого|how much|total|koliko.{0,30}(?:sve|ukupno)|колико.{0,30}(?:све|укупно)/iu.test(text)&&/\d+\s*(?:м²|m²|квадрат|kvadrat|square)|\b(?:уборка|cleaning|čišćenje|чишћење)\b.{0,15}\d+/iu.test(text)&&!/входит|входят|includ|uključ|ukljuc|укључ/iu.test(text))return false;
+ if(/сколько(?:.{0,25}(?:вс[её]|будет|итого))?|стоим|цен|price|cost|итого|how much|total|koliko.{0,30}(?:sve|ukupno)|колико.{0,30}(?:све|укупно)/iu.test(text)&&/\d+\s*(?:м²|m²|квадрат|kvadrat|square)|\b(?:уборка|cleaning|čišćenje|чишћење)\b.{0,15}\d+/iu.test(text)&&!/входит|входят|includ|uključ|ukljuc|укључ/iu.test(text))return false;
  return searchBusinessKnowledge({query:text.slice(0,400),limit:1}).matches.length>0;
 }

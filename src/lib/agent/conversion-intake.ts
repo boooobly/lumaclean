@@ -4,6 +4,7 @@ import {inputQuestion} from './chat-presentation';
 import {formatRsd,calculatePrice} from '@/lib/pricing';
 import {serviceDatePolicy} from './temporal';
 import {businessLabels,businessServiceLabel} from './business-labels';
+import {searchBusinessKnowledge} from './knowledge/search';
 
 export function nextQualification(state:AgentState):AgentState['nextInput'] {
   const f=state.draftFacts;
@@ -36,6 +37,11 @@ export function quoteText(state:AgentState,locale:string){
   const lines=[service+' '+q.input.area+' m² — '+formatRsd(q.base,sr?'sr':locale)];
   for(const item of q.breakdown??[])lines.push(item.quantity+' '+(labels[item.code]??item.code)+' — '+formatRsd(item.amount,sr?'sr':locale));
   lines.push((cyrl?'Укупно за потврђене ставке: ':sr?'Ukupno za potvrđene stavke: ':en?'Known subtotal: ':'Сумма известных позиций: ')+formatRsd(q.total,sr?'sr':locale));
+  if((state.draftFacts?.bathroomCount??1)>1){
+    const code=q.input.service==='regular'?'ADD-BATH-001':q.input.service==='deep'?'ADD-BATH-002':null;
+    const price=code?searchBusinessKnowledge({query:code,limit:1}).matches[0]?.price:null;
+    if(price)lines.push((cyrl?'Једно стандардно купатило је укључено; свако додатно пуно купатило — ':sr?'Jedno standardno kupatilo je uključeno; svako dodatno puno kupatilo — ':en?'One standard bathroom is included; each additional full bathroom — ':'Один стандартный санузел включён; каждый дополнительный полный санузел — ')+formatRsd(price.amount,sr?'sr':locale)+(cyrl?'. Није у наведеном подзбиру; коначну цену треба усагласити.':sr?'. Nije u navedenom podzbiru; konačnu cenu treba usaglasiti.':en?'. Excluded from the subtotal above; the complete price needs review.':'. Не входит в сумму выше; полный итог нужно согласовать.'));
+  }
   if(state.draftFacts?.reviewItems?.includes('roletne'))lines.push(cyrl?'Ролетне: цену још проверавамо са тимом.':sr?'Roletne: cenu još proveravamo sa timom.':en?'Shutters: the team is reviewing the price.':'Рольставни: цену уточняет команда.');
   else if(q.requiresHumanReview||state.review?.reasons.length)lines.push(cyrl?'Тим још проверава детаље; ово није коначна цена.':sr?'Tim još proverava detalje; ovo nije konačna cena.':en?'The team is reviewing details; this is not the final price.':'Команда уточняет детали; это не окончательная цена.');
   if(state.duration&&state.draftFacts?.requestedCrew===state.duration.requiredCleaners)lines.push(cyrl?'За ову врсту чишћења планирамо '+state.duration.requiredCleaners+' особе.':sr?'Da, za ovu vrstu čišćenja planiramo '+state.duration.requiredCleaners+' osobe.':en?'The configured crew is '+state.duration.requiredCleaners+' cleaners.':'По правилам для этой уборки планируем '+state.duration.requiredCleaners+' человек.');

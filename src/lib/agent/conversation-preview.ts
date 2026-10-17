@@ -1,4 +1,5 @@
 import {whatsappFixtureDatabase} from './knowledge/preview-whatsapp';
+import {applyChannelStatus} from './channel-ingress';
 import {knowledgeScenarios} from './knowledge-scenarios';
 import {randomUUID} from 'node:crypto';
 import type {PrismaClient} from '@/generated/prisma/client';
@@ -56,11 +57,18 @@ export async function conversationPreview(db:PrismaClient,userId:string,input:In
  await runClaimedJob(db,claim,selected,async()=>({images:[],count:0}),()=>({send:async()=>{capturedSends++;return{status:'SENT',externalMessageId:'synthetic-only:'+randomUUID()};}}));
  const live=await db.conversation.findUniqueOrThrow({where:{id:c.id}}),state=live.state as AgentState;
  const [response,tools,invocations,lead]=await Promise.all([
-  db.message.findUniqueOrThrow({where:{responseToMessageId:accepted.messageId},select:{text:true,structured:true}}),
+  db.message.findUniqueOrThrow({where:{responseToMessageId:accepted.messageId},select:{id:true,text:true,structured:true}}),
   db.agentToolTrace.findMany({where:{jobId:claim.job.id},select:{tool:true,outcome:true,entityId:true,latencyMs:true}}),
   db.aIInvocation.findMany({where:{jobId:claim.job.id},select:{provider:true,success:true,errorCode:true,inputTokens:true,outputTokens:true,latencyMs:true,estimatedCostUsd:true}}),
   live.leadId?db.lead.findUnique({where:{id:live.leadId},select:{estimatedPrice:true,extras:{select:{quantity:true,unitPrice:true,extra:{select:{code:true}}}}}}):null,
  ]);
+ if(channel==='WHATSAPP'){
+  // Simulate the owned test transport receipt, not a real Meta delivery. Without
+  // this, the next scripted turn correctly replays an undelivered old question.
+  const externalMessageId='synthetic-only:'+response.id;
+  await db.message.update({where:{id:response.id},data:{deliveryStatus:'SENT',channelMessageId:externalMessageId}});
+  await applyChannelStatus(db,{channel:'WHATSAPP',externalThreadId:c.externalThreadId!,externalMessageId,status:'DELIVERED',at:new Date()});
+ }
  const {name,phone,addressQuery,neighborhoodHint,...safeFacts}=state.draftFacts??{};void name;void phone;void addressQuery;void neighborhoodHint;
  return{channel,capturedSends,externalDelivery:false,elapsedMs:Date.now()-started,step:index+1,provider:selected[0].name,nativeComplete:invocations.length>0&&invocations.every(i=>i.success&&i.provider===selected[0].name),inconclusive:invocations.some(i=>!i.success||i.provider!==selected[0].name),facts:safeFacts,quote:state.quote?{total:state.quote.total,base:state.quote.base,breakdown:state.quote.breakdown}:null,nextInput:state.nextInput,unresolvedInput:state.unresolvedInput,proposal:!!state.pendingFactProposal,review:state.review?.reasons??[],control:live.control,booking:!!state.booking,revision:live.revision,reliability:state.reliability,tools,invocations,response:response.text,recovery:(response.structured as {autonomy?:{recovery?:boolean}}|null)?.autonomy?.recovery??false,lead:lead?{estimate:lead.estimatedPrice?Number(lead.estimatedPrice):null,extras:lead.extras.map(e=>({code:e.extra.code,quantity:Number(e.quantity),unitPrice:Number(e.unitPrice)}))}:null};
 }

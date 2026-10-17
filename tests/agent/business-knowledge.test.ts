@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {businessKnowledge,directBusinessQuestion,knowledgeConsistency,searchBusinessKnowledge} from '../../src/lib/agent/knowledge/search';
+import {businessKnowledge,catalogConsultationRequest,directBusinessQuestion,knowledgeConsistency,searchBusinessKnowledge} from '../../src/lib/agent/knowledge/search';
 import {knowledgeQuerySchema,knowledgeSnapshotSchema} from '../../src/lib/agent/knowledge/schema';
 import {explicitCustomerFacts,applyCustomerFacts} from '../../src/lib/agent/customer-facts';
 import {bookingReviewBlocked} from '../../src/lib/agent/conversion-facts';
@@ -69,6 +69,17 @@ test('unavailable catalog entries cannot acquire a price or booking permission',
 test('zeros describe inclusion, never free standalone services',()=>{
  for(const e of businessKnowledge.entries.filter(e=>e.price?.amount===0)){assert.equal(e.price?.kind,'included');assert(e.restrictions);}
 });
+test('manual work is consulted before standard area qualification, without assuming a service variant',()=>{
+ assert(catalogConsultationRequest('Хочу помыть ролеты на всех окнах'));
+ assert(catalogConsultationRequest('Хочу почистить трёхместный диван'));
+ assert(!catalogConsultationRequest('Хочу поддерживающую уборку 75 квадратов'));
+});
+test('knowledge rollback does not remove existing unsupported-work booking guards',()=>{
+ const previous=process.env.AGENT_BUSINESS_KNOWLEDGE_ENABLED;
+ try{process.env.AGENT_BUSINESS_KNOWLEDGE_ENABLED='false';assert.equal(searchBusinessKnowledge({query:'oven'}).matches.length,0);assert(bookingReviewBlocked({knowledgeRequests:[{code:'ADD-WINDOW-017',evidence:'Хочу ролеты'}]}));assert(bookingReviewBlocked({draftFacts:{bathroomCount:2}}));}
+ finally{if(previous===undefined)delete process.env.AGENT_BUSINESS_KNOWLEDGE_ENABLED;else process.env.AGENT_BUSINESS_KNOWLEDGE_ENABLED=previous;}
+ assert(searchBusinessKnowledge({query:'oven'}).matches.length);
+});
 test('the known unit prices and no unsupported autonomous catalog expansion',()=>{
  const expected:Record<string,number>={'ADD-KITCHEN-001':1000,'ADD-KITCHEN-004':1400,'ADD-TEXTILE-005':900,'ADD-TEXTILE-008':750,'ADD-BATH-001':1200,'ADD-BATH-002':2500,'UPH-SOFA-002':4600,'UPH-MATTRESS-002':2000,'UPH-CARPET-001':450};
  for(const [code,amount] of Object.entries(expected))assert.equal(businessKnowledge.entries.find(e=>e.code===code)?.price?.amount,amount);
@@ -110,5 +121,11 @@ test('knowledge facts allow explained units/deadlines/hours, never invented tota
  assert(!outputAllowed('Мы приедем завтра в 09:00.',{},[],[],entries));
  assert(!outputAllowed('Итого 1400 RSD.',{},[],[],entries));
  assert(!outputAllowed('Духовка 1900 RSD.',{},[],[],entries));
+ assert(!outputAllowed('Духовка 1900 дин.',{},[],[],entries));
+ assert(!outputAllowed('Духовка 1900 din.',{},[],[],entries));
+ assert(!outputAllowed('Глажка 900 RSD за час.',{},[],[],entries));
+ const appliances=businessKnowledge.entries.filter(e=>['fridge','oven'].includes(e.runtimeCode??''));
+ assert(!outputAllowed('Холодильник — 1400 RSD.',{},[],[],appliances));
+ assert(outputAllowed('Холодильник — 1000 RSD, духовка — 1400 RSD.',{},[],[],appliances));
  assert(!outputAllowed('Мы возместим весь ущерб.',{},[],[],entries));
 });

@@ -30,7 +30,7 @@ import {extrasPrices} from '@/lib/pricing';
 import {applianceLabels,applianceScope} from '@/lib/appliance-catalog';
 import {recoverMissingFacts,loopClarificationText} from './conversation-recovery';
 import {alternativePriceRequest} from './alternative-price';
-import {businessKnowledge,searchBusinessKnowledge,directBusinessQuestion} from './knowledge/search';
+import {businessKnowledge,businessKnowledgeEnabled,searchBusinessKnowledge,directBusinessQuestion} from './knowledge/search';
 import type {KnowledgeEntry} from './knowledge/schema';
 import {normalizeKnowledge} from './knowledge/vocabulary';
 import { AgentError, customerFactsSchema,toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
@@ -238,6 +238,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     return result;
   }
   if(name==='recordKnowledgeRequest'){
+    if(!businessKnowledgeEnabled())return{error:'REVIEW_REQUIRED'};
     const input=toolSchemas[name].parse(payload),turn=await currentClientTurn(tx,c.id);
     if(!turn.some(m=>m.text.includes(input.evidence))||directBusinessQuestion(input.evidence))return{error:'FACT_EVIDENCE_REJECTED'};
     if(input.action==='ADD'&&!/(?:хочу|нужн|добав|помой|почист|отмыть|есть.{0,20}ролет|treba|želim|zelim|треба|желим|i need|i want|please|add)/iu.test(input.evidence))return{error:'FACT_EVIDENCE_REJECTED'};
@@ -277,11 +278,16 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const activeExtras=await tx.serviceExtra.findMany({where:{active:true},select:{code:true,unitPrice:true}});
     const lang=c.locale==='sr-Cyrl'?'sr-Cyrl':c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru';
     const priceCatalog=Object.entries(extrasPrices).map(([code,amount])=>({code,amount,label:applianceLabels[lang][code as keyof typeof applianceLabels.ru]??siteContent[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'].calculator.labels[code],currency:'RSD',confirmed:activeExtras.some(e=>e.code===code&&Number(e.unitPrice)===amount)}));
+    if(!businessKnowledgeEnabled()){
+      const content=siteContent[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'];
+      ctx.factAmounts=priceCatalog.filter(e=>e.confirmed).map(e=>e.amount);
+      return{knowledge:'DISABLED',services:content.services,scope:content.comparison,priceCatalog,faq:[],access:{confirmedHandoverProcess:false},presence:{confirmedRequirement:'UNKNOWN'},rule:'Only these current public facts are confirmed. Unsupported details need review; all stored custom-work and bathroom booking guards remain active.'};
+    }
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
     const packages=businessKnowledge.entries.filter(e=>e.category==='cleaning').map(({code,name,includes,excludes})=>({code,name,includes,excludes}));
     const payment=businessKnowledge.entries.filter(e=>['RULE-PAY-001','RULE-PAY-003','RULE-PAY-004','RULE-PAY-005','RULE-PAY-006'].includes(e.code));
-    ctx.knowledgeEvidence=payment;
-    ctx.factPercentages=[20];ctx.factAmounts=priceCatalog.filter(e=>e.confirmed).map(e=>e.amount);
+    ctx.knowledgeEvidence=[...new Map([...(ctx.knowledgeEvidence??[]),...payment].map(e=>[e.code,e])).values()].slice(-12);
+    ctx.factPercentages=[20];ctx.factAmounts=[...new Set([...(ctx.factAmounts??[]),...priceCatalog.filter(e=>e.confirmed).map(e=>e.amount)])];
     return {version:businessKnowledge.version,city:'Belgrade',services:packages,priceCatalog,
       faq:payment.map(e=>({q:e.name,a:e.description})),
       search:'Use searchBusinessKnowledge for the specific current question: full extras, upholstery, package scope and business rules. This overview is not an order quote.',

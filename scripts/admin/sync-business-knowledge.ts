@@ -9,6 +9,7 @@ const input=process.argv[2];if(!input)throw new Error('Usage: tsx scripts/admin/
 type Source={title:string;rows:{row:number;cells:(string|number|null)[]}[]};
 const source=JSON.parse(readFileSync(input,'utf8')) as Source[];
 if(source.length!==6||source.some((s,i)=>!s.title.startsWith(String(i+1).padStart(2,'0'))))throw new Error('Only six approved source tabs are accepted');
+for(const [tab,column] of [[1,7],[2,5],[3,5],[4,4]])if(!/ПРОЕКТ/iu.test(String(source[tab-1].rows.find(r=>r.row===4)?.cells[column]??'')))throw new Error(`Project-value header required in tab ${tab}`);
 const rows=(tab:number)=>source[tab-1].rows.filter(r=>r.row>=5);
 const value=(v:unknown)=>String(v??'').replace(/\s+/gu,' ').trim();
 const internal=/себестоим|маржин|экономик|чел[. -]*(?:мин|час)|человеко|норматив|норма времени|порог времени|11!|рынок|n\s*=\s*\d|команда\s*K|доход|прибыл|зарплат|выплат|внутренн.{0,15}(?:расч|финанс)|fallback|буфер|optimizer|затрат|активн.{0,12}мин|минут.{0,20}(?:одного клинера|активного труда)|подтвержден.{0,15}владел|хронометр|не активный труд/iu;

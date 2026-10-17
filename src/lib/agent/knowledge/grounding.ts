@@ -1,6 +1,6 @@
 import type {KnowledgeEntry} from './schema';
 export function knowledgeAmounts(entries:KnowledgeEntry[]){
- return [...new Set(entries.flatMap(e=>[...(e.price&&e.price.kind!=='percent'?[e.price.amount]:[]),...[e.description,e.includes,e.excludes,e.restrictions].join(' ').matchAll(/(\d[\d ]*)\s*RSD/gu)].map(v=>typeof v==='number'?v:Number(v[1].replace(/ /g,'')))))];
+ return [...new Set(entries.flatMap(e=>[...(e.price&&e.price.kind!=='percent'?[e.price.amount]:[]),...e.tariffs.map(t=>t.amount),...[e.description,e.includes,e.excludes,e.restrictions].join(' ').matchAll(/(\d[\d ]*)\s*RSD/gu)].map(v=>typeof v==='number'?v:Number(v[1].replace(/ /g,'')))))];
 }
 export function knowledgeTimeExplanation(sentence:string,entries:KnowledgeEntry[]){
  if(/(?:можем приехать|приедем|записал|available at|we can come|dolazimo|долазимо|slobodan termin|слободан термин)/iu.test(sentence))return false;
@@ -16,10 +16,15 @@ export function unsupportedKnowledgeClaim(text:string,entries:KnowledgeEntry[],h
  if(!hasQuote&&/(?:итого|итоговая (?:цена|стоимость)|всего к оплате|order total|total (?:cost|price|is)|ukupno za (?:sve|narudžbinu)|укупно за све)\D{0,30}\d[\d ,.]*\s*(?:RSD|динар|dinara)/iu.test(text))return true;
  const bindings:[RegExp,string][]=[[/холодиль|fridge|refrigerator|frižider|frizider|фрижидер/iu,'fridge'],[/духов|oven|rerna|рерн/iu,'oven'],[/свч|микроволн|microwave|mikrotalas|микроталас/iu,'microwave'],[/вытяж|extractor hood|aspirator|аспиратор/iu,'hood'],[/посудомо|dishwasher|sudov|судов/iu,'dishwasher'],[/стиральн|washing machine|veš mašin|ves masin|веш машин/iu,'washingMachine']];
  for(const clause of text.split(/[;\n]|,(?!\d)/u)){
-  const amounts=[...clause.matchAll(/(\d[\d\s.,]*?)\s*(?:RSD|динар(?:ов|а)?|dinara)/giu)].map(m=>Number(m[1].replace(/[\s,.]/g,'')));
+  const amounts=[...clause.matchAll(/(\d[\d\s.,]*?)\s*(?:RSD|динар(?:ов|а)?|дин\.?|dinara|din\.?)/giu)].map(m=>Number(m[1].replace(/[\s,.]/g,'')));
   if(amounts.length!==1)continue;
   const codes=bindings.filter(([pattern])=>pattern.test(clause)).map(([,code])=>code);
   if(codes.length===1){const e=entries.find(e=>e.runtimeCode===codes[0]);if(e?.price&&amounts[0]!==e.price.amount&&!hasQuote)return true;}
+  if(!hasQuote&&amounts.length===1){
+   const sizes:[RegExp,string][]=[[/тр[её]хмест|three.seat|trosed|тросед/iu,'UPH-SOFA-002'],[/двухмест|two.seat|dvosed|двосед/iu,'UPH-SOFA-001'],[/углов|corner sofa|ugaon|угаон/iu,'UPH-SOFA-004']];
+   for(const [pattern,code] of sizes){const e=entries.find(e=>e.code===code);if(e?.price&&pattern.test(clause)&&!/дополн|сверх|extra|additional|preko|dodat|додат/iu.test(clause)&&amounts[0]!==e.price.amount)return true;}
+   if(amounts[0]===5600&&/за.{0,15}(?:место|seat|mesto)|per seat/iu.test(clause)&&entries.some(e=>e.code==='UPH-SOFA-004'))return true;
+  }
   if(/900\s*RSD/iu.test(clause)&&/глаж|ironing|pegl|пегл/iu.test(clause)&&/(?:за|per|po|по)\s*(?:один\s*|1\s*)?(?:час|hour|sat|сат)/iu.test(clause))return true;
  }
  for(const e of entries){
