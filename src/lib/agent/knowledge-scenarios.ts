@@ -1,5 +1,8 @@
 /** Synthetic clients, no contacts, addresses or confirmation: never an Order. */
 export const knowledgeScenarios={
+ whatsappRu:{channel:'WHATSAPP',locale:'ru',texts:['В Airbnb входит смена постельного белья?','Нужно только диван почистить. Трёхместный.','А можно оплатить картой?']},
+ whatsappSr:{channel:'WHATSAPP',locale:'sr-Latn',texts:['Da li perete roletne?','Koliko košta pranje troseda?','Da li je rerna uključena u cenu?']},
+ whatsappEn:{channel:'WHATSAPP',locale:'en',texts:['Do you clean inside kitchen cabinets?','I need only a sofa cleaned, a three seater.','What is the minimum visit charge?']},
  packages:{locale:'ru',texts:['Что входит в поддерживающую уборку?','Чем генеральная отличается?','Нужно 80 квадратов. А окна в генеральную входят?','А стирка, глажка и смена белья?']},
  goldenA:{locale:'ru',texts:['У вас генеральная уборка, 65 квадратов, духовка и холодильник изнутри. Обычное загрязнение, больше ничего. Сколько?','Я же написал, что духовка нужна. Сколько всего?']},
  goldenB:{locale:'ru',texts:['Два санузла, поддерживающая, 75 квадратов. Обычное загрязнение, больше ничего.','Второй санузел сколько стоит?','А окна входят?']},

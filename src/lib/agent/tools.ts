@@ -32,6 +32,7 @@ import {recoverMissingFacts,loopClarificationText} from './conversation-recovery
 import {alternativePriceRequest} from './alternative-price';
 import {businessKnowledge,searchBusinessKnowledge,directBusinessQuestion} from './knowledge/search';
 import type {KnowledgeEntry} from './knowledge/schema';
+import {normalizeKnowledge} from './knowledge/vocabulary';
 import { AgentError, customerFactsSchema,toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
 type Tx=Prisma.TransactionClient;
@@ -582,6 +583,6 @@ export async function executeAgentTool(db:PrismaClient,ctx:ToolContext,name:stri
       throw new AgentError("TOOL_EXECUTION_UNCERTAIN");
     }
   }
-  await db.agentToolTrace.create({data:{conversationId:ctx.conversationId,jobId:ctx.jobId,tool:typed,outcome:typeof result.error==="string"?result.error:"OK",entityId:typeof result.leadId==="string"?result.leadId:null,latencyMs:Date.now()-started,shadow:ctx.mode==="SHADOW"}});
+  await db.agentToolTrace.create({data:{conversationId:ctx.conversationId,jobId:ctx.jobId,tool:typed,outcome:typeof result.error==="string"?result.error:"OK",entityId:typed==='searchBusinessKnowledge'?`knowledge:${businessKnowledge.version}:${createHash('sha256').update(normalizeKnowledge(toolSchemas.searchBusinessKnowledge.parse(parsed.data).query)).digest('hex').slice(0,16)}`:typeof result.leadId==="string"?result.leadId:null,latencyMs:Date.now()-started,shadow:ctx.mode==="SHADOW"}});
   return result;
 }

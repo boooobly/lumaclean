@@ -84,6 +84,8 @@ export function outputAllowed(text:string,state:AgentState,factAmounts:number[]=
   if(text.length>1800||(text.match(/\?/g)?.length??0)>2||/sk-or-|(?:API[_ -]?KEY|DATABASE_URL|BETTER_AUTH_SECRET)\s*[:=]/i.test(text))return false;
   const amounts=[...text.matchAll(/(\d[\d\s.,]*?)\s*(?:RSD|динар(?:ов|а)?|dinara)/gi)].map(m=>Number(m[1].replace(/[\s,.]/g,"")));
   const upholstery=state.upholsteryQuote;
+  const totals=[...text.matchAll(/(?:итого|всего к оплате|итоговая (?:цена|стоимость)|order total|total(?: cost| price)?|ukupno|укупно)\D{0,30}(\d[\d\s.,]*?)\s*(?:RSD|динар(?:ов|а)?|dinara)/giu)].map(m=>Number(m[1].replace(/[\s,.]/g,'')));
+  if(totals.some(n=>n!==state.quote?.total&&n!==upholstery?.total))return false;
   const approved=[...factAmounts,...knowledgeAmounts(knowledge),...(upholstery?[upholstery.total,upholstery.subtotal,upholstery.surcharge,upholstery.minimumAdjustment,upholstery.cleaningBase,upholstery.itemsSubtotal,...upholstery.lines.flatMap(line=>[line.unitPrice,line.amount])]:[]),...(state.quote?[state.quote.total,state.quote.base,...(state.quote.breakdown??[]).map(e=>e.amount)]:[])];
   if(amounts.some(n=>!approved.includes(n)))return false;
   if(state.quote?.pendingReviewItems?.length&&amounts.includes(state.quote.total)&&!/(?:potvrđene stavke|potvrdjene stavke|known subtotal|известных позиций|цену.*уточ|cenu.*prover|price.*review)/iu.test(text))return false;

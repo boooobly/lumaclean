@@ -11,7 +11,7 @@ const source=JSON.parse(readFileSync(input,'utf8')) as Source[];
 if(source.length!==6||source.some((s,i)=>!s.title.startsWith(String(i+1).padStart(2,'0'))))throw new Error('Only six approved source tabs are accepted');
 const rows=(tab:number)=>source[tab-1].rows.filter(r=>r.row>=5);
 const value=(v:unknown)=>String(v??'').replace(/\s+/gu,' ').trim();
-const internal=/себестоим|маржин|экономик|чел[. -]*(?:мин|час)|человеко|норматив|норма времени|порог времени|11!|рынок|n\s*=\s*\d|команда\s*K|доход|прибыл|зарплат|выплат|внутренн.{0,15}(?:расч|финанс)|fallback|буфер|optimizer|затрат/iu;
+const internal=/себестоим|маржин|экономик|чел[. -]*(?:мин|час)|человеко|норматив|норма времени|порог времени|11!|рынок|n\s*=\s*\d|команда\s*K|доход|прибыл|зарплат|выплат|внутренн.{0,15}(?:расч|финанс)|fallback|буфер|optimizer|затрат|активн.{0,12}мин|минут.{0,20}(?:одного клинера|активного труда)|подтвержден.{0,15}владел|хронометр|не активный труд/iu;
 function clean(v:unknown){return value(v).split(/(?<=[.;])\s+|(?=Время —)/u).filter(s=>!internal.test(s)).join(' ').slice(0,700);}
 const map:Record<string,string>={'ADD-WINDOW-001':'standardWindow','ADD-WINDOW-002':'largeWindow','ADD-OUTDOOR-001':'balcony','ADD-KITCHEN-001':'fridge','ADD-KITCHEN-004':'oven','ADD-KITCHEN-005':'microwave','ADD-KITCHEN-006':'hood','ADD-KITCHEN-008':'dishwasher','ADD-KITCHEN-009':'washingMachine','ADD-KITCHEN-017':'cabinets','ADD-TEXTILE-005':'ironing','ADD-TEXTILE-008':'linen','ADD-PET-001':'petHair','ADD-SPECIAL-020':'steam'};
 const entries:KnowledgeEntry[]=[];
@@ -22,7 +22,7 @@ for(const tab of [2,3])for(const r of rows(tab)){
  const c=r.cells,e=entry(value(c[0]),value(c[2]),tab===2?'extra':'upholstery',tab,r.row);
  if(!e.code)continue;
  e.status=c[8]==='Не оказываем'?'UNAVAILABLE':c[8]==='По согласованию'?'BY_AGREEMENT':'OFFERED';
- e.unit=value(c[3]).replace(/чел[. -]*час/gu,'час работы исполнителя');e.includes=tab===2?clean(c[9]):'';e.restrictions=clean(c[tab===2?10:9]);
+ e.unit=value(c[3]).replace(/чел[. -]*час/gu,'час работы исполнителя');e.includes=tab===2&&c[9]!=='Нет'?clean(c[9]):'';e.restrictions=clean(c[tab===2?10:9]);
  e.runtimeCode=map[e.code]??null;
  e.appliesTo=tab===2?['cleaning']:['upholstery'];
  if(e.code==='ADD-BATH-001'||e.code==='ADD-BATH-003')e.appliesTo=['regular'];
@@ -44,6 +44,7 @@ for(const tab of [2,3])for(const r of rows(tab)){
  if(e.code==='ADD-LOGISTICS-012')e.restrictions='Дополнительные 30 минут команды за новый заранее согласованный объём; альтернатива дополнительному часу, не одновременно за то же время.';
  if(e.code==='ADD-TEXTILE-001')e.restrictions='Одна стандартная загрузка до 5 кг в машине клиента. В генеральную включена одна загрузка; дополнительная оплачивается отдельно. Глажка и смена белья не включены.';
  if(e.code==='ADD-SPECIAL-020')e.restrictions='Локальная обработка доступной зоны до 5 м² совместно с уборкой. Парогенератор приобретается под подтверждённый запрос; оборудование и возможность работы предварительно согласовать. Не дезинфекция.';
+ if(e.code==='ADD-KITCHEN-004')e.restrictions='Стандартная бытовая духовка внутри, без демонтажа и ремонта. Сильный пригар или нестандартный объём согласуется заранее.';
  if(e.status==='UNAVAILABLE'){e.price=null;e.autoBook=false;e.autoCalculate=false;}
  entries.push(e);
 }
@@ -52,6 +53,7 @@ for(const r of rows(6)){
  const c=r.cells,key=packages[value(c[0])];if(!key)throw new Error('Unknown package');
  const e=entry(`PACKAGE-${value(c[0])}`,value(c[1]),'cleaning',6,r.row);
  e.runtimeCode=key;e.unit='м² / диапазон площади';e.includes=clean(c[4]);e.excludes=clean(c[5]);e.restrictions=clean(c[7]);e.appliesTo=[key];e.managerReview=false;e.autoCalculate=true;e.autoBook=true;e.standalone='YES';
+ e.includes=e.includes.replace(/ и 15 мин/gu,'').replace(/Ожидание машины[^.]*\./gu,'Ожидание завершения стирки и дополнительный визит согласуются заранее.');
  // Sheet names vary; the five consecutive groups are fixed by stable service codes.
  const group=rows(1).slice(Object.values(packages).indexOf(key)*5,Object.values(packages).indexOf(key)*5+5);
  if(group.some((x,i)=>x.cells[0]!==`${c[0]}_${i+1}`))throw new Error('Service band code mismatch');

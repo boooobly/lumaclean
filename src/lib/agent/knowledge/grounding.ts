@@ -14,6 +14,14 @@ export function knowledgeTimeExplanation(sentence:string,entries:KnowledgeEntry[
 export function unsupportedKnowledgeClaim(text:string,entries:KnowledgeEntry[],hasQuote:boolean){
  if(/себестоим|маржиналь|зарплат|выплат.{0,12}клинер|profit margin|cleaner payout|cost of supplies|troškovi poslovanja/iu.test(text))return true;
  if(!hasQuote&&/(?:итого|итоговая (?:цена|стоимость)|всего к оплате|order total|total (?:cost|price|is)|ukupno za (?:sve|narudžbinu)|укупно за све)\D{0,30}\d[\d ,.]*\s*(?:RSD|динар|dinara)/iu.test(text))return true;
+ const bindings:[RegExp,string][]=[[/холодиль|fridge|refrigerator|frižider|frizider|фрижидер/iu,'fridge'],[/духов|oven|rerna|рерн/iu,'oven'],[/свч|микроволн|microwave|mikrotalas|микроталас/iu,'microwave'],[/вытяж|extractor hood|aspirator|аспиратор/iu,'hood'],[/посудомо|dishwasher|sudov|судов/iu,'dishwasher'],[/стиральн|washing machine|veš mašin|ves masin|веш машин/iu,'washingMachine']];
+ for(const clause of text.split(/[;\n]|,(?!\d)/u)){
+  const amounts=[...clause.matchAll(/(\d[\d\s.,]*?)\s*(?:RSD|динар(?:ов|а)?|dinara)/giu)].map(m=>Number(m[1].replace(/[\s,.]/g,'')));
+  if(amounts.length!==1)continue;
+  const codes=bindings.filter(([pattern])=>pattern.test(clause)).map(([,code])=>code);
+  if(codes.length===1){const e=entries.find(e=>e.runtimeCode===codes[0]);if(e?.price&&amounts[0]!==e.price.amount&&!hasQuote)return true;}
+  if(/900\s*RSD/iu.test(clause)&&/глаж|ironing|pegl|пегл/iu.test(clause)&&/(?:за|per|po|по)\s*(?:один\s*|1\s*)?(?:час|hour|sat|сат)/iu.test(clause))return true;
+ }
  for(const e of entries){
   if(e.status!=='UNAVAILABLE')continue;
   if(/(?:выполним|оказываем|можем (?:сделать|убрать|почистить)|we (?:offer|can clean|provide)|radimo|nudimo|радимо|нудимо)/iu.test(text)&&!/не (?:выполняем|оказываем|делаем|предоставляем)|не можем|do not|don't|cannot|not offer|ne radimo|ne nudimo|не радимо|не нудимо/iu.test(text))return true;

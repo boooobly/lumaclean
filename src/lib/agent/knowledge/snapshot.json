@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2026-10-17.c69d2a06c4fd",
+  "version": "2026-10-17.30dbc2a1b50a",
   "sourceId": "1Xua3GrAYAgYfcbYUEWrU6I6cMZEA0IULLdSuKrbW4DY",
   "sourceHash": "a0fac96ee0e6f864d36fe099f04c1cecb7e03231b12a11e1af5a1b1074428781",
   "entries": [
@@ -30,7 +30,7 @@
       "appliesTo": [
         "regular"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сверх 1 включенного санузла. Включает сантехнику и обычные поверхности: компоненты второй раз не начислять.",
       "standalone": "BY_AGREEMENT",
@@ -70,7 +70,7 @@
       "appliesTo": [
         "deep"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сверх одного включённого стандартного санузла при генеральной уборке. Локальный налёт входит; сплошной сильный налёт и швы оцениваются отдельно, не начислять одну работу дважды.",
       "standalone": "BY_AGREEMENT",
@@ -113,7 +113,7 @@
       "appliesTo": [
         "regular"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Гостевой WC без душа/ванны; дешевле полного санузла.",
       "standalone": "BY_AGREEMENT",
@@ -157,7 +157,7 @@
       "appliesTo": [
         "deep"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Гостевой WC без душа/ванны; не складывать с полным санузлом.",
       "standalone": "BY_AGREEMENT",
@@ -192,7 +192,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Не начислять, если душ уже включен в оплаченный дополнительный санузел.",
       "standalone": "BY_AGREEMENT",
@@ -228,7 +228,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Не начислять, если ванна уже включена в оплаченный санузел.",
       "standalone": "BY_AGREEMENT",
@@ -611,7 +611,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Пустая секция до 60 см, до 2 полок; вещи убирает клиент.",
       "standalone": "BY_AGREEMENT",
@@ -649,7 +649,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Пустая секция до 60 см.",
       "standalone": "BY_AGREEMENT",
@@ -675,7 +675,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -706,7 +706,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Только безопасно доступные поверхности",
       "standalone": "BY_AGREEMENT",
@@ -732,7 +732,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Не демонтаж санитарного силикона",
       "standalone": "BY_AGREEMENT",
@@ -864,7 +864,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Специализированная работа: не обещать без отдельного допуска",
       "standalone": "BY_AGREEMENT",
@@ -900,7 +900,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Пустой отключенный холодильник стандартного размера; разморозка не входит.",
       "standalone": "BY_AGREEMENT",
@@ -935,7 +935,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Предварительно разморожен клиентом, без ожидания.",
       "standalone": "BY_AGREEMENT",
@@ -965,7 +965,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Нужно согласование времени",
       "standalone": "BY_AGREEMENT",
@@ -1001,9 +1001,9 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
-      "restrictions": "Духовка внутри: 60 активных минут одного клинера подтверждены владельцем; стандартный бытовой объем. Сильный пригар/нестандартный объем согласовать заранее.",
+      "restrictions": "Стандартная бытовая духовка внутри, без демонтажа и ремонта. Сильный пригар или нестандартный объём согласуется заранее.",
       "standalone": "BY_AGREEMENT",
       "managerReview": false,
       "autoCalculate": true,
@@ -1036,7 +1036,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Обычное загрязнение, доступные части.",
       "standalone": "BY_AGREEMENT",
@@ -1071,7 +1071,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Включая 1 моющийся фильтр; не брать ADD-KITCHEN-007 повторно.",
       "standalone": "BY_AGREEMENT",
@@ -1109,7 +1109,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Только отдельно от полной вытяжки или за дополнительный фильтр.",
       "standalone": "BY_AGREEMENT",
@@ -1144,7 +1144,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Доступные уплотнители/фильтр без обслуживания/разборки.",
       "standalone": "BY_AGREEMENT",
@@ -1179,7 +1179,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Доступные манжета/лоток без обслуживания/разборки.",
       "standalone": "BY_AGREEMENT",
@@ -1210,7 +1210,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Не разборка",
       "standalone": "BY_AGREEMENT",
@@ -1271,7 +1271,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без ремонта",
       "standalone": "BY_AGREEMENT",
@@ -1297,7 +1297,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без профессиональной декальцинации",
       "standalone": "BY_AGREEMENT",
@@ -1323,7 +1323,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Только по инструкции модели",
       "standalone": "BY_AGREEMENT",
@@ -1380,7 +1380,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без разборки",
       "standalone": "BY_AGREEMENT",
@@ -1415,7 +1415,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Пустая секция до 60 см ширины и 90 см высоты, до 2 полок; большой пенал кратно секциям.",
       "standalone": "BY_AGREEMENT",
@@ -1450,7 +1450,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Пустой ящик до 60 см; если входит в оплаченный сегмент шкафа —0 доплаты.",
       "standalone": "BY_AGREEMENT",
@@ -1735,7 +1735,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Обычные продукты; без опасных/биологических загрязнений; входит в мойку холодильника при согласованном объеме.",
       "standalone": "BY_AGREEMENT",
@@ -1771,7 +1771,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -1807,7 +1807,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -1869,7 +1869,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Только доступная поверхность",
       "standalone": "BY_AGREEMENT",
@@ -1900,7 +1900,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Не складывать с уборкой кухни в пакете на тот же объем; доплата только за избыточный объем.",
       "standalone": "BY_AGREEMENT",
@@ -1935,7 +1935,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без гарантии полного удаления",
       "standalone": "BY_AGREEMENT",
@@ -1970,7 +1970,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Полная мойка стены не входит в генеральную; только моющееся покрытие, тест.",
       "standalone": "BY_AGREEMENT",
@@ -2005,7 +2005,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "До 2 створок, площадь проема≤2 м²; обе стороны, рамы/пазы/подоконник включены. Не по 2 раза за стороны.",
       "standalone": "BY_AGREEMENT",
@@ -2040,7 +2040,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "До 3 створок, проем>2 и≤3 м²; обе стороны, рамы/пазы/подоконник включены.",
       "standalone": "BY_AGREEMENT",
@@ -2078,7 +2078,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Площадь проема, обе стороны; от 3 м². Не площадь двух сторон. Доступ с пола.",
       "standalone": "BY_AGREEMENT",
@@ -2116,7 +2116,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Обе стороны, рамка/пазы входят; если уже в цене оконного блока — не начислять.",
       "standalone": "BY_AGREEMENT",
@@ -2149,7 +2149,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -2184,7 +2184,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "За дополнительную створку вне стандартного/большого окна; не сумма всех створок поверх цены окна.",
       "standalone": "BY_AGREEMENT",
@@ -2219,7 +2219,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Только доступное поворотное окно без высоты/выхода на крышу.",
       "standalone": "BY_AGREEMENT",
@@ -2249,7 +2249,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Высотная/нестандартная работа сайтом не подтверждена; не обещать.",
       "standalone": "BY_AGREEMENT",
@@ -2279,7 +2279,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сейчас послеремонтная уборка не оказывается",
       "standalone": "BY_AGREEMENT",
@@ -2310,7 +2310,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Одна сторона стандартного окна; вместе 2 стороны заменять полной мойкой 1000.",
       "standalone": "BY_AGREEMENT",
@@ -2341,7 +2341,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Только безопасный доступ; не вместе с полной мойкой окна.",
       "standalone": "BY_AGREEMENT",
@@ -2372,7 +2372,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "м² проекции; обе стороны, доступ с пола.",
       "standalone": "BY_AGREEMENT",
@@ -2477,7 +2477,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "м² проекции; обычное бытовое загрязнение, обе доступные стороны.",
       "standalone": "BY_AGREEMENT",
@@ -2512,7 +2512,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Вне оконного пакета; за сетку до 1.5 м².",
       "standalone": "BY_AGREEMENT",
@@ -2547,7 +2547,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Один проем до 2 м², доступ с пола; без демонтажа.",
       "standalone": "BY_AGREEMENT",
@@ -2579,7 +2579,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -2611,7 +2611,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -2646,7 +2646,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Материал требует проверки",
       "standalone": "BY_AGREEMENT",
@@ -2716,7 +2716,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Рамы входят в полную мойку окна; отдельная цена — только рамы без стекла.",
       "standalone": "BY_AGREEMENT",
@@ -2751,7 +2751,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Пазы включены в полную мойку окна.",
       "standalone": "BY_AGREEMENT",
@@ -2786,7 +2786,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Фурнитура включена в полную мойку окна.",
       "standalone": "BY_AGREEMENT",
@@ -2847,7 +2847,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -2873,7 +2873,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Только безопасный доступ",
       "standalone": "BY_AGREEMENT",
@@ -2903,7 +2903,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -2933,7 +2933,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -2959,7 +2959,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Материал и доступ по согласованию",
       "standalone": "BY_AGREEMENT",
@@ -2994,7 +2994,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Пустая секция до 60 см, до 2 полок; тот же стандарт, что кухонные шкафы.",
       "standalone": "BY_AGREEMENT",
@@ -3025,7 +3025,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Внутренние поверхности гардеробной не входят в уборку снаружи шкафов.",
       "standalone": "BY_AGREEMENT",
@@ -3056,7 +3056,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Пустой ящик; не доплачивать, если включен в секцию.",
       "standalone": "BY_AGREEMENT",
@@ -3113,7 +3113,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -3287,7 +3287,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без демонтажа",
       "standalone": "BY_AGREEMENT",
@@ -3325,7 +3325,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Только съемный пылевой фильтр после проверки инструкции; не обслуживание.",
       "standalone": "BY_AGREEMENT",
@@ -3386,7 +3386,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без разборки",
       "standalone": "BY_AGREEMENT",
@@ -3448,7 +3448,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "После фото: безопасный доступ, без разборки электрики.",
       "standalone": "BY_AGREEMENT",
@@ -3515,7 +3515,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Только при мойке окон",
       "standalone": "BY_AGREEMENT",
@@ -3541,7 +3541,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -3643,7 +3643,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без высотных работ",
       "standalone": "BY_AGREEMENT",
@@ -3709,7 +3709,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Моющаяся стена: тест покрытия, оценка доработки; полная мойка не входит.",
       "standalone": "BY_AGREEMENT",
@@ -3735,7 +3735,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Не гарантия, без абразивов",
       "standalone": "BY_AGREEMENT",
@@ -3766,7 +3766,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Бытовые наклейки, не строительный клей, тест материала.",
       "standalone": "BY_AGREEMENT",
@@ -3792,7 +3792,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без повреждения поверхности",
       "standalone": "BY_AGREEMENT",
@@ -3889,7 +3889,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -3985,7 +3985,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Перемещение хрупких вещей только по согласованию",
       "standalone": "BY_AGREEMENT",
@@ -4025,7 +4025,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без влажной химчистки ткани",
       "standalone": "BY_AGREEMENT",
@@ -4051,7 +4051,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -4077,7 +4077,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Совместимость средства с покрытием",
       "standalone": "BY_AGREEMENT",
@@ -4107,7 +4107,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сверх базового состава",
       "standalone": "BY_AGREEMENT",
@@ -4204,7 +4204,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Ручная детальная обработка; обычная мойка пола уже включена.",
       "standalone": "BY_AGREEMENT",
@@ -4230,7 +4230,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без шлифовки",
       "standalone": "BY_AGREEMENT",
@@ -4256,7 +4256,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без переувлажнения",
       "standalone": "BY_AGREEMENT",
@@ -4282,7 +4282,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "По допуску материала",
       "standalone": "BY_AGREEMENT",
@@ -4312,7 +4312,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -4346,7 +4346,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Только при наличии оборудования",
       "standalone": "BY_AGREEMENT",
@@ -4519,7 +4519,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Или общий ADD-PET-001 за 30 мин, не одновременно.",
       "standalone": "BY_AGREEMENT",
@@ -4611,7 +4611,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -4641,7 +4641,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -4881,9 +4881,9 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
-      "restrictions": "За 30 активных минут 1 человека; не час и не 30 мин команды.",
+      "restrictions": "не час и не 30 мин команды.",
       "standalone": "BY_AGREEMENT",
       "managerReview": false,
       "autoCalculate": true,
@@ -4916,7 +4916,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Альтернатива оплате времени глажки; не обе.",
       "standalone": "BY_AGREEMENT",
@@ -4954,7 +4954,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Альтернатива оплате времени глажки.",
       "standalone": "BY_AGREEMENT",
@@ -4989,7 +4989,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Кровать до 180 см, комплект подготовлен; снятие/наволочки/застилание входят.",
       "standalone": "BY_AGREEMENT",
@@ -5051,7 +5051,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Часть полной смены белья, не добавлять к 750.",
       "standalone": "BY_AGREEMENT",
@@ -5086,7 +5086,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без высотных работ",
       "standalone": "BY_AGREEMENT",
@@ -5121,7 +5121,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без монтажа",
       "standalone": "BY_AGREEMENT",
@@ -5159,7 +5159,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Загрузка до 5 кг по ярлыку; снятие/навес отдельно; дубликат общего цикла стирки.",
       "standalone": "BY_AGREEMENT",
@@ -5232,7 +5232,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Тот же цикл, что ADD-TEXTILE-001; не двойной счет.",
       "standalone": "BY_AGREEMENT",
@@ -5267,7 +5267,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -5299,7 +5299,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Не включать в обычную влажную уборку",
       "standalone": "BY_AGREEMENT",
@@ -5372,7 +5372,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "обычное наличие питомца без доплаты.",
       "standalone": "BY_AGREEMENT",
@@ -5403,7 +5403,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -5465,7 +5465,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -5496,7 +5496,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Обычный лоток без опасного загрязнения; наполнитель клиента.",
       "standalone": "BY_AGREEMENT",
@@ -5527,7 +5527,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без контакта с животным",
       "standalone": "BY_AGREEMENT",
@@ -5562,7 +5562,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -5593,7 +5593,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без гарантии удаления",
       "standalone": "BY_AGREEMENT",
@@ -5628,7 +5628,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Вместо общей доплаты за шерсть на том же участке.",
       "standalone": "BY_AGREEMENT",
@@ -5659,7 +5659,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Число животных само по себе не повод для надбавки. Оплачивается фактическая дополнительная шерсть/работа. Входит только в соответствующую согласованную работу, не бесплатный самостоятельный выезд.",
       "standalone": "BY_AGREEMENT",
@@ -5694,7 +5694,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "До 4 м²: пол, обычные перила, паутина; стекло/мебель отдельно.",
       "standalone": "BY_AGREEMENT",
@@ -5729,7 +5729,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Терраса 4–15 м², минимум 1200 за террасу; обычная мойка пола/перил.",
       "standalone": "BY_AGREEMENT",
@@ -5764,7 +5764,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Более 15 м²: индивидуальная смета; нет скидки по порогу до оценки.",
       "standalone": "BY_AGREEMENT",
@@ -5910,7 +5910,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Не химчистка (обеспыливание, пылесос, протирка от пыли)",
       "standalone": "BY_AGREEMENT",
@@ -5945,7 +5945,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "м²проема обе стороны, аналог панорамного стекла; не 300 за каждую сторону.",
       "standalone": "BY_AGREEMENT",
@@ -5976,7 +5976,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Лоджия вне площади квартиры; минимум 1200; не включена автоматически в генеральную.",
       "standalone": "BY_AGREEMENT",
@@ -6068,7 +6068,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Доступ и безопасность",
       "standalone": "BY_AGREEMENT",
@@ -6094,7 +6094,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Доступ и безопасность",
       "standalone": "BY_AGREEMENT",
@@ -6120,7 +6120,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -6146,7 +6146,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -6177,7 +6177,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Бытовой объем, без мойки под давлением.",
       "standalone": "BY_AGREEMENT",
@@ -6208,7 +6208,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "До 12 ступеней; не отдельная промышленная услуга.",
       "standalone": "BY_AGREEMENT",
@@ -6234,7 +6234,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -6260,7 +6260,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без сложной химии",
       "standalone": "BY_AGREEMENT",
@@ -6427,7 +6427,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Дополнительный полный санузел поддерживающей; идентично ADD-BATH-001.",
       "standalone": "BY_AGREEMENT",
@@ -6489,7 +6489,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "м²проекции, обе стороны; единый тариф ADD-WINDOW-012.",
       "standalone": "BY_AGREEMENT",
@@ -6520,7 +6520,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "м²проекции обе стороны, безопасный доступ; аналог стеклянной перегородки.",
       "standalone": "BY_AGREEMENT",
@@ -6555,7 +6555,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -6588,7 +6588,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Работа серверной не подтверждена сайтом и требует отдельного регламента.",
       "standalone": "BY_AGREEMENT",
@@ -6624,7 +6624,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Только раскладка подготовленных клиентом материалов; закупка не входит.",
       "standalone": "BY_AGREEMENT",
@@ -6694,7 +6694,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -6760,7 +6760,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -6791,7 +6791,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "С товаром/без товара уточнить",
       "standalone": "BY_AGREEMENT",
@@ -6822,7 +6822,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -6853,7 +6853,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -6888,7 +6888,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -6927,7 +6927,7 @@
       "appliesTo": [
         "office"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Тот же объем и цена, что ADD-KITCHEN-001.",
       "standalone": "BY_AGREEMENT",
@@ -6958,7 +6958,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сверх пакета",
       "standalone": "BY_AGREEMENT",
@@ -6989,7 +6989,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Уборка, не хоумстейджинг",
       "standalone": "BY_AGREEMENT",
@@ -7028,7 +7028,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Тот же комплект, что ADD-TEXTILE-008; не обе позиции.",
       "standalone": "BY_AGREEMENT",
@@ -7064,7 +7064,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "",
       "standalone": "BY_AGREEMENT",
@@ -7095,7 +7095,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Материалы отдельно",
       "standalone": "BY_AGREEMENT",
@@ -7126,7 +7126,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Материалы отдельно",
       "standalone": "BY_AGREEMENT",
@@ -7157,7 +7157,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Инвентаризация без хранения",
       "standalone": "BY_AGREEMENT",
@@ -7193,7 +7193,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без строительного мусора",
       "standalone": "BY_AGREEMENT",
@@ -7229,7 +7229,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "За 15 мин 1 человека; мойка посуды не входит в базовую уборку.",
       "standalone": "BY_AGREEMENT",
@@ -7260,7 +7260,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "До 10 простых бокалов; не совместно с оплатой времени мытья той же посуды.",
       "standalone": "BY_AGREEMENT",
@@ -7291,7 +7291,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Без перемещения тяжёлых предметов",
       "standalone": "BY_AGREEMENT",
@@ -7322,7 +7322,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Тот же объем ADD-KITCHEN-031; не двойной счет.",
       "standalone": "BY_AGREEMENT",
@@ -7353,7 +7353,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Финальная подготовка после уборки; дубликат подготовки к фотосъемке, не новая уборка всего объекта.",
       "standalone": "BY_AGREEMENT",
@@ -7388,7 +7388,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Тот же цикл ADD-TEXTILE-001; не включает ожидание завершения.",
       "standalone": "BY_AGREEMENT",
@@ -7426,7 +7426,7 @@
       "appliesTo": [
         "airbnb"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Тот же комплект 750; срочность 20% на заказ один раз.",
       "standalone": "BY_AGREEMENT",
@@ -7461,7 +7461,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7492,7 +7492,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7527,7 +7527,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7558,7 +7558,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7589,7 +7589,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7620,7 +7620,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7651,7 +7651,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7686,7 +7686,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7725,7 +7725,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7764,7 +7764,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7800,7 +7800,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7831,7 +7831,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7862,7 +7862,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7897,7 +7897,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Проект бытовой помощи; на сайте нет отдельного тарифа. Только по согласованному перечню; материалы клиента, не выбрасывать без разрешения.",
       "standalone": "BY_AGREEMENT",
@@ -7923,7 +7923,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -7953,7 +7953,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -7979,7 +7979,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8009,7 +8009,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8042,7 +8042,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8068,7 +8068,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8099,7 +8099,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8125,7 +8125,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8155,7 +8155,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8181,7 +8181,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8207,7 +8207,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8233,7 +8233,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8263,7 +8263,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8293,7 +8293,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8323,7 +8323,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8349,7 +8349,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8380,7 +8380,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8411,7 +8411,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Сайт исключает либо не подтверждает специальную услугу/оборудование. Не предлагать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -8447,7 +8447,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "См.UPH-CARPET-001; выездная экстракция, без вывоза/цеховой мойки. Моющий пылесос есть; способ, насадки и совместимость материала подтвердить перед заказом.",
       "standalone": "BY_AGREEMENT",
@@ -8482,7 +8482,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Локальная обработка доступной зоны до 5 м² совместно с уборкой. Парогенератор приобретается под подтверждённый запрос; оборудование и возможность работы предварительно согласовать. Не дезинфекция.",
       "standalone": "BY_AGREEMENT",
@@ -8513,7 +8513,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Удаление запаха/озонирование не подтверждены сайтом.",
       "standalone": "BY_AGREEMENT",
@@ -8544,7 +8544,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Локальная экстракция после фото; не дублировать UPH-SPOT-007. Моющий пылесос есть; модель, насадки и материал проверить перед заказом.",
       "standalone": "BY_AGREEMENT",
@@ -8575,7 +8575,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Общий минимум отдельного заказа не заменяет стартовые цены пакетов. Поддерживающая уборка начинается от 4 900 RSD; итог пакета только через calculatePrice.",
       "standalone": "BY_AGREEMENT",
@@ -8606,7 +8606,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Минимальная итоговая стоимость отдельного выезда на химчистку — 4 000 RSD. Это нижний предел суммы, не дополнительный сбор. При совместной уборке условия согласуются; минимум повторно не начисляется.",
       "standalone": "BY_AGREEMENT",
@@ -8632,7 +8632,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "В Белграде обычный выезд включен. За городом — только итоговая согласованная смета.",
       "standalone": "BY_AGREEMENT",
@@ -8663,7 +8663,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "В городе нет километровой доплаты; за городом индивидуально, не ставка 0 на любую дальность. Входит только в соответствующую согласованную работу, не бесплатный самостоятельный выезд.",
       "standalone": "BY_AGREEMENT",
@@ -8698,7 +8698,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Срочный заказ сегодня: +20% к согласованной сумме работ после минимума. При совпадении с праздником остается одна надбавка 20%. До 17:00 по Белграду, при наличии слота.",
       "standalone": "BY_AGREEMENT",
@@ -8729,7 +8729,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Выходной без автоматической надбавки; только подтвержденный слот. Входит только в соответствующую согласованную работу, не бесплатный самостоятельный выезд.",
       "standalone": "BY_AGREEMENT",
@@ -8760,7 +8760,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Праздник +20%. Если заказ также срочный — одна общая надбавка 20%, не 40%. Один раз на весь заказ; возможность выезда согласовать.",
       "standalone": "BY_AGREEMENT",
@@ -8791,7 +8791,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "До 09: 00 не планировать автоматически; индивидуальное согласование, доплата не введена. Входит только в соответствующую согласованную работу, не бесплатный самостоятельный выезд.",
       "standalone": "BY_AGREEMENT",
@@ -8817,7 +8817,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Выезд после 17: 00 не предлагать по текущему правилу сайта; доплата не заменяет ограничение.",
       "standalone": "BY_AGREEMENT",
@@ -8843,7 +8843,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Команда 2 включена в тариф; третьего исполнителя сейчас нет.",
       "standalone": "BY_AGREEMENT",
@@ -8874,7 +8874,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Дополнительный час команды только за новый заранее согласованный объём, не за превышение времени согласованной уборки.",
       "standalone": "BY_AGREEMENT",
@@ -8905,7 +8905,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Дополнительные 30 минут команды за новый заранее согласованный объём; альтернатива дополнительному часу, не одновременно за то же время.",
       "standalone": "BY_AGREEMENT",
@@ -8940,7 +8940,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Доставка включена в согласованную химчистку/eco steam; отдельного сбора нет. Входит только в соответствующую согласованную работу, не бесплатный самостоятельный выезд.",
       "standalone": "BY_AGREEMENT",
@@ -8971,7 +8971,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Обычная парковка учтена в итоговой цене; специальный дорогой доступ согласовать до выезда. Входит только в соответствующую согласованную работу, не бесплатный самостоятельный выезд.",
       "standalone": "BY_AGREEMENT",
@@ -9002,7 +9002,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Не добавлять к парковке повторно. Входит только в соответствующую согласованную работу, не бесплатный самостоятельный выезд.",
       "standalone": "BY_AGREEMENT",
@@ -9033,7 +9033,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Новая самостоятельная заявка — общий минимум 4000. Исправление недостатков согласованной уборки бесплатно.",
       "standalone": "BY_AGREEMENT",
@@ -9059,7 +9059,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Платное ожидание не вводим без утвержденной политики; после 15 мин связаться с клиентом.",
       "standalone": "BY_AGREEMENT",
@@ -9089,7 +9089,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Штраф за отмену не введен; не удерживать автоматически.",
       "standalone": "BY_AGREEMENT",
@@ -9115,7 +9115,7 @@
       "appliesTo": [
         "cleaning"
       ],
-      "includes": "Нет",
+      "includes": "",
       "excludes": "",
       "restrictions": "Ночная работа не подтверждена и противоречит стандартным ограничениям выезда.",
       "standalone": "BY_AGREEMENT",
@@ -12459,7 +12459,7 @@
       "appliesTo": [
         "deep"
       ],
-      "includes": "Поддерживающая + двери/плинтусы/выключатели, фасады, доступные радиаторы и светильники, локальный налет/швы до 2 м² и 15 мин. Одна загрузка стирки до 5 кг включена: сортировка, загрузка, развешивание либо запуск сушилки; складывание сухого белья этого объема. Глажка и смена постельного белья отдельно. Ожидание машины не активный труд; дополнительное ожидание/визит заранее согласовать.",
+      "includes": "Поддерживающая + двери/плинтусы/выключатели, фасады, доступные радиаторы и светильники, локальный налет/швы до 2 м². Одна загрузка стирки до 5 кг включена: сортировка, загрузка, развешивание либо запуск сушилки; складывание сухого белья этого объема. Глажка и смена постельного белья отдельно. дополнительное ожидание/визит заранее согласовать.",
       "excludes": "Сплошная глубокая обработка кафеля/швов, сильный жир/налет сверх согласованного объема, окна, балкон, внутренности техники/шкафов, химчистка текстиля, пар — отдельно. Стирка сверх одной загрузки, глажка и смена белья — отдельно.",
       "restrictions": "Только бытовые загрязнения.1 санузел+1 кухня; окна/внутренности/балкон/текстиль отдельно.",
       "standalone": "YES",
@@ -15167,7 +15167,7 @@
       ],
       "includes": "",
       "excludes": "",
-      "restrictions": "Генеральная квартиры/жилого дома: одна загрузка до 5 кг включена; сортировка/загрузка и развешивание либо запуск сушилки. Остальные пакеты и дополнительный цикл — 500. Ожидание машины не активный труд.",
+      "restrictions": "Генеральная квартиры/жилого дома: одна загрузка до 5 кг включена; сортировка/загрузка и развешивание либо запуск сушилки. Остальные пакеты и дополнительный цикл — 500.",
       "standalone": "NO",
       "managerReview": true,
       "autoCalculate": false,
@@ -15201,7 +15201,7 @@
       ],
       "includes": "",
       "excludes": "",
-      "restrictions": "Генеральная квартиры/жилого дома: одна загрузка до 5 кг включена; сортировка/загрузка и развешивание либо запуск сушилки. Остальные пакеты и дополнительный цикл — 500. Ожидание машины не активный труд.",
+      "restrictions": "Генеральная квартиры/жилого дома: одна загрузка до 5 кг включена; сортировка/загрузка и развешивание либо запуск сушилки. Остальные пакеты и дополнительный цикл — 500.",
       "standalone": "NO",
       "managerReview": true,
       "autoCalculate": false,
@@ -15367,7 +15367,7 @@
       ],
       "includes": "",
       "excludes": "",
-      "restrictions": "Моющий пылесос есть — подтверждено владельцем. Химчистка по каталогу 03 и согласованию предмета/материала/насадок; не включена в обычные пакеты.",
+      "restrictions": "Химчистка по каталогу 03 и согласованию предмета/материала/насадок; не включена в обычные пакеты.",
       "standalone": "NO",
       "managerReview": true,
       "autoCalculate": false,
@@ -15401,7 +15401,7 @@
       ],
       "includes": "",
       "excludes": "",
-      "restrictions": "Моющий пылесос есть — подтверждено владельцем. Химчистка по каталогу 03 и согласованию предмета/материала/насадок; не включена в обычные пакеты.",
+      "restrictions": "Химчистка по каталогу 03 и согласованию предмета/материала/насадок; не включена в обычные пакеты.",
       "standalone": "NO",
       "managerReview": true,
       "autoCalculate": false,
@@ -15436,7 +15436,7 @@
       ],
       "includes": "",
       "excludes": "",
-      "restrictions": "Моющий пылесос есть — подтверждено владельцем. Химчистка по каталогу 03 и согласованию предмета/материала/насадок; не включена в обычные пакеты.",
+      "restrictions": "Химчистка по каталогу 03 и согласованию предмета/материала/насадок; не включена в обычные пакеты.",
       "standalone": "NO",
       "managerReview": true,
       "autoCalculate": false,
@@ -15962,7 +15962,7 @@
       ],
       "includes": "",
       "excludes": "",
-      "restrictions": "Обычный собственный пылесос есть — подтверждено владельцем. Доставка включена, отдельного сбора нет; использование аппарата клиента только по согласованию.",
+      "restrictions": "Доставка включена, отдельного сбора нет; использование аппарата клиента только по согласованию.",
       "standalone": "NO",
       "managerReview": true,
       "autoCalculate": false,

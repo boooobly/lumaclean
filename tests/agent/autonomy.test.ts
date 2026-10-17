@@ -10,7 +10,6 @@ import {conversionFacts} from '../../src/lib/agent/conversion-facts';
 import {upholsteryBookingIntent} from '../../src/lib/upholstery-intent';
 import {autonomyMetrics} from '../../src/lib/agent/autonomy-metrics';
 import {routineFaq} from '../../src/lib/agent/routine-faq';
-import {siteContent} from '../../src/lib/content';
 export function corpusLevel(text:string,event?:string){
  if(event==='HUMAN_CONTROL')return 'HARD_HANDOFF';
  if(['NO_SLOTS','AMBIGUOUS','PHOTO','INVALID_TOOL_ARGUMENTS'].includes(event??''))return 'CLARIFICATION';
@@ -54,11 +53,11 @@ test('only assessed hard handoffs enter false-positive denominator, using latest
  const row={id:'c',state:{},orderId:null,lastMessageAt:new Date(),messages:[],handoffs:[{id:'h',reason:'UNCERTAINTY'},{id:'s',reason:'SOFT:PRICE_REVIEW'}],toolTraces:[],invocations:[]};
  const m=autonomyMetrics([row],new Set(),new Map([['h',true],['s',true]]));assert.equal(m.audited,1);assert.equal(m.falsePositiveRate,100);
 });
-test('single payment/key/discount FAQ uses catalog facts without an exception request',async()=>{
+test('legacy FAQ cannot override versioned business facts with canned payment/key/discount replies',async()=>{
  for(const s of autonomyCorpus.filter(s=>['payment-faq','discount-faq','access-faq'].includes(s.category))){
   const calls:string[]=[];
-  const answer=await routineFaq(s.text,s.locale,async name=>{calls.push(name);return{faq:siteContent[s.locale.startsWith('sr')?'sr':s.locale==='en'?'en':'ru'].faq.items,discounts:{publicPromotionConfirmed:false},access:{confirmedHandoverProcess:false}};});
-  assert(answer,s.id);assert.deepEqual(calls,['getBusinessInfo']);assert(outputAllowed(answer,{}),s.id);
+  const answer=await routineFaq(s.text,s.locale,async name=>{calls.push(name);throw Error('Business FAQ must use knowledge retrieval');});
+  assert.equal(answer,undefined,s.id);assert.deepEqual(calls,[]);
  }
  assert.equal(await routineFaq('Дайте индивидуальную скидку.', 'ru',async()=>{throw Error('must not use FAQ shortcut')}),undefined);
  assert.equal(await routineFaq('Можно картой? Нужна уборка квартиры 80 м².', 'ru',async()=>{throw Error('must not skip intake')}),undefined);

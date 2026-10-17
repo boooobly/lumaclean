@@ -18,11 +18,18 @@ export function knowledgeConsistency(){
  for(const [code,amount] of Object.entries(upholstered))if(businessKnowledge.entries.find(e=>e.code===code)?.price?.amount!==amount)errors.push(code);
  return{ok:!errors.length,errors};
 }
+const resultCache=new Map<string,{at:number;result:ReturnType<typeof lookup>}>();
 export function searchBusinessKnowledge(input:unknown){
+ const parsed=knowledgeQuerySchema.parse(input),key=businessKnowledge.version+':'+normalizeKnowledge(parsed.query)+':'+(parsed.limit??4);
+ const saved=resultCache.get(key);if(saved&&Date.now()-saved.at<600000)return structuredClone(saved.result);
+ const result=lookup(parsed);if(resultCache.size>=64)resultCache.delete(resultCache.keys().next().value!);resultCache.set(key,{at:Date.now(),result});return structuredClone(result);
+}
+function lookup(input:unknown){
  const {query,limit=4}=knowledgeQuerySchema.parse(input),q=normalizeKnowledge(query),tokens=words(query);
  const queryTopics=topics.filter(([r])=>r.test(query)).map(([,a])=>a.map(normalizeKnowledge));
  const selected=indexed.map(({entry,name,aliases,words:terms})=>{
   let score=tokens.reduce((sum,w)=>sum+(terms.some(t=>t===w)?3:terms.some(t=>w.length>3&&t.length>3&&(t.startsWith(w.slice(0,-1))||w.startsWith(t.slice(0,-1))))?1:0),0);
+  if(q===normalizeKnowledge(entry.code))score+=1000;
   const phrase=aliases.filter(a=>a.length>=4&&q.includes(a)).reduce((n,a)=>Math.max(n,a.length),0);
   score+=phrase*2+(q.includes(name)?30:0);
   score+=queryTopics.reduce((n,t)=>n+(t.some(a=>aliases.includes(a))?5:0),0);
@@ -45,6 +52,9 @@ export function searchBusinessKnowledge(input:unknown){
   if(entry.code==='ADD-WINDOW-017'&&/ролет|роллет|rolet|shutter|рольстав/iu.test(query))score+=25;
   if(entry.code==='ADD-WINDOW-016'&&/москит|mosquito|komarnik|комарник/iu.test(query))score+=25;
   if(entry.code==='ADD-TEXTILE-001'&&/стирк|laundry|pranje ve[šs]a|прање веша/iu.test(query))score+=20;
+  if(entry.code==='RULE-CREW-015'&&/оборуд|пылесос|equipment|Kärcher|Karcher|oprem|usisiva|опрем|усисива/iu.test(query))score+=30;
+  if(entry.code==='RULE-TRAVEL-008'&&/средств|расходник|supplies|detergent|sredstv|средств/iu.test(query))score+=25;
+  if(entry.code==='RULE-PAY-016'&&/гарант|все пятн|всех пятен|all stains|guarantee|garant|sve mrlj|sve flek|све мрљ|све флек|материал|fabric|material|материјал/iu.test(query))score+=30;
   // The standard generic item outranks office/rental variants; context may select those explicitly.
   if(entry.code.startsWith('ADD-OFFICE')&&!/офис|office|kancelar|канцелар/iu.test(query))score-=10;
   if(entry.code.startsWith('ADD-AIRBNB')&&!/airbnb|гост|guest/iu.test(query))score-=10;
