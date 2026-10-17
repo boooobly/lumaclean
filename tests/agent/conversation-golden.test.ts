@@ -22,10 +22,10 @@ test('exact production golden: preserve both appliances and progress to server q
   if(i>=1)assert.equal(state.draftFacts?.service,'regular');
   if(i>=2)assert.equal(state.draftFacts?.area,88);
   if(i>=3){assert.deepEqual([...(state.draftFacts?.extras??[])].sort((a,b)=>a.code.localeCompare(b.code)),[{code:'fridge',quantity:1},{code:'oven',quantity:1}]);assert.equal(state.draftFacts?.extrasConfirmed,true);assert.notEqual(nextQualification(state),'EXTRAS');}
-  if(i>=4){assert.equal(state.draftFacts?.soilLevel,'NORMAL');assert.equal(nextQualification(state),undefined);const f=state.draftFacts!;const q=calculatePrice(f.service!,f.area!,f.extras??[],false);assert.equal(q.base,7200);assert.equal(q.total,9200);}
+  if(i>=4){assert.equal(state.draftFacts?.soilLevel,'NORMAL');assert.equal(nextQualification(state),undefined);const f=state.draftFacts!;const q=calculatePrice(f.service!,f.area!,f.extras??[],false);assert.equal(q.base,9800);assert.equal(q.total,12200);}
  }
 });
-test('approved appliance breakdown is 1000 RSD for each confirmed unit',()=>{
+test('approved appliance breakdown uses individual confirmed unit prices',()=>{
  const q=calculatePrice('regular',88,[{code:'fridge',quantity:1},{code:'oven',quantity:1}],false);
- assert.deepEqual(q.extras.map(e=>({code:e.code,unitPrice:e.unitPrice})),[{code:'fridge',unitPrice:1000},{code:'oven',unitPrice:1000}]);
+ assert.deepEqual(q.extras.map(e=>({code:e.code,unitPrice:e.unitPrice})),[{code:'fridge',unitPrice:1000},{code:'oven',unitPrice:1400}]);
 });

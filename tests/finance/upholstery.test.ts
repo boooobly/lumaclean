@@ -31,7 +31,7 @@ test("four owner pricing examples are computed deterministically", () => {
       cleaning: { service: "regular", area: 55 },
       urgent: false,
     }).total,
-    6100,
+    7000,
   );
   assert.equal(
     quote({
@@ -40,26 +40,26 @@ test("four owner pricing examples are computed deterministically", () => {
       cleaning: { service: "regular", area: 55 },
       urgent: false,
     }).total,
-    7600,
+    10600,
   );
   assert.equal(
     quote({ mode: "STANDALONE", items: [item()], urgent: false }).total,
-    3000,
+    4600,
   );
   const light = quote({
     mode: "STANDALONE",
     items: [item("SOFA3", "LIGHT")],
     urgent: false,
   });
-  assert.equal(light.itemsSubtotal, 2500);
-  assert.equal(light.minimumAdjustment, 500);
-  assert.equal(light.total, 3000);
+  assert.equal(light.itemsSubtotal, 4600);
+  assert.equal(light.minimumAdjustment, 0);
+  assert.equal(light.total, 4600);
 });
 test("one standalone stain includes treatment in visit minimum", () => {
   const q = quote({ mode: "STANDALONE", items: [item("SPOT")], urgent: false });
-  assert.equal(q.itemsSubtotal, 1500);
-  assert.equal(q.minimumAdjustment, 1500);
-  assert.equal(q.total, 3000);
+  assert.equal(q.itemsSubtotal, 1000);
+  assert.equal(q.minimumAdjustment, 3000);
+  assert.equal(q.total, 4000);
   assert.equal(q.deliveryIncluded, true);
   assert.equal(q.lines.length, 1);
 });
@@ -86,16 +86,16 @@ test("same furniture cannot incur both full cleaning and its stain treatment", (
       ],
       urgent: false,
     }).total,
-    4500,
+    5600,
   );
 });
 test("addon has no standalone floor or second equipment charge", () => {
   const q = quote({ mode: "ADDON", items: [item("SPOT")], urgent: false });
-  assert.equal(q.total, 1500);
+  assert.equal(q.total, 1000);
   assert.equal(q.minimumAdjustment, 0);
   assert.equal(
     quote({ mode: "ADDON", items: [item()], urgent: false }).total,
-    3000,
+    4600,
   );
 });
 test("quantities and seating places remain item based", () => {
@@ -107,8 +107,8 @@ test("quantities and seating places remain item based", () => {
     ],
     urgent: false,
   });
-  assert.equal(q.total, 8700);
-  assert.equal(q.lines[0].units, 8);
+  assert.equal(q.total, 13000);
+  assert.equal(q.lines[0].units, 2);
 });
 test("heavy soiling requires photo and final price review", () => {
   const q = quote({
@@ -116,7 +116,7 @@ test("heavy soiling requires photo and final price review", () => {
     items: [item("SOFA3", "HEAVY")],
     urgent: false,
   });
-  assert.equal(q.total, 3800);
+  assert.equal(q.total, 4600);
   assert.equal(q.from, true);
   assert(q.reviewReasons.includes("PHOTO_PRICE_REVIEW"));
   assert.equal(q.autonomousBooking, false);
@@ -144,20 +144,20 @@ test("urgent surcharge is the shared existing twenty percent rule", () => {
     cleaning: { service: "regular", area: 55 },
     urgent: true,
   });
-  assert.equal(q.subtotal, 7600);
-  assert.equal(q.surcharge, 1500);
-  assert.equal(q.total, 9100);
+  assert.equal(q.subtotal, 10600);
+  assert.equal(q.surcharge, 2100);
+  assert.equal(q.total, 12700);
 });
 test("admin catalogue is configurable without altering earlier snapshots", () => {
   const a = quote({ mode: "STANDALONE", items: [item()], urgent: false }),
     b = calculateUpholstery(
       { mode: "STANDALONE", items: [item()], urgent: false },
-      { ...upholsteryDefaults, sofa3Normal: 3500 },
+      { ...upholsteryDefaults, sofa3Normal: 5000 },
       2,
     );
-  assert.equal(a.total, 3000);
+  assert.equal(a.total, 4600);
   assert.equal(a.version, 1);
-  assert.equal(b.total, 3500);
+  assert.equal(b.total, 5000);
   assert.equal(b.version, 2);
 });
 test("shape rejects square matrix misuse and invalid corner quantity", () => {
@@ -212,7 +212,7 @@ test("AI output permits computed amounts and rejects invented price or duration"
     state = { upholsteryInquiry: true, upholsteryQuote };
   assert(
     outputAllowed(
-      "Стоимость 3 000 RSD. Материал и срок уточнит администратор.",
+      "Стоимость 4 600 RSD. Материал и срок уточнит администратор.",
       state,
     ),
   );

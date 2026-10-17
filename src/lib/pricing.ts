@@ -1,4 +1,4 @@
-import {applianceUnitPrice} from './appliance-catalog';
+import {appliancePrices} from './appliance-catalog';
 export const serviceIds = ["regular", "deep", "move", "airbnb", "office"] as const;
 export type ServiceId = (typeof serviceIds)[number];
 export type AreaServiceId = ServiceId;
@@ -13,24 +13,19 @@ export const priceAreaLabels: Record<"ru" | "sr" | "en", [string, string, string
 };
 
 export const priceMatrix: Record<ServiceId, [number, number, number, number, number]> = {
-  regular: [4000, 4600, 5700, 7200, 85],
-  deep: [9300, 10700, 12900, 14900, 180],
-  move: [10200, 11700, 14300, 16400, 200],
-  airbnb: [4000, 4500, 5500, 6900, 80],
-  office: [4000, 4700, 5900, 7200, 75],
+  regular: [4900, 6000, 8200, 9800, 98],
+  deep: [9900, 11400, 14200, 17000, 180],
+  move: [10700, 12800, 15600, 18400, 180],
+  airbnb: [4900, 5800, 7400, 9000, 90],
+  office: [4900, 5800, 7400, 9000, 90],
 };
 
 export const extrasPrices = {
-  standardWindow: 900,
-  largeWindow: 1200,
-  balcony: 1100,
-  fridge: applianceUnitPrice,
-  oven: applianceUnitPrice,
-  microwave: applianceUnitPrice,
-  hood: applianceUnitPrice,
-  dishwasher: applianceUnitPrice,
-  washingMachine: applianceUnitPrice,
-  cabinets: 900,
+  standardWindow: 1000,
+  largeWindow: 1500,
+  balcony: 1200,
+  ...appliancePrices,
+  cabinets: 500,
   ironing: 900,
   steam: 2800,
   linen: 750,

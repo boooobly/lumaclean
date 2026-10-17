@@ -10,7 +10,7 @@ import {
   upholsterySlugs,
   upholsteryUi,
 } from "@/lib/upholstery-content";
-import { upholsteryPriceKeys } from "@/lib/upholstery";
+import { upholsteryPublicPriceKeys, upholsteryPublicPrice } from "@/lib/upholstery";
 import { formatRsd } from "@/lib/pricing";
 import { getUpholsteryCatalog } from "@/lib/services/upholstery-catalog";
 import { SiteHeader } from "@/components/site/site-header";
@@ -115,7 +115,7 @@ export default async function Page({ params }: Props) {
             </a>
           </div>
           <small>
-            {u.from} {formatRsd(catalog.sofa3Light, locale)} · {u.minimum}:{" "}
+            {u.from} {formatRsd(catalog.sofa3Normal, locale)} · {u.minimum}:{" "}
             {formatRsd(catalog.minimumVisit, locale)}
           </small>
         </header>
@@ -129,12 +129,12 @@ export default async function Page({ params }: Props) {
               </tr>
             </thead>
             <tbody>
-              {upholsteryPriceKeys.map((key) => (
+              {upholsteryPublicPriceKeys.map((key) => (
                 <tr key={key}>
-                  <td>{u.catalogLabels[key]}</td>
+                  <td>{key === "cornerSeat" ? u.cornerBaseLabel : u.catalogLabels[key]}</td>
                   <td>
-                    {["spot", "sofa3Heavy"].includes(key) ? `${u.from} ` : ""}
-                    {formatRsd(catalog[key], locale)}
+                    {key !== "minimumVisit" ? `${u.from} ` : ""}
+                    {formatRsd(upholsteryPublicPrice(catalog, key), locale)}
                   </td>
                 </tr>
               ))}

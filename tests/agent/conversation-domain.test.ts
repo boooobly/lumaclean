@@ -8,6 +8,7 @@ import {acceptMessage,runInboxCommand} from '../../src/lib/agent/inbox';
 import {claimJob,runClaimedJob} from '../../src/lib/agent/runner';
 import {executeAgentTool,json,type ToolContext} from '../../src/lib/agent/tools';
 import type {AgentState} from '../../src/lib/agent/contracts';
+import {appliancePrices} from '../../src/lib/appliance-catalog';
 import type {AIProvider} from '../../src/lib/agent/providers';
 const url=process.env.RELIABILITY_TEST_DATABASE_URL;
 test('source proposals, partial-list blocking and CRM safety through actual Preview tools',{skip:!url},async t=>{
@@ -33,15 +34,15 @@ test('source proposals, partial-list blocking and CRM safety through actual Prev
    const f=await fixture({draftFacts:{service:'regular',area:88}},'Уборка 88 м²');const result=await executeAgentTool(db,f.ctx,'createOrUpdateLead',{intent:'cleaning',service:'deep',area:1});assert.equal(result.error,'CUSTOMER_FACTS_REQUIRED');assert.equal((await db.conversation.findUniqueOrThrow({where:{id:f.c.id}})).leadId,null);
   });
   await t.test('Lead rejects an invented contact name',async()=>{const f=await fixture({},'Здравствуйте');const result=await executeAgentTool(db,f.ctx,'createOrUpdateLead',{intent:'cleaning',name:'Mila'});assert.equal(result.error,'CUSTOMER_FACTS_REQUIRED');});
-  await t.test('catalog has six active per-unit items at approved prices',async()=>{const rows=await db.serviceExtra.findMany({where:{code:{in:['fridge','oven','microwave','hood','dishwasher','washingMachine']}}});assert.equal(rows.length,6);assert(rows.every(e=>e.active&&Number(e.unitPrice)===1000&&e.unit==='item'));});
+  await t.test('catalog has six active per-unit items at approved prices',async()=>{const rows=await db.serviceExtra.findMany({where:{code:{in:['fridge','oven','microwave','hood','dishwasher','washingMachine']}}});assert.equal(rows.length,6);assert(rows.every(e=>e.active&&Number(e.unitPrice)===appliancePrices[e.code as keyof typeof appliancePrices]&&e.unit==='item'));});
   await t.test('calculator zero placeholders cannot pollute confirmed selected extras',async()=>{
    const f=await fixture({draftFacts:{service:'regular',area:88,soilLevel:'NORMAL',extras:[{code:'fridge',quantity:1}],extrasConfirmed:true}},'Сколько стоит?');
-   const result=await executeAgentTool(db,f.ctx,'calculatePrice',{service:'regular',area:88,soilLevel:'NORMAL',urgent:false,extras:[{code:'fridge',quantity:1},{code:'oven',quantity:0},{code:'hood',quantity:0}]});assert.equal(result.total,8200);assert.deepEqual(f.ctx.state.draftFacts?.extras,[{code:'fridge',quantity:1}]);assert.deepEqual(f.ctx.state.quote?.input.extras,[{code:'fridge',quantity:1}]);
+   const result=await executeAgentTool(db,f.ctx,'calculatePrice',{service:'regular',area:88,soilLevel:'NORMAL',urgent:false,extras:[{code:'fridge',quantity:1},{code:'oven',quantity:0},{code:'hood',quantity:0}]});assert.equal(result.total,10800);assert.deepEqual(f.ctx.state.draftFacts?.extras,[{code:'fridge',quantity:1}]);assert.deepEqual(f.ctx.state.quote?.input.extras,[{code:'fridge',quantity:1}]);
   });
   await t.test('hypothetical appliance exclusion uses the server calculator without changing the draft',async()=>{
    const f=await fixture({draftFacts:{service:'regular',area:88,soilLevel:'NORMAL',extras:[{code:'fridge',quantity:1},{code:'oven',quantity:1}],extrasConfirmed:true}},'А без холодильника?');
    await executeAgentTool(db,f.ctx,'calculatePrice',{service:'regular',area:88,soilLevel:'NORMAL',urgent:false,extras:[{code:'fridge',quantity:1},{code:'oven',quantity:1}]});
-   const before=structuredClone(f.ctx.state);const result=await executeAgentTool(db,f.ctx,'calculateAlternativePrice',{exclude:['fridge'],evidence:'А без холодильника?'});assert.equal((result.quote as AgentState['quote'])?.total,8200);assert.deepEqual(f.ctx.state,before);assert.equal(f.ctx.state.quote?.total,9200);
+   const before=structuredClone(f.ctx.state);const result=await executeAgentTool(db,f.ctx,'calculateAlternativePrice',{exclude:['fridge'],evidence:'А без холодильника?'});assert.equal((result.quote as AgentState['quote'])?.total,11200);assert.deepEqual(f.ctx.state,before);assert.equal(f.ctx.state.quote?.total,12200);
   });
   await t.test('human reconciliation cannot apply an already persisted additional quantity twice',async()=>{
    const f=await fixture({draftFacts:{service:'regular',area:88,soilLevel:'NORMAL',extras:[{code:'fridge',quantity:1}],extrasConfirmed:true}},'Исходные детали');

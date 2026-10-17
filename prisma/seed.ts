@@ -68,10 +68,10 @@ async function seed() {
         create: {
           code,
           name: extraNames[code as keyof typeof extraNames],
-          unit: ["standardWindow", "largeWindow", "cabinets",...applianceCodes].includes(code)
+          unit: code === "cabinets" ? "section" : code === "linen" ? "bed" : ["standardWindow", "largeWindow",...applianceCodes].includes(code)
             ? "item"
             : code === "ironing"
-              ? "hour"
+              ? "30min"
               : "service",
           unitPrice,
         },

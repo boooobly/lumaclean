@@ -25,7 +25,7 @@ export async function UpholsteryTeaser({
                 : "Local stain treatment with cleaning"
             : u.name}{" "}
           — {u.from}{" "}
-          {formatRsd(extra ? catalog.spot : catalog.sofa3Light, locale)}
+          {formatRsd(extra ? catalog.spot : catalog.sofa3Normal, locale)}
         </strong>
         <small>
           {u.minimum}: {formatRsd(catalog.minimumVisit, locale)} · Kärcher

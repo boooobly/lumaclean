@@ -38,7 +38,7 @@ export const upholstery: Article = {
           id: "cost",
           title: "Od čega zavisi cena pranja kauča?",
           paragraphs: [
-            "Cena zavisi od tipa i dimenzija komada, broja sedišta, količine, materijala i zaprljanosti. Dvosed, standardni trosed i velika ugaona garnitura nemaju isti obim rada. Kod ugaone garniture proverite da li ponuda računa sedeće mesto i koliko ih ima vaš komad.",
+            "Cena zavisi od tipa i dimenzija komada, broja sedišta, količine, materijala i zaprljanosti. Dvosed, standardni trosed i velika ugaona garnitura nemaju isti obim rada. Osnovna cena ugaone garniture pokriva do četiri mesta; dodatna mesta obračunavaju se posebno prema cenovniku.",
             "Pitajte da li su obuhvaćeni sedišta i nasloni, priprema, sredstva i dolazak. Reklamna cena „od” može da se odnosi na najmanji predmet ili lakše stanje. Konačnu cenu za jako zaprljan nameštaj treba dogovoriti posle fotografija i provere materijala.",
           ],
         },
@@ -110,7 +110,7 @@ export const upholstery: Article = {
           id: "order",
           title: "Kako zatražiti LumaClean procenu?",
           paragraphs: [
-            "Otvorite stranicu usluge, izaberite predmet i zaprljanost u kalkulatoru, pa navedite da li vam treba i čišćenje stana. Za nepoznat materijal ili jake fleke pošaljite fotografije u četu. Cena iz kalkulatora je početna procena, a ne automatski rezervisan termin.",
+            "U zajedničkom obrascu označite dubinsko pranje ili izaberite samo dubinsko pranje. Opišite predmete i navedite da li vam treba i čišćenje stana. Za nepoznat materijal ili jake fleke pošaljite fotografije u četu. Konačnu cenu i termin potvrđuje administrator.",
             "Administrator potvrđuje materijal, obim, konačnu cenu, trajanje i dostupnost ekstraktora. Pre rezervacije dobijate sažetak uslova i izričito ih potvrđujete. Za hitan termin važi postojeće pravilo dostupnosti i doplate; sama ponuda u kalkulatoru ne garantuje slobodan termin.",
           ],
         },
@@ -218,7 +218,7 @@ export const upholstery: Article = {
           id: "order",
           title: "Как заказать оценку LumaClean",
           paragraphs: [
-            "На странице услуги выберите предмет и загрязнение, укажите отдельный или совместный выезд. Отправьте фото в чат при неизвестном материале или сложных пятнах. Расчёт показывает ориентир и не создаёт подтверждённую запись.",
+            "В общей форме отметьте необходимость химчистки или выберите «Только химчистка». Опишите предметы и укажите отдельный или совместный выезд. Отправьте фото в чат при неизвестном материале или сложных пятнах. Итоговую цену и время подтверждает администратор.",
             "Администратор согласует материал, цену, длительность, команду и оборудование. Перед записью вы получаете итоговые условия и явно подтверждаете их. Для срочной записи действуют существующая доплата и проверка доступности.",
           ],
         },
@@ -326,7 +326,7 @@ export const upholstery: Article = {
           id: "order",
           title: "Requesting a LumaClean assessment",
           paragraphs: [
-            "Open the service page, choose the item and soiling, and select a standalone or combined visit. Send photos through the chat for unknown fabric or difficult stains. The calculator provides an estimate rather than a confirmed booking.",
+            "In the shared enquiry form, tick upholstery cleaning or select upholstery only. Describe the items and whether you also need apartment cleaning. Send photos through the chat for unknown fabric or difficult stains. An administrator confirms the final price and appointment.",
             "An administrator confirms fabric, scope, price, duration, team and equipment. You receive a recap and explicitly confirm the terms before booking. Urgent requests follow the existing surcharge and availability policy.",
           ],
         },
