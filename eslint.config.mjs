@@ -16,6 +16,9 @@ const eslintConfig = defineConfig([
     "src/generated/**",
     "artifacts/**",
     "work/**",
+    "qa-output/**",
+    // Copied from maplibre-gl by prebuild/predev; not application source.
+    "public/maplibre/**",
   ]),
 ]);
 

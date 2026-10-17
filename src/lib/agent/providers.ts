@@ -1,14 +1,15 @@
 import { z } from "zod";
-import { AgentError, type ToolName, nativeTools } from "./contracts";
+import { AgentError, type ToolName,conversationNativeTools } from "./contracts";
+import {conversationStrategy,type ConversationStrategy} from './conversation-strategy';
 
 export type ToolCall = {id:string;name:ToolName;arguments:string};
 export type AgentMessage = {role:"system"|"user"|"assistant"|"tool";content:string;images?:{mimeType:'image/jpeg';data:string}[];toolCalls?:ToolCall[];toolCallId?:string};
-export type Completion = {text:string;toolCalls:ToolCall[];inputTokens:number;cachedInputTokens:number;outputTokens:number;latencyMs:number;provider:string;model:string;estimatedCostUsd:number|null};
-export interface AIProvider { readonly name:string; readonly model:string; complete(messages:AgentMessage[],signal?:AbortSignal):Promise<Completion>; }
+export type Completion = {text:string;toolCalls:ToolCall[];inputTokens:number;cachedInputTokens:number;outputTokens:number;reasoningTokens?:number;billedCostUsd?:number;latencyMs:number;provider:string;model:string;estimatedCostUsd:number|null};
+export interface AIProvider { readonly name:string; readonly model:string; complete(messages:AgentMessage[],signal?:AbortSignal,options?:{strategy:ConversationStrategy}):Promise<Completion>; }
 const wireTool = z.object({id:z.string().min(1).max(200),function:z.object({name:z.string().max(100),arguments:z.string().max(8000)})});
 const wireMessage = z.object({content:z.string().nullable().optional(),tool_calls:z.array(wireTool).max(8).optional()});
 const tokens=z.number().int().nonnegative().max(1000000);
-const usageSchema=z.object({prompt_tokens:tokens.optional(),input_tokens:tokens.optional(),completion_tokens:tokens.optional(),output_tokens:tokens.optional(),prompt_tokens_details:z.object({cached_tokens:tokens.optional()}).optional(),input_tokens_details:z.object({cached_tokens:tokens.optional()}).optional()});
+const usageSchema=z.object({prompt_tokens:tokens.optional(),input_tokens:tokens.optional(),completion_tokens:tokens.optional(),output_tokens:tokens.optional(),cost:z.number().finite().nonnegative().optional(),completion_tokens_details:z.object({reasoning_tokens:tokens.optional()}).optional(),prompt_tokens_details:z.object({cached_tokens:tokens.optional()}).optional(),input_tokens_details:z.object({cached_tokens:tokens.optional()}).optional()});
 const chatSchema=z.object({model:z.string().optional(),choices:z.array(z.object({message:wireMessage,finish_reason:z.string().optional()})).min(1),usage:usageSchema.optional()});
 // PoYo's native function_call envelope supplies arguments as a JSON object and
 // content:null (observed in isolated Preview). Both native forms stay bounded;
@@ -46,8 +47,8 @@ export function normalizeCompletion(provider:string,model:string,protocol:"chat"
   }
   if(text.length>4000||calls.length>8||(!text.trim()&&!calls.length))throw new AgentError("PROVIDER_MALFORMED");
   const inputTokens=usage.prompt_tokens??usage.input_tokens??0,outputTokens=usage.completion_tokens??usage.output_tokens??0;
-  // Intentionally discard all reasoning, encrypted reasoning and provider error payloads.
-  return {text,toolCalls:calls,inputTokens,outputTokens,cachedInputTokens:usage.prompt_tokens_details?.cached_tokens??usage.input_tokens_details?.cached_tokens??0,latencyMs,provider,model,estimatedCostUsd:rates?(inputTokens*rates.input+outputTokens*rates.output)/1e6:null};
+  // Keep only numeric usage; discard reasoning content and provider error payloads.
+  return {text,toolCalls:calls,inputTokens,outputTokens,cachedInputTokens:usage.prompt_tokens_details?.cached_tokens??usage.input_tokens_details?.cached_tokens??0,reasoningTokens:usage.completion_tokens_details?.reasoning_tokens,billedCostUsd:usage.cost,latencyMs,provider,model,estimatedCostUsd:usage.cost??(rates?(inputTokens*rates.input+outputTokens*rates.output)/1e6:null)};
 }
 abstract class HTTPProvider implements AIProvider {
   abstract readonly name:string;
@@ -72,14 +73,18 @@ abstract class HTTPProvider implements AIProvider {
 }
 export class OpenRouterProvider extends HTTPProvider {
   readonly name="openrouter";
-  complete(messages:AgentMessage[],signal?:AbortSignal){return this.request("https://openrouter.ai/api/v1/chat/completions",{model:this.model,messages:messages.map(m=>({role:m.role,content:m.images?.length?[{type:'text',text:m.content},...m.images.map(i=>({type:'image_url',image_url:{url:`data:${i.mimeType};base64,${i.data}`}}))]:m.content,...(m.toolCallId?{tool_call_id:m.toolCallId}:{}),...(m.toolCalls?{tool_calls:m.toolCalls.map(c=>({id:c.id,type:"function",function:{name:c.name,arguments:c.arguments}}))}:{})})),tools:nativeTools,max_tokens:1200,provider:{require_parameters:true}},"chat",signal);}
+  constructor(model:string,key:string,send:typeof fetch=fetch,rates?:{input:number;output:number},private options?:{maxTokens:number;reasoningEffort:'low'|'medium'|'high'}){
+    super(model,key,send,rates);
+    if(options&&(!Number.isInteger(options.maxTokens)||options.maxTokens<256||options.maxTokens>2400))throw new AgentError('INVALID_OUTPUT_BUDGET');
+  }
+  complete(messages:AgentMessage[],signal?:AbortSignal,options?:{strategy:ConversationStrategy}){return this.request("https://openrouter.ai/api/v1/chat/completions",{model:this.model,messages:messages.map(m=>({role:m.role,content:m.images?.length?[{type:'text',text:m.content},...m.images.map(i=>({type:'image_url',image_url:{url:`data:${i.mimeType};base64,${i.data}`}}))]:m.content,...(m.toolCallId?{tool_call_id:m.toolCallId}:{}),...(m.toolCalls?{tool_calls:m.toolCalls.map(c=>({id:c.id,type:"function",function:{name:c.name,arguments:c.arguments}}))}:{})})),tools:conversationNativeTools(options?.strategy??conversationStrategy()),max_tokens:this.options?.maxTokens??1200,...(this.options?{reasoning:{effort:this.options.reasoningEffort,exclude:true}}:{}),provider:{require_parameters:true}},"chat",signal);}
 }
 export class PoyoProvider extends HTTPProvider {
   readonly name="poyo";
   // Native Responses function calling, never parse pseudo-tool JSON from plain text.
-  complete(messages:AgentMessage[],signal?:AbortSignal){
+  complete(messages:AgentMessage[],signal?:AbortSignal,options?:{strategy:ConversationStrategy}){
     const input=messages.flatMap<Record<string,unknown>>(m=>m.role==="tool"?[{type:"function_call_output",call_id:m.toolCallId,output:m.content}]:m.toolCalls?m.toolCalls.map(c=>({type:"function_call",call_id:c.id,name:c.name,arguments:c.arguments})):[{role:m.role,content:m.images?.length?[{type:'input_text',text:m.content},...m.images.map(i=>({type:'input_image',image_url:`data:${i.mimeType};base64,${i.data}`,detail:'auto'}))]:m.content}]);
-    return this.request("https://api.poyo.ai/v1/responses",{model:this.model,input,tools:nativeTools.map(t=>({type:"function",...t.function})),max_output_tokens:1200,parallel_tool_calls:false,reasoning:{effort:"low"},store:false},"responses",signal);
+    return this.request("https://api.poyo.ai/v1/responses",{model:this.model,input,tools:conversationNativeTools(options?.strategy??conversationStrategy()).map(t=>({type:"function",...t.function})),max_output_tokens:1200,parallel_tool_calls:false,reasoning:{effort:"low"},store:false},"responses",signal);
   }
 }
 export function configuredProviders():[AIProvider,AIProvider]{

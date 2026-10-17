@@ -17,7 +17,7 @@ import {createReplySet,inputAlreadyKnown,inputQuestion} from './chat-presentatio
 import {behaviorMetric} from './behavior-telemetry';
 import {messageImages} from './chat-attachments';
 import {channelAdapter,type ChannelAdapter} from './channels';
-import {conversionIntake} from './conversion-intake';
+import {conversionIntake,nextQualification} from './conversion-intake';
 import {currentClientTurn,operationalSummary,pendingHumanStatements} from './conversation-memory';
 import {setTimeout as debounce} from 'node:timers/promises';
 import {routineFaq} from './routine-faq';
@@ -25,6 +25,7 @@ import {persistOpenQuestion,loopSignal} from './question-planning';
 import {needsStructuredExtraction} from './extraction-planning';
 import {customerFactsSchema} from './contracts';
 import {reliabilityCount} from './reliability-telemetry';
+import {conversationStrategy,llmFirstInstructions,naturalQuestionMatches,answerOrigin,type ConversationStrategy} from './conversation-strategy';
 
 export function modelState(state:AgentState){
   const {reliability,lastDecision,...facts}=state;void reliability;void lastDecision;
@@ -105,17 +106,20 @@ async function persistAnswer(db:PrismaClient,ctx:ToolContext,text:string,plan:un
       const structured={...recapStructured,...(replySet?{replySet}:{}),autonomy:{useful,recovery}};
       const answer=await tx.message.upsert({where:{responseToMessageId:job.messageId},create:{conversationId:c.id,responseToMessageId:job.messageId,author:"AI",text,structured:structured?json(structured):Prisma.DbNull,externalMessageId:`agent:${ctx.jobId}:${ctx.revision}`,deliveryStatus:c.channel==="WEBSITE"?"DELIVERED":"PENDING"},update:{}});
       if(ctx.state.nextInput&&!inputAlreadyKnown(ctx.state.nextInput,ctx.state)&&(ctx.questionAsked||!!ctx.state.pending||text===inputQuestion(ctx.state.nextInput,c.locale)))persistOpenQuestion(ctx.state,ctx.state.nextInput,answer.id);
-      ctx.state.lastDecision={knownFields:Object.keys(ctx.state.draftFacts??{}).sort(),nextInput:ctx.state.nextInput,questionAttempts:ctx.state.questionContext?.attempts??0,tools:actions.slice(-12)};
+      ctx.state.lastDecision={knownFields:Object.keys(ctx.state.draftFacts??{}).sort(),nextInput:ctx.state.nextInput,questionAttempts:ctx.state.questionContext?.attempts??0,tools:actions.slice(-12),...ctx.conversationDiagnostics};
       await tx.conversation.update({where:{id:c.id},data:{summary:operationalSummary(ctx.state,c.summary),state:json(ctx.state),lastMessageAt:new Date(),needsAttention:ctx.handoff||!!ctx.state.booking||!!ctx.state.review?.reasons.length}});
     }
     await tx.agentJob.update({where:{id:ctx.jobId},data:{status:"DONE",completedAt:new Date(),leaseUntil:null,leaseKey:null,errorCode:null}});
   });
 }
-export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<ReturnType<typeof claimJob>>>,providers?:[AIProvider,AIProvider],loadImages:typeof messageImages=messageImages,outbound:(channel:string)=>ChannelAdapter=channelAdapter){
+export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<ReturnType<typeof claimJob>>>,providers?:[AIProvider,AIProvider],loadImages:typeof messageImages=messageImages,outbound:(channel:string)=>ChannelAdapter=channelAdapter,options?:{strategy:ConversationStrategy}){
   const {job,conversation:c,mode,leaseKey}=claim;
   const ctx:ToolContext={conversationId:c.id,jobId:job.id,leaseKey,revision:c.revision,mode,state:mode==="SHADOW"?{...structuredClone(c.shadowState) as AgentState,draftFacts:stateOf(c).draftFacts}:stateOf(c)};
   const plan:{tool:string;outcome:string}[]=[];
   let toolFailures=0,text="",outputRepaired=false;
+  const strategy=options?.strategy??conversationStrategy(),llmFirst=strategy==='LLM_FIRST';
+  ctx.conversationStrategy=strategy;
+  let modelComposed=false,providerRecovered=false,recoveryUsed=false;
   const limits=await db.businessSettings.findUniqueOrThrow({where:{id:'default'}});
   let modelCalls=0;
   const readRetries=new Set<string>();
@@ -132,9 +136,10 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       if(++modelCalls>Math.min(16,Math.max(1,limits.aiMaxModelCalls)))throw new AgentError('MODEL_CALL_LIMIT');
       const spent=await db.aIInvocation.aggregate({where:{conversationId:c.id,success:true},_sum:{estimatedCostUsd:true},_count:{estimatedCostUsd:true,_all:true}});
       if(Number(spent._sum.estimatedCostUsd??0)+0.005>Number(limits.aiMaxConversationCostUsd)||spent._count._all>spent._count.estimatedCostUsd)throw new AgentError('CONVERSATION_COST_LIMIT');
-      await callBudget(db,m,p);return p.complete(m,s);
+      await callBudget(db,m,p);return p.complete(m,s,{strategy});
     }})) as [AIProvider,AIProvider];
     const answer=await completeWithFallback(metered,messages,async(provider,result,errorCode,latency)=>{
+      if(errorCode)providerRecovered=true;
       await db.aIInvocation.create({data:{conversationId:c.id,jobId:job.id,provider:provider.name,model:provider.model,inputTokens:result?.inputTokens??0,cachedInputTokens:result?.cachedInputTokens??0,outputTokens:result?.outputTokens??0,latencyMs:latency,estimatedCostUsd:result?.estimatedCostUsd,toolCallCount:result?.toolCalls.length??0,success:!errorCode,errorCode,mode}});
     },signal);
     preferredFallback=answer.provider===selected[1].name;return answer;
@@ -177,7 +182,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
     }
     else{
       if(forced&&reasonLevel(forced)==='SOFT_REVIEW')await tool('requestReview',{reason:forced});
-      const extractionSource=!humanPending&&!hasPhotos&&!ctx.state.upholsteryInquiry?claim.turn.find(m=>{
+      const extractionSource=!llmFirst&&!humanPending&&!hasPhotos&&!ctx.state.upholsteryInquiry?claim.turn.find(m=>{
         const metadata=m.structured as {inputIntent?:AgentState['nextInput'];factExtraction?:{accepted?:unknown}}|null;
         const incoming=customerFactsSchema.safeParse(metadata?.factExtraction?.accepted);
         return incoming.success&&needsStructuredExtraction(m.text,metadata?.inputIntent,incoming.data);
@@ -196,8 +201,9 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       }
       if(!humanPending&&!hasPhotos&&loopSignal(ctx.state,turnText))await tool('recoverConversationFacts',{});
       if(!humanPending&&(substantiveIntent(turnText)||c.leadId||ctx.state.phone||ctx.state.draftFacts?.service))await tool('createOrUpdateLead',{intent:'cleaning',...(ctx.state.phone?{phone:ctx.state.phone}:{})});
-      const faq=humanPending||hasPhotos?undefined:await routineFaq(turnText,c.locale as keyof typeof handoffText,tool);
-      const intake=ctx.responseText??faq??(humanPending||hasPhotos||ctx.state.upholsteryInquiry?undefined:await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent));
+      const structuredChoice=claim.turn.length===1&&(claim.turn[0].structured as {quickReplyConfirmed?:boolean}|null)?.quickReplyConfirmed===true;
+      const faq=llmFirst||humanPending||hasPhotos?undefined:await routineFaq(turnText,c.locale as keyof typeof handoffText,tool);
+      const intake=ctx.responseText??faq??(llmFirst&&!structuredChoice||humanPending||hasPhotos||ctx.state.upholsteryInquiry?undefined:await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent));
       if(intake)text=intake;
       else{
       let compact=c.summary??null;
@@ -211,7 +217,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       for(let step=0;step<Math.min(8,Math.max(1,limits.aiMaxToolSteps))&&!signal.aborted;step++){
         // Reconcile critical state before every provider retry/fallback; providers never execute tools.
         if(mode==="AUTO"){const live=await db.conversation.findUniqueOrThrow({where:{id:c.id}});ctx.state=stateOf(live);compact=live.summary;}
-        messages[0]={role:"system",content:conversationPolicy(c.locale,modelState(ctx.state) as AgentState,compact,buildAgentTemporalContext(current.sentAt,limits),c.displayAlias)+imagePolicy};
+        messages[0]={role:"system",content:conversationPolicy(c.locale,modelState(ctx.state) as AgentState,compact,buildAgentTemporalContext(current.sentAt,limits),c.displayAlias)+imagePolicy+(llmFirst?'\n'+llmFirstInstructions+'\nSERVER PREREQUISITES (data): '+JSON.stringify({missingQualification:nextQualification(ctx.state),leadAlreadySynchronized:plan.some(p=>p.tool==='createOrUpdateLead'&&p.outcome==='OK')}):'')};
         let answer:Completion;
         try{answer=await modelComplete(messages);if(messages.some(m=>m.images?.length)){await db.chatAttachment.updateMany({where:{messageId:{in:claim.turn.map(m=>m.id)}},data:{aiAnalysisStatus:'ANALYZED'}});}}
         catch(e){if(!(e instanceof AgentError)||e.code!=='PROVIDERS_UNAVAILABLE'||!messages.some(m=>m.images?.length))throw e;for(const m of messages)delete m.images;imagePolicy+='\nVISION UNAVAILABLE: You have only the attachment count. Never describe or claim to have seen any image. Ask for a description; image unavailability alone does not require handoff.';messages[0].content+=imagePolicy;await db.chatAttachment.updateMany({where:{messageId:{in:claim.turn.map(m=>m.id)}},data:{aiAnalysisStatus:'UNAVAILABLE'}});answer=await modelComplete(messages);}
@@ -224,10 +230,10 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
             outputRepaired=true;if(persona)behaviorMetric('personaRepairCount');
             messages.push({role:'assistant',content:answer.text},{role:'system',content:personaRepairInstruction+' Rewrite briefly, at most 1800 characters and TWO questions. Remove repeated qualification questions; use recorded facts and answer the latest question. Preserve all facts. No business tools: return text only.'});
             const repaired=await modelComplete(messages);
-            if(repaired.toolCalls.length||masculineSelfReference(repaired.text,c.locale as keyof typeof handoffText)||!repairPreservesFacts(answer.text,repaired.text)||!outputAllowed(repaired.text,ctx.state,ctx.factAmounts,ctx.factPercentages)){text=safeRecovery(ctx.state,c.locale as keyof typeof handoffText);break;}
+            if(repaired.toolCalls.length||masculineSelfReference(repaired.text,c.locale as keyof typeof handoffText)||!repairPreservesFacts(answer.text,repaired.text)||!outputAllowed(repaired.text,ctx.state,ctx.factAmounts,ctx.factPercentages)){recoveryUsed=true;text=safeRecovery(ctx.state,c.locale as keyof typeof handoffText);break;}
             answer=repaired;
           }
-          text=answer.text;break;
+          text=answer.text;modelComposed=true;break;
         }
         if(answer.toolCalls.length>4)throw new AgentError("TOOL_LIMIT");
         messages.push({role:"assistant",content:answer.text,toolCalls:answer.toolCalls});
@@ -235,8 +241,12 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
           let args:unknown;
           try{args=JSON.parse(call.arguments);}catch{args=null;}
           const result=await tool(call.name,args);
+          if(llmFirst&&result.modelComposed===true)modelComposed=true;
           messages.push({role:"tool",toolCallId:call.id,content:JSON.stringify(result).slice(0,8000)});
-          if(call.name==='reconcileHumanContext'&&!result.error&&!hasPhotos&&mode==='AUTO'){
+          if(llmFirst&&call.name==='requestCustomerInput'&&!result.error&&naturalQuestionMatches(ctx.state.nextInput,answer.text)&&answer.toolCalls.at(-1)?.id===call.id&&!masculineSelfReference(answer.text,c.locale as keyof typeof handoffText)&&outputAllowed(answer.text,ctx.state,ctx.factAmounts,ctx.factPercentages)){
+            ctx.responseText=answer.text;modelComposed=true;
+          }
+          if(!llmFirst&&call.name==='reconcileHumanContext'&&!result.error&&!hasPhotos&&mode==='AUTO'){
             // Resume the same deterministic intake used for a normal client turn after
             // operator corrections are reconciled. Do not spend the model step budget
             // repeating qualification, quotes and soft-review tools for known facts.
@@ -261,7 +271,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       }
       if(!ctx.handoff&&(!text||masculineSelfReference(text,c.locale as keyof typeof handoffText)||!outputAllowed(text,ctx.state,ctx.factAmounts,ctx.factPercentages))){
         // Never send an unsupported amount/slot/booking claim. Preserve facts for the next turn.
-        text=safeRecovery(ctx.state,c.locale as keyof typeof handoffText);
+        recoveryUsed=true;modelComposed=false;text=safeRecovery(ctx.state,c.locale as keyof typeof handoffText);
       }
       }
     }
@@ -271,6 +281,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       const notice=c.locale==='ru'?`С командой нужно согласовать ${detail}. Могу продолжить уточнять остальные условия.`:c.locale==='en'?'The team needs to confirm this specific detail. I can continue with the other questions.':c.locale==='sr-Cyrl'?'Тим треба да потврди овај детаљ. Могу да наставим са осталим питањима.':'Tim treba da potvrdi ovaj detalj. Mogu da nastavim sa ostalim pitanjima.';
       text=notice+'\n\n'+(text.length+notice.length>1800?safeRecovery(ctx.state,c.locale as keyof typeof handoffText):text);
     }
+    ctx.conversationDiagnostics={strategy,modelCalls,answerOrigin:answerOrigin(modelComposed,plan.some(p=>p.tool==='calculatePrice'&&p.outcome==='OK'),providerRecovered||recoveryUsed,!!ctx.handoff)};
     await persistAnswer(db,ctx,text,plan,leaseKey);
     await deliverOutbox(db,c.id,outbound);
   }catch(e){
