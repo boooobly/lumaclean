@@ -70,6 +70,6 @@ export function bookingReviewBlocked(state:AgentState){
   if(state.unresolvedInput)return true;
   if(state.pendingFactProposal)return true;
   if(state.draftFacts?.applianceScopePending?.length)return true;
-  if(state.upholsteryInquiry)return true;
+  if(state.upholsteryInquiry||state.knowledgeRequests?.length||(state.draftFacts?.bathroomCount??1)>1)return true;
   return !!state.review?.reasons.some(r=>r!=='CONTACT_PREFERENCE')||!!state.draftFacts?.reviewItems?.length||!!state.draftFacts?.serviceConfirmationRequired||windowQuantitiesMissing(state.draftFacts);
 }

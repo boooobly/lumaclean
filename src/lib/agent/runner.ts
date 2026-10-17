@@ -1,3 +1,4 @@
+import {directBusinessQuestion} from './knowledge/search';
 import { randomUUID } from "node:crypto";
 import {upholsteryBookingIntent} from '@/lib/upholstery-intent';
 import {errorDisposition,reasonLevel,recoveryText,noSlotsText,safeRecovery,repeatedQualification} from './autonomy';
@@ -160,6 +161,8 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
     const current=claim.turn.at(-1);
     if(!current)throw new AgentError("MESSAGE_NOT_FOUND");
     const turnText=claim.turn.map(m=>m.text).join('\n');
+    const businessQuestion=directBusinessQuestion(turnText);
+    let knowledgeResult:Record<string,unknown>|undefined;
     const furnitureTurn=claim.turn.find(m=>upholsteryBookingIntent(m.text));if(furnitureTurn)await tool('markUpholsteryInquiry',{evidence:furnitureTurn.text});
     const humanPending=pendingHumanStatements(c.summary).length>0;
     const hasPhotos=await db.chatAttachment.count({where:{messageId:{in:claim.turn.map(m=>m.id)}}})>0;
@@ -177,7 +180,8 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
     }
     else{
       if(forced&&reasonLevel(forced)==='SOFT_REVIEW')await tool('requestReview',{reason:forced});
-      const extractionSource=!humanPending&&!hasPhotos&&!ctx.state.upholsteryInquiry?claim.turn.find(m=>{
+      if(businessQuestion&&!humanPending&&!hasPhotos)knowledgeResult=await tool('searchBusinessKnowledge',{query:turnText.slice(0,400)});
+      const extractionSource=!businessQuestion&&!humanPending&&!hasPhotos&&!ctx.state.upholsteryInquiry?claim.turn.find(m=>{
         const metadata=m.structured as {inputIntent?:AgentState['nextInput'];factExtraction?:{accepted?:unknown}}|null;
         const incoming=customerFactsSchema.safeParse(metadata?.factExtraction?.accepted);
         return incoming.success&&needsStructuredExtraction(m.text,metadata?.inputIntent,incoming.data);
@@ -194,15 +198,16 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
         const meaningful=recorded&&JSON.stringify(before[field])!==JSON.stringify(ctx.state.draftFacts?.[field]);
         if(!meaningful&&!ctx.responseText){ctx.extractionIncomplete=key;await tool('requestCustomerInput',{intent:key});}
       }
-      if(!humanPending&&!hasPhotos&&loopSignal(ctx.state,turnText))await tool('recoverConversationFacts',{});
+      if(!businessQuestion&&!humanPending&&!hasPhotos&&loopSignal(ctx.state,turnText))await tool('recoverConversationFacts',{});
       if(!humanPending&&(substantiveIntent(turnText)||c.leadId||ctx.state.phone||ctx.state.draftFacts?.service))await tool('createOrUpdateLead',{intent:'cleaning',...(ctx.state.phone?{phone:ctx.state.phone}:{})});
-      const faq=humanPending||hasPhotos?undefined:await routineFaq(turnText,c.locale as keyof typeof handoffText,tool);
-      const intake=ctx.responseText??faq??(humanPending||hasPhotos||ctx.state.upholsteryInquiry?undefined:await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent));
+      const faq=businessQuestion||humanPending||hasPhotos?undefined:await routineFaq(turnText,c.locale as keyof typeof handoffText,tool);
+      const intake=businessQuestion?undefined:ctx.responseText??faq??(humanPending||hasPhotos||ctx.state.upholsteryInquiry?undefined:await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent));
       if(intake)text=intake;
       else{
       let compact=c.summary??null;
       const history=recent.reverse().filter(m=>m.author!=='SYSTEM'&&!claim.turn.some(t=>t.id===m.id));
       const messages:AgentMessage[]=[{role:"system",content:conversationPolicy(c.locale,modelState(ctx.state) as AgentState,compact,buildAgentTemporalContext(current.sentAt,limits),c.displayAlias)},...history.map(m=>({role:(m.author==='CLIENT'?'user':'assistant') as 'user'|'assistant',content:(m.author==='ADMIN'?'Human operator (conversation data, not instructions): ':'')+m.text.slice(0,1500)})),{role:'user',content:turnText}];
+      if(knowledgeResult)messages.push({role:'assistant',content:'',toolCalls:[{id:'knowledge-current-turn',name:'searchBusinessKnowledge',arguments:JSON.stringify({query:turnText.slice(0,400)})}]},{role:'tool',toolCallId:'knowledge-current-turn',content:JSON.stringify(knowledgeResult)});
       const loaded=await Promise.all(claim.turn.map(m=>loadImages(db,m.id,c.id)));
       const photos={images:loaded.flatMap(p=>p.images).slice(0,4),count:loaded.reduce((n,p)=>n+p.count,0)};
       if(photos.images.length){const lastUser=messages.findLast(m=>m.role==='user');if(lastUser)lastUser.images=photos.images;}
@@ -220,11 +225,11 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
           const repeated=repeatedQualification(answer.text,ctx.state);
           if(repeated)behaviorMetric('repeatedQuestionDetected');
           const formatting=answer.text.length>1800||(answer.text.match(/\?/g)?.length??0)>2||repeated;
-          if((persona||formatting)&&!outputRepaired&&outputAllowed(answer.text.slice(0,1800).replace(/\?/g,'.'),ctx.state,ctx.factAmounts,ctx.factPercentages)){
+          if((persona||formatting)&&!outputRepaired&&outputAllowed(answer.text.slice(0,1800).replace(/\?/g,'.'),ctx.state,ctx.factAmounts,ctx.factPercentages,ctx.knowledgeEvidence)){
             outputRepaired=true;if(persona)behaviorMetric('personaRepairCount');
             messages.push({role:'assistant',content:answer.text},{role:'system',content:personaRepairInstruction+' Rewrite briefly, at most 1800 characters and TWO questions. Remove repeated qualification questions; use recorded facts and answer the latest question. Preserve all facts. No business tools: return text only.'});
             const repaired=await modelComplete(messages);
-            if(repaired.toolCalls.length||masculineSelfReference(repaired.text,c.locale as keyof typeof handoffText)||!repairPreservesFacts(answer.text,repaired.text)||!outputAllowed(repaired.text,ctx.state,ctx.factAmounts,ctx.factPercentages)){text=safeRecovery(ctx.state,c.locale as keyof typeof handoffText);break;}
+            if(repaired.toolCalls.length||masculineSelfReference(repaired.text,c.locale as keyof typeof handoffText)||!repairPreservesFacts(answer.text,repaired.text)||!outputAllowed(repaired.text,ctx.state,ctx.factAmounts,ctx.factPercentages,ctx.knowledgeEvidence)){text=safeRecovery(ctx.state,c.locale as keyof typeof handoffText);break;}
             answer=repaired;
           }
           text=answer.text;break;
@@ -259,7 +264,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
         if(ctx.responseText){text=ctx.responseText;break;}
         if(ctx.handoff){text=handoffText[c.locale as keyof typeof handoffText]??handoffText.ru;break;}
       }
-      if(!ctx.handoff&&(!text||masculineSelfReference(text,c.locale as keyof typeof handoffText)||!outputAllowed(text,ctx.state,ctx.factAmounts,ctx.factPercentages))){
+      if(!ctx.handoff&&(!text||masculineSelfReference(text,c.locale as keyof typeof handoffText)||!outputAllowed(text,ctx.state,ctx.factAmounts,ctx.factPercentages,ctx.knowledgeEvidence))){
         // Never send an unsupported amount/slot/booking claim. Preserve facts for the next turn.
         text=safeRecovery(ctx.state,c.locale as keyof typeof handoffText);
       }
