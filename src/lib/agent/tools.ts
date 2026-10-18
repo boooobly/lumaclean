@@ -257,12 +257,13 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   if(name==='recordKnowledgeRequest'){
     if(!businessKnowledgeEnabled())return{error:'REVIEW_REQUIRED'};
     const input=toolSchemas[name].parse(payload),turn=await currentClientTurn(tx,c.id);
-    if(!turn.some(m=>m.text.includes(input.evidence))||directBusinessQuestion(input.evidence))return{error:'FACT_EVIDENCE_REJECTED'};
+    if(!turn.some(m=>m.text.includes(input.evidence)))return{error:'FACT_EVIDENCE_REJECTED',reason:'NOT_CURRENT_VERBATIM_CLIENT_EVIDENCE',message:'Copy the current CLIENT sentence verbatim, including the named service and intent. Do not translate or paraphrase.'};
+    if(directBusinessQuestion(input.evidence))return{error:'FACT_EVIDENCE_REJECTED',reason:'QUESTION_IS_NOT_A_SERVICE_REQUEST'};
     if(input.action==='ADD'&&!/(?:хочу|нужн|добав|помой|почист|отмыть|есть.{0,20}ролет|treba|želim|zelim|треба|желим|i need|i want|please|add)/iu.test(input.evidence))return{error:'FACT_EVIDENCE_REJECTED'};
     if(input.action==='REMOVE'&&!/не надо|не нуж|убрать|отмен|without|remove|cancel|bez|ne treba|без|не треба/iu.test(input.evidence))return{error:'FACT_EVIDENCE_REJECTED'};
     const relevant=searchBusinessKnowledge({query:input.evidence.slice(0,400),limit:5}).matches;
     const selected=input.codes.map(code=>relevant.find(e=>e.code===code));
-    if(selected.some(e=>!e||e.status==='UNAVAILABLE'||e.category!=='extra'&&e.category!=='upholstery'||e.autoCalculate))return{error:'FACT_EVIDENCE_REJECTED'};
+    if(selected.some(e=>!e||e.status==='UNAVAILABLE'||e.category!=='extra'&&e.category!=='upholstery'||e.autoCalculate))return{error:'FACT_EVIDENCE_REJECTED',reason:'CODE_NOT_ELIGIBLE_FOR_THIS_EVIDENCE',eligibleCodes:relevant.filter(e=>e.status!=='UNAVAILABLE'&&(e.category==='extra'||e.category==='upholstery')&&!e.autoCalculate).map(e=>({code:e.code,name:e.name})),message:'Use the exact retrieved stable code matching the named work. Evidence must include the service name, not just a pronoun. Do not substitute a different service.'};
     if(ctx.mode==='SHADOW')return{error:'SHADOW_MUTATION_BLOCKED'};
     state.knowledgeRequests=(state.knowledgeRequests??[]).filter(e=>!input.codes.includes(e.code));
     if(input.action==='ADD')state.knowledgeRequests.push(...input.codes.map(code=>({code,evidence:input.evidence.slice(0,300)})));
@@ -393,6 +394,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const {intent,businessAnswer}=toolSchemas.requestCustomerInput.parse(payload);
     if(ctx.consultation&&!businessAnswer)return{error:'ANSWER_DIRECT_QUESTION_FIRST',message:'Provide a verified direct businessAnswer before the optional qualification question, or answer in plain text without a follow-up.'};
     if(businessAnswer&&(!ctx.knowledgeEvidence?.length||businessAnswer.includes('?')||!outputAllowed(businessAnswer,state,ctx.factAmounts,ctx.factPercentages,ctx.knowledgeEvidence)))return{error:'BUSINESS_ANSWER_UNVERIFIED',message:'The answer must contain only retrieved facts and approved unit prices, no guessed totals/times or questions.'};
+    if(ctx.consultation&&(intent==='WINDOW_COUNTS'||intent==='WINDOW_TYPE')&&!state.draftFacts?.windowCleaning?.requested)return{error:'INPUT_CONTEXT_REQUIRED',message:'Window inputs require an explicit window-washing selection. Shutters, mosquito nets and other catalog services must not be substituted with window washing.'};
     if(ctx.extractionIncomplete===intent){reliabilityCount(state,'factExtractionFailure');state.unresolvedInput=intent;delete ctx.extractionIncomplete;delete state.pending;delete state.slots;delete state.selectedSlotToken;}
     if(state.upholsteryInquiry&&intent!=='PHONE')return{error:'UPHOLSTERY_MANAGER_INTAKE',message:'Collect only missing name/contact. Manager will clarify furniture and pricing; do not run cleaning or furniture qualification.'};
     if(inputAlreadyKnown(intent,state)){behaviorMetric('repeatedQuestionDetected');behaviorMetric('repeatedQualificationQuestionCount');return{error:'FACT_ALREADY_KNOWN',facts:state.draftFacts};}

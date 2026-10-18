@@ -11,7 +11,7 @@ export function knowledgeTimeExplanation(sentence:string,entries:KnowledgeEntry[
  if(/30\s*(?:мин|minute|minut|минут)/iu.test(sentence))return entries.some(e=>e.runtimeCode==='ironing')&&/глаж|ironing|pegl|пегл/iu.test(sentence);
  if(/24\s*(?:час|hour|sat|сат)/iu.test(sentence))return entries.some(e=>e.code==='RULE-HOURS-009')&&/рекоменд|recommend|preporuč|preporuc|препоруч/iu.test(sentence);
  const times=sentence.match(/\b\d{1,2}:\d{2}\b/gu)??[];
- if(times.length)return entries.some(e=>e.code.startsWith('RULE-HOURS-')||e.code==='RULE-URGENCY-001')&&times.every(t=>['09:00','17:00','22:00'].includes(t))&&/заяв|работ|выезд|порог|после|до |hours|request|cutoff|depart|radn|prijav|polas|радн|пријав|полас/iu.test(sentence);
+ if(times.length)return entries.some(e=>e.code.startsWith('RULE-HOURS-')||e.code==='RULE-URGENCY-001')&&times.every(t=>['09:00','17:00','22:00'].includes(t))&&/заяв|работ|выезд|порог|после|до |hours|request|cutoff|depart|same.day.{0,70}until|radn|prijav|polas|радн|пријав|полас/iu.test(sentence);
  return false;
 }
 export function unsupportedKnowledgeClaim(text:string,entries:KnowledgeEntry[],hasQuote:boolean){

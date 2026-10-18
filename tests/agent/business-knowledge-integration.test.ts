@@ -49,6 +49,7 @@ test('actual knowledge tools, Lead persistence and booking boundaries on the dis
    assert.equal((await executeAgentTool(db,ctx,'requestCustomerInput',{intent:'AREA'})).error,'ANSWER_DIRECT_QUESTION_FIRST');
    assert.equal((await executeAgentTool(db,ctx,'requestCustomerInput',{intent:'AREA',businessAnswer:'Цена этой уборки — 999999 RSD.'})).error,'BUSINESS_ANSWER_UNVERIFIED');
    const answer='В поддерживающую уборку входят полы, доступные поверхности, кухня снаружи и один стандартный санузел.';
+   assert.equal((await executeAgentTool(db,ctx,'requestCustomerInput',{intent:'WINDOW_COUNTS',businessAnswer:answer})).error,'INPUT_CONTEXT_REQUIRED');assert.equal(ctx.state.nextInput,undefined);
    assert.equal((await executeAgentTool(db,ctx,'requestCustomerInput',{intent:'AREA',businessAnswer:answer})).finishTurn,true);
    assert(ctx.responseText?.startsWith(answer+'\n\n'));assert.equal(ctx.state.nextInput,'AREA');
   });
@@ -63,6 +64,16 @@ test('actual knowledge tools, Lead persistence and booking boundaries on the dis
    const evidence='Da li perete roletne?',ctx=await context(evidence);
    assert.equal((await executeAgentTool(db,ctx,'recordKnowledgeRequest',{codes:['ADD-WINDOW-017'],evidence,action:'ADD'})).error,'FACT_EVIDENCE_REJECTED');
    assert.equal((await db.conversation.findUniqueOrThrow({where:{id:ctx.conversationId}})).leadId,null);
+  });
+  await t.test('native custom-service sentences persist exact work and offer actionable correction without accepting substitutions',async()=>{
+   for(const [evidence,code] of [['Есть ролеты на всех окнах, хочу их помыть вместе с уборкой.','ADD-WINDOW-017'],['Мне нужно отмыть душевую от сильного налёта.','ADD-BATH-007']]){
+    const ctx=await context(evidence);
+    const wrong=await executeAgentTool(db,ctx,'recordKnowledgeRequest',{codes:['ADD-WINDOW-001'],evidence,action:'ADD'});
+    assert.equal(wrong.error,'FACT_EVIDENCE_REJECTED');assert.equal(wrong.reason,'CODE_NOT_ELIGIBLE_FOR_THIS_EVIDENCE');assert((wrong.eligibleCodes as {code:string}[]).some(e=>e.code===code));
+    assert.equal((await executeAgentTool(db,ctx,'recordKnowledgeRequest',{codes:[code],evidence,action:'ADD'})).saved,true);
+    assert.equal(ctx.state.knowledgeRequests?.[0]?.code,code);assert(bookingReviewBlocked(ctx.state));
+    const c=await db.conversation.findUniqueOrThrow({where:{id:ctx.conversationId}}),lead=await db.lead.findUniqueOrThrow({where:{id:c.leadId!}});assert(lead.internalNote?.includes(code));assert.equal(c.control,'AI_CONTROL');
+   }
   });
   await t.test('second bathroom returns only known subtotal and blocks a final quote',async()=>{
    const input={service:'regular' as const,area:75,soilLevel:'NORMAL' as const,extras:[],urgent:false},ctx=await context('Два санузла, поддерживающая 75 м²',{draftFacts:{...input,extrasConfirmed:true,bathroomCount:2}});
