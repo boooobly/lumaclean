@@ -4,7 +4,7 @@
 .site-home .rate-result { min-width:0; }
 .site-home .rate-focus .rate-result-label { color:var(--lc-teal-ink); font-weight:650; }
 .site-home .rate-result strong { display:flex; align-items:baseline; gap:10px; line-height:1.1; font-variant-numeric:tabular-nums; }
-.site-home .rate-result .rate-amount { min-width:5ch; font:inherit; letter-spacing:inherit; }
+.site-home .rate-result .rate-amount { min-width:6ch; font:inherit; letter-spacing:inherit; }
 .site-home .rate-result strong small { font:400 18px var(--lc-font-text); letter-spacing:0; white-space:nowrap; }
 .site-home .rate-selection { margin:3px 0 0; color:var(--lc-ink-soft); font-size:13px; line-height:1.5; }
 .site-home .rate-controls { gap:18px; }
@@ -62,7 +62,9 @@
 .site-home .estimate-focused .site-comment summary { cursor:pointer; padding-block:10px; color:var(--lc-paper); font-size:12px; }
 .site-home .estimate-focused .estimate-enquiry-note { color:var(--lc-paper); margin-block:16px 0; }
 .site-home .estimate-focused .site-lead-fields { grid-template-columns:1fr; }
-.site-home .estimate-focused .site-lead-fields label > span { color:var(--lc-paper); }
+.site-home .estimate-focused .site-lead-fields label > span { color:var(--lc-paper); font-size:11px; }
+.site-home .estimate-focused .site-lead-fields :is(input,textarea)::placeholder { color:rgba(251,250,246,.68); }
+.site-home .estimate-focused .site-lead-fields .site-consent span { font-size:12px; }
 .site-home .estimate-focused .receipt-total span { color:var(--lc-paper); }
 .site-home .estimate-focused .receipt-body > p { color:var(--lc-paper); }
 .site-home .homepage-method-anchor { display:block; position:relative; top:-90px; visibility:hidden; }

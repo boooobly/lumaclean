@@ -1,7 +1,7 @@
 "use client";
 
 import {useRef, useState} from 'react';
-import {isValidPhoneNumber} from 'libphonenumber-js/min';
+import {isWebsitePhoneValid} from '@/lib/website-phone';
 import type {Locale} from '@/i18n/routing';
 import type {EditorialContent} from '@/lib/site-content';
 import {homepageUxCopy} from '@/lib/homepage-ux-content';
@@ -19,7 +19,7 @@ export function ContactRequest({locale, copy}: {locale: Locale; copy: EditorialC
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy.current || status === 'success') return;
-    if (!isValidPhoneNumber(phone, 'RS') || !consent) {
+    if (!isWebsitePhoneValid(phone) || !consent) {
       setStatus('validation'); trackEvent('lead_error', {locale, error_type: 'validation'}); return;
     }
     busy.current = true; setStatus('sending');
@@ -40,7 +40,7 @@ export function ContactRequest({locale, copy}: {locale: Locale; copy: EditorialC
     } finally { busy.current = false; }
   }
   return <form className="contact-request" onSubmit={submit} noValidate onFocusCapture={() => {if (!started.current) {started.current = true; trackEvent('form_start', {locale});}}}>
-    <label className="contact-phone"><span>{copy.phone}</span><input type="tel" name="phone" autoComplete="tel" inputMode="tel" value={phone} onChange={e => setPhone(e.target.value)} required maxLength={40} aria-invalid={status === 'validation' && !isValidPhoneNumber(phone, 'RS')} aria-describedby={status === 'validation' || status === 'error' ? 'contact-status' : undefined}/></label>
+    <label className="contact-phone"><span>{copy.phone}</span><input type="tel" name="phone" autoComplete="tel" inputMode="tel" value={phone} onChange={e => setPhone(e.target.value)} required maxLength={40} aria-invalid={status === 'validation' && !isWebsitePhoneValid(phone)} aria-describedby={status === 'validation' || status === 'error' ? 'contact-status' : undefined}/></label>
     <label className="site-consent"><input type="checkbox" name="consent" checked={consent} onChange={e => setConsent(e.target.checked)} required aria-invalid={status === 'validation' && !consent}/><span>{copy.consent}</span></label>
     <button type="submit" disabled={status === 'sending' || status === 'success'}>{status === 'sending' ? copy.sending : c.send}<ArrowIcon/></button>
     {status === 'success' && <p role="status">{c.success}</p>}

@@ -1,6 +1,6 @@
 "use client";
 
-import {isValidPhoneNumber} from 'libphonenumber-js/min';
+import {isWebsitePhoneValid} from '@/lib/website-phone';
 import {homepageUxCopy} from '@/lib/homepage-ux-content';
 import Image from "next/image";
 import {Minus, Plus} from "lucide-react";
@@ -32,7 +32,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
   const ExtraGroup=focused?"div":Fragment;
   const started = useRef(false);
   const submitting = useRef(false);
-  const submission = useRef<{id: string; payload: string} | null>(null);
+  const submission = useRef<{id: string; fields: string; payload: string} | null>(null);
   const [service, setService] = useState<ServiceId>(initialService);
   const [area, setArea] = useState(55);
   const [counts, setCounts] = useState<Record<CountExtra, number>>({standardWindow: 0, largeWindow: 0, cabinets: 0, ironing: 0,fridge:0,oven:0,microwave:0,hood:0,dishwasher:0,washingMachine:0});
@@ -64,7 +64,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting.current || status === 'success') return;
-    if ((name.trim().length > 0 && name.trim().length < 2) || !isValidPhoneNumber(phone, "RS") || !consent) {
+    if ((name.trim().length > 0 && name.trim().length < 2) || !isWebsitePhoneValid(phone) || !consent) {
       setStatus("validation");
       trackEvent("lead_error", {locale, service, error_type: "validation"});
       return;
@@ -74,9 +74,9 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
     const details = calculation.lines.map((line) => `${line.label}: ${formatRsd(line.value, locale)}`).join("\n");
     const estimate = `${copy.calculation}\n${details}\n${hasUpholstery?e.cleaningPrice:copy.total}: ${formatRsd(calculation.total, locale)}${hasUpholstery?`\n${e.pending}\n${e.agreed}`:''}`;
     try {
-      const payload = JSON.stringify({name, phone, comment: comment.trim() || undefined, locale, requestKind:onlyUpholstery?'UPHOLSTERY':hasUpholstery?'CLEANING_UPHOLSTERY':'CLEANING',upholsteryRequested:hasUpholstery,...(onlyUpholstery?{}:{estimate,service,area,urgent,extras:calculation.extras}), consent, attribution: leadAttribution()});
-      if (!submission.current || submission.current.payload !== payload) submission.current = {id:crypto.randomUUID(),payload};
-      const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, signal: AbortSignal.timeout(20000), body: JSON.stringify({...JSON.parse(payload),submissionId:submission.current.id})});
+      const fields = JSON.stringify({name, phone, comment: comment.trim() || undefined, locale, requestKind:onlyUpholstery?'UPHOLSTERY':hasUpholstery?'CLEANING_UPHOLSTERY':'CLEANING',upholsteryRequested:hasUpholstery,...(onlyUpholstery?{}:{estimate,service,area,urgent,extras:calculation.extras}), consent});
+      if (!submission.current || submission.current.fields !== fields) submission.current = {id:crypto.randomUUID(),fields,payload:JSON.stringify({...JSON.parse(fields),attribution:leadAttribution()})};
+      const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, signal: AbortSignal.timeout(20000), body: JSON.stringify({...JSON.parse(submission.current.payload),submissionId:submission.current.id})});
       const result = await response.json().catch(() => null);
       const success = response.ok && result?.ok === true;
       setStatus(success ? "success" : response.status === 400 ? "validation" : "error");
@@ -139,7 +139,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
           {hasUpholstery&&<div className="estimate-review-note"><p>{onlyUpholstery?e.onlyPrice:e.pending}</p><small>{e.agreed}</small></div>}
           <div className="site-lead-fields">
             <label><span>{copy.name}</span><input name="name" value={name} onChange={(event) => setName(event.target.value)} placeholder={copy.name} autoComplete="name" maxLength={100} aria-invalid={status === "validation" && name.trim().length > 0 && name.trim().length < 2}/></label>
-            <label><span>{copy.phone}</span><input type="tel" name="phone" maxLength={40} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder={copy.phone} autoComplete="tel" inputMode="tel" required aria-invalid={status === "validation" && !isValidPhoneNumber(phone, "RS")}/></label>
+            <label><span>{copy.phone}</span><input type="tel" name="phone" maxLength={40} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder={copy.phone} autoComplete="tel" inputMode="tel" required aria-invalid={status === "validation" && !isWebsitePhoneValid(phone)}/></label>
             {focused?<details className="site-comment"><summary>{copy.comment} · {ux.optional}</summary><label><span>{copy.comment}</span><textarea name="comment" value={comment} onChange={(event) => setComment(event.target.value)} placeholder={hasUpholstery?e.placeholder:copy.commentHint} maxLength={1000} rows={2}/></label></details>:<label className="site-comment"><span>{copy.comment}</span><textarea name="comment" value={comment} onChange={(event) => setComment(event.target.value)} placeholder={hasUpholstery?e.placeholder:copy.commentHint} maxLength={1000} rows={2}/></label>}
             <label className="site-consent"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} required aria-invalid={status === "validation" && !consent}/><span>{copy.consent}</span></label>
           </div>
