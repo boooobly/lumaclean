@@ -36,13 +36,14 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
       }
       if(input.urgent){const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}}),now=new Date();const date=buildAgentTemporalContext(now,settings,now).nowLocalDate;if('error' in serviceDatePolicy(date,settings,now))throw new CrmError('VALIDATION','SAME_DAY_CUTOFF');}
       const standalone=requestKind==='UPHOLSTERY';
-      const service = await tx.service.findUnique({
+      const contact=requestKind==='CONTACT_REQUEST';
+      const service = contact?null:await tx.service.findUnique({
         where: { code: standalone?'upholstery':input.service! },
         select: { id: true, active: true },
       });
-      if (!service?.active)
+      if (!contact&&!service?.active)
         throw new CrmError("VALIDATION", "Service unavailable");
-      const calculated = standalone?null:quote(
+      const calculated = standalone||contact?null:quote(
         input.service!,
         input.area!,
         input.extras,
@@ -65,9 +66,9 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
           phone: input.phone,
           normalizedPhone: normalizedPhone(input.phone),
           locale: input.locale,
-          requestKind,upholsteryRequested,humanReviewRequired:upholsteryRequested,consentAt:new Date(),
-          serviceId: service.id,
-          area: standalone?null:input.area,
+          requestKind,upholsteryRequested,humanReviewRequired:upholsteryRequested||contact,consentAt:new Date(),
+          serviceId: service?.id??null,
+          area: standalone||contact?null:input.area,
           estimatedPrice: calculated?.total??null,
           urgent: input.urgent,
           comment: input.comment,
@@ -84,7 +85,7 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
           },
         },
       });
-      if(upholsteryRequested)await enqueueLeadReview(tx,{...lead,service:input.service,area:input.area,estimatedPrice:calculated?.total??null});
+      if(upholsteryRequested||contact)await enqueueLeadReview(tx,{...lead,service:input.service,area:input.area,estimatedPrice:calculated?.total??null});
       await writeAudit(
         tx,
         { type: "SYSTEM", key: "website-intake" },
@@ -101,7 +102,7 @@ export async function notifyWebsiteLead(
   input: ReturnType<typeof websiteLeadSchema.parse>,
   send: typeof fetch = fetch,
 ) {
-  if(input.upholsteryRequested){try{await publishNotifications(db);}catch{/* Durable pending notification is recovered by the existing worker. */}return;}
+  if(input.upholsteryRequested||input.requestKind==='CONTACT_REQUEST'){try{await publishNotifications(db);}catch{/* Durable pending notification is recovered by the existing worker. */}return;}
   let sent = false;
   try {
     const token = process.env.TELEGRAM_BOT_TOKEN,
@@ -110,7 +111,7 @@ export async function notifyWebsiteLead(
     const text = [
       "🧹 Новая заявка LumaClean",
       `Номер: ${lead.reference}`,
-      `Имя: ${input.name}`,
+      `Имя: ${input.name??'Не указано'}`,
       `Телефон: ${input.phone}`,
       `Язык: ${input.locale}`,
       `Услуга: ${serviceLabels[input.service!]}`,

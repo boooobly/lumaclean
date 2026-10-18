@@ -21,8 +21,8 @@ export const priceMatrix: Record<ServiceId, [number, number, number, number, num
 };
 
 export const extrasPrices = {
-  standardWindow: 1000,
-  largeWindow: 1500,
+  standardWindow: 700,
+  largeWindow: 1000,
   balcony: 1200,
   ...appliancePrices,
   cabinets: 500,

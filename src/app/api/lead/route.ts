@@ -46,7 +46,7 @@ export async function POST(request: Request) {
   try {
     const db = getDatabase();
     const lead = await saveWebsiteLead(db, parsed.data);
-    if (lead.created||parsed.data.upholsteryRequested) await notifyWebsiteLead(db, lead, parsed.data);
+    if (lead.created||parsed.data.upholsteryRequested||parsed.data.requestKind==='CONTACT_REQUEST') await notifyWebsiteLead(db, lead, parsed.data);
     return NextResponse.json(
       { ok: true, reference: lead.reference },
       { headers: { "Cache-Control": "no-store" } },

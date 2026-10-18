@@ -28,7 +28,7 @@ export default async function NewClient({
         redirectTo="/admin/clients/[id]"
       >
         <ClientFields
-          value={lead ? { name: lead.name, phone: lead.phone } : undefined}
+          value={lead ? { name: lead.name ?? "", phone: lead.phone } : undefined}
         />
       </CrmForm>
     </>

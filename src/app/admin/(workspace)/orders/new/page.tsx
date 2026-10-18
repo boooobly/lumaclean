@@ -46,7 +46,7 @@ export default async function NewOrder({
               }
             : undefined
         }
-        clientValues={lead ? { name: lead.name, phone: lead.phone } : undefined}
+        clientValues={lead ? { name: lead.name ?? "", phone: lead.phone } : undefined}
         value={
           lead
             ? {

@@ -21,7 +21,9 @@ for (const service of Object.keys(expected) as ServiceId[]) for (const [i,area] 
 const extras: [Parameters<typeof calculatePrice>[2],number][] = [
   [[{code:'fridge',quantity:1}],1000], [[{code:'oven',quantity:1}],1400],
   [[{code:'microwave',quantity:1}],700], [[{code:'fridge',quantity:1},{code:'oven',quantity:1}],2400],
-  [[{code:'standardWindow',quantity:2}],2000], [[{code:'largeWindow',quantity:1}],1500],
+  [[{code:'standardWindow',quantity:1}],700], [[{code:'standardWindow',quantity:2}],1400],
+  [[{code:'largeWindow',quantity:1}],1000], [[{code:'largeWindow',quantity:2}],2000],
+  [[{code:'standardWindow',quantity:2},{code:'largeWindow',quantity:1}],2400],
   [[{code:'cabinets',quantity:2}],1000], [[{code:'ironing',quantity:1}],900],
   [[{code:'ironing',quantity:2}],1800], [[{code:'linen',quantity:1}],750],
   [[{code:'balcony',quantity:1}],1200], [[{code:'petHair',quantity:1}],900],
