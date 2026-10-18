@@ -1,5 +1,5 @@
 {
-  "fingerprint": "d5823d6cab519fd3d3ef8ab8a43c4436e8292b97062465e5fda13257ddada01a",
+  "fingerprint": "82866d892a3c07a32b5c791e9cdd57dbfc6ad413d732cac89fc03f85db1bf47b",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -159,7 +159,7 @@
     "src/lib/agent/autonomy-corpus.ts": "3ff2f9937dc1f6a9da3de5c02ada6d9da87d6155dc96b0aac291f7229e34a46b",
     "src/lib/agent/autonomy-metrics.ts": "f0837699b20605c36e274849d0fe04fa236c314c7cd5d782da7f4b39e947c54e",
     "src/lib/agent/autonomy-preview.ts": "418219bde2344a57896a296b104fd361a6fb8a801ac230392da1d7d1ae37da2f",
-    "src/lib/agent/autonomy.ts": "458fb0f3d5d6a1f63c11a7df9f65045b61b00a5cbdc45d024cee95c69dc8c22d",
+    "src/lib/agent/autonomy.ts": "8da766fc03cb19935655aa84ee6ead045658522b343c4cf73124c9f1a75e5329",
     "src/lib/agent/behavior-eval.ts": "58875967d9aebc564f9ecc67ec83768c4376a30e2591d735c10c8780b705a097",
     "src/lib/agent/behavior-telemetry.ts": "65b6f66b11127abbf6a29be0c69e56f544779477094dae99603fad5ece1d1242",
     "src/lib/agent/business-labels.ts": "aa9313bd859d8f565df06ecd3d16a0a559594a337a29d3bc75c250a88dce6f17",
@@ -173,7 +173,7 @@
     "src/lib/agent/chat-attachments.ts": "4489b694b8cffe28f25edaee4801be053319e05031ea0a20aa383e584e628daa",
     "src/lib/agent/chat-presentation.ts": "db120b2d4ff0cd66e542fb0e8be90127dd378542c4b2790ab1dac24d35dfab45",
     "src/lib/agent/chat-upload-http.ts": "217ce3fc7f5e3be3c613bfebda0d4316fd222550a0473b02daf023262dd45302",
-    "src/lib/agent/contracts.ts": "53dd4d33c54d4d9363c4066308d308a8212b79cb1ac10624e8ffe09f0e5674e8",
+    "src/lib/agent/contracts.ts": "3c6e22a2dbce08a67399e67d6372b7a4cc595325bfab284b1b707aacd733ed9f",
     "src/lib/agent/conversation-memory.ts": "612e9a816cbfbf894600318831652cf9d96f1f4e2d6196c4a3388b4a5def9328",
     "src/lib/agent/conversation-preview.ts": "8dea853566cd5494bc7f09a74373a362719dbb9eba235decfe8b7c4b52e1e122",
     "src/lib/agent/conversation-recovery.ts": "c4f9d99403b2c825cc74e41470970c1eb3db795c15bb5151bd02030438d9b06e",
@@ -206,11 +206,11 @@
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
     "src/lib/agent/reliability-telemetry.ts": "b50d9c2b273a33b67d03cffbdfffee0a4512efba753fb501ea589dbcf9a725bb",
     "src/lib/agent/routine-faq.ts": "3fc0c31de2cd0f17c766889a5fb2043cfe46f350f95edc1c97c962cf45f5f912",
-    "src/lib/agent/runner.ts": "1c59434f6aa2a1d6af949e38e5883f6b2d0199eaf3d2e39915a3b6e9e8f1badf",
+    "src/lib/agent/runner.ts": "1a733b86de4608016f2a9321873182d6482c9385fb820f498ff7936dcfdf23f7",
     "src/lib/agent/settings.ts": "bf18dc0f06eaa3bb5551f2a846bb1fed31966cace4815843a1919b671e550017",
     "src/lib/agent/telegram-handoff.ts": "7224d44de2e24a0f79c01327de935cd55910f5d0e731e3a5678a482239c40037",
     "src/lib/agent/temporal.ts": "7dff9432c06f3dd3e9da30ece37add57aa50c2f434f5dec434de3769ec39ad05",
-    "src/lib/agent/tools.ts": "092bb063629876cace3b86cfd35f32a84bd93fac3cd55fb2d472213c7db605f9",
+    "src/lib/agent/tools.ts": "31ce22cf7d6bd97c529c2698764a3bb821cb7ef436b67111660b0bc20d948955",
     "src/lib/analytics.ts": "ac20e7f318855188db315705788fff372d2375f33cb1114b48612fa30f839498",
     "src/lib/appliance-catalog.ts": "a489ccf44633d0b7afeee3c6c6218245c0a20f566a526d43bfaef6cd4734c711",
     "src/lib/articles/airbnb.ts": "6ac8861e9d41cadf626a26d54c10c2da58dd6bcfa376cb5cf40d35fd19952857",
@@ -338,22 +338,22 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 967,
+  "tests": 968,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-17T22:57:20.134Z",
+  "checkedAt": "2026-10-18T09:32:14.218Z",
   "suites": [
     "890 passing agent/admin/CRM/finance/scheduling checks; 25 environment-dependent checks skipped",
-    "77 actual knowledge/pricing tool checks on the existing isolated Neon test branch; no Orders or mode changes",
+    "78 actual knowledge/pricing tool checks on the existing isolated Neon test branch; no Orders or mode changes",
     "132 multilingual retrieval cases plus typed units, privacy, refusal, rollback and booking safety checks"
   ],
   "lintWarnings": "Two pre-existing next/no-img-element warnings in unchanged website-chat.tsx",
   "verificationScope": "Versioned public business knowledge from approved tabs 01–06. Shared Website/WhatsApp agent tools; explicit manual-service review, additional-bathroom guard and upholstery-only Lead persistence. No schema, public prices/UI, provider/model or persistent channel-mode changes. Native provider consultation measurements and source-bound live booking proof are separate evidence; neither is inferred from unit tests.",
   "previousVerification": {
-    "fingerprint": "ce63ad3ce535ca48ec083c14c598699ae226cce0c0493b93d5e7ae88d738d8a9",
-    "tests": 959,
-    "checkedAt": "2026-10-17T22:34:46.525Z"
+    "fingerprint": "d5823d6cab519fd3d3ef8ab8a43c4436e8292b97062465e5fda13257ddada01a",
+    "tests": 967,
+    "checkedAt": "2026-10-17T22:57:20.134Z"
   }
 }

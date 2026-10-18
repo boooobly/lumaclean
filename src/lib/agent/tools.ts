@@ -24,7 +24,7 @@ import {inputQuestion,inputAlreadyKnown} from "./chat-presentation";
 import {behaviorMetric} from "./behavior-telemetry";
 import {reliabilityCount} from './reliability-telemetry';
 import {bookingReviewBlocked,windowQuantitiesMissing,catalogQuestion} from './conversion-facts';
-import {mandatoryHandoff} from './policy';
+import {mandatoryHandoff,outputAllowed} from './policy';
 import {supportedProposal,proposalQuestion} from './fact-proposals';
 import {extrasPrices} from '@/lib/pricing';
 import {applianceLabels,applianceScope} from '@/lib/appliance-catalog';
@@ -36,7 +36,7 @@ import {normalizeKnowledge} from './knowledge/vocabulary';
 import { AgentError, customerFactsSchema,toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
 type Tx=Prisma.TransactionClient;
-export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;allowedTools?:readonly ToolName[];handoff?:boolean;factAmounts?:number[];factPercentages?:number[];knowledgeEvidence?:KnowledgeEntry[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; questionAsked?:boolean; extractionIncomplete?:AgentState['nextInput']; validatedDepartures?:DepartureLegInput[]};
+export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;allowedTools?:readonly ToolName[];consultation?:boolean;handoff?:boolean;factAmounts?:number[];factPercentages?:number[];knowledgeEvidence?:KnowledgeEntry[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; questionAsked?:boolean; extractionIncomplete?:AgentState['nextInput']; validatedDepartures?:DepartureLegInput[]};
 export const json=(value:unknown)=>JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 export const stateOf=(c:Pick<Conversation,"state">)=>structuredClone(c.state) as AgentState;
 // PostgreSQL jsonb reorders object keys. Hash and compare facts, never their insertion order.
@@ -390,7 +390,9 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     return{facts:state.draftFacts};
   }
   if(name==='requestCustomerInput'){
-    const {intent}=toolSchemas.requestCustomerInput.parse(payload);
+    const {intent,businessAnswer}=toolSchemas.requestCustomerInput.parse(payload);
+    if(ctx.consultation&&!businessAnswer)return{error:'ANSWER_DIRECT_QUESTION_FIRST',message:'Provide a verified direct businessAnswer before the optional qualification question, or answer in plain text without a follow-up.'};
+    if(businessAnswer&&(!ctx.knowledgeEvidence?.length||businessAnswer.includes('?')||!outputAllowed(businessAnswer,state,ctx.factAmounts,ctx.factPercentages,ctx.knowledgeEvidence)))return{error:'BUSINESS_ANSWER_UNVERIFIED',message:'The answer must contain only retrieved facts and approved unit prices, no guessed totals/times or questions.'};
     if(ctx.extractionIncomplete===intent){reliabilityCount(state,'factExtractionFailure');state.unresolvedInput=intent;delete ctx.extractionIncomplete;delete state.pending;delete state.slots;delete state.selectedSlotToken;}
     if(state.upholsteryInquiry&&intent!=='PHONE')return{error:'UPHOLSTERY_MANAGER_INTAKE',message:'Collect only missing name/contact. Manager will clarify furniture and pricing; do not run cleaning or furniture qualification.'};
     if(inputAlreadyKnown(intent,state)){behaviorMetric('repeatedQuestionDetected');behaviorMetric('repeatedQualificationQuestionCount');return{error:'FACT_ALREADY_KNOWN',facts:state.draftFacts};}
@@ -405,7 +407,9 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
       question=content.services.filter(s=>s.id==='regular'||s.id==='deep').map(s=>s.name+': '+s.description).join('\n')+'\n'+exclusions+'\n\n'+question;
     }
     if(!question)return{error:'UNSUPPORTED_INPUT_INTENT'};
-    state.nextInput=intent;ctx.responseText=question;ctx.questionAsked=true;
+    const responseText=businessAnswer?businessAnswer+'\n\n'+question:question;
+    if(responseText.length>1800)return{error:'BUSINESS_ANSWER_UNVERIFIED',message:'Shorten the businessAnswer so the complete answer and one question fit the response limit.'};
+    state.nextInput=intent;ctx.responseText=responseText;ctx.questionAsked=true;
     return{question,intent,finishTurn:true};
   }
   if(name==="createOrUpdateLead")return updateLead(tx,c,ctx,toolSchemas[name].parse(payload));

@@ -43,6 +43,15 @@ test('actual knowledge tools, Lead persistence and booking boundaries on the dis
    const result=await executeAgentTool(db,ctx,'requestCustomerInput',{intent:'AREA'});
    assert.equal(result.error,'ANSWER_DIRECT_QUESTION_FIRST');assert.equal(ctx.responseText,undefined);assert.equal(ctx.state.nextInput,undefined);
   });
+  await t.test('a useful follow-up preserves both the verified answer and the existing question context',async()=>{
+   const ctx=await context('Что входит в поддерживающую уборку?',{draftFacts:{service:'regular'}});ctx.allowedTools=['searchBusinessKnowledge','requestCustomerInput'];ctx.consultation=true;
+   await executeAgentTool(db,ctx,'searchBusinessKnowledge',{query:'PACKAGE-REG'});
+   assert.equal((await executeAgentTool(db,ctx,'requestCustomerInput',{intent:'AREA'})).error,'ANSWER_DIRECT_QUESTION_FIRST');
+   assert.equal((await executeAgentTool(db,ctx,'requestCustomerInput',{intent:'AREA',businessAnswer:'Цена этой уборки — 999999 RSD.'})).error,'BUSINESS_ANSWER_UNVERIFIED');
+   const answer='В поддерживающую уборку входят полы, доступные поверхности, кухня снаружи и один стандартный санузел.';
+   assert.equal((await executeAgentTool(db,ctx,'requestCustomerInput',{intent:'AREA',businessAnswer:answer})).finishTurn,true);
+   assert(ctx.responseText?.startsWith(answer+'\n\n'));assert.equal(ctx.state.nextInput,'AREA');
+  });
   await t.test('unsupported extra request is saved once, remains AI_CONTROL and cannot be booked',async()=>{
    const evidence='Хочу помыть ролеты на всех окнах',ctx=await context(evidence);
    for(let i=0;i<2;i++)assert.equal((await executeAgentTool(db,ctx,'recordKnowledgeRequest',{codes:['ADD-WINDOW-017'],evidence,action:'ADD'})).saved,true);
