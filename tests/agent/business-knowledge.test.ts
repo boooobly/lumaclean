@@ -141,6 +141,11 @@ test('knowledge facts allow explained units/deadlines/hours, never invented tota
  assert(!outputAllowed('Холодильник — 1400 RSD.',{},[],[],appliances));
  assert(outputAllowed('Холодильник — 1000 RSD, духовка — 1400 RSD.',{},[],[],appliances));
  assert(!outputAllowed('Мы возместим весь ущерб.',{},[],[],entries));
+ assert(outputAllowed('Пока не могу подтвердить оплату картой. Принимаем наличные и банковский перевод; возможность оплаты картой нужно уточнить у команды.',{},[],[],entries));
+ assert(outputAllowed('Возможность оплаты картой пока не подтверждена.',{},[],[],entries));
+ assert(!outputAllowed('Можно оплатить картой.',{},[],[],entries));
+ assert(!outputAllowed('Принимаем карты; доступность терминала уточним.',{},[],[],entries));
+ assert(!outputAllowed('We accept cards; cash is also possible.',{},[],[],entries));
  assert(!outputAllowed('Гарантируем полное удаление всех пятен.',{},[],[],entries));
  assert(!outputAllowed('We guarantee all stains will be removed.',{},[],[],entries));
 });

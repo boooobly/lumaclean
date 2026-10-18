@@ -1,5 +1,5 @@
 {
-  "fingerprint": "469522032dbf09ed7ceb843830dda1f232e57a1e7c20c6dd5f2aae63132faefe",
+  "fingerprint": "a6050a0e6c062a46cb89ef25e23c47fa2ddf638b679101d7158e8907a7ac4b79",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -196,7 +196,7 @@
     "src/lib/agent/live-test.ts": "0f1582daf6610c84ca608a508c4ba3261d91da1f0318d68bf215831b3c3a54c1",
     "src/lib/agent/notifications.ts": "57f4823e4c0fff5638255a4c13bab56b8a613ac735ff85160106119e4727c03d",
     "src/lib/agent/persona.ts": "eed1e3cb5f5e62d6aa043c689d671be79c27d43dc35a88f989bfb87540794af3",
-    "src/lib/agent/policy.ts": "b2f3f0aed521b3bbcee8a831a4ffa0546378d9fda19a74124869fefc0dab9115",
+    "src/lib/agent/policy.ts": "bb507dfaf62ac1e6e81ce407e3c715cc81c879e7e7a1b284bfbf66d9275e7cfd",
     "src/lib/agent/providers.ts": "fbb8d7b8fb16b4ac5e287f7126a2848287fbc2b3b5b6c5a378d1bcfa5ab01da3",
     "src/lib/agent/queries.ts": "31883e6ba20713a2a97294056d48a0b03ebc57715efa9ba82c2312d3ad141655",
     "src/lib/agent/question-planning.ts": "b446bc0933d7017b1ac74c043adaa84e8f8557f6cab7141e74553383eb9bf395",
@@ -343,7 +343,7 @@
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-18T10:09:12.949Z",
+  "checkedAt": "2026-10-18T10:23:09.862Z",
   "suites": [
     "892 passing agent/admin/CRM/finance/scheduling checks; 25 environment-dependent checks skipped",
     "79 actual knowledge/pricing tool checks on the existing isolated Neon test branch; no Orders or mode changes",
@@ -352,8 +352,8 @@
   "lintWarnings": "Two pre-existing next/no-img-element warnings in unchanged website-chat.tsx",
   "verificationScope": "Versioned public business knowledge from approved tabs 01–06. Shared Website/WhatsApp agent tools; explicit manual-service review, additional-bathroom guard and upholstery-only Lead persistence. No schema, public prices/UI, provider/model or persistent channel-mode changes. Native provider consultation measurements and source-bound live booking proof are separate evidence; neither is inferred from unit tests.",
   "previousVerification": {
-    "fingerprint": "aa29c81e6036be9d646998cf226f05a0f8fe382eb51a1ca44f4b6bb7770fcb6b",
-    "tests": 970,
-    "checkedAt": "2026-10-18T10:01:47.069Z"
+    "fingerprint": "469522032dbf09ed7ceb843830dda1f232e57a1e7c20c6dd5f2aae63132faefe",
+    "tests": 971,
+    "checkedAt": "2026-10-18T10:09:12.949Z"
   }
 }

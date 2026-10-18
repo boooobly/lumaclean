@@ -74,8 +74,8 @@ export function outputAllowed(text:string,state:AgentState,factAmounts:number[]=
   if(repeatedQualification(text,state))return false;
   if(!state.review?.reasons.length&&/(?:передала|передаю).{0,35}(?:команд|менеджер)|(?:forwarded|passed).{0,35}(?:team|manager)|prosledila.{0,35}(?:tim|prover)|проследила.{0,35}(?:тим|провер)/iu.test(text))return false;
   // No confirmed key-custody/card-payment/refund workflow exists in the business catalog.
-  for(const sentence of text.split(/(?<=[.!?])\s+|\n+/u)){
-    if(/(?:можно|можете|принимаем).{0,40}карт|(?:accept|can pay|may pay).{0,25}cards?|(?:možete|mozete).{0,30}kartic|можете.{0,30}картиц/iu.test(sentence)&&!/не.{0,30}карт|(?:cannot|can't|do not|don't|not).{0,30}card|није|не можете|nije|ne možete|ne mozete/iu.test(sentence))return false;
+  for(const sentence of text.split(/(?<=[.!?;])\s+|\n+/u)){
+    if(/(?<![\p{L}])(?:можно|можете|принимаем)(?![\p{L}]).{0,40}карт|\b(?:accept|can pay|may pay)\b.{0,25}cards?|(?<![\p{L}])(?:možete|mozete)(?![\p{L}]).{0,30}kartic|(?<![\p{L}])можете(?![\p{L}]).{0,30}картиц/iu.test(sentence)&&!/не.{0,30}карт|(?:cannot|can't|do not|don't|not).{0,30}card|није|не можете|nije|ne možete|ne mozete/iu.test(sentence))return false;
     if(/(?:можно|можете|оставьте|оставить).{0,45}ключ|ключ.{0,30}(?:можно|можете).{0,20}остав|(?:you can|you may|please).{0,25}(?:leave|store).{0,25}keys?|(?:možete|mozete).{0,30}ostavit.{0,25}ključ|ključ.{0,30}možete.{0,20}ostavit|кључ.{0,30}можете.{0,20}остав|можете.{0,30}остав.{0,25}кључ/iu.test(sentence)&&!/не.{0,40}ключ|(?:cannot|can't|not).{0,40}keys?|не можете|ne možete|ne mozete/iu.test(sentence))return false;
     if(/(?:возместим|компенсируем|гарантируем возврат|we (?:will )?(?:refund|reimburse|compensate)|nadoknadićemo|надокнадићемо)/iu.test(sentence))return false;
   }
