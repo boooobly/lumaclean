@@ -127,4 +127,3 @@ if(rows(2).length!==280||rows(3).length!==94||rows(5).length!==108)throw new Err
 const snapshot=knowledgeSnapshotSchema.parse({schemaVersion:1,version:'2026-10-17.'+createHash('sha256').update(JSON.stringify(entries)).digest('hex').slice(0,12),sourceId:'1Xua3GrAYAgYfcbYUEWrU6I6cMZEA0IULLdSuKrbW4DY',sourceHash:createHash('sha256').update(JSON.stringify(source)).digest('hex'),entries});
 writeFileSync('src/lib/agent/knowledge/snapshot.json',JSON.stringify(snapshot,null,2)+'\n');
 console.log(JSON.stringify({version:snapshot.version,count:entries.length,statuses:Object.fromEntries(['OFFERED','BY_AGREEMENT','UNAVAILABLE'].map(s=>[s,entries.filter(e=>e.status===s).length]))}));
-
