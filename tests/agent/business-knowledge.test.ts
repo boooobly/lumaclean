@@ -130,6 +130,8 @@ test('knowledge facts allow explained units/deadlines/hours, never invented tota
  const urgency=searchBusinessKnowledge({query:'Can you come today?'}).matches;
  assert(outputAllowed('Same-day visits may be possible until 17:00 Belgrade time, subject to an available slot. A 20% same-day surcharge applies.',{},[],[20],urgency));
  assert(!outputAllowed('We can come today at 17:00.',{},[],[20],urgency));
+ for(const cutoff of ['17:00','5:00 p.m.','5 pm'])assert(outputAllowed('Same-day cleaning may be possible if a slot is available. There is a 20% surcharge, and bookings for today close at '+cutoff+' Belgrade time.',{},[],[20],urgency),cutoff);
+ for(const time of ['5:00 p.m.','5 pm','4 pm'])assert(!outputAllowed('We can come today at '+time+'.',{},[],[20],urgency),time);
  assert(!outputAllowed('Итого 1400 RSD.',{},[],[],entries));
  assert(!outputAllowed('Духовка 1900 RSD.',{},[],[],entries));
  assert(!outputAllowed('Духовка 1900 дин.',{},[],[],entries));

@@ -2,7 +2,7 @@ import type {buildAgentTemporalContext} from "./temporal";
 import {contextualReason,repeatedQualification} from './autonomy';
 import { type AgentLocale, type AgentState, type HandoffReason, type BookingRecap } from "./contracts";
 import type {KnowledgeEntry} from './knowledge/schema';
-import {knowledgeAmounts,knowledgeTimeExplanation,minimumExplanation,unsupportedKnowledgeClaim} from './knowledge/grounding';
+import {knowledgeAmounts,knowledgeTimeExplanation,minimumExplanation,normalizeClockTimes,unsupportedKnowledgeClaim} from './knowledge/grounding';
 
 export function conversationPolicy(locale:string,state:AgentState,summary:string|null,temporal?:ReturnType<typeof buildAgentTemporalContext>,alias="Anna"){
   return `You are the LumaClean cleaning administrator in Belgrade. Be warm, precise and brief. Continue from the customer's NEW information; never repeat an already answered greeting or availability acknowledgment such as "Да, здесь", "I'm here" or "Здравствуйте" in later turns. Do not repeat questions the customer already answered. Example: after "Вы тут?" and your acknowledgment, "60 квадратов, поддерживающая" needs a reply about normal/heavy dirt and extras, without another greeting or "Да, здесь". Ask ONE or TWO related questions at a time, never a contact questionnaire. Reply in ${locale}; follow explicit user language changes, preserving Serbian Cyrillic when used. You are ${alias}, a female AI administrator. Stable female self-reference in Russian (поняла, передала, проверила, уточнила, нашла, записала, сохранила, готова, рада), preferably neutral formulations. Serbian uses neutral Razumem/Proveravam/Mogu da proverim/Prosleđujem upit timu, or feminine past proverila sam/razumela sam/prosledila sam; Cyrillic equivalent. Human operators' gender is unknown: refer to the team. Be honest when asked: AI assistant, no human biography.
@@ -69,6 +69,7 @@ export function confirmsRecap(text:string,recap:BookingRecap){
 }
 export const handoffText:Record<AgentLocale,string>={ru:"Передаю ваш вопрос администратору. Ответим здесь после уточнения.","sr-Latn":"Prosleđujem vaš upit timu. Odgovorićemo ovde čim proverimo detalje.","sr-Cyrl":"Прослеђујем ваш упит тиму. Одговорићемо овде чим проверимо детаље.",en:"I'm passing this to the LumaClean team. We'll reply here after checking the details."};
 export function outputAllowed(text:string,state:AgentState,factAmounts:number[]=[],factPercentages:number[]=[],knowledge:KnowledgeEntry[]=[]){
+  text=normalizeClockTimes(text);
   if(unsupportedKnowledgeClaim(text,knowledge,!!state.quote||!!state.upholsteryQuote))return false;
   if(repeatedQualification(text,state))return false;
   if(!state.review?.reasons.length&&/(?:передала|передаю).{0,35}(?:команд|менеджер)|(?:forwarded|passed).{0,35}(?:team|manager)|prosledila.{0,35}(?:tim|prover)|проследила.{0,35}(?:тим|провер)/iu.test(text))return false;

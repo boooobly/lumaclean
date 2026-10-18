@@ -27,6 +27,8 @@ Consultation turns advertise a bounded tool subset to both existing providers an
 
 Existing calculator extras and existing upholstery keys are checked against runtime defaults, then active database tariffs at retrieval time. An existing-code mismatch returns `PRICE_CATALOG_MISMATCH`, not a stale price. All five area bands are validated. Order totals still require the shared deterministic server tool; knowledge cannot synthesize new quote lines. Output guards bind informational amounts to retrieved facts and keep slot/confirmation/refund restrictions.
 
+Native QA also caught two structural failures: shutters mounted on windows triggered window-count qualification, and a correct English cutoff explanation was rejected when the model used 12-hour notation. Accessory mentions now require a separate explicit window-washing request before window inputs can be used. Rejected catalog writes return bounded reasons and eligible stable codes while retaining exact CLIENT evidence checks. Time validation normalizes equivalent AM/PM notation; informational cutoff explanations remain separate from actual slot promises, which still require server evidence. Retrieved Russian descriptions must be translated completely into the customer's language.
+
 Production currently allows autonomous area-service tools only for `regular` and `deep`. Retrieval overlays calculation/booking capabilities from that current server setting. All five packages remain available for consultation; moving, Airbnb and office enquiries require the existing manual workflow. This release does not widen the allowed-service list.
 
 ## Controlled refresh and rollback

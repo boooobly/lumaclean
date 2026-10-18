@@ -1,4 +1,7 @@
 import type {KnowledgeEntry} from './schema';
+export function normalizeClockTimes(text:string){
+ return text.replace(/\b(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*([ap])\.?m\.?(?![\p{L}])/giu,(_,hour:string,minute:string|undefined,period:string)=>`${String(Number(hour)%12+(period.toLowerCase()==='p'?12:0)).padStart(2,'0')}:${minute??'00'}`);
+}
 export function minimumExplanation(text:string,amount:number,entries:KnowledgeEntry[]){
  return entries.some(e=>['UPH-RULE-001','ADD-LOGISTICS-002'].includes(e.code)&&e.price?.amount===amount)&&/минимальн|минимум|не менее|minimum|minimaln|najmanje|минимал|најмање/iu.test(text);
 }
@@ -6,12 +9,13 @@ export function knowledgeAmounts(entries:KnowledgeEntry[]){
  return [...new Set(entries.flatMap(e=>[...(e.price&&e.price.kind!=='percent'?[e.price.amount]:[]),...e.tariffs.map(t=>t.amount),...[e.description,e.includes,e.excludes,e.restrictions].join(' ').matchAll(/(\d[\d ]*)\s*RSD/gu)].map(v=>typeof v==='number'?v:Number(v[1].replace(/ /g,'')))))];
 }
 export function knowledgeTimeExplanation(sentence:string,entries:KnowledgeEntry[]){
+ sentence=normalizeClockTimes(sentence);
  if(/(?:можем приехать|приедем|записал|available at|we can come|dolazimo|долазимо|slobodan termin|слободан термин)/iu.test(sentence))return false;
  if(/12\s*(?:час|hour|sat|сат)/iu.test(sentence))return entries.some(e=>e.code==='RULE-PAY-011')&&/замечан|недостат|обращен|претенз|report|defect|complaint|reklam|реклам|пријав|prijav/iu.test(sentence);
  if(/30\s*(?:мин|minute|minut|минут)/iu.test(sentence))return entries.some(e=>e.runtimeCode==='ironing')&&/глаж|ironing|pegl|пегл/iu.test(sentence);
  if(/24\s*(?:час|hour|sat|сат)/iu.test(sentence))return entries.some(e=>e.code==='RULE-HOURS-009')&&/рекоменд|recommend|preporuč|preporuc|препоруч/iu.test(sentence);
  const times=sentence.match(/\b\d{1,2}:\d{2}\b/gu)??[];
- if(times.length)return entries.some(e=>e.code.startsWith('RULE-HOURS-')||e.code==='RULE-URGENCY-001')&&times.every(t=>['09:00','17:00','22:00'].includes(t))&&/заяв|работ|выезд|порог|после|до |hours|request|cutoff|depart|same.day.{0,70}until|radn|prijav|polas|радн|пријав|полас/iu.test(sentence);
+ if(times.length)return entries.some(e=>e.code.startsWith('RULE-HOURS-')||e.code==='RULE-URGENCY-001')&&times.every(t=>['09:00','17:00','22:00'].includes(t))&&/заяв|работ|выезд|порог|после|до |hours|request|cutoff|depart|same.day.{0,70}(?:until|before)|bookings?.{0,40}close|radn|prijav|polas|радн|пријав|полас/iu.test(sentence);
  return false;
 }
 export function unsupportedKnowledgeClaim(text:string,entries:KnowledgeEntry[],hasQuote:boolean){
