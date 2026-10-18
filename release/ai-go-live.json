@@ -1,5 +1,5 @@
 {
-  "fingerprint": "aa29c81e6036be9d646998cf226f05a0f8fe382eb51a1ca44f4b6bb7770fcb6b",
+  "fingerprint": "469522032dbf09ed7ceb843830dda1f232e57a1e7c20c6dd5f2aae63132faefe",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -188,7 +188,7 @@
     "src/lib/agent/knowledge/grounding.ts": "8596b346f644c55d4263faa66eb324f2620b66c3f29f216e134fbddbbd62fecc",
     "src/lib/agent/knowledge/preview-whatsapp.ts": "9e78a9587f9db12582f49f0d60d82870bf3bd0a5b9d308048f28af76ea7c669e",
     "src/lib/agent/knowledge/schema.ts": "5884ed407ca1060ad5e7b4376ffdf842f523ee1234ac58a74b72be95ba13cdc5",
-    "src/lib/agent/knowledge/search.ts": "885d76a89911dd7bb4e92aa18280cddfbf6063233a4b25ba64e149205ccefc0b",
+    "src/lib/agent/knowledge/search.ts": "340ce09612f4a8d1beb21bfe3ba326126b5b7cc287206d3ac77d44b6f66405b7",
     "src/lib/agent/knowledge/snapshot.json": "7748cb109d568ef47bff079690930492ac4de848a478ecd93c581362c691af79",
     "src/lib/agent/knowledge/vocabulary.ts": "022836716f7fee2b01fa389b313a6b618ab3f1ff67b4abe5e9cb5df9e62300aa",
     "src/lib/agent/knowledge-scenarios.ts": "f818d9f46e2742022b05af64e7a9be78c5f7bd70d192e30e395b8eb4c63a52c1",
@@ -338,22 +338,22 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 970,
+  "tests": 971,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-18T10:01:47.069Z",
+  "checkedAt": "2026-10-18T10:09:12.949Z",
   "suites": [
-    "891 passing agent/admin/CRM/finance/scheduling checks; 25 environment-dependent checks skipped",
+    "892 passing agent/admin/CRM/finance/scheduling checks; 25 environment-dependent checks skipped",
     "79 actual knowledge/pricing tool checks on the existing isolated Neon test branch; no Orders or mode changes",
     "132 multilingual retrieval cases plus typed units, privacy, refusal, rollback and booking safety checks"
   ],
   "lintWarnings": "Two pre-existing next/no-img-element warnings in unchanged website-chat.tsx",
   "verificationScope": "Versioned public business knowledge from approved tabs 01–06. Shared Website/WhatsApp agent tools; explicit manual-service review, additional-bathroom guard and upholstery-only Lead persistence. No schema, public prices/UI, provider/model or persistent channel-mode changes. Native provider consultation measurements and source-bound live booking proof are separate evidence; neither is inferred from unit tests.",
   "previousVerification": {
-    "fingerprint": "d4fb73633244ac2b7f3386ee417187723d468189e3dfb9d3820ce0ab2385f85a",
+    "fingerprint": "aa29c81e6036be9d646998cf226f05a0f8fe382eb51a1ca44f4b6bb7770fcb6b",
     "tests": 970,
-    "checkedAt": "2026-10-18T09:52:26.269Z"
+    "checkedAt": "2026-10-18T10:01:47.069Z"
   }
 }

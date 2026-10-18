@@ -88,5 +88,6 @@ export function directBusinessQuestion(text:string){
  if(/сколько.{0,50}(?:вс[её]|стоить|вместе)|итого|how much.{0,30}(?:all|total|both|together)|koliko.{0,30}(?:sve|ukupno)/iu.test(text)&&/(?:хочу|мне нуж|нам нуж|treba mi|желим|треба ми|i need|i want|please clean)/iu.test(text)&&!/входит|входят|includ|uključ|ukljuc|укључ/iu.test(text))return false;
  // Personalized total remains the server quote path. Unit-price questions stay knowledge questions.
  if(/сколько(?:.{0,25}(?:вс[её]|будет|итого))?|стоим|цен|price|cost|итого|how much|total|koliko.{0,30}(?:sve|ukupno)|колико.{0,30}(?:све|укупно)/iu.test(text)&&/\d+\s*(?:м²|m²|квадрат|kvadrat|square)|\b(?:уборка|cleaning|čišćenje|чишћење)\b.{0,15}\d+/iu.test(text)&&!/входит|входят|includ|uključ|ukljuc|укључ/iu.test(text))return false;
- return searchBusinessKnowledge({query:text.slice(0,400),limit:1}).matches.length>0;
+ // An unknown business rule is still a question, not permission to resume intake.
+ return searchBusinessKnowledge({query:text.slice(0,400),limit:1}).matches.length>0||/surcharge|weekend|discount|payment method|vikend|doplata|popust|попуст|доплата|надбав|нацен|выходн|викенд/iu.test(text);
 }

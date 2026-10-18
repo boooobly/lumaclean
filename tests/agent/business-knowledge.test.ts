@@ -154,3 +154,9 @@ test('window-mounted accessories are not substituted with window washing',()=>{
  }
  for(const text of ['Хочу помыть окна и ролеты.','I want to wash windows and shutters.','Treba pranje prozora i roletni.'])assert.equal(explicitCustomerFacts(text,new Date('2026-10-18T09:00:00Z'),'Europe/Belgrade').windowCleaning?.requested,true,text);
 });
+
+test('unknown business policy interrupts a pending qualification question without inventing a rule',()=>{
+ assert.equal(searchBusinessKnowledge({query:'Is there a weekend surcharge?'}).matches.length,0);
+ for(const text of ['Is there a weekend surcharge?','А в выходные есть наценка?','Da li postoji doplata vikendom?'])assert.equal(directBusinessQuestion(text),true,text);
+ assert.equal(directBusinessQuestion('Хочу уборку в выходные'),false);
+});
