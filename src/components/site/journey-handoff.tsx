@@ -12,6 +12,7 @@ export function JourneyHandoff({copy}: {copy: EditorialContent["handoff"]}) {
   const noteRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
     let frame = 0;
     const render = () => {
       frame = 0;

@@ -194,7 +194,7 @@ export default async function Page({
       />
       {lead && (
         <p>
-          Заявка: {lead.name} · {lead.phone}. Создание свяжет только эту заявку
+          Заявка: {lead.name ?? "Имя не указано"} · {lead.phone}. Создание свяжет только эту заявку
           и выбранный заказ.
         </p>
       )}

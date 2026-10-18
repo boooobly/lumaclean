@@ -75,6 +75,7 @@ export function Analytics({locale, measurementId, enabled, paths}: {locale: Loca
       const link = (event.target as Element)?.closest?.("a[href]");
       if (!link) return;
       const url = new URL(link.getAttribute("href")!, window.location.origin);
+      if (url.origin === window.location.origin && url.hash === '#estimate') w.lcTrack?.('calculator_open', {locale, flow_version:'conversion_v1'});
       const channel = url.hostname === "t.me" ? "telegram" : ["wa.me", "api.whatsapp.com"].includes(url.hostname) ? "whatsapp" : url.protocol === "viber:" ? "viber" : undefined;
       if (channel) w.lcTrack?.("messenger_click", {locale, channel});
       if (pathname.includes("/articles/") && url.origin === window.location.origin && url.pathname.includes("/services/") && paths.includes(url.pathname)) w.lcTrack?.("article_to_service", {locale, destination: url.pathname});

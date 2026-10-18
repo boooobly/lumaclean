@@ -14,7 +14,7 @@ const copy = {
     touch: "Dodirnite i zadržite da vidite pre",
     scroll: "Skrolujte kroz prostor",
     primary: "Izračunajte cenu",
-    secondary: "Zakažite čišćenje",
+    secondary: "Šta je uključeno",
     phases: ["Dnevna soba", "Kupatilo", "Detalji", "Kuhinja"],
     transitionEyebrow: "Put kroz prostor",
     transitionTitle: "Sledeća stanica — kupatilo.",
@@ -45,7 +45,7 @@ const copy = {
     touch: "Нажмите и удерживайте, чтобы увидеть до",
     scroll: "Листайте, чтобы пройти по квартире",
     primary: "Рассчитать стоимость",
-    secondary: "Заказать уборку",
+    secondary: "Что входит в уборку",
     phases: ["Гостиная", "Ванная", "Детали", "Кухня"],
     transitionEyebrow: "Маршрут по пространству",
     transitionTitle: "Следующая зона — ванная.",
@@ -76,7 +76,7 @@ const copy = {
     touch: "Touch and hold to see before",
     scroll: "Scroll through the apartment",
     primary: "Estimate the cost",
-    secondary: "Book cleaning",
+    secondary: "What is included",
     phases: ["Living room", "Bathroom", "Details", "Kitchen"],
     transitionEyebrow: "A journey through the space",
     transitionTitle: "Next stop — the bathroom.",
@@ -172,7 +172,7 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
     const trackElement = track.current;
     const videoElements = videos.current.slice(0, SCRUB_CLIPS.length);
     if (!trackElement || videoElements.length !== SCRUB_CLIPS.length || videoElements.some((element) => !element)) return;
-    if(window.matchMedia('(max-width: 680px)').matches)return;
+    if(window.matchMedia('(max-width: 680px), (prefers-reduced-motion: reduce)').matches)return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let disposed = false;
@@ -537,7 +537,7 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
           <p className="journey-mobile-description">{locale==='ru'?'LumaClean — уборка квартир и небольших офисов в Белграде.':locale==='en'?'LumaClean — apartment and small office cleaning in Belgrade.':'LumaClean — čišćenje stanova i malih kancelarija u Beogradu.'}</p>
           <div className="cinematic-actions">
             <a className="button button-light" href={calculatorHref}>{text.primary}<ArrowRight size={16} /></a>
-            <a className="cinematic-link" href={calculatorHref}>{text.secondary}<ArrowDown size={15} /></a>
+            <a className="cinematic-link" href="#flow-included">{text.secondary}<ArrowDown size={15} /></a>
           </div>
         </div>
 
@@ -580,11 +580,11 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
           </div>
         </aside>
 
-        <div className="journey-hover-hint">
+        <button type="button" className="journey-hover-hint journey-before-control" onFocus={()=>revealBefore(true)} onBlur={()=>revealBefore(false)} onPointerDown={()=>revealBefore(true)} onPointerUp={()=>revealBefore(false)} onPointerCancel={()=>revealBefore(false)} onKeyDown={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();revealBefore(true);}}} onKeyUp={()=>revealBefore(false)}>
           <MousePointer2 size={15} />
           <span className="pointer-fine-copy">{text.hover}</span>
           <span className="pointer-coarse-copy">{text.touch}</span>
-        </div>
+        </button>
 
         <div className="journey-progress" aria-live="polite">
           <div className="journey-phase-number">0{activePhase + 1}</div>

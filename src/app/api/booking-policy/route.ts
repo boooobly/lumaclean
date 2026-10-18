@@ -6,6 +6,6 @@ export async function GET() {
   try {
     const settings=await getDatabase().businessSettings.findUniqueOrThrow({where:{id:'default'}});
     const now=new Date(),context=buildAgentTemporalContext(now,settings,now);
-    return Response.json({allowed:context.sameDayBookingAllowedNow,cutoff:context.sameDayBookingCutoff,earliestDate:context.earliestPotentialServiceDate,timezone:context.timezone,checkedAt:now.toISOString()},{headers});
+    return Response.json({allowed:context.sameDayBookingAllowedNow,today:context.nowLocalDate,cutoff:context.sameDayBookingCutoff,earliestDate:context.earliestPotentialServiceDate,timezone:context.timezone,checkedAt:now.toISOString()},{headers});
   } catch { return Response.json({allowed:false},{status:503,headers}); }
 }

@@ -69,10 +69,13 @@ export function SiteHeader({locale, copy, homeHref = "", estimateHref = "#estima
         {articlesLabel && <Link href={`/${locale}/articles`}>{articlesLabel}</Link>}
       </nav>
       <div className="site-header-actions">
+        {!homeHref&&<select className="site-mobile-locale" aria-label={copy.languageLabel} value={locale} onChange={event=>{const next=event.target.value as Locale;window.location.assign(localeHrefs?.[next]||`/${next}`);}}>
+          {(['ru','sr','en'] as Locale[]).map(item=><option key={item} value={item}>{item.toUpperCase()}</option>)}
+        </select>}
         <div className="site-locales" role="navigation" aria-label={copy.languageLabel}>
           {(["ru", "sr", "en"] as Locale[]).map((item) => <Link className={item === locale ? "active" : ""} href={localeHrefs?.[item] || `/${item}`} key={item}>{item.toUpperCase()}</Link>)}
         </div>
-        <a className="header-cta" href={estimateHref}><b className="site-cta-long">{copy.cta}</b><b className="site-cta-short">{copy.shortCta}</b><i aria-hidden="true"><ArrowIcon direction="down-right" /></i></a>
+        <a className="header-cta" aria-label={copy.cta} href={estimateHref}><b className="site-cta-long">{copy.cta}</b><b className="site-cta-short">{copy.shortCta}</b><i aria-hidden="true"><ArrowIcon direction="down-right" /></i></a>
       </div>
     </header>
   );

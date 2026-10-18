@@ -58,7 +58,7 @@ export default async function LeadsPage({
               <small>{date(r.createdAt)}</small>
             </td>
             <td>
-              {r.name}
+              {r.name ?? "Имя не указано"}
               <small>{r.phone}</small>
             </td>
             <td>

@@ -1,22 +1,28 @@
 "use client";
 
-import {useState} from "react";
+import {useEffect,useState} from "react";
 import type {Locale} from "@/i18n/routing";
 import type {SiteContent} from "@/lib/content";
 import {formatRsd, priceMatrix, serviceIds, type ServiceId} from "@/lib/pricing";
 import type {EditorialContent} from "@/lib/site-content";
+import {trackEvent} from '@/lib/analytics';
 
-export function Rates({locale, copy, pricing}: {locale: Locale; copy: EditorialContent["rates"]; pricing: SiteContent["pricing"]}) {
-  const [service, setService] = useState<ServiceId>("regular");
+export function Rates({locale, copy, pricing, initialService='regular'}: {locale: Locale; copy: EditorialContent["rates"]; pricing: SiteContent["pricing"]; initialService?:ServiceId}) {
+  const [service, setService] = useState<ServiceId>(initialService);
   const [areaIndex, setAreaIndex] = useState(1);
   const selected = priceMatrix[service][areaIndex];
+  useEffect(()=>{
+    const select=(event:Event)=>{const id=(event as CustomEvent).detail?.service;if(serviceIds.includes(id))setService(id);};
+    window.addEventListener('lc-service-select',select);return()=>window.removeEventListener('lc-service-select',select);
+  },[]);
+  function choose(id:ServiceId){setService(id);window.dispatchEvent(new CustomEvent('lc-service-select',{detail:{service:id}}));trackEvent('service_select',{locale,service:id,flow_version:'conversion_v1'});}
 
   return (
     <>
       <div className="rate-focus">
         <div><span>{copy.focus}</span><strong>{areaIndex === 4 ? `${pricing.from} ${selected} RSD / m²` : formatRsd(selected, locale)}</strong></div>
         <div className="rate-controls">
-          <label>{copy.type}<select value={service} onChange={(event) => setService(event.target.value as ServiceId)}>{serviceIds.map((id) => <option value={id} key={id}>{pricing.serviceNames[id]}</option>)}</select></label>
+          <label>{copy.type}<select value={service} onChange={(event) => choose(event.target.value as ServiceId)}>{serviceIds.map((id) => <option value={id} key={id}>{pricing.serviceNames[id]}</option>)}</select></label>
           <label>{copy.area}<select value={areaIndex} onChange={(event) => setAreaIndex(Number(event.target.value))}>{pricing.area.map((area, index) => <option value={index} key={area}>{area}</option>)}</select></label>
         </div>
       </div>
@@ -24,13 +30,14 @@ export function Rates({locale, copy, pricing}: {locale: Locale; copy: EditorialC
       <div className="rate-ledger" role="group" aria-label={copy.number}>
         <div className="ledger-row ledger-head"><span>{copy.service}</span>{pricing.area.map((area) => <span key={area}>{area}</span>)}</div>
         {serviceIds.map((id) => (
-          <button className={`ledger-row ledger-button ${service === id ? "is-active" : ""}`} data-service={id} onClick={() => setService(id)} aria-pressed={service === id} key={id}>
+          <button className={`ledger-row ledger-button ${service === id ? "is-active" : ""}`} data-service={id} onClick={() => choose(id)} aria-pressed={service === id} key={id}>
             <strong>{pricing.serviceNames[id]}</strong>
             {priceMatrix[id].map((price, index) => <span key={index}>{index === 4 ? `${price} / m²` : new Intl.NumberFormat(locale === "en" ? "en-US" : locale === "ru" ? "ru-RU" : "sr-Latn-RS").format(price)}</span>)}
           </button>
         ))}
       </div>
       <p className="fine-print">{pricing.note}</p>
+      <a href="#estimate" className="flow-text-button" onClick={()=>choose(service)}>{copy.link} ↗</a>
     </>
   );
 }

@@ -3,11 +3,11 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import { websiteLeadSchema } from "@/lib/validation/crm";
 import { normalizedPhone, CrmError, serviceLabels } from "@/lib/domain/crm";
 import { quote } from "@/lib/domain/crm-pricing";
-import {serviceDatePolicy,buildAgentTemporalContext} from "@/lib/agent/temporal";
+import {websiteDatePolicy, preferredTimeLabels} from '@/lib/domain/website-preferences';
 import { writeAudit } from "./audit";
 import {enqueueLeadReview} from './lead-notifications';
 import {publishNotifications} from '@/lib/agent/notifications';
-export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
+export async function saveWebsiteLead(db: PrismaClient, payload: unknown, now = new Date()) {
   const input = websiteLeadSchema.parse(payload);
   input.extras = input.extras
     .filter((e) => e.quantity > 0)
@@ -34,7 +34,10 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
           created: false,
         };
       }
-      if(input.urgent){const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}}),now=new Date();const date=buildAgentTemporalContext(now,settings,now).nowLocalDate;if('error' in serviceDatePolicy(date,settings,now))throw new CrmError('VALIDATION','SAME_DAY_CUTOFF');}
+      const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+      const datePolicy=websiteDatePolicy(input,settings,now);
+      if('error' in datePolicy && datePolicy.error) throw new CrmError('VALIDATION',datePolicy.error);
+      const urgent=datePolicy.urgent;
       const standalone=requestKind==='UPHOLSTERY';
       const service = await tx.service.findUnique({
         where: { code: standalone?'upholstery':input.service! },
@@ -46,7 +49,7 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
         input.service!,
         input.area!,
         input.extras,
-        input.urgent,
+        urgent,
       );
       const catalogue = await tx.serviceExtra.findMany({
         where: { code: { in: input.extras.map((e) => e.code) }, active: true },
@@ -65,11 +68,15 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
           phone: input.phone,
           normalizedPhone: normalizedPhone(input.phone),
           locale: input.locale,
-          requestKind,upholsteryRequested,humanReviewRequired:upholsteryRequested,consentAt:new Date(),
+          requestKind,upholsteryRequested,humanReviewRequired:upholsteryRequested||input.soilLevel==='HEAVY',consentAt:new Date(),
+          preferredDate:input.preferredDate?new Date(`${input.preferredDate}T00:00:00Z`):null,
+          preferredTime:input.preferredTime,
+          preferredChannel:input.preferredChannel,
+          soilLevel:input.soilLevel,
           serviceId: service.id,
           area: standalone?null:input.area,
-          estimatedPrice: calculated?.total??null,
-          urgent: input.urgent,
+          estimatedPrice: input.soilLevel==='HEAVY'?null:calculated?.total??null,
+          urgent,
           comment: input.comment,
           estimateText: input.estimate,
           entrySource: input.attribution?.source,
@@ -110,11 +117,15 @@ export async function notifyWebsiteLead(
     const text = [
       "🧹 Новая заявка LumaClean",
       `Номер: ${lead.reference}`,
-      `Имя: ${input.name}`,
+      input.name ? `Имя: ${input.name}` : 'Имя не указано',
       `Телефон: ${input.phone}`,
       `Язык: ${input.locale}`,
       `Услуга: ${serviceLabels[input.service!]}`,
       `Площадь: ${input.area} м²`,
+      `Желаемая дата (Белград): ${input.preferredDate??'Уточнить позже'} — не подтверждённая бронь`,
+      input.preferredTime?`Предпочтение по времени: ${preferredTimeLabels[input.preferredTime]} (не интервал прибытия)`:'',
+      input.preferredChannel?`Способ связи: ${input.preferredChannel}`:'',
+      input.soilLevel==='HEAVY'?'Сильное/нестандартное загрязнение: цена требует согласования':'',
       input.attribution
         ? `Источник (по браузеру): ${input.attribution.source}\nСтраница входа: ${input.attribution.landing}`
         : "Источник: не определён",

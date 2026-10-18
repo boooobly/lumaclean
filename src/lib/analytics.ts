@@ -1,5 +1,5 @@
-type EventName = "form_start" | "calculator_interaction" | "generate_lead" | "lead_error" | "messenger_click" | "article_to_service";
-type EventData = {locale?: string; service?: string; error_type?: string; channel?: string; destination?: string};
+type EventName = typeof eventNames[number];
+type EventData = {locale?: string; service?: string; error_type?: string; channel?: string; destination?: string; date_choice?: string; flow_version?: string};
 type TrackingWindow = Window & {lcTrack?: (name: EventName, data: EventData) => void};
 
 // Deliberately accepts no customer fields, form values, query strings or free text.
@@ -15,7 +15,7 @@ export function leadAttribution(): {landing: string; source: string} | undefined
   } catch { /* A visitor can submit without analytics or storage. */ }
 }
 
-export const eventNames = ["form_start", "calculator_interaction", "generate_lead", "lead_error", "messenger_click", "article_to_service"] as const;
+export const eventNames = ["form_start", "calculator_interaction", "generate_lead", "lead_error", "messenger_click", "article_to_service", "calculator_open", "service_select", "price_view", "extras_open", "preferred_date_select", "contact_start"] as const;
 export const entrySources = ["google_business_profile", "google", "yandex", "bing", "internal", "referral", "direct_or_unknown"] as const;
 export type EntrySource = typeof entrySources[number];
 
@@ -34,6 +34,8 @@ export function acquisitionContext(source: EntrySource) {
 }
 export function safeEventData(data: EventData, paths: readonly string[]) {
   const clean: Record<string, string> = {};
+  if (data.flow_version === 'conversion_v1') clean.flow_version = data.flow_version;
+  if (['today','future','later'].includes(data.date_choice ?? '')) clean.date_choice = data.date_choice!;
   if (["ru", "sr", "en"].includes(data.locale || "")) clean.locale = data.locale!;
   if (["regular", "deep", "move", "airbnb", "office"].includes(data.service || "")) clean.service = data.service!;
   if (["validation", "server", "network"].includes(data.error_type || "")) clean.error_type = data.error_type!;

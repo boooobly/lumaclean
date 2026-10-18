@@ -54,7 +54,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof CrmError)
       return NextResponse.json(
-        { ok: false },
+        { ok: false, error: ['SAME_DAY_CUTOFF','PAST_SERVICE_DATE','INVALID_PHONE'].includes(error.message)?error.message:'VALIDATION' },
         { status: error.code === "IDEMPOTENCY" ? 409 : 400 },
       );
     console.error(

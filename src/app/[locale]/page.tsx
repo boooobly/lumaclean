@@ -14,8 +14,9 @@ import {UpholsteryTeaser} from '@/components/site/upholstery-teaser';
 import {routing, type Locale} from "@/i18n/routing";
 import {businessContact, businessContactCopy, getMessengerLinks, googleBusinessProfile, whatsappContact} from "@/lib/contacts";
 import {GoogleProfileLinks} from "@/components/site/google-profile-links";
+import {conversionContent} from "@/lib/conversion-content";
 import {siteContent} from "@/lib/content";
-import {extrasPrices, formatRsd, priceMatrix} from "@/lib/pricing";
+import {extrasPrices, formatRsd, serviceIds} from "@/lib/pricing";
 import {getServicePath} from "@/lib/seo-services";
 import {editorialContent} from "@/lib/site-content";
 import {siteUrl} from "@/lib/seo";
@@ -45,15 +46,17 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   };
 }
 
-export default async function HomePage({params,searchParams}: {params: Promise<{locale: string}>;searchParams:Promise<{request?:string}>}) {
+export default async function HomePage({params,searchParams}: {params: Promise<{locale: string}>;searchParams:Promise<{request?:string;service?:string}>}) {
   const {locale} = await params;
-  const initialRequest=(await searchParams).request==='upholstery'?'UPHOLSTERY':'CLEANING';
+  const query=await searchParams;
+  const initialRequest=query.request==='upholstery'?'UPHOLSTERY':'CLEANING';
+  const initialService=serviceIds.find(id=>id===query.service)??'regular';
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   const c = siteContent[locale];
   const v = editorialContent[locale];
+  const flow = conversionContent[locale];
   const messengerLinks = getMessengerLinks(locale);
-  const extraKeys = ["standardWindow", "largeWindow", "balcony", "fridge", "oven", "microwave", "hood", "dishwasher", "washingMachine", "cabinets", "ironing", "steam", "petHair", "linen"] as const;
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -103,20 +106,18 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
         <ApartmentExperience locale={locale} calculatorHref="#estimate"/>
         <JourneyHandoff copy={v.handoff}/>
 
-        <section className="editorial-section scope-section" id="scope">
+        <section className="estimate-section" id="estimate" tabIndex={-1}>
           <div className="shell">
-            <div className="section-number">{v.scope.number}</div>
-            <div className="section-intro split-intro"><h2>{v.scope.title}</h2><p>{v.scope.body}</p></div>
-            <div className="scope-comparison">
-              {[c.comparison.regular, c.comparison.deep].map((item, index) => (
-                <article className={index ? "scope-deep" : ""} key={item.title}>
-                  <div className="scope-index">{index ? v.scope.deep : v.scope.regular}</div>
-                  <h3>{item.title}</h3><p>{item.text}</p>
-                  <ul>{item.items.map((line) => <li key={line}>{line}</li>)}</ul>
-                  <div className="scope-price"><span>{c.pricing.from}</span><strong>{new Intl.NumberFormat(locale === "en" ? "en-US" : locale === "ru" ? "ru-RU" : "sr-Latn-RS").format(index ? priceMatrix.deep[0] : priceMatrix.regular[0])}</strong><small>RSD</small></div>
-                </article>
-              ))}
-            </div>
+            <div className="section-number">01 / LumaClean</div>
+            <div className="estimate-title"><h2>{flow.title}</h2><p>{flow.intro}</p></div>
+            <Estimate key={initialRequest} initialRequest={initialRequest} initialService={initialService} locale={locale} copy={v.estimate} content={c}/>
+          </div>
+        </section>
+
+        <section className="editorial-section scope-section" id="service-directory">
+          <div className="shell">
+            <div className="section-number">02 / LumaClean</div>
+            <h2>{flow.directory}</h2>
             <nav className="service-directory" aria-label={v.nav.services}>
               {c.services.map((service, index) => (
                 <Link href={getServicePath(locale, service.id)} key={service.id}>
@@ -129,11 +130,9 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
         </section>
 
         <section className="editorial-section rates-section" id="rates">
-          <div className="shell">
-            <div className="section-number">{v.rates.number}</div>
-            <div className="rates-head"><h2>{v.rates.title}</h2><div><p>{v.rates.body}</p><a href="#estimate">{v.rates.link}<ArrowIcon direction="down-right" /></a></div></div>
-            <Rates locale={locale} copy={v.rates} pricing={c.pricing}/>
-          </div>
+          <div className="shell"><details className="commercial-details"><summary>{flow.tariffs}<span aria-hidden="true">+</span></summary>
+            <Rates locale={locale} copy={v.rates} pricing={c.pricing} initialService={initialService}/>
+          </details></div>
         </section>
 
         <section className="material-section" id="services">
@@ -145,7 +144,6 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
               <figure><Image src="/media/material-chrome.webp" alt={v.materials.steam} fill sizes="(max-width: 900px) 100vw, 38vw"/><figcaption><span>{v.materials.steam}</span><strong>{c.pricing.from} {formatRsd(extrasPrices.steam, locale)}</strong></figcaption></figure>
               <figure><Image src="/media/material-cabinet.webp" alt={v.materials.appliance} fill sizes="(max-width: 900px) 100vw, 38vw"/><figcaption><span>{v.materials.appliance}</span><strong>{c.pricing.from} {formatRsd(extrasPrices.cabinets, locale)}</strong></figcaption></figure>
             </div>
-            <div className="extras-ledger">{extraKeys.map((key, index) => <div key={key}><span>{String(index + 1).padStart(2, "0")}</span><strong>{c.calculator.labels[key]}</strong><small>{c.pricing.from} {formatRsd(extrasPrices[key], locale)}</small></div>)}</div>
           </div>
         </section>
 
@@ -175,7 +173,7 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
             <div className="section-intro split-intro"><h2>{v.faq.title}</h2><p>{v.faq.body}</p></div>
             <div className="site-faq-list">
               {c.faq.items.map((item, index) => (
-                <details key={item.q} open={index === 0}>
+                <details key={item.q}>
                   <summary><span>{String(index + 1).padStart(2, "0")}</span><strong>{item.q}</strong><i aria-hidden="true">+</i></summary>
                   <p>{item.a}</p>
                 </details>
@@ -184,13 +182,7 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
           </div>
         </section>
 
-        <section className="estimate-section" id="estimate">
-          <div className="shell">
-            <div className="section-number">{v.estimate.number}</div>
-            <div className="estimate-title"><h2>{v.estimate.title}</h2><p>{v.estimate.body}</p></div>
-            <Estimate key={initialRequest} initialRequest={initialRequest} locale={locale} copy={v.estimate} content={c}/>
-          </div>
-        </section>
+
 
         <section className="closing-section"><div className="shell closing-grid"><div><div className="section-number light">{v.closing.number}</div><h2>{v.closing.title}</h2></div><div><p>{v.closing.body}</p><a className="site-closing-primary" href="#estimate">{v.closing.cta}<ArrowIcon /></a><div className="site-direct-contacts"><span>{v.closing.direct}</span><div>{messengerLinks.map((contact) => <a className="site-contact-link" href={contact.href} target={contact.id === "viber" ? undefined : "_blank"} rel={contact.id === "viber" ? undefined : "noreferrer"} key={contact.id}><small>{contact.label}</small><strong>{contact.value}</strong><i aria-hidden="true"><ArrowIcon /></i></a>)}</div></div></div></div></section>
       </main>

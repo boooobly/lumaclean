@@ -170,7 +170,7 @@ export const manualLeadSchema = z
 export const websiteLeadSchema = z
   .object({
     submissionId: z.uuid(),
-    name: z.string().trim().min(2).max(100),
+    name: text(100),
     phone: z.string().trim().min(6).max(40),
     comment: text(1000),
     estimate: text(3000),
@@ -178,6 +178,10 @@ export const websiteLeadSchema = z
     service: z.enum(serviceIds).optional(),
     area: number(25, 180).optional(),
     urgent: z.boolean().default(false),
+    preferredDate: z.iso.date().optional(),
+    preferredTime: z.enum(['MORNING', 'AFTERNOON', 'EVENING']).optional(),
+    preferredChannel: z.enum(['TELEGRAM', 'WHATSAPP', 'VIBER']).optional(),
+    soilLevel: z.enum(['NORMAL', 'HEAVY']).optional(),
     extras: extrasSchema.default([]),
     requestKind:z.enum(requestKinds).optional(),
     upholsteryRequested:z.boolean().optional(),

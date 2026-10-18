@@ -282,6 +282,10 @@ model ClientAddress {
 }
 
 model Lead {
+  preferredDate   DateTime? @db.Date
+  preferredTime   String?
+  preferredChannel Channel?
+  soilLevel       SoilLevel?
   requestKind String @default("CLEANING")
   upholsteryRequested Boolean @default(false)
   humanReviewRequired Boolean @default(false)
@@ -302,7 +306,7 @@ model Lead {
   extras          LeadExtra[]
   clientId        String?
   client          Client?            @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  name            String
+  name            String?
   phone           String
   locale          String?
   status          LeadStatus         @default(NEW)

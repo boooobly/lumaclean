@@ -1,0 +1,165 @@
+/* LumaClean's existing paper, ink and teal; no external design system. */
+html:has(.site-page.site-home){scroll-behavior:auto}
+.site-mobile-locale{display:none}
+.site-page.site-home .journey-before-control{pointer-events:auto;cursor:pointer;border:1px solid #ffffff66;background:#10252b99;color:white;border-radius:8px;padding:12px;min-height:44px;font:inherit}
+.site-page.site-home .journey-before-control:focus-visible{outline:3px solid white;outline-offset:4px}
+.site-page.site-home :is(.editorial-section,.material-section,.method-section,.estimate-section){padding:88px 0}
+.site-page.site-home .estimate-section{scroll-margin-top:76px;background:var(--lc-paper-bright)}
+.site-page.site-home .estimate-title{margin:24px 0 40px;gap:32px;grid-template-columns:1.1fr 1fr}
+.site-page.site-home .estimate-title h2{font-size:clamp(36px,4.3vw,64px);line-height:1.08;letter-spacing:-.045em}
+.site-page.site-home .estimate-title p{max-width:450px;font-size:16px;line-height:1.6;color:var(--lc-ink-soft)}
+.site-page.site-home .section-intro{margin-bottom:36px}
+.site-page.site-home .section-intro h2,.site-page.site-home .rates-head h2,.site-page.site-home .evidence-title h2{font-size:clamp(32px,4vw,56px);line-height:1.1}
+.booking-flow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.8fr);gap:48px;align-items:start;color:var(--lc-ink);font-family:var(--lc-font-text)}
+.booking-flow *, .booking-flow *::before, .booking-flow *::after{box-sizing:border-box}
+.booking-flow :is(button,input,select,textarea){font:inherit}
+.flow-main,.flow-summary{min-width:0}
+.flow-section{min-width:0;margin:0;padding:28px 0;border:0;border-bottom:1px solid var(--lc-line);scroll-margin-top:100px}
+.flow-section:first-child{padding-top:0}
+.flow-section :is(legend,h3),.flow-section-title{display:flex;align-items:center;gap:14px;width:100%;margin:0 0 22px;padding:0;font-size:20px;font-weight:550;letter-spacing:-.03em;line-height:1.3}
+.flow-section :is(legend,h3)>span:first-child,.flow-section-title>span{font-size:11px;letter-spacing:.08em;color:var(--lc-teal-ink);font-weight:600}
+.flow-section p,.flow-contact>p,.flow-quote>p{font-size:13px;line-height:1.65;color:var(--lc-ink-soft);margin:10px 0 18px}
+.flow-service-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.flow-service-card{position:relative;display:flex;flex-direction:column;gap:15px;min-width:0;padding:22px 18px;cursor:pointer;border:1px solid var(--lc-line);border-radius:var(--lc-radius-sm);background:var(--lc-paper-bright);transition:border-color .2s,background .2s}
+.flow-service-card:hover{border-color:var(--lc-teal-ink)}
+.flow-service-card.is-selected{border-color:var(--lc-teal-ink);box-shadow:inset 0 0 0 1px var(--lc-teal-ink);background:#eaf3ef}
+.flow-service-card>input{position:absolute;opacity:0;width:1px;height:1px}
+.flow-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:9px;font-size:17px;font-weight:550;line-height:1.3}
+.flow-radio{display:grid;place-items:center;flex:0 0 20px;width:20px;height:20px;border:1px solid var(--lc-line);border-radius:50%}
+.is-selected .flow-radio{color:white;background:var(--lc-teal-ink);border-color:var(--lc-teal-ink)}
+.flow-service-card small{color:var(--lc-ink-soft);font-size:12px;line-height:1.6}
+.flow-service-card>strong{margin-top:auto;font-size:19px;font-weight:500;letter-spacing:-.03em}
+.booking-flow summary{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;list-style:none;font-size:14px;font-weight:500;min-height:48px}
+.booking-flow summary::-webkit-details-marker{display:none}
+.booking-flow summary svg{flex-shrink:0;transition:transform .2s}
+.booking-flow details[open]>summary>svg,.booking-flow details[open]>summary .flow-selected-count>svg{transform:rotate(180deg)}
+.flow-secondary{margin-top:12px}
+.flow-other-services{display:grid;gap:10px;padding:6px 0}
+.flow-other-services label{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px}
+.flow-other-services small{margin-left:auto;color:var(--lc-ink-soft)}
+.flow-area{display:grid;grid-template-columns:160px 1fr;align-items:center;gap:22px}
+.flow-area .flow-area-input{display:flex;align-items:center;gap:10px;border:1px solid var(--lc-line);border-radius:var(--lc-radius-sm);padding:6px 14px;max-width:180px}
+.flow-area-input input{min-width:0;width:100%;border:0;background:transparent;font-size:28px;padding:6px 0;font-variant-numeric:tabular-nums;color:var(--lc-ink)}
+.flow-area-input>span{color:var(--lc-ink-soft)}
+.flow-live-price{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:20px 0;padding:20px;background:var(--lc-paper);border-radius:var(--lc-radius-sm)}
+.flow-live-price span{font-size:12px;color:var(--lc-ink-soft)}
+.flow-live-price output{font-family:var(--lc-font-display);font-size:clamp(22px,3vw,30px);letter-spacing:-.04em;white-space:nowrap}
+.flow-condition,.flow-scope-highlights li{display:flex;align-items:flex-start;gap:9px}
+.flow-condition svg,.flow-scope-highlights svg{flex-shrink:0;color:var(--lc-teal-ink);margin-top:3px}
+.flow-check{display:flex!important;align-items:flex-start!important;gap:10px;cursor:pointer;font-size:13px;line-height:1.6}
+.booking-flow input[type=checkbox],.booking-flow input[type=radio]{accent-color:var(--lc-teal-ink);width:18px;height:18px;flex-shrink:0;margin:2px 0 0}
+.flow-scope-highlights{display:grid;grid-template-columns:1fr 1fr;gap:12px;list-style:none;padding:0;margin:18px 0;font-size:13px;line-height:1.5}
+.flow-comparison{overflow-x:auto;max-width:100%;margin:8px 0}
+.flow-comparison table{border-collapse:collapse;width:100%;font-size:12px;line-height:1.5}
+.flow-comparison :is(th,td){text-align:left;padding:12px 8px;border-bottom:1px solid var(--lc-line);font-weight:400;vertical-align:top;overflow-wrap:anywhere}
+.flow-comparison thead th{font-weight:550}
+.flow-comparison th:first-child{width:45%;padding-left:0}
+.flow-extras>summary .flow-section-title{margin:0;width:auto}
+.flow-selected-count{display:flex;align-items:center;gap:9px;font-size:11px;color:var(--lc-ink-soft)}
+.flow-extra-group{border:0;min-width:0;padding:20px 0 8px;margin:0}
+.flow-extra-group legend{margin:0;padding-top:24px;font-size:15px;letter-spacing:0}
+.flow-counter,.flow-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--lc-line);font-size:13px}
+.flow-counter>div:first-child{min-width:0}
+.flow-counter small{display:block;margin-top:5px;color:var(--lc-ink-soft);font-size:11px}
+.flow-stepper{display:flex;align-items:center;flex-shrink:0;border:1px solid var(--lc-line);border-radius:8px;overflow:hidden}
+.flow-stepper button{display:grid;place-items:center;width:44px;height:44px;border:0;background:transparent;color:var(--lc-ink);cursor:pointer}
+.flow-stepper button:hover:not(:disabled){background:var(--lc-paper)}
+.flow-stepper button:disabled{opacity:.35;cursor:default}
+.flow-stepper output{min-width:25px;text-align:center;font-variant-numeric:tabular-nums}
+.flow-toggle span{flex:1}
+.flow-toggle small{color:var(--lc-ink-soft);white-space:nowrap}
+.flow-text-button{display:inline-flex;align-items:center;gap:8px;padding:8px 0;min-height:44px;border:0;border-bottom:1px solid var(--lc-line);background:transparent;color:var(--lc-teal-ink);font-size:13px;cursor:pointer}
+.flow-date-choices{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+.flow-date-choices button{min-height:44px;border:1px solid var(--lc-line);border-radius:8px;padding:10px 12px;font-size:12px;background:transparent;color:var(--lc-ink);cursor:pointer}
+.flow-date-choices button[aria-pressed=true]{background:var(--lc-ink);border-color:var(--lc-ink);color:white}
+.flow-date-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.flow-date-fields label{min-width:0}
+.flow-date-fields label>span,.flow-contact label>span:first-child{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px}
+.booking-flow :is(.flow-date-fields,.flow-contact) :is(input:not([type=checkbox]),select,textarea){display:block;width:100%;min-width:0;min-height:48px;border:1px solid var(--lc-line);border-radius:8px;padding:12px;background:var(--lc-paper-bright);color:var(--lc-ink);font-size:16px}
+.flow-date-fields input[type=date]{appearance:auto;max-width:100%;min-height:50px}
+.flow-notice{padding:12px 14px;border-left:2px solid var(--lc-teal-ink);background:var(--lc-paper)}
+.booking-flow .flow-error{color:#9c342b;font-size:13px;line-height:1.6}
+.booking-flow :is(input,textarea)[aria-invalid=true]{border-color:#9c342b!important}
+.flow-summary{border:1px solid var(--lc-line);border-radius:var(--lc-radius-sm);overflow:hidden;background:var(--lc-paper)}
+.flow-quote{padding:30px;color:var(--lc-paper-bright);background:var(--lc-ink);scroll-margin-top:90px}
+.flow-eyebrow{display:block;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--lc-ink-soft)}
+.flow-quote .flow-eyebrow{color:var(--lc-teal-light)}
+.flow-quote h3{margin:12px 0 24px;font-family:var(--lc-font-display);font-size:27px;font-weight:400;letter-spacing:-.04em}
+.flow-quote-service{display:flex;justify-content:space-between;gap:12px;font-size:14px;margin-bottom:16px}
+.flow-quote-lines>div{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid #405157;font-size:12px;line-height:1.5}
+.flow-quote-lines b{flex-shrink:0;font-weight:400;white-space:nowrap}
+.flow-price{padding-top:20px}
+.flow-price>span{font-size:11px;color:#c1ccce}
+.flow-price strong{display:block;margin-top:6px;font-family:var(--lc-font-display);font-size:clamp(26px,3.3vw,42px);font-weight:400;letter-spacing:-.04em;line-height:1.2;overflow-wrap:anywhere}
+.flow-quote>p{color:#c1ccce;font-size:12px;line-height:1.6;margin:14px 0}
+.flow-quote .flow-review{color:var(--lc-teal-light)}
+.flow-contact-link{display:flex;align-items:center;justify-content:space-between;min-height:44px;padding-top:12px;border-top:1px solid #405157;font-size:13px;color:var(--lc-paper-bright)}
+.flow-contact{display:grid;gap:16px;padding:30px;scroll-margin-top:88px}
+.flow-contact h3{margin:0 0 6px;font-family:var(--lc-font-display);font-weight:450;font-size:25px;line-height:1.25;letter-spacing:-.035em}
+.flow-contact>p{font-size:11px;margin:-6px 0 0}
+.flow-contact .flow-consent span{font-size:11px;line-height:1.6}
+.flow-consent a{display:block;text-decoration:underline;text-underline-offset:3px}
+.flow-submit{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;border:0;border-radius:8px;padding:15px 18px;background:var(--lc-teal-ink);color:white;font-size:15px;font-weight:550;cursor:pointer}
+.flow-submit:hover:not(:disabled){background:var(--lc-ink)}
+.flow-submit:disabled{opacity:.6;cursor:wait}
+.flow-success{padding:20px 0;font-size:15px;line-height:1.6}
+.flow-success svg{color:var(--lc-teal-ink)}
+.flow-success strong{display:block;overflow-wrap:anywhere;font-size:16px;margin-top:8px}
+.booking-flow :is(input,select,textarea,button,a,summary):focus-visible,.flow-service-card:focus-within{outline:3px solid var(--lc-teal-ink);outline-offset:4px}
+.site-page.site-home .commercial-details{border-top:1px solid var(--lc-line);padding-top:22px}
+.site-page.site-home .commercial-details>summary{display:flex;align-items:center;justify-content:space-between;min-height:54px;list-style:none;cursor:pointer;font-size:19px}
+.site-page.site-home .commercial-details>summary::-webkit-details-marker{display:none}
+.site-page.site-home .service-directory{margin-top:28px}
+.site-page.site-home .evidence-title{min-height:300px}
+.site-page.site-home .evidence-ledger article{min-height:160px;padding-top:24px}
+.site-page.site-home .evidence-ledger h3{margin-top:26px}
+.site-page.site-home .material-stories{grid-template-rows:220px 220px}
+.site-page.site-home .method-shell{min-height:600px}
+.site-page.site-home .site-faq-list{margin-top:24px}
+.site-page.site-home .site-faq-list summary{min-height:72px}
+.site-page.site-home .closing-section{padding:80px 0}
+@media(max-width:1100px){.booking-flow{gap:28px;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr)}.flow-service-card{padding:18px 14px}.flow-card-top{font-size:16px}.flow-quote,.flow-contact{padding:24px}}
+@media(max-width:900px){
+  .site-page.site-home .estimate-title{grid-template-columns:1fr;gap:16px;margin-bottom:28px}
+  .booking-flow{grid-template-columns:1fr;gap:0}.flow-main,.flow-summary{display:contents}
+  .flow-main>.flow-section{order:4}.flow-main>.flow-section:first-child{order:1}.flow-main>.flow-section:nth-child(2){order:2}
+  .flow-quote{order:3;margin-top:8px;border-radius:var(--lc-radius-sm)}.flow-contact{order:6;background:var(--lc-paper);border-radius:var(--lc-radius-sm);margin-top:28px}
+  .flow-scope-highlights{grid-template-columns:1fr 1fr}.flow-service-card{padding:22px}.flow-card-top{font-size:18px}
+  .site-page.site-home .method-shell{min-height:650px}.site-page.site-home .material-stories{grid-template-rows:300px 200px 200px}
+  .site-page.site-home :is(.editorial-section,.material-section,.method-section,.estimate-section){padding:60px 0}
+}
+@media(max-width:680px){
+  .site-page.site-home .journey-before-control{display:flex;position:absolute;top:80px;left:20px;right:auto;bottom:auto;z-index:6;max-width:calc(100% - 40px);font-size:11px}
+  .site-page.site-home .site-mobile-locale{display:block;width:50px;min-height:44px;border:1px solid currentColor;border-radius:6px;color:inherit;background:transparent;font-size:11px}
+  .site-page.site-home .site-mobile-locale option{color:var(--lc-ink);background:var(--lc-paper)}
+  .site-page.site-home .site-locales{display:none}
+  .site-page.site-home .site-header .header-cta{display:inline-flex;min-height:44px;font-size:10px;padding:9px 10px;gap:5px}
+  .site-page.site-home .site-header-actions{gap:8px;padding-right:56px}
+  .site-page.site-home .site-header .proto-brand{width:96px}
+  .site-page.site-home .site-cta-long{display:none}.site-page.site-home .site-cta-short{display:inline}
+}
+@media(max-width:520px){
+  .site-page.site-home .site-header{gap:8px;grid-template-columns:minmax(0,1fr) auto}
+  .site-page.site-home .site-header .proto-brand{width:clamp(96px,27vw,130px)}
+  .site-page.site-home .site-header-actions{gap:8px}
+  .site-page.site-home .site-locales a{min-width:28px;min-height:44px}
+  .site-page.site-home .header-cta{min-height:44px}
+  .site-page.site-home .estimate-title h2{font-size:36px}.site-page.site-home .estimate-title p{font-size:14px}
+  .flow-service-cards{grid-template-columns:1fr;gap:10px}.flow-service-card{display:grid;grid-template-columns:1fr auto;padding:18px;gap:10px 16px}.flow-card-top{grid-column:1/-1;font-size:18px}.flow-service-card small{font-size:12px}.flow-service-card>strong{align-self:end;white-space:nowrap;font-size:17px}
+  .flow-section :is(legend,h3),.flow-section-title{font-size:19px;gap:10px}
+  .flow-area{grid-template-columns:128px 1fr;gap:14px}.flow-area p{font-size:11px}
+  .flow-date-fields{grid-template-columns:1fr}.flow-scope-highlights{grid-template-columns:1fr}
+  .flow-counter{gap:10px}.flow-counter>div:first-child{font-size:12px}.flow-stepper output{min-width:22px}.flow-stepper button{width:44px}
+  .flow-quote,.flow-contact{padding:24px 20px}.flow-other-services label{flex-wrap:wrap}.flow-other-services small{font-size:11px}
+  .flow-comparison :is(th,td){font-size:11px;padding:10px 4px}.flow-comparison th:first-child{width:40%}
+  .site-page.site-home .closing-section{padding:56px 0}.site-page.site-home .evidence-title{min-height:260px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}.booking-flow *{transition:none!important}
+  .site-page.site-home .journey-track{height:auto!important}.site-page.site-home .journey-sticky{position:relative!important}
+  .site-page.site-home .handoff{height:auto!important;margin-top:0!important}.site-page.site-home .handoff-sticky{position:relative!important;height:auto!important;min-height:0;padding:48px 24px}
+  .site-page.site-home .handoff-copy{position:relative;inset:auto;width:auto;opacity:1!important;transform:none!important}
+  .site-page.site-home .handoff :is(.kitchen-frame,.handoff-route,.scroll-note){display:none}
+}
+
+@media(min-width:901px){.site-page.site-home .handoff{height:180dvh}}

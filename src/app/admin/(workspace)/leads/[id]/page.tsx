@@ -35,7 +35,7 @@ export default async function LeadPage({
   return (
     <>
       <CrmHeader
-        title={lead.name}
+        title={lead.name ?? 'Имя не указано'}
         subtitle={lead.reference ?? "Заявка"}
         back="/admin/leads"
         action={
@@ -53,7 +53,11 @@ export default async function LeadPage({
           <Facts secondary={["Язык", "Канал"]} technical={["Нормализованный телефон"]}
             items={[
               ["Тип обращения",requestKindLabels[leadRequestKind(lead)]],
-              ["Имя", lead.name],
+              ["Имя", lead.name ?? 'Не указано'],
+              ["Желаемая дата · Белград", lead.preferredDate ? `${lead.preferredDate.toISOString().slice(0,10)} · не подтверждённая бронь` : 'Уточнить позже'],
+              ["Предпочтение по времени", lead.preferredTime ? ({MORNING:'Утро',AFTERNOON:'День',EVENING:'Вечер'}[lead.preferredTime] ?? lead.preferredTime) : 'Без предпочтения'],
+              ["Способ связи", lead.preferredChannel ? channelLabels[lead.preferredChannel] : 'Без предпочтения'],
+              ["Состояние", lead.soilLevel === 'HEAVY' ? 'Сильное / нестандартное: согласовать цену' : 'Обычное / уточнить'],
               [
                 "Телефон",
                 <a
