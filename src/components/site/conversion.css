@@ -129,7 +129,7 @@ html:has(.site-page.site-home){scroll-behavior:auto}
   .site-page.site-home :is(.editorial-section,.material-section,.method-section,.estimate-section){padding:60px 0}
 }
 @media(max-width:680px){
-  .site-page.site-home .journey-before-control{display:flex;position:absolute;top:80px;left:20px;right:auto;bottom:auto;z-index:6;max-width:calc(100% - 40px);font-size:11px}
+  .site-page.site-home .journey-before-control{display:flex;position:absolute;top:80px;left:20px;right:auto;bottom:auto;transform:none;z-index:6;max-width:calc(100% - 40px);font-size:11px}
   .site-page.site-home .site-mobile-locale{display:block;width:50px;min-height:44px;border:1px solid currentColor;border-radius:6px;color:inherit;background:transparent;font-size:11px}
   .site-page.site-home .site-mobile-locale option{color:var(--lc-ink);background:var(--lc-paper)}
   .site-page.site-home .site-locales{display:none}

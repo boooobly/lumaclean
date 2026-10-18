@@ -1,5 +1,5 @@
 {
-  "fingerprint": "0b9ceac53afaafd37aa75deb4d3c118f3090770f16f6f81873ec7479aa3ba8a5",
+  "fingerprint": "b26c9dd278b335dbde4e5a5e0c224adae73df038c8b994c1321105be82a6c164",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -136,7 +136,7 @@
     "src/components/site/article-components.tsx": "d97070aeb7b3a2922b045973ee61c991c0018771c2a13828ae4382e0eaaa7974",
     "src/components/site/article-data-table.tsx": "c1dc2f13055eb0946d5c28d187188ffc10a9af38e90e8800e3c6ed45e16dc96c",
     "src/components/site/chat-photos.tsx": "15cf8449b47625f5e097a46f25619aca7140443d3e5af77fcb85fc4e85a21b7d",
-    "src/components/site/conversion.css": "b2c489a3b6390f645479f0e8b9f26f9f51a73915d76e6650678d8effd39fb031",
+    "src/components/site/conversion.css": "1332244badb7dafd32825cadfe18df734da7e2a517b92f2246ab91749b7598e4",
     "src/components/site/estimate.tsx": "78b15ea2a4fb08e9a839a3cd523dff5dc4fd0d72bae107aba7c75d7fe5588bf1",
     "src/components/site/google-profile-links.module.css": "68b9667bc02da1087c32600f1dfd65a722e10ef4f1215e9a27292976cfd0f3f5",
     "src/components/site/google-profile-links.tsx": "cf276374eb0dc502d611d59449976a86544d4d12b2da75790d450b09d33c0e40",
@@ -347,15 +347,16 @@
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-18T13:24:36.619Z",
+  "checkedAt": "2026-10-18T14:14:22.331Z",
   "suites": [
     "908 regression checks passed; 26 environment-dependent checks skipped",
     "6 actual isolated database/local HTTP intake checks passed; optional name, preferred date, retry, cutoff and no Orders",
     "66 actual AI/public/CRM pricing checks passed on isolated test branch",
-    "Additive intake migration tested on isolated test and Preview branches with protected historical data fingerprints unchanged"
+    "Additive intake migration tested on isolated test and Preview branches with protected historical data fingerprints unchanged",
+    "Chrome Preview: 18 locale/viewport checks, five window combinations and actual optional-name Lead with structured date, double-click deduplication and unchanged Order fingerprint"
   ],
-  "lintWarnings": "Two pre-existing next/no-img-element warnings in unchanged website-chat.tsx",
-  "verificationScope": "Conversion homepage and typed Website Lead intake preferences. Shared pricing retained; no autonomous booking introduced. No scheduler, AI provider/model, persona or persistent channel mode changes. Browser visual/keyboard/touch/CWV acceptance and source-bound Preview booking proof are separate, outstanding requirements. This evidence does not authorize production release; owner visual approval is required.",
+  "lintWarnings": "Full lint: zero errors; generated public/maplibre vendor warnings plus two existing website-chat image warnings. Source-only lint excludes generated vendor assets.",
+  "verificationScope": "Conversion homepage and typed Website Lead intake preferences. Prior 980 targeted checks retained; final CSS-only mobile before-button alignment fix rebuilt and typechecked. Chrome Preview verified RU/SR/EN at six widths, shared prices, extras retention, upholstery-only mode, inline phone validation, keyboard disclosures, date urgency and one actual double-click enquiry without name or Orders. Physical touch, reduced-motion emulation, CWV, authenticated CRM visual inspection and source-bound booking proof remain separate outstanding gates. No production release authorization; owner visual approval required.",
   "previousVerification": {
     "fingerprint": "527b2eacc594fd2140998384773575611ae8291e6a7f3f12168579682b083067",
     "tests": 965,
