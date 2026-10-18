@@ -43,7 +43,10 @@ export function conversionFacts(text:string,at:Date,timezone:string,expected?:Ag
   else if(/(?:reply here|odgovorite ovde|ответьте здесь)/iu.test(t))f.preferredContactChannel='CURRENT_CHAT';
   const phone=text.trim().replace(/^(?:telefon|tel|phone|телефон)\s*[:=]?\s*/iu,'');
   if(/^[+0][\d\s()-]{6,30}$/u.test(phone)){const normalized=normalizedPhone(phone);if(normalized)f.phone=normalized;}
-  const windowContext=!catalogQuestion(text)&&(windowWord.test(t)||expected==='WINDOW_COUNTS'||expected==='WINDOW_TYPE'||!!state?.draftFacts?.windowCleaning?.requested);
+  // A shutter/net mounted on a window is a separate catalog item, not window washing.
+  const accessory=/ролл?ет|рольстав|rolet|shutter|москит|комарник|komarnik|mosquito|жалюз|blinds/iu.test(t);
+  const explicitWindows=/(?:помыть|мыть|мойк[ау]|pranje|operi|wash|clean)\s+(?:все\s+|all\s+)?(?:окн|окон|prozor|прозор|windows?)|(?:окн[а-я]*|prozor[a-z]*|прозор[а-я]*|windows?)\s+(?:и|and|i|и)\s+(?:ролл?ет|рольстав|rolet|shutter|москит|комарник|komarnik|mosquito)|(?:ролл?ет[а-я]*|rolet[a-z]*|shutters?|komarnik[a-z]*)\s+(?:и|and|i)\s+(?:окн|окон|prozor|прозор|window)/iu.test(t);
+  const windowContext=!catalogQuestion(text)&&(!accessory||explicitWindows)&&(windowWord.test(t)||expected==='WINDOW_COUNTS'||expected==='WINDOW_TYPE'||!!state?.draftFacts?.windowCleaning?.requested);
   if(!catalogQuestion(text)&&/bez prozor|prozore necemo|ne treba.{0,20}(?:pranje )?prozor|without windows|no window cleaning|без окон|окна не (?:нужны|надо)|не нужно.{0,15}мыть окна/iu.test(t)) {
     f.windowCleaning={requested:false};f.declinedExtras=['standardWindow','largeWindow'];
   }else if(windowContext){
@@ -70,6 +73,6 @@ export function bookingReviewBlocked(state:AgentState){
   if(state.unresolvedInput)return true;
   if(state.pendingFactProposal)return true;
   if(state.draftFacts?.applianceScopePending?.length)return true;
-  if(state.upholsteryInquiry)return true;
+  if(state.upholsteryInquiry||state.knowledgeRequests?.length||(state.draftFacts?.bathroomCount??1)>1)return true;
   return !!state.review?.reasons.some(r=>r!=='CONTACT_PREFERENCE')||!!state.draftFacts?.reviewItems?.length||!!state.draftFacts?.serviceConfirmationRequired||windowQuantitiesMissing(state.draftFacts);
 }

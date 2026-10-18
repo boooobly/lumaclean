@@ -1,3 +1,4 @@
+import {directBusinessQuestion} from './knowledge/search';
 import type { AgentState } from './contracts';
 import { customerFactsSchema } from './contracts';
 import { resolveCustomerDate } from './temporal';
@@ -14,7 +15,11 @@ export function equivalentCustomerFact(key:string,a:unknown,b:unknown){
  return JSON.stringify(stable(normalized(a)))===JSON.stringify(stable(normalized(b)));
 }
 /** Deliberately narrow. Unclear quantities, negations and word-only times require clarification. */
-export function explicitCustomerFacts(text: string, sentAt: Date, timezone: string, expectedInput?: AgentState['nextInput'],state?:AgentState): CustomerFacts {
+export function explicitCustomerFacts(text: string, sentAt: Date, timezone: string, expectedInput?: AgentState['nextInput'],state?:AgentState,consultationFiltered=false): CustomerFacts {
+  if(!consultationFiltered&&directBusinessQuestion(text)){
+    const declarations=text.match(/[^.!?]+[.!?]?/gu)?.filter(s=>!directBusinessQuestion(s)&&!s.trim().endsWith('?')).join(' ').trim();
+    return declarations&&declarations!==text.trim()?explicitCustomerFacts(declarations,sentAt,timezone,expectedInput,state,true):serviceNeedsConfirmation(text)?{serviceConfirmationRequired:true}:{};
+  }
   const facts: CustomerFacts = conversionFacts(text,sentAt,timezone,expectedInput,state);
   const name=text.match(/(?:^|[\n;,])\s*(?:меня зовут|мо[её] имя|имя|my name is|name|zovem se|ime(?: je)?|ја се зовем|зовем се)[:\s]+([\p{L}][\p{L} .'-]{1,99})(?=$|[\n;,])/iu)?.[1];
   if(name)facts.name=name.trim();
@@ -89,13 +94,13 @@ export function applyCustomerFacts(state: AgentState, incoming: CustomerFacts, c
   if(facts.name)state.name=facts.name;
   if(facts.preferredContactChannel)state.preferredContactChannel=facts.preferredContactChannel;
   delete state.nextInput;
-  if (changed.some(key => ['service','area','soilLevel','extras','extrasConfirmed','windowCleaning','reviewItems','serviceConfirmationRequired','applianceScopePending'].includes(key)||key==='requestedDate'&&(!currentLocalDate||!!state.quote&&state.quote.input.urgent!==(facts.requestedDate===currentLocalDate)))) {
+  if (changed.some(key => ['service','area','soilLevel','extras','extrasConfirmed','windowCleaning','bathroomCount','reviewItems','serviceConfirmationRequired','applianceScopePending'].includes(key)||key==='requestedDate'&&(!currentLocalDate||!!state.quote&&state.quote.input.urgent!==(facts.requestedDate===currentLocalDate)))) {
     delete state.qualification; delete state.quote; delete state.duration;
   }
   if (changed.includes('addressQuery')) { delete state.address; delete state.addressCandidates; }
   const routingChanged=changed.includes('addressQuery');
   const dateChanged=changed.includes('requestedDate');
-  const cleaningChanged=changed.some(key=>['service','area','soilLevel','extras','extrasConfirmed','windowCleaning','reviewItems','serviceConfirmationRequired','applianceScopePending'].includes(key));
+  const cleaningChanged=changed.some(key=>['service','area','soilLevel','extras','extrasConfirmed','windowCleaning','bathroomCount','reviewItems','serviceConfirmationRequired','applianceScopePending'].includes(key));
   if(cleaningChanged||routingChanged||dateChanged){delete state.slots;delete state.selectedSlotToken;delete state.pending;}
   if(dateChanged)delete state.requestedWindow;
   if(changed.includes('phone')||changed.includes('name'))delete state.pending; // A recap must be confirmed for the current contact.

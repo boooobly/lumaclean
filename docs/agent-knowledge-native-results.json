@@ -1,0 +1,12 @@
+{
+  "catalogVersion": "2026-10-17.4ede733b908e",
+  "acceptedConsultations": {
+    "primary": {"turns":48,"p50Ms":8580,"p95Ms":30270,"llmCalls":61,"inputTokens":625771,"outputTokens":3480,"estimatedCostUsd":0.05145368,"knowledgeLookups":45,"repeatedLookups":0,"toolErrors":0,"providerErrors":0,"hardHandoffs":0,"guardRecoveries":0,"bookings":0,"fixturesCleaned":true},
+    "fallback": {"turns":14,"p50Ms":3190,"p95Ms":4786,"llmCalls":14,"inputTokens":87329,"outputTokens":2199,"estimatedCostUsd":0.0098324,"knowledgeLookups":14,"repeatedLookups":0,"toolErrors":0,"providerErrors":0,"hardHandoffs":0,"guardRecoveries":0,"bookings":0,"fixturesCleaned":true}
+  },
+  "primaryScenarios": {"packages":4,"goldenA":2,"goldenB":3,"goldenC":3,"boundaries":4,"serbian":5,"cyrlKnowledge":4,"englishKnowledge":5,"custom":4,"rules":5,"whatsappRu":3,"whatsappSr":3,"whatsappEn":3},
+  "fallbackScenarios": {"packages":4,"serbian":5,"englishKnowledge":5},
+  "testedRevisions": {"unchangedConsultations":"a33fbdf","customAndFallback":"2f2b9bb","whatsappEn":"c928a7a","rules":"5c5c26e","whatsappRu":"98fb86e"},
+  "externalWhatsAppDelivery": false,
+  "notes": "Accepted complete runs only, after fixing failures discovered during native QA. Earlier PoYo timeouts recovered through the existing fallback and remained INCONCLUSIVE for primary-only assertions until clean repeats. Earlier guard recoveries were fixed and retested, not counted as passes. Paired before/after performance uses the separate 27-turn benchmark files; this larger 62-turn corpus is not a matched comparison. Costs are configured estimates. No real customer delivery or production test Orders."
+}

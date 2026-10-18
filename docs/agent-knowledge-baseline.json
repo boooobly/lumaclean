@@ -1,0 +1,21 @@
+{
+  "commit": "b397abec406ec2595e666eae1f42c3cb8fffbf75",
+  "environment": "isolated authenticated Native Preview",
+  "provider": "existing primary provider; unchanged model and limits",
+  "conversations": 8,
+  "matchedTurns": 27,
+  "scenarios": {"packages":4,"boundaries":1,"serbian":5,"englishKnowledge":5,"cyrlKnowledge":4,"goldenA":2,"goldenB":3,"goldenC":3},
+  "p50Ms": 9524,
+  "p95Ms": 21018,
+  "llmCalls": 44,
+  "inputTokens": 544468,
+  "outputTokens": 1839,
+  "estimatedCostUsd": 0.04429304,
+  "knowledgeLookups": 19,
+  "repeatedLookupsWithinConversation": 12,
+  "toolErrors": 4,
+  "unnecessaryHardHandoffs": 2,
+  "providerErrors": 0,
+  "fixturesCleaned": true,
+  "notes": "Recorded before implementation with the same fixed synthetic scripts and real configured provider. Boundaries ended after its first turn because the old system entered HUMAN_CONTROL. Compare only those 27 matched turns; additional new turns are reported separately. Costs are configured token-price estimates, not invoices. No production Orders or real customer messages."
+}

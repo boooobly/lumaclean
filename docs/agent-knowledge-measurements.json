@@ -1,0 +1,23 @@
+{
+  "commit": "a33fbdf1b03ab72101e74216a4f3b76f0d5b5fb4",
+  "sourceFingerprint": "82866d892a3c07a32b5c791e9cdd57dbfc6ad413d732cac89fc03f85db1bf47b",
+  "knowledgeVersion": "2026-10-17.4ede733b908e",
+  "environment": "isolated authenticated Native Preview; existing primary provider",
+  "conversations": 8,
+  "matchedTurns": 27,
+  "p50Ms": 6493,
+  "p95Ms": 21120,
+  "llmCalls": 30,
+  "inputTokens": 320235,
+  "outputTokens": 2204,
+  "estimatedCostUsd": 0.0265004,
+  "knowledgeLookups": 24,
+  "repeatedLookupsWithinConversation": 0,
+  "toolErrors": 0,
+  "providerErrors": 0,
+  "unnecessaryHardHandoffs": 0,
+  "guardRecoveries": 0,
+  "bookings": 0,
+  "fixturesCleaned": true,
+  "notes": "Same 27 turns and percentile method as agent-knowledge-baseline.json. Additional new scenarios are separate. Token costs are configured estimates, not invoices. Single small benchmark, not proof of the 95% consultation business target. p95 is effectively unchanged; median and estimated cost improved."
+}

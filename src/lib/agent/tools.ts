@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Prisma, type PrismaClient, type Conversation, type AgentMode } from "@/generated/prisma/client";
 import { siteContent } from "@/lib/content";
-import {calculateUpholstery,upholsteryCatalogSchema,upholsteryPublicPriceKeys,upholsteryPublicPrice} from '@/lib/upholstery';
+import {calculateUpholstery,upholsteryCatalogSchema} from '@/lib/upholstery';
 import {upholsteryBookingIntent} from '@/lib/upholstery-intent';
 import {reasonLevel,noSlotsText,transientReadFailure} from './autonomy';
 import { quote, priceSnapshot } from "@/lib/domain/crm-pricing";
@@ -19,22 +19,24 @@ import {photoQualificationAllowed} from './chat-attachments';
 import { orderNotifications, handoffNotification } from './notifications';
 import {buildAgentTemporalContext,serviceDatePolicy,latestStartForEndBy,incomingDeparturePolicy,type DepartureLegInput} from "./temporal";
 import {applyCustomerFacts,explicitCustomerFacts,supportedFacts,equivalentCustomerFact} from "./customer-facts";
-import {upholsteryUi} from '@/lib/upholstery-content';
 import {currentClientTurn,pendingHumanStatements,operationalSummary,conversationMemory} from './conversation-memory';
 import {inputQuestion,inputAlreadyKnown} from "./chat-presentation";
 import {behaviorMetric} from "./behavior-telemetry";
 import {reliabilityCount} from './reliability-telemetry';
 import {bookingReviewBlocked,windowQuantitiesMissing,catalogQuestion} from './conversion-facts';
-import {mandatoryHandoff} from './policy';
+import {mandatoryHandoff,outputAllowed} from './policy';
 import {supportedProposal,proposalQuestion} from './fact-proposals';
 import {extrasPrices} from '@/lib/pricing';
 import {applianceLabels,applianceScope} from '@/lib/appliance-catalog';
 import {recoverMissingFacts,loopClarificationText} from './conversation-recovery';
 import {alternativePriceRequest} from './alternative-price';
+import {businessKnowledge,businessKnowledgeEnabled,searchBusinessKnowledge,directBusinessQuestion} from './knowledge/search';
+import type {KnowledgeEntry} from './knowledge/schema';
+import {normalizeKnowledge} from './knowledge/vocabulary';
 import { AgentError, customerFactsSchema,toolSchemas, type AgentState, type BookingRecap, type ToolName, type ToolResult } from "./contracts";
 
 type Tx=Prisma.TransactionClient;
-export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;handoff?:boolean;factAmounts?:number[];factPercentages?:number[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; questionAsked?:boolean; extractionIncomplete?:AgentState['nextInput']; validatedDepartures?:DepartureLegInput[]};
+export type ToolContext={conversationId:string;jobId:string;leaseKey:string;revision:number;mode:AgentMode;state:AgentState;allowedTools?:readonly ToolName[];consultation?:boolean;handoff?:boolean;factAmounts?:number[];factPercentages?:number[];knowledgeEvidence?:KnowledgeEntry[];previewTestId?:string; temporal?:ReturnType<typeof buildAgentTemporalContext>; responseText?:string; questionAsked?:boolean; extractionIncomplete?:AgentState['nextInput']; validatedDepartures?:DepartureLegInput[]};
 export const json=(value:unknown)=>JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 export const stateOf=(c:Pick<Conversation,"state">)=>structuredClone(c.state) as AgentState;
 // PostgreSQL jsonb reorders object keys. Hash and compare facts, never their insertion order.
@@ -64,7 +66,7 @@ async function activePrice(tx:Tx,state:AgentState,c:Conversation,input:ReturnTyp
   const calculated=quote(input.service,input.area,selected,input.urgent),discount=Number(client?.discountPercent??0);
   if(calculated.extras.some(e=>!catalog.some(item=>item.code===e.code&&Number(item.unitPrice)===e.unitPrice)))throw new AgentError('PRICE_CATALOG_MISMATCH');
   const snapshot=priceSnapshot(calculated.total,discount,null,null);
-  const requiresHumanReview=["HEAVY","EXTREME"].includes(input.soilLevel)||selected.some(e=>e.code==="largeWindow");
+  const requiresHumanReview=["HEAVY","EXTREME"].includes(input.soilLevel)||selected.some(e=>["largeWindow","steam"].includes(e.code))||(state.draftFacts?.bathroomCount??1)>1||!!state.knowledgeRequests?.length;
   void state;
   return{service,calculated,snapshot,requiresHumanReview};
 }
@@ -87,7 +89,7 @@ async function updateLead(tx:Tx,c:Conversation,ctx:ToolContext,input:ReturnType<
   if(input.service&&!service?.active)return{error:"SERVICE_UNAVAILABLE"};
   if(ctx.mode==="SHADOW")return{planned:true,operation:"createOrUpdateLead",error:"SHADOW_MUTATION_BLOCKED"};
   const area=input.area??ctx.state.draftFacts?.area;
-  const fields={name:ctx.state.name??"Контакт уточняется",phone:ctx.state.phone??"",normalizedPhone:ctx.state.phone?normalizedPhone(ctx.state.phone):null,locale:c.locale,...(service?{serviceId:service.id}:{}),...(area?{area}:{}),...(ctx.state.upholsteryInquiry?{upholsteryRequested:true,humanReviewRequired:true,requestKind:service&&area?'CLEANING_UPHOLSTERY':'UPHOLSTERY'}:{})};
+  const fields={name:ctx.state.name??"Контакт уточняется",phone:ctx.state.phone??"",normalizedPhone:ctx.state.phone?normalizedPhone(ctx.state.phone):null,locale:c.locale,...(service?{serviceId:service.id}:{}),...(area?{area}:{}),...((ctx.state.draftFacts?.bathroomCount??1)>1||ctx.state.knowledgeRequests?.length?{humanReviewRequired:true}:{}),...(ctx.state.upholsteryInquiry?{upholsteryRequested:true,humanReviewRequired:true,requestKind:service&&area?'CLEANING_UPHOLSTERY':'UPHOLSTERY'}:{})};
   const previous=c.leadId?await tx.lead.findUnique({where:{id:c.leadId}}):null;
   if(previous?.status==="LOST")return{error:"LEAD_CLOSED",message:"Owner closed this enquiry. Do not reopen or book it automatically."};
   if(previous?.status==="CONVERTED")return{ok:true,leadId:previous.id};
@@ -101,8 +103,8 @@ async function updateLead(tx:Tx,c:Conversation,ctx:ToolContext,input:ReturnType<
     await tx.leadExtra.deleteMany({where:{leadId:lead.id}});
     if(selected.length)await tx.leadExtra.createMany({data:selected.map(e=>({leadId:lead.id,extraId:catalogue.find(x=>x.code===e.code)!.id,quantity:e.quantity,unitPrice:quote(serviceCode??'regular',area??1,[e],false).extras[0].unitPrice}))});
   }
-  if(confirmed){
-    const currentFacts={service:confirmed.service,area:confirmed.area,soilLevel:confirmed.soilLevel,bathroomCount:confirmed.bathroomCount,windows:confirmed.windowCleaning,requestedDate:confirmed.requestedDate,requestedCrew:confirmed.requestedCrew};
+  if(confirmed||ctx.state.knowledgeRequests?.length){
+    const currentFacts={service:confirmed?.service,area:confirmed?.area,soilLevel:confirmed?.soilLevel,bathroomCount:confirmed?.bathroomCount,windows:confirmed?.windowCleaning,requestedDate:confirmed?.requestedDate,requestedCrew:confirmed?.requestedCrew,knowledgeRequests:ctx.state.knowledgeRequests};
     const oldNote=(previous?.internalNote??'').replace(/\n?\[\[AI_FACTS\]\][\s\S]*?\[\[\/AI_FACTS\]\]/gu,'').trim();
     await tx.lead.update({where:{id:lead.id},data:{estimatedPrice:ctx.state.quote?.total??ctx.state.upholsteryQuote?.total??null,internalNote:(oldNote?oldNote+'\n':'')+'[[AI_FACTS]]'+JSON.stringify(currentFacts)+'[[/AI_FACTS]]'}});
   }
@@ -223,11 +225,60 @@ export async function bookConfirmed(tx:Tx,c:Conversation,ctx:ToolContext,resched
 }
 async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,payload:unknown):Promise<ToolResult>{
   const state=ctx.state;
+  if(name==='searchBusinessKnowledge'){
+    const input=toolSchemas[name].parse(payload),result=searchBusinessKnowledge(input);
+    // Persist only bounded public record pointers, never prices. A minimum-visit
+    // explanation may refer to the item discussed previously; re-read its price
+    // from this version and validate it against runtime below.
+    if(businessKnowledgeEnabled()&&/миним|minimum|minimal|минимал/iu.test(input.query)&&(input.limit??4)>1){
+      const codes=[...(state.knowledgeRequests??[]).map(e=>e.code),...(state.knowledgeContext?.codes??[])];
+      const previous=codes.find(code=>code.startsWith('UPH-')&&!code.startsWith('UPH-RULE-'));
+      const context=previous?searchBusinessKnowledge({query:previous,limit:1}).matches[0]:null;
+      if(context&&!result.matches.some(e=>e.code===context.code)){
+        result.matches=[...result.matches.slice(0,(input.limit??4)-1),context];
+        while(JSON.stringify(result).length>7000&&result.matches.length>1)result.matches.splice(result.matches.length-2,1);
+      }
+    }
+    const business=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
+    for(const entry of result.matches)if(entry.category==='cleaning'&&entry.runtimeCode&&!business.aiAllowedServices.includes(entry.runtimeCode)){
+      entry.autoCalculate=false;entry.autoBook=false;entry.managerReview=true;
+    }
+    const codes=result.matches.flatMap(e=>e.runtimeCode&&e.category==='extra'?[e.runtimeCode]:[]);
+    const active=await tx.serviceExtra.findMany({where:{code:{in:codes},active:true},select:{code:true,unitPrice:true}});
+    const upholstery=upholsteryCatalogSchema.parse((await tx.upholsterySettings.findUniqueOrThrow({where:{id:'default'}})).catalog);
+    const upholsteryMap:Record<string,keyof typeof upholstery>={'UPH-SOFA-001':'sofa2','UPH-SOFA-002':'sofa3Normal','UPH-CHAIR-001':'armchair','UPH-CHAIR-007':'chair','UPH-SOFA-006':'cornerSeat','UPH-SPOT-001':'spot','UPH-RULE-001':'minimumVisit'};
+    if(result.matches.some(e=>e.category==='extra'&&e.runtimeCode&&!active.some(a=>a.code===e.runtimeCode&&Number(a.unitPrice)===e.price?.amount)||upholsteryMap[e.code]&&upholstery[upholsteryMap[e.code]]!==e.price?.amount))return{error:'PRICE_CATALOG_MISMATCH',matches:[],version:result.version};
+    ctx.knowledgeEvidence=[...new Map([...(ctx.knowledgeEvidence??[]),...result.matches].map(e=>[e.code,e])).values()].slice(-12);
+    state.knowledgeContext={version:result.version,codes:result.matches.map(e=>e.code).slice(0,5)};
+    ctx.factAmounts=[...new Set([...(ctx.factAmounts??[]),...result.matches.flatMap(e=>e.price&&e.price.kind!=='percent'?[e.price.amount]:[])])];
+    if(result.matches.some(e=>/20%/.test(e.description)))ctx.factPercentages=[...new Set([...(ctx.factPercentages??[]),20])];
+    return result;
+  }
+  if(name==='recordKnowledgeRequest'){
+    if(!businessKnowledgeEnabled())return{error:'REVIEW_REQUIRED'};
+    const input=toolSchemas[name].parse(payload),turn=await currentClientTurn(tx,c.id);
+    if(!turn.some(m=>m.text.includes(input.evidence)))return{error:'FACT_EVIDENCE_REJECTED',reason:'NOT_CURRENT_VERBATIM_CLIENT_EVIDENCE',message:'Copy the current CLIENT sentence verbatim, including the named service and intent. Do not translate or paraphrase.'};
+    if(directBusinessQuestion(input.evidence))return{error:'FACT_EVIDENCE_REJECTED',reason:'QUESTION_IS_NOT_A_SERVICE_REQUEST'};
+    if(input.action==='ADD'&&!/(?:хочу|нужн|добав|помой|почист|отмыть|есть.{0,20}ролет|treba|želim|zelim|треба|желим|i need|i want|please|add)/iu.test(input.evidence))return{error:'FACT_EVIDENCE_REJECTED'};
+    if(input.action==='REMOVE'&&!/не надо|не нуж|убрать|отмен|without|remove|cancel|bez|ne treba|без|не треба/iu.test(input.evidence))return{error:'FACT_EVIDENCE_REJECTED'};
+    const relevant=searchBusinessKnowledge({query:input.evidence.slice(0,400),limit:5}).matches;
+    const selected=input.codes.map(code=>relevant.find(e=>e.code===code));
+    if(selected.some(e=>!e||e.status==='UNAVAILABLE'||e.category!=='extra'&&e.category!=='upholstery'||e.autoCalculate))return{error:'FACT_EVIDENCE_REJECTED',reason:'CODE_NOT_ELIGIBLE_FOR_THIS_EVIDENCE',eligibleCodes:relevant.filter(e=>e.status!=='UNAVAILABLE'&&(e.category==='extra'||e.category==='upholstery')&&!e.autoCalculate).map(e=>({code:e.code,name:e.name})),message:'Use the exact retrieved stable code matching the named work. Evidence must include the service name, not just a pronoun. Do not substitute a different service.'};
+    if(ctx.mode==='SHADOW')return{error:'SHADOW_MUTATION_BLOCKED'};
+    state.knowledgeRequests=(state.knowledgeRequests??[]).filter(e=>!input.codes.includes(e.code));
+    if(input.action==='ADD')state.knowledgeRequests.push(...input.codes.map(code=>({code,evidence:input.evidence.slice(0,300)})));
+    if(state.knowledgeRequests.length>12)throw new AgentError('INVALID_TOOL_ARGUMENTS');
+    delete state.quote;delete state.duration;delete state.pending;delete state.slots;delete state.selectedSlotToken;
+    if(selected.some(e=>e?.category==='upholstery')&&input.action==='ADD')state.upholsteryInquiry=true;
+    await updateLead(tx,c,ctx,{intent:'cleaning'});
+    if(input.action==='ADD')await dispatch(tx,c,ctx,'requestReview',{reason:'CUSTOM_EXTRA'});
+    return{saved:true,codes:state.knowledgeRequests.map(e=>e.code),autonomousBooking:false,finalPrice:false};
+  }
   if(name==='markUpholsteryInquiry'){
     const input=toolSchemas[name].parse(payload),turn=await currentClientTurn(tx,c.id);
     if(!upholsteryBookingIntent(input.evidence)||!turn.some(m=>m.text.includes(input.evidence)))throw new AgentError('CUSTOMER_FACTS_REQUIRED');
     state.upholsteryInquiry=true;state.review={...state.review,reasons:[...new Set([...(state.review?.reasons??[]),'UPHOLSTERY_BOOKING_PROOF_REQUIRED'])]};delete state.quote;delete state.duration;delete state.pending;delete state.slots;delete state.selectedSlotToken;
-    if(c.leadId&&ctx.mode==='AUTO')await updateLead(tx,c,ctx,{intent:'cleaning'});
+    if(ctx.mode==='AUTO')await updateLead(tx,c,ctx,{intent:'cleaning'});
     await dispatch(tx,c,ctx,'requestReview',{reason:'OPERATIONAL'});
     return{requiresHumanReview:true,autonomousBooking:false,intake:'Contact only. Manager will clarify furniture details; do not run a technical questionnaire.'};
   }
@@ -245,14 +296,26 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const activeExtras=await tx.serviceExtra.findMany({where:{active:true},select:{code:true,unitPrice:true}});
     const lang=c.locale==='sr-Cyrl'?'sr-Cyrl':c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru';
     const priceCatalog=Object.entries(extrasPrices).map(([code,amount])=>({code,amount,label:applianceLabels[lang][code as keyof typeof applianceLabels.ru]??siteContent[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'].calculator.labels[code],currency:'RSD',confirmed:activeExtras.some(e=>e.code===code&&Number(e.unitPrice)===amount)}));
-    const content=siteContent[c.locale.startsWith("sr")?"sr":c.locale==="en"?"en":"ru"];
+    if(!businessKnowledgeEnabled()){
+      const content=siteContent[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'];
+      ctx.factAmounts=priceCatalog.filter(e=>e.confirmed).map(e=>e.amount);
+      return{knowledge:'DISABLED',services:content.services,scope:content.comparison,priceCatalog,faq:[],access:{confirmedHandoverProcess:false},presence:{confirmedRequirement:'UNKNOWN'},rule:'Only these current public facts are confirmed. Unsupported details need review; all stored custom-work and bathroom booking guards remain active.'};
+    }
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
-    const catalog=upholsteryCatalogSchema.parse((await tx.upholsterySettings.findUniqueOrThrow({where:{id:'default'}})).catalog);
-    const upholstery=upholsteryUi[c.locale.startsWith('sr')?'sr':c.locale==='en'?'en':'ru'];const facts={upholstery:{name:upholstery.name,method:'wet spray extraction',equipment:'Professional Kärcher equipment and products; model not confirmed',faq:upholstery.faq,limits:upholstery.limits,publicPrices:upholsteryPublicPriceKeys.map(key=>({item:key==='cornerSeat'?upholstery.cornerBaseLabel:upholstery.catalogLabels[key],from:upholsteryPublicPrice(catalog,key),currency:'RSD'})),pricing:'These are public starting prices, not a personal quote. Standalone minimum applies. Use calculateUpholstery for exact sums only when the customer supplies the facts. No mental arithmetic.',autonomousBooking:false},sameDayPolicy:{cutoffMinute:settings.sameDayBookingCutoffMinute,latestDepartureMinute:settings.latestCleanerDepartureMinute,timezone:settings.timezone,requiresRealAvailability:true,surchargePercent:20},city:content.footer.location,services:content.services,scope:content.comparison,assurance:content.assurance,faq:content.faq.items,extras:content.calculator.labels,pricingPolicy:content.calculator.note,access:{confirmedHandoverProcess:false,rule:'No public key handover or custody protocol is confirmed. Do not propose drop-off locations, custody, storage or entry codes. For a general FAQ say this detail must be agreed before any actual handover. Only an actual unusual access/key-custody request requires review.'},discounts:{publicPromotionConfirmed:false,rule:'Only an existing server-verified client discount is applied by calculatePrice. A universal returning-customer discount is not published in this catalog. General FAQ does not require review; an actual request for an individual discount does.'}};
-    ctx.factPercentages=[20];
-    ctx.factAmounts=[...priceCatalog.filter(e=>e.confirmed).map(e=>e.amount),...Object.values(catalog),...[...JSON.stringify(facts).matchAll(/(\d[\d\s,]*?)\s*RSD/gi)].map(m=>Number(m[1].replace(/[\s,]/g,"")))];
-    return {...facts,priceCatalog,applianceScope:applianceScope[lang],presence:{confirmedRequirement:'UNKNOWN',rule:'A requirement to stay home or permission to be absent is not published. Agree access before service; do not invent key collection/custody. General FAQ alone does not require handoff.'}};
+    const packages=businessKnowledge.entries.filter(e=>e.category==='cleaning').map(({code,name,includes,excludes})=>({code,name,includes,excludes}));
+    const payment=businessKnowledge.entries.filter(e=>['RULE-PAY-001','RULE-PAY-003','RULE-PAY-004','RULE-PAY-005','RULE-PAY-006'].includes(e.code));
+    ctx.knowledgeEvidence=[...new Map([...(ctx.knowledgeEvidence??[]),...payment].map(e=>[e.code,e])).values()].slice(-12);
+    ctx.factPercentages=[20];ctx.factAmounts=[...new Set([...(ctx.factAmounts??[]),...priceCatalog.filter(e=>e.confirmed).map(e=>e.amount)])];
+    return {version:businessKnowledge.version,city:'Belgrade',services:packages,priceCatalog,
+      faq:payment.map(e=>({q:e.name,a:e.description})),
+      search:'Use searchBusinessKnowledge for the specific current question: full extras, upholstery, package scope and business rules. This overview is not an order quote.',
+      sameDayPolicy:{cutoffMinute:settings.sameDayBookingCutoffMinute,latestDepartureMinute:settings.latestCleanerDepartureMinute,timezone:settings.timezone,surchargePercent:20,requiresRealAvailability:true},
+      applianceScope:applianceScope[lang],
+      discounts:{publicPromotionConfirmed:false,rule:'No automatic universal discount; individual written agreement. Only server-verified client terms apply to quotes.'},
+      access:{confirmedHandoverProcess:false,rule:'Key transfer/storage requires prior agreement; never invent custody or drop-off.'},
+      presence:{confirmedRequirement:'UNKNOWN',rule:'Agree access before service. No confirmed general requirement to stay home; no invented key custody.'}};
   }
+
   if(name==="findClient"){
     if(!c.identityVerified||!c.clientId)return{verified:false,error:"IDENTITY_REQUIRED"};
     const client=await tx.client.findUnique({where:{id:c.clientId},select:{name:true,discountPercent:true,orders:{where:{historical:false},take:3,orderBy:{createdAt:"desc"},select:{service:{select:{code:true}}}}}});
@@ -328,7 +391,10 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     return{facts:state.draftFacts};
   }
   if(name==='requestCustomerInput'){
-    const {intent}=toolSchemas.requestCustomerInput.parse(payload);
+    const {intent,businessAnswer}=toolSchemas.requestCustomerInput.parse(payload);
+    if(ctx.consultation&&!businessAnswer)return{error:'ANSWER_DIRECT_QUESTION_FIRST',message:'Provide a verified direct businessAnswer before the optional qualification question, or answer in plain text without a follow-up.'};
+    if(businessAnswer&&(!ctx.knowledgeEvidence?.length||businessAnswer.includes('?')||!outputAllowed(businessAnswer,state,ctx.factAmounts,ctx.factPercentages,ctx.knowledgeEvidence)))return{error:'BUSINESS_ANSWER_UNVERIFIED',message:'The answer must contain only retrieved facts and approved unit prices, no guessed totals/times or questions.'};
+    if(ctx.consultation&&(intent==='WINDOW_COUNTS'||intent==='WINDOW_TYPE')&&!state.draftFacts?.windowCleaning?.requested)return{error:'INPUT_CONTEXT_REQUIRED',message:'Window inputs require an explicit window-washing selection. Shutters, mosquito nets and other catalog services must not be substituted with window washing.'};
     if(ctx.extractionIncomplete===intent){reliabilityCount(state,'factExtractionFailure');state.unresolvedInput=intent;delete ctx.extractionIncomplete;delete state.pending;delete state.slots;delete state.selectedSlotToken;}
     if(state.upholsteryInquiry&&intent!=='PHONE')return{error:'UPHOLSTERY_MANAGER_INTAKE',message:'Collect only missing name/contact. Manager will clarify furniture and pricing; do not run cleaning or furniture qualification.'};
     if(inputAlreadyKnown(intent,state)){behaviorMetric('repeatedQuestionDetected');behaviorMetric('repeatedQualificationQuestionCount');return{error:'FACT_ALREADY_KNOWN',facts:state.draftFacts};}
@@ -343,7 +409,9 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
       question=content.services.filter(s=>s.id==='regular'||s.id==='deep').map(s=>s.name+': '+s.description).join('\n')+'\n'+exclusions+'\n\n'+question;
     }
     if(!question)return{error:'UNSUPPORTED_INPUT_INTENT'};
-    state.nextInput=intent;ctx.responseText=question;ctx.questionAsked=true;
+    const responseText=businessAnswer?businessAnswer+'\n\n'+question:question;
+    if(responseText.length>1800)return{error:'BUSINESS_ANSWER_UNVERIFIED',message:'Shorten the businessAnswer so the complete answer and one question fit the response limit.'};
+    state.nextInput=intent;ctx.responseText=responseText;ctx.questionAsked=true;
     return{question,intent,finishTurn:true};
   }
   if(name==="createOrUpdateLead")return updateLead(tx,c,ctx,toolSchemas[name].parse(payload));
@@ -379,7 +447,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const pricing=await activePrice(tx,state,c,input);
     state.qualification=input;
     state.draftFacts={...state.draftFacts,service:input.service,area:input.area,soilLevel:input.soilLevel,extras:input.extras,extrasConfirmed:true};
-    const pendingReviewItems=[...new Set([...(facts?.reviewItems??[]),...(pricing.requiresHumanReview?['PRICE_REVIEW']:[]),...(state.review?.reasons??[]).filter(r=>r!=='CONTACT_PREFERENCE')])];
+    const pendingReviewItems=[...new Set([...(facts?.reviewItems??[]),...((facts?.bathroomCount??1)>1?['ADDITIONAL_BATHROOM']:[]),...(state.knowledgeRequests??[]).map(e=>e.code),...(pricing.requiresHumanReview?['PRICE_REVIEW']:[]),...(state.review?.reasons??[]).filter(r=>r!=='CONTACT_PREFERENCE')])];
     state.quote={id:randomUUID(),serviceId:pricing.service.id,input,total:pricing.snapshot.finalPrice,base:pricing.calculated.base,discountPercent:pricing.snapshot.discountPercent,requiresHumanReview:pricing.requiresHumanReview,at:new Date().toISOString(),breakdown:pricing.calculated.extras.map(e=>({...e,amount:e.quantity*e.unitPrice})),pendingReviewItems};
     if(state.priceRequestPending)reliabilityCount(state,'quoteAfterCustomerPriceRequest');
     delete state.priceRequestPending;
@@ -526,6 +594,7 @@ export async function executeAgentTool(db:PrismaClient,ctx:ToolContext,name:stri
   try{
     result=await db.$transaction(async tx=>{
       const c=await assertToolAccess(tx,ctx);
+      if(ctx.allowedTools&&!ctx.allowedTools.includes(typed))return{error:'ANSWER_DIRECT_QUESTION_FIRST',message:'Answer the current business question from verified knowledge. Qualification and booking are not permitted during this consultation turn.'};
       if(ctx.mode==="AUTO")ctx.state=stateOf(c);
       if(pendingHumanStatements(c.summary).length&&!['getBusinessInfo','markUpholsteryInquiry','recordCustomerFacts','reconcileHumanContext','requestHumanHandoff','requestReview'].includes(typed))return{error:'HUMAN_CONTEXT_REQUIRED'};
       const output=await dispatch(tx,c,ctx,typed,parsed.data);
@@ -544,6 +613,6 @@ export async function executeAgentTool(db:PrismaClient,ctx:ToolContext,name:stri
       throw new AgentError("TOOL_EXECUTION_UNCERTAIN");
     }
   }
-  await db.agentToolTrace.create({data:{conversationId:ctx.conversationId,jobId:ctx.jobId,tool:typed,outcome:typeof result.error==="string"?result.error:"OK",entityId:typeof result.leadId==="string"?result.leadId:null,latencyMs:Date.now()-started,shadow:ctx.mode==="SHADOW"}});
+  await db.agentToolTrace.create({data:{conversationId:ctx.conversationId,jobId:ctx.jobId,tool:typed,outcome:typeof result.error==="string"?result.error:"OK",entityId:typed==='searchBusinessKnowledge'?`knowledge:${businessKnowledge.version}:${createHash('sha256').update(normalizeKnowledge(toolSchemas.searchBusinessKnowledge.parse(parsed.data).query)).digest('hex').slice(0,16)}`:typeof result.leadId==="string"?result.leadId:null,latencyMs:Date.now()-started,shadow:ctx.mode==="SHADOW"}});
   return result;
 }

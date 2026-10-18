@@ -13,11 +13,12 @@ export function contextualReason(text:string,reason:HandoffReason|null):HandoffR
  const question=/\?|^(?:как|что|есть|какие|можно ли|do you|how|what|are there|can i|da li|kako|šta|sta|да ли|како|шта)/iu.test(text.trim());
  const exception=/индивидуаль|сделайте.{0,20}скид|дайте.{0,20}скид|хочу.{0,20}скид|special discount|give me.{0,20}discount|\bcustom\b|\bexception\b|poseban popust|dajte.{0,20}popust|посебан попуст|дајте.{0,20}попуст/iu.test(text);
  if(reason==='DISCOUNT'&&question&&!exception)return null;
+ if(reason==='COMPLAINT'&&question&&/policy|procedure|rules|порядок|правила|срок|правил|reklamacij.{0,20}(?:rok|pravil)|политик/iu.test(text)&&!/my (?:order|cleaner)|мой заказ|сломал|повредил|damaged|broke|верните|refund me|поквари|oštet/iu.test(text))return null;
  if(reason==='PAYMENT_REVIEW'&&question&&!/сч[её]т.{0,20}(?:компан|фирм)|invoice|faktur|фактур|только.{0,15}карт|only.{0,15}card/iu.test(text))return null;
  if(reason==='ACCESS_REVIEW'&&question&&!/хран|хранить|keep|store|čuv|cuv|чув|остав.{0,25}(?:навсегда|недел)|leave.{0,25}week/iu.test(text))return null;
  if(reason==='ARRIVAL_REVIEW'&&!/где|where|gde|где|опазд|late|kasn|касн|\beta\b/iu.test(text))return null;
  if(['MOLD','RENOVATION','HAZARDOUS_CLEANING','HEAVY_LIFTING'].includes(reason)){
-  const serviceQuestion=/^(?:вы|а вы|do you|does lumaclean|da li|да ли).{0,70}(?:делаете|убираете|моете|чистите|clean|remove|offer|carry|move|čist|cist|uklanj|pomer|чист|уклањ|помер)/iu.test(text.trim());
+  const serviceQuestion=/^(?:(?:вы|а вы|do you|does lumaclean|da li|да ли).{0,70}|(?=чистите|убираете|делаете|моете))(?:делаете|убираете|моете|чистите|clean|remove|offer|carry|move|čist|cist|uklanj|pomer|чист|уклањ|помер)/iu.test(text.trim())||['MOLD','RENOVATION'].includes(reason)&&question&&/удаляете|чистите|убираете|делаете|do you|can you|čistite li|cistite li|uklanjate|да ли|да ли перете/iu.test(text);
   const actual=/у меня|у нас|мой|мою|нам нужно|мне нужно|помогите|нужно.{0,25}(?:убрать|переставить)|my |our |please |help |treba mi|kod mene|треба ми|код мене/iu.test(text);
   if(serviceQuestion&&!actual)return null;
  }
@@ -25,8 +26,8 @@ export function contextualReason(text:string,reason:HandoffReason|null):HandoffR
  return reason;
 }
 
-const clarificationCodes=new Set(['INVALID_TOOL_ARGUMENTS','INVALID_PHONE','CONTACT_REQUIRED','ADDRESS_REQUIRED','ADDRESS_NOT_FOUND','ADDRESS_SELECTION_REQUIRED','QUOTE_REQUIRED','CUSTOMER_FACTS_REQUIRED','HUMAN_CONTEXT_REQUIRED','FACT_ALREADY_KNOWN','SAME_DAY_CUTOFF','PAST_SERVICE_DATE','PAST_DEPARTURE','URGENT_REPRICE_REQUIRED','INVALID_DATE_WINDOW','CUSTOMER_DATE_MISMATCH','CUSTOMER_CORRECTION_REQUIRES_CURRENT_FACTS','DATE_REQUIRED','TIME_WINDOW_REQUIRED','PAST_START_TIME','SERVICE_CONFIRMATION_REQUIRED','WINDOW_QUANTITIES_REQUIRED','SLOTS_REQUIRED','INPUT_CONTEXT_REQUIRED','UPHOLSTERY_MANAGER_INTAKE','UPHOLSTERY_REVIEW_REQUIRED','REVIEW_REQUIRED','EXPLICIT_CONFIRMATION_REQUIRED','INCOMPLETE_BOOKING','STALE_SLOT','SLOT_NO_LONGER_AVAILABLE','AMBIGUOUS','NO_SLOTS','TOOL_READ_TEMPORARY']);
-export function transientReadFailure(tool:string,error:unknown){return ['getBusinessInfo','findClient'].includes(tool)&&!!error&&typeof error==='object'&&['ETIMEDOUT','ECONNRESET','ECONNREFUSED','P2024','P1001','P1002'].includes(String((error as {code?:string}).code));}
+const clarificationCodes=new Set(['ANSWER_DIRECT_QUESTION_FIRST','BUSINESS_ANSWER_UNVERIFIED','INVALID_TOOL_ARGUMENTS','INVALID_PHONE','CONTACT_REQUIRED','ADDRESS_REQUIRED','ADDRESS_NOT_FOUND','ADDRESS_SELECTION_REQUIRED','QUOTE_REQUIRED','CUSTOMER_FACTS_REQUIRED','HUMAN_CONTEXT_REQUIRED','FACT_ALREADY_KNOWN','SAME_DAY_CUTOFF','PAST_SERVICE_DATE','PAST_DEPARTURE','URGENT_REPRICE_REQUIRED','INVALID_DATE_WINDOW','CUSTOMER_DATE_MISMATCH','CUSTOMER_CORRECTION_REQUIRES_CURRENT_FACTS','DATE_REQUIRED','TIME_WINDOW_REQUIRED','PAST_START_TIME','SERVICE_CONFIRMATION_REQUIRED','WINDOW_QUANTITIES_REQUIRED','SLOTS_REQUIRED','INPUT_CONTEXT_REQUIRED','UPHOLSTERY_MANAGER_INTAKE','UPHOLSTERY_REVIEW_REQUIRED','REVIEW_REQUIRED','EXPLICIT_CONFIRMATION_REQUIRED','INCOMPLETE_BOOKING','STALE_SLOT','SLOT_NO_LONGER_AVAILABLE','AMBIGUOUS','NO_SLOTS','TOOL_READ_TEMPORARY']);
+export function transientReadFailure(tool:string,error:unknown){return ['getBusinessInfo','searchBusinessKnowledge','findClient'].includes(tool)&&!!error&&typeof error==='object'&&['ETIMEDOUT','ECONNRESET','ECONNREFUSED','P2024','P1001','P1002'].includes(String((error as {code?:string}).code));}
 export function errorDisposition(code:string):'CLARIFY'|'REVIEW'|'HARD' {
  if(['FACT_CONFIRMATION_REQUIRED','FACT_EVIDENCE_REJECTED'].includes(code))return 'CLARIFY';
  if(clarificationCodes.has(code)||code==='SHADOW_MUTATION_BLOCKED')return 'CLARIFY';
