@@ -7,7 +7,7 @@ import {serviceDatePolicy,buildAgentTemporalContext} from "@/lib/agent/temporal"
 import { writeAudit } from "./audit";
 import {enqueueLeadReview} from './lead-notifications';
 import {limitNewWebsiteLead} from './lead-rate-limit';
-import {publishNotifications} from '@/lib/agent/notifications';
+import {publishNotifications,deliverNotification} from '@/lib/agent/notifications';
 export async function saveWebsiteLead(db: PrismaClient, payload: unknown, source?: string) {
   const input = websiteLeadSchema.parse(payload);
   input.extras = input.extras
@@ -102,8 +102,14 @@ export async function notifyWebsiteLead(
   lead: { id: string; reference: string },
   input: ReturnType<typeof websiteLeadSchema.parse>,
   send: typeof fetch = fetch,
+  workers = {publish:publishNotifications,deliver:deliverNotification},
 ) {
   // Retain the public helper signature for callers; all delivery goes through the outbox.
-  void lead; void input; void send;
-  try{await publishNotifications(db);}catch{/* Recovery reads committed PENDING rows. */}
+  void input; void send;
+  try{
+    await workers.publish(db);
+    const event=await db.notification.findUnique({where:{eventKey:`website-lead:${lead.id}:telegram`}});
+    // The same leased worker can deliver after the HTTP response if the queue is down.
+    if(event?.deliveryState==='PENDING'&&!event.publishedAt&&event.lastErrorCode==='QUEUE_UNAVAILABLE')await workers.deliver(db,event.id);
+  }catch{/* Recovery reads committed PENDING rows. */}
 }

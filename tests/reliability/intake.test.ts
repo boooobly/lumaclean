@@ -85,6 +85,16 @@ test('reliability: isolated PostgreSQL intake and delivery regressions',{skip:!u
       const lead=await saveWebsiteLead(db,payload());assert(await db.notification.count({where:{eventKey:`website-lead:${lead.id}:telegram`}}));
       await db.user.update({where:{id:admin.id},data:{active:true}});
     });
+    await t.test('queue outage falls back to the same leased notification worker after persistence',async()=>{
+      const input=websiteLeadSchema.parse(payload()),lead=await saveWebsiteLead(db,input);
+      const n=await db.notification.findUniqueOrThrow({where:{eventKey:`website-lead:${lead.id}:telegram`}});
+      let sends=0;
+      await notifyWebsiteLead(db,lead,input,async()=>assert.fail('No legacy direct send'),{
+        publish:async()=>{await db.notification.update({where:{id:n.id},data:{lastErrorCode:'QUEUE_UNAVAILABLE'}});},
+        deliver:async(database,id)=>deliverNotification(database,id,async()=>{sends++;return{status:'DELIVERED',externalMessageId:'synthetic-queue-fallback'};}),
+      });
+      assert.equal(sends,1);assert.equal((await db.notification.findUniqueOrThrow({where:{id:n.id}})).deliveryState,'DELIVERED');
+    });
     await t.test('unconfigured Telegram preserves lead and retry state; recovery may send only once',async()=>{
       const input=payload(),lead=await saveWebsiteLead(db,input),eventKey=`website-lead:${lead.id}:telegram`;
       await notifyWebsiteLead(db,lead,websiteLeadSchema.parse(input),async()=>assert.fail('HTTP intake must not send Telegram'));

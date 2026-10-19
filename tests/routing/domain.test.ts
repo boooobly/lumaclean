@@ -425,6 +425,7 @@ test("Google matrix request uses TRANSIT, status mask, arrival time", async () =
   const result = await new GoogleRoutesProvider(
     "test-key",
     mock as typeof fetch,
+    () => new Date("2026-10-01T12:00:00Z"),
   ).getRouteMatrix([point], [other], "TRANSIT", request.at, "arrival");
   const body = JSON.parse(String(sent!.body));
   assert.equal(body.travelMode, "TRANSIT");
@@ -445,6 +446,7 @@ test("Google no route stays unavailable", async () => {
   const r = await new GoogleRoutesProvider(
     "test",
     mock as typeof fetch,
+    () => new Date("2026-10-01T12:00:00Z"),
   ).getTravelTime(request);
   assert.equal(r.status, "NO_ROUTE");
   assert.equal(r.durationSeconds, null);
