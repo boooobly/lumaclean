@@ -349,21 +349,22 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 1003,
+  "tests": 1004,
   "skipped": 28,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-19T21:35:06.556Z",
+  "checkedAt": "2026-10-19T21:42:03.697Z",
   "suites": [
     "artifacts/rc-suite.txt",
-    "artifacts/rc-reliability.txt"
+    "artifacts/rc-reliability.txt",
+    "artifacts/rc-migration-chain.txt"
   ],
   "verificationScope": "Integrated PR21/23/24. Full local suite plus 17 isolated PostgreSQL HTTP/outbox regressions. Neon RC additive migration and historical fingerprints verified. Native live booking proof and real test Telegram remain separate BLOCKED release gates; this certificate does not assert them. Visual browser QA blocked by Work setting.",
   "previousVerification": {
-    "fingerprint": "e5a9341d9917b7ba2af3cf7ff5d5df85c8df2b3fc42f1bd3a6557122b1e9900c",
-    "tests": 916,
-    "checkedAt": "2026-10-19T19:19:35.417Z"
+    "fingerprint": "e2b31d046845928c4e227879a93d8c2f06a1c20677cf60050d585ec45f005bf2",
+    "tests": 1003,
+    "checkedAt": "2026-10-19T21:35:06.556Z"
   }
 }
