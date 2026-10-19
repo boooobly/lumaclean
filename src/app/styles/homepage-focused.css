@@ -52,7 +52,7 @@
 .site-home .estimate-focused .site-extra-options label:nth-child(n) { padding:12px 0; border-right:0; }
 .site-home .estimate-extras-disclosure { border-block:1px solid var(--lc-line); }
 .site-home .estimate-extras-disclosure > summary { display:flex; justify-content:space-between; gap:16px; padding:20px 0; cursor:pointer; font-size:14px; font-weight:600; }
-.site-home .estimate-extras-disclosure > summary span { color:var(--lc-teal-ink); font-size:12px; }
+.site-home .estimate-extras-disclosure > summary span { flex-shrink:0; align-self:center; color:var(--lc-teal-ink); font-size:12px; white-space:nowrap; }
 .site-home .estimate-other { margin-top:18px; font-size:12px; }
 .site-home .estimate-other summary { cursor:pointer; padding:10px 0; color:var(--lc-teal-ink); }
 .site-home .estimate-other .service-options { margin-top:8px; }
