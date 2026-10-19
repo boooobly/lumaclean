@@ -4,7 +4,8 @@
 .site-home .rate-result { min-width:0; }
 .site-home .rate-focus .rate-result-label { color:var(--lc-teal-ink); font-weight:650; }
 .site-home .rate-result strong { display:flex; align-items:baseline; gap:10px; line-height:1.1; font-variant-numeric:tabular-nums; }
-.site-home .rate-result .rate-amount { min-width:6ch; font:inherit; letter-spacing:inherit; }
+.site-home .rate-result .rate-amount { font:inherit; letter-spacing:inherit; }
+.site-home .rate-result strong { min-height:1.1em; }
 .site-home .rate-result strong small { font:400 18px var(--lc-font-text); letter-spacing:0; white-space:nowrap; }
 .site-home .rate-selection { margin:3px 0 0; color:var(--lc-ink-soft); font-size:13px; line-height:1.5; }
 .site-home .rate-controls { gap:18px; }
@@ -33,6 +34,9 @@
 .site-home .homepage-estimate .estimate-title p { color:var(--lc-paper); }
 .site-home .homepage-estimate .estimate-sheet { min-height:0; border:0; border-radius:var(--lc-radius-sm); overflow:clip; background:var(--lc-paper-bright); color:var(--lc-ink); grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); }
 .site-home .homepage-estimate .estimate-form { padding:40px; gap:32px; }
+.site-home .estimate-focused .estimate-request-kind select { appearance:none; min-height:52px; padding:14px 44px 14px 16px; border-color:var(--lc-line); border-radius:var(--lc-radius-sm); background:var(--lc-paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%2310252b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 18px center; font-size:16px; }
+.site-home .estimate-focused .estimate-request-kind select:hover { border-color:var(--lc-teal-ink); }
+.site-home .estimate-focused .estimate-request-kind select:focus-visible { outline-color:var(--lc-teal-ink); }
 .site-home .homepage-estimate .receipt-body { padding:30px; }
 .site-home .homepage-estimate .receipt-lines { margin-top:24px; }
 .site-home .homepage-estimate .receipt-total { margin-top:24px; padding-top:0; }
@@ -82,6 +86,12 @@
 .site-home .contact-request button:disabled { opacity:.65; cursor:default; }
 .site-home .contact-request p { margin:0; font-size:14px; }
 .site-home .contact-request [aria-invalid=true] { outline:2px solid #ffb5a7; outline-offset:3px; }
+/* Keep the closed chat in the form's outer gutter instead of across its CTA. */
+@media(min-width:681px) {
+  body:has(.site-home) .website-chat:has(.website-chat-launcher) { right:12px; }
+  body:has(.site-home) .website-chat-launcher { width:44px; min-height:44px; justify-content:center; padding:10px; }
+  body:has(.site-home) .chat-launcher-full { display:none; }
+}
 @media(max-width:1100px) { .site-home .homepage-estimate .estimate-form { padding:30px; } .site-home .estimate-focused .estimate-extra-group { grid-template-columns:1fr; } }
 @media(max-width:900px) {
   .site-home .rate-controls { grid-template-columns:1fr 1fr; }
@@ -102,5 +112,11 @@
   .site-home .estimate-focused .site-extra-counter button { min-width:44px; min-height:44px; }
   .site-home .homepage-estimate .receipt-total strong { font-size:42px; }
   .site-home .homepage-contact { padding-block:68px; }
+  .site-home .evidence-title { min-height:0; padding:28px 24px; }
+  .site-home .evidence-title h2 { font-size:clamp(36px,10.7vw,44px); text-wrap:initial; }
+  .site-home .evidence-title p { margin:28px 0 0; }
+  .site-home .evidence-ledger article { min-height:0; }
+  .site-home .evidence-ledger h3 { margin-top:28px; }
+  .site-home .site-mobile-total { box-shadow:0 6px 16px rgba(16,37,43,.12); }
 }
 @media(prefers-reduced-motion:reduce) { .site-home .rate-highlight,.site-home .rate-grid .ledger-row > *,.site-home .rate-controls select { transition:none; } }

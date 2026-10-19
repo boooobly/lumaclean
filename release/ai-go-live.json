@@ -1,5 +1,5 @@
 {
-  "fingerprint": "60b645710a57544b91d27867abb911f7b3d6a4695f12eeb6abf17aeaeeeada3c",
+  "fingerprint": "7b5b13eb93b58f56bc35f11e00202a0e153cb44f5c3c9b985093c6bc30ae7680",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -74,10 +74,10 @@
     "src/app/icon.svg": "01cde45ba72881463221bd30579e4cb1240bdd7b5eb8059f46edcc35da1d6e0f",
     "src/app/robots.ts": "d76d0417be060de32e5948a59bfcd5b886a9d2cca4ed429900cd089670d4d637",
     "src/app/sitemap.ts": "56be180c562ec64fce5203eab85076e99b00ba263b0848a95d430d2c819d4e04",
-    "src/app/styles/homepage-focused.css": "5dfc80b123d4f946e59863828369be40de6f056ab6bafedf0573007a9f0cf2db",
+    "src/app/styles/homepage-focused.css": "57e2b42333299fbe8ac38dc4c0bf9f6d0e8b920830b7478fb45267e365eb22a6",
     "src/app/styles/seo-additions.css": "0277eb68bc6dcee536ec85d74ec752d23e1af5acaf61fa19be7cd461f122a644",
     "src/app/styles/site-base.css": "34c114a0066c2f3bfd9c25e96cbfa6fa0125730c219c2f46d8075d4e00852256",
-    "src/app/styles/site-production.css": "7ead8e66c66d37375f0ab7d04f7f60342f51821d5314c1b92ca9b788e2329226",
+    "src/app/styles/site-production.css": "475574360f0edc0fde7462f8a6469ba6fb108a54bf8b322c7b829b686cde1f0a",
     "src/app/styles/tokens.css": "063a64ba9dbcba6fec6298c366b340044cdb2ea7db1c6b48e0ada66bc2fe3f08",
     "src/app/[locale]/articles/articles.css": "57ffe965393896f0bbb5200eb0f63ba9f7a706f85f13aaac39f42fc55e56f30f",
     "src/app/[locale]/articles/layout.tsx": "298f68c0324d3598bd2f0b66d59bd78e03d095ff05f0d6543e413cd94b4539b4",
@@ -152,7 +152,7 @@
     "src/components/site/upholstery-fields.tsx": "59f4d5a96276d564c9110af58c6a63f965521a8509430b5913b816b3d41c49a6",
     "src/components/site/upholstery-photo-button.tsx": "314b90e555af082ef005c5bda9ac6c67f70e828794d11a28ebb08930c85357b7",
     "src/components/site/upholstery-teaser.tsx": "433b1917269f340a61f530eac822a483622603a445ee5ee460eb20d06107dadb",
-    "src/components/site/upholstery.css": "29b3c18f684300201c3b42047097e78b127f22ab6db5889c12c0423d41ce4598",
+    "src/components/site/upholstery.css": "ff4f97a2413dd41a5659070d39501f7cc17d8bc89f337cfe5a26003e11a5293a",
     "src/components/site/website-chat.css": "59470fd58e6c7ffae8bcc78d28d377c196d04a166de64d1a578673fb04da0862",
     "src/components/site/website-chat.tsx": "93241f0983f22151f356f14280500b7f2b97a778c37b8bf9bcb6a0e98d093784",
     "src/i18n/request.ts": "9e8c03ca10ec8022d7c4e46ecf5e25c4d9e723d9f7c9b04fc8a5401d00aead7a",
@@ -345,22 +345,21 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 993,
+  "tests": 916,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-18T19:42:13.163Z",
+  "checkedAt": "2026-10-19T19:14:02.859Z",
   "suites": [
-    "916 passing agent/admin/CRM/finance/scheduling checks; 26 environment-dependent checks skipped",
-    "70 routing checks pass with the fixed 2026-10-02 fixture clock; 2 integrations skipped. At the real current date two unchanged Google routing unit tests reject their stale October 2 fixture before reaching the mock.",
-    "7 actual database checks: optional names, CONTACT_REQUEST, parallel retry, manager notification via injected delivery, window prices, upholstery and protected historical fingerprints"
+    "916 existing agent/admin/CRM/finance/scheduling checks pass; 26 environment-dependent checks skipped. Current CSS-only UI polish also passes TypeScript, ESLint (two existing image warnings) and production build.",
+    "Prior functional and isolated database verification is recorded in docs/homepage-focused-ux.md; those integrations were not rerun for this CSS-only change."
   ],
   "lintWarnings": "Two pre-existing next/no-img-element warnings in unchanged website-chat.tsx",
-  "verificationScope": "Focused homepage sections and existing website Lead intake. Production baseline 93e8e3d; approved window tariff patch only from PR #21. No agent model/provider, prompts, channel modes, scheduling or booking changes. The source inventory is refreshed after actual tests and isolated migrations; live provider consultation, source-bound native booking proof, owner visual approval and production migration remain distinct release gates.",
+  "verificationScope": "CSS-only visual polish on the focused homepage UX branch: responsive header, price spacing, request select, compact closed chat, mobile terms and public upholstery page. No application logic, schema, migrations, business data, booking, AI configuration, prompts, provider or channel mode changed. Source inventory refreshed after the current regression checks. Owner visual approval and the existing production release gates remain required.",
   "previousVerification": {
-    "fingerprint": "a6050a0e6c062a46cb89ef25e23c47fa2ddf638b679101d7158e8907a7ac4b79",
-    "tests": 971,
-    "checkedAt": "2026-10-18T10:23:09.862Z"
+    "fingerprint": "60b645710a57544b91d27867abb911f7b3d6a4695f12eeb6abf17aeaeeeada3c",
+    "tests": 993,
+    "checkedAt": "2026-10-18T19:42:13.163Z"
   }
 }
