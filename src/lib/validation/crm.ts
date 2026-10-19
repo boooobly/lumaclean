@@ -170,7 +170,7 @@ export const manualLeadSchema = z
 export const websiteLeadSchema = z
   .object({
     submissionId: z.uuid(),
-    name: z.string().trim().min(2).max(100),
+    name: text(100).refine(v => v === null || v.length >= 2, 'Укажите имя или оставьте поле пустым'),
     phone: z.string().trim().min(6).max(40),
     comment: text(1000),
     estimate: text(3000),
@@ -188,10 +188,12 @@ export const websiteLeadSchema = z
       .optional(),
   })
   .strict().transform(v=>({...v,requestKind:v.requestKind??(v.upholsteryRequested?'CLEANING_UPHOLSTERY':'CLEANING'),upholsteryRequested:v.upholsteryRequested??(v.requestKind==='UPHOLSTERY'||v.requestKind==='CLEANING_UPHOLSTERY')})).superRefine((v,ctx)=>{
-    if(v.requestKind==='UPHOLSTERY'){
+    if(v.requestKind==='CONTACT_REQUEST'){
+      if(v.service!==undefined||v.area!==undefined||v.extras.length||v.urgent||v.estimate||v.name||v.comment||v.upholsteryRequested)ctx.addIssue({code:'custom',message:'Contact request cannot contain cleaning or customer details beyond phone'});
+    }else if(v.requestKind==='UPHOLSTERY'){
       if(v.service!==undefined||v.area!==undefined||v.extras.length||v.urgent||v.estimate)ctx.addIssue({code:'custom',message:'Standalone enquiry cannot contain a cleaning quote'});
     }else if(!v.service||v.area===undefined)ctx.addIssue({code:'custom',message:'Cleaning service and area required'});
-    if(v.upholsteryRequested!==(v.requestKind!=='CLEANING'))ctx.addIssue({code:'custom',message:'Inconsistent request intent'});
+    if(v.upholsteryRequested!==(['UPHOLSTERY','CLEANING_UPHOLSTERY'].includes(v.requestKind)))ctx.addIssue({code:'custom',message:'Inconsistent request intent'});
   });
 export const commandSchemas = {
   "lead-create": manualLeadSchema,

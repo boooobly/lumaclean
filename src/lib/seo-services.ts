@@ -1,5 +1,6 @@
 import type {Locale} from "@/i18n/routing";
 import type {ServiceId, CatalogueServiceId} from "@/lib/pricing";
+import {extrasPrices, formatRsd} from "@/lib/pricing";
 import {upholsteryPath} from '@/lib/upholstery-content';
 
 export type ServiceSeoContent = {
@@ -107,7 +108,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
       faq: [
         {q: "Сколько стоит уборка квартиры в Белграде?", a: "Поддерживающая уборка стоит от 4 900 RSD. Точный ориентир зависит от площади, состояния квартиры и дополнительных работ."},
         {q: "Можно заказать уборку в день обращения?", a: "Да, если есть свободное окно. Для срочного выезда в тот же день к стоимости добавляется 20%."},
-        {q: "Входит ли мойка окон?", a: "Окна оплачиваются отдельно: стандартное — 1 000 RSD за окно до 2 м², большое — 1 500 RSD за окно до 3 м². Обе стороны, рамы и подоконник включены."},
+        {q: "Входит ли мойка окон?", a: `Окна оплачиваются отдельно: стандартное — ${formatRsd(extrasPrices.standardWindow, "ru")} за окно до 2 м², большое — ${formatRsd(extrasPrices.largeWindow, "ru")} за окно до 3 м². Обе стороны, доступные рамы, пазы и подоконник включены.`},
         {q: "Нужно ли покупать чистящие средства?", a: "Нет. Мы можем приехать со своими средствами или использовать ваши — как удобнее и безопаснее для поверхностей."},
       ],
       image: "/media/living-room-clean.jpg",
@@ -245,7 +246,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
         {q: "Koliko košta čišćenje stana u Beogradu?", a: "Održavajuće čišćenje počinje od 4.900 RSD. Tačan okvir zavisi od kvadrature, stanja i dodatnih radova."},
         {q: "Koja je razlika između redovnog i generalnog čišćenja?", a: "Redovno čišćenje obuhvata prašinu, podove, kuhinjske površine spolja, kupatilo i ogledala. Generalno čišćenje predviđa više vremena za vrata, lajsne, prekidače, frontove i zahtevne zone."},
         {q: "Mogu li da zakažem čišćenje istog dana?", a: "Da, ako postoji slobodan termin. Hitni dolazak istog dana uvećava cenu za 20%."},
-        {q: "Da li su prozori uključeni?", a: "Prozori se doplaćuju: standardni 1.000 RSD po prozoru do 2 m², veliki 1.500 RSD po prozoru do 3 m². Obe strane, ramovi i prozorska daska su uključeni."},
+        {q: "Da li su prozori uključeni?", a: `Prozori se doplaćuju: standardni ${formatRsd(extrasPrices.standardWindow, "sr")} po prozoru do 2 m², veliki ${formatRsd(extrasPrices.largeWindow, "sr")} po prozoru do 3 m². Obe strane, dostupni ramovi, žlebovi i prozorska daska su uključeni.`},
         {q: "Da li moram da kupim sredstva?", a: "Ne. Možemo doneti svoja sredstva ili koristiti vaša, u zavisnosti od vaših želja i površina."},
       ],
       image: "/media/living-room-clean.jpg",
@@ -383,7 +384,7 @@ export const serviceSeoContent: Record<Locale, Record<ServiceId, ServiceSeoConte
       faq: [
         {q: "How much does apartment cleaning cost in Belgrade?", a: "Regular cleaning starts at 4,900 RSD. The exact guide depends on floor area, condition and selected extras."},
         {q: "Can I book a same-day clean?", a: "Yes, when a slot is available. An urgent same-day visit adds 20% to the price."},
-        {q: "Are windows included?", a: "Windows cost extra: 1,000 RSD per standard window up to 2 m² and 1,500 RSD per large window up to 3 m². Both sides, frames and sill are included."},
+        {q: "Are windows included?", a: `Windows cost extra: ${formatRsd(extrasPrices.standardWindow, "en")} per standard window up to 2 m² and ${formatRsd(extrasPrices.largeWindow, "en")} per large window up to 3 m². Both sides, accessible frames, grooves and sill are included.`},
         {q: "Do I need to buy cleaning products?", a: "No. We can bring our own or use yours, depending on your preferences and the surfaces in your home."},
       ],
       image: "/media/living-room-clean.jpg",

@@ -35,7 +35,7 @@ export default async function LeadPage({
   return (
     <>
       <CrmHeader
-        title={lead.name}
+        title={lead.name ?? "Имя не указано"}
         subtitle={lead.reference ?? "Заявка"}
         back="/admin/leads"
         action={
@@ -49,11 +49,11 @@ export default async function LeadPage({
           <h2>
             Исходные данные <Chip status={lead.status} />
           </h2>
-          {leadRequestKind(lead)!=='CLEANING'&&lead.status!=='CONVERTED'&&<p className="crm-warning">Требуется уточнение химчистки</p>}
+          {['UPHOLSTERY','CLEANING_UPHOLSTERY'].includes(leadRequestKind(lead))&&lead.status!=='CONVERTED'&&<p className="crm-warning">Требуется уточнение химчистки</p>}
           <Facts secondary={["Язык", "Канал"]} technical={["Нормализованный телефон"]}
             items={[
               ["Тип обращения",requestKindLabels[leadRequestKind(lead)]],
-              ["Имя", lead.name],
+              ["Имя", lead.name ?? "Не указано"],
               [
                 "Телефон",
                 <a
@@ -76,7 +76,7 @@ export default async function LeadPage({
                   >
                 )[lead.locale ?? ""] ?? lead.locale,
               ],
-              ["Услуга", lead.service?.name],
+              ["Услуга", lead.service?.name ?? "Не указана"],
               ["Площадь", lead.area ? `${lead.area} м²` : "—"],
               [lead.upholsteryQuote?'Предыдущий расчёт услуг':leadRequestKind(lead)==='CLEANING_UPHOLSTERY'?'Уборка без химчистки':'Оценка', lead.estimatedPrice===null?'Цена после уточнения':money(lead.estimatedPrice)],
               ["Срочность", lead.urgent ? "Да" : "Нет"],

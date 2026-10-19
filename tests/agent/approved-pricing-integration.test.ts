@@ -22,6 +22,12 @@ test('actual AI tool, active CRM catalogue and public calculator agree', {skip:!
     const cases=serviceIds.flatMap(service=>[39,40,59,60,79,80,99,100,120].map(area=>({service,area,extras:[] as {code:keyof typeof extrasPrices;quantity:number}[]})));
     for(const [code] of Object.entries(extrasPrices)) cases.push({service:'regular',area:39,extras:[{code:code as keyof typeof extrasPrices,quantity:['ironing','cabinets','standardWindow'].includes(code)?2:1}]});
     cases.push({service:'regular',area:39,extras:[{code:'fridge',quantity:1},{code:'oven',quantity:1}]});
+    const windows: [typeof cases[number]['extras'],number][] = [
+      [[{code:'standardWindow',quantity:1}],700], [[{code:'standardWindow',quantity:2}],1400],
+      [[{code:'largeWindow',quantity:1}],1000], [[{code:'largeWindow',quantity:2}],2000],
+      [[{code:'standardWindow',quantity:2},{code:'largeWindow',quantity:1}],2400],
+    ];
+    for(const [extras] of windows) cases.push({service:'regular',area:39,extras});
     for (const input of cases) await t.test(`${input.service}/${input.area}/${JSON.stringify(input.extras)}`,async()=>{
       const state={draftFacts:{...input,soilLevel:'NORMAL' as const,extrasConfirmed:true as const}};
       const c=await db.conversation.create({data:{channel:'WEBSITE',locale:'ru',externalThreadId:'pricing-test:'+randomUUID(),state:json(state)}});owned.push(c.id);
@@ -32,6 +38,8 @@ test('actual AI tool, active CRM catalogue and public calculator agree', {skip:!
       if(!settings.aiAllowedServices.includes(input.service)){assert.equal(result.error,'UNSUPPORTED_SERVICE');return;}
       assert.equal(result.error,undefined,JSON.stringify(result));
       const publicQuote=calculatePrice(input.service,input.area,input.extras,false);
+      const windowCase=windows.find(([extras])=>JSON.stringify(extras)===JSON.stringify(input.extras));
+      if(windowCase) assert.equal(result.total,4900+windowCase[1]);
       assert.equal(result.total,publicQuote.total);assert.equal(result.base,publicQuote.base);
       assert.deepEqual(quote(input.service,input.area,input.extras,false),publicQuote);
       const rows=await db.serviceExtra.findMany({where:{code:{in:input.extras.map(e=>e.code)}}});

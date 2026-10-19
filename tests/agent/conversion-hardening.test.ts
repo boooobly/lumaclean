@@ -43,9 +43,9 @@ test('exact incident fact replay preserves intake and deterministic quote path',
   for(const intent of ['EXTRAS','SERVICE_TYPE','AREA','SOIL_LEVEL'])assert(inputAlreadyKnown(intent,s));
   assert.equal(nextQualification(s),undefined);assert(bookingReviewBlocked(s));
   const general=quote('deep',57,s.draftFacts!.extras!,false),regular=quote('regular',57,s.draftFacts!.extras!,false);
-  assert.equal(general.total,20900);assert.equal(regular.total,15500);assert.equal(general.extras.reduce((sum,e)=>sum+e.quantity*e.unitPrice,0),9500);
+  assert.equal(general.total,17800);assert.equal(regular.total,12400);assert.equal(general.extras.reduce((sum,e)=>sum+e.quantity*e.unitPrice,0),6400);
   s.quote={id:'q',serviceId:'s',input:{service:'deep',area:57,extras:s.draftFacts!.extras!,soilLevel:'NORMAL',urgent:false},total:general.total,base:general.base,discountPercent:0,requiresHumanReview:true,at:at.toISOString(),breakdown:general.extras.map(e=>({...e,amount:e.quantity*e.unitPrice}))};
-  const text=quoteText(s,'sr-Latn');assert(text.includes('20.900'));assert(text.includes('7.500'));assert(text.includes('2.000'));assert(text.includes('Roletne'));assert(outputAllowed(text,s));
+  const text=quoteText(s,'sr-Latn');assert(text.includes('17.800'));assert(text.includes('5.000'));assert(text.includes('1.400'));assert(text.includes('Roletne'));assert(outputAllowed(text,s));
   s.review={reasons:['CUSTOM_EXTRA']};const thanks=await conversionIntake(()=>s,'Ok, hvala','sr-Latn',async()=>assert.fail('A thank-you under review must not repeat qualification'));assert(thanks?.includes('Hvala vama'));assert(!thanks?.includes('?'));
   turn(s,'Možete li SMS-om?');assert.equal(s.preferredContactChannel,'SMS');assert(phoneOffer('Da vam pošaljem broj tel'));
   turn(s,'+381 60 123-4567');assert.equal(s.phone,'+381601234567');assert(bookingReviewBlocked(s));

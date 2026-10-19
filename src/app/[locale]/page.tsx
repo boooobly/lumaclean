@@ -6,13 +6,15 @@ import {hasLocale} from "next-intl";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 import {ApartmentExperience} from "@/components/apartment-experience";
+import {ContactRequest} from '@/components/site/contact-request';
+import {homepageUxCopy} from '@/lib/homepage-ux-content';
 import {Estimate} from "@/components/site/estimate";
 import {JourneyHandoff} from "@/components/site/journey-handoff";
 import {SiteHeader} from "@/components/site/site-header";
 import {Rates} from "@/components/site/rates";
 import {UpholsteryTeaser} from '@/components/site/upholstery-teaser';
 import {routing, type Locale} from "@/i18n/routing";
-import {businessContact, businessContactCopy, getMessengerLinks, googleBusinessProfile, whatsappContact} from "@/lib/contacts";
+import {businessContact, businessContactCopy, googleBusinessProfile, whatsappContact} from "@/lib/contacts";
 import {GoogleProfileLinks} from "@/components/site/google-profile-links";
 import {siteContent} from "@/lib/content";
 import {extrasPrices, formatRsd, priceMatrix} from "@/lib/pricing";
@@ -52,7 +54,7 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
   setRequestLocale(locale);
   const c = siteContent[locale];
   const v = editorialContent[locale];
-  const messengerLinks = getMessengerLinks(locale);
+  const ux = homepageUxCopy[locale];
   const extraKeys = ["standardWindow", "largeWindow", "balcony", "fridge", "oven", "microwave", "hood", "dishwasher", "washingMachine", "cabinets", "ironing", "steam", "petHair", "linen"] as const;
   const organizationJsonLd = {
     "@context": "https://schema.org",
@@ -149,15 +151,16 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
           </div>
         </section>
 
-        <section className="method-section" id="method">
-          <div className="shell method-shell">
-            <div className="method-copy"><div className="section-number light">{v.method.number}</div><h2>{v.method.title}</h2><p>{v.method.body}</p></div>
-            <Image className="method-route" src="/media/floorplan-route.svg" alt="" width={1400} height={900}/>
-            <ol className="method-steps">{c.process.steps.map((step) => <li key={step.number}><span>{step.number}</span><div><strong>{step.title}</strong><p>{step.text}</p></div></li>)}</ol>
+        <section className="estimate-section homepage-estimate" id="estimate-section">
+          <div className="shell">
+            <div className="section-number">{v.estimate.number}</div>
+            <div className="estimate-title"><h2>{v.estimate.title}</h2><p>{v.estimate.body}</p></div>
+            <Estimate focused key={initialRequest} initialRequest={initialRequest} locale={locale} copy={v.estimate} content={c}/>
           </div>
         </section>
 
         <section className="editorial-section evidence-section" id="terms">
+          <span id="method" className="homepage-method-anchor" aria-hidden="true"/>
           <div className="shell">
             <div className="section-number">{v.evidence.number}</div>
             <div className="evidence-grid"><div className="evidence-title"><h2>{v.evidence.title}</h2><p>{v.evidence.body}</p></div><figure><Image src="/media/material-textile.webp" alt="" width={1024} height={1024}/></figure></div>
@@ -184,15 +187,9 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
           </div>
         </section>
 
-        <section className="estimate-section" id="estimate">
-          <div className="shell">
-            <div className="section-number">{v.estimate.number}</div>
-            <div className="estimate-title"><h2>{v.estimate.title}</h2><p>{v.estimate.body}</p></div>
-            <Estimate key={initialRequest} initialRequest={initialRequest} locale={locale} copy={v.estimate} content={c}/>
-          </div>
-        </section>
 
-        <section className="closing-section"><div className="shell closing-grid"><div><div className="section-number light">{v.closing.number}</div><h2>{v.closing.title}</h2></div><div><p>{v.closing.body}</p><a className="site-closing-primary" href="#estimate">{v.closing.cta}<ArrowIcon /></a><div className="site-direct-contacts"><span>{v.closing.direct}</span><div>{messengerLinks.map((contact) => <a className="site-contact-link" href={contact.href} target={contact.id === "viber" ? undefined : "_blank"} rel={contact.id === "viber" ? undefined : "noreferrer"} key={contact.id}><small>{contact.label}</small><strong>{contact.value}</strong><i aria-hidden="true"><ArrowIcon /></i></a>)}</div></div></div></div></section>
+
+        <section className="closing-section homepage-contact" id="contact"><div className="shell closing-grid"><div><div className="section-number light">{ux.contactNumber}</div><h2>{ux.contactTitle}</h2></div><div><p>{ux.contactBody}</p><ContactRequest locale={locale} copy={v.estimate}/></div></div></section>
       </main>
       <footer className="site-footer"><div className="shell"><Image src="/brand/logo-primary.svg" alt="LumaClean" width={622} height={132}/><span>{v.footer}</span><Link href={`/${locale}/privacy-policy`}>{legalContent[locale].privacy}</Link><Link href={`/${locale}/data-deletion`}>{legalContent[locale].deletion}</Link>{getVisibleArticles().length > 0 && <Link href={`/${locale}/articles`}>{articleUi[locale].all}</Link>}<div className="site-footer-locales">{(["ru", "sr", "en"] as Locale[]).map((item) => <Link className={item === locale ? "active" : ""} href={`/${item}`} key={item}>{item.toUpperCase()}</Link>)}</div><GoogleProfileLinks locale={locale}/></div></footer>
     </div>

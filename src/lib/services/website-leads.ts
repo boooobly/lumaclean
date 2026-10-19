@@ -7,7 +7,7 @@ import {serviceDatePolicy,buildAgentTemporalContext} from "@/lib/agent/temporal"
 import { writeAudit } from "./audit";
 import {enqueueLeadReview} from './lead-notifications';
 import {limitNewWebsiteLead} from './lead-rate-limit';
-import {publishNotifications,deliverNotification} from '@/lib/agent/notifications';
+import {publishNotifications} from '@/lib/agent/notifications';
 export async function saveWebsiteLead(db: PrismaClient, payload: unknown, source?: string) {
   const input = websiteLeadSchema.parse(payload);
   input.extras = input.extras
@@ -38,13 +38,14 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown, source
       if(source)await limitNewWebsiteLead(tx,source);
       if(input.urgent){const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}}),now=new Date();const date=buildAgentTemporalContext(now,settings,now).nowLocalDate;if('error' in serviceDatePolicy(date,settings,now))throw new CrmError('VALIDATION','SAME_DAY_CUTOFF');}
       const standalone=requestKind==='UPHOLSTERY';
-      const service = await tx.service.findUnique({
+      const contact=requestKind==='CONTACT_REQUEST';
+      const service = contact?null:await tx.service.findUnique({
         where: { code: standalone?'upholstery':input.service! },
         select: { id: true, active: true },
       });
-      if (!service?.active)
+      if (!contact&&!service?.active)
         throw new CrmError("VALIDATION", "Service unavailable");
-      const calculated = standalone?null:quote(
+      const calculated = standalone||contact?null:quote(
         input.service!,
         input.area!,
         input.extras,
@@ -67,9 +68,9 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown, source
           phone: input.phone,
           normalizedPhone: normalizedPhone(input.phone),
           locale: input.locale,
-          requestKind,upholsteryRequested,humanReviewRequired:upholsteryRequested,consentAt:new Date(),
-          serviceId: service.id,
-          area: standalone?null:input.area,
+          requestKind,upholsteryRequested,humanReviewRequired:upholsteryRequested||contact,consentAt:new Date(),
+          serviceId: service?.id??null,
+          area: standalone||contact?null:input.area,
           estimatedPrice: calculated?.total??null,
           urgent: input.urgent,
           comment: input.comment,

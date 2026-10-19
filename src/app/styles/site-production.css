@@ -37,7 +37,14 @@
 .site-page .site-header:not(.is-paper) .site-locales a.active { color: #fff; }
 .site-page .site-header.is-paper .site-locales a:hover,
 .site-page .site-header.is-paper .site-locales a.active { color: var(--lc-ink); }
-.site-page .header-cta b { font-weight: 600; }
+.site-page .header-cta b { font-weight: 600; white-space: nowrap; }
+@media (min-width: 901px) and (max-width: 1200px) {
+  .site-page .site-header { grid-template-columns:180px minmax(0,1fr) auto; column-gap:20px; }
+  .site-page .site-header .proto-brand { width:180px; }
+  .site-page .site-header nav { justify-content:center; gap:14px; font-size:12px; }
+  .site-page .header-cta { gap:14px; padding-inline:12px; font-size:11px; }
+  .site-header-actions { gap: 12px; }
+}
 .site-page .header-cta i { display: grid; place-items: center; color: var(--lc-teal); font-size: 18px; font-style: normal; }
 .site-cta-short { display: none; }
 .journey-mobile-description { display: none; }
