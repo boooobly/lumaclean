@@ -7,7 +7,7 @@ import {customerWebhook} from '../../src/lib/agent/channel-webhook';
 import {claimJob,runClaimedJob} from '../../src/lib/agent/runner';
 import {acceptMessage} from '../../src/lib/agent/inbox';
 import {websiteLeadSchema} from '../../src/lib/validation/crm';
-import {saveWebsiteLead,notifyWebsiteLead} from '../../src/lib/services/website-leads';
+import {saveWebsiteLead,notifyWebsiteLead,publishWebsiteLead} from '../../src/lib/services/website-leads';
 import {deliverNotification} from '../../src/lib/agent/notifications';
 import {sendAdminLeadTelegram} from '../../src/lib/agent/telegram-handoff';
 import {leadRequestSource} from '../../src/lib/services/lead-rate-limit';
@@ -84,6 +84,26 @@ test('reliability: isolated PostgreSQL intake and delivery regressions',{skip:!u
       await db.user.updateMany({where:{role:'ADMIN'},data:{active:false}});
       const lead=await saveWebsiteLead(db,payload());assert(await db.notification.count({where:{eventKey:`website-lead:${lead.id}:telegram`}}));
       await db.user.update({where:{id:admin.id},data:{active:true}});
+    });
+    await t.test('publication before response targets only the committed event and tolerates queue failure',async()=>{
+      const lead=await saveWebsiteLead(db,payload());
+      const event=await db.notification.findUniqueOrThrow({where:{eventKey:`website-lead:${lead.id}:telegram`}});
+      let published=0;
+      await publishWebsiteLead(db,lead.id,async(database,id)=>{assert.equal(database,db);assert.equal(id,event.id);published++;});
+      assert.equal(published,1);
+      await publishWebsiteLead(db,lead.id,async()=>{throw Error('synthetic queue outage');});
+      assert.equal((await db.notification.findUniqueOrThrow({where:{id:event.id}})).deliveryState,'PENDING');
+      assert(await db.lead.count({where:{id:lead.id}}));
+    });
+    await t.test('CRM can recover an unpublished aged PENDING event but cannot reset a live send',async()=>{
+      const lead=await saveWebsiteLead(db,payload());
+      const event=await db.notification.findUniqueOrThrow({where:{eventKey:`website-lead:${lead.id}:telegram`}});
+      await assert.rejects(runCrmCommand(db,admin.id,'lead-notification-retry',{id:lead.id}),/Повтор разрешён/);
+      await db.notification.update({where:{id:event.id},data:{scheduledAt:new Date(Date.now()-180000),lastErrorCode:'QUEUE_UNAVAILABLE'}});
+      await runCrmCommand(db,admin.id,'lead-notification-retry',{id:lead.id});
+      assert.equal((await db.notification.findUniqueOrThrow({where:{id:event.id}})).lastErrorCode,null);
+      await db.notification.update({where:{id:event.id},data:{deliveryState:'SENDING',leaseKey:randomUUID(),leaseUntil:new Date(Date.now()+60000)}});
+      await assert.rejects(runCrmCommand(db,admin.id,'lead-notification-retry',{id:lead.id}),/Повтор разрешён/);
     });
     await t.test('queue outage falls back to the same leased notification worker after persistence',async()=>{
       const input=websiteLeadSchema.parse(payload()),lead=await saveWebsiteLead(db,input);

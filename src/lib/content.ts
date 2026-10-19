@@ -23,7 +23,7 @@ export type SiteContent = {
 };
 
 const ru: SiteContent = {
-  nav: {services: "Услуги", prices: "Цены", process: "Как работаем", faq: "FAQ", cta: "Рассчитать"},
+  nav: {services: "Услуги", prices: "Цены", process: "Условия", faq: "FAQ", cta: "Рассчитать"},
   hero: {eyebrow: "Клининг по всему Белграду", title: "Чистый дом.", accent: "Легче дышать.", body: "Аккуратная уборка квартир, Airbnb и небольших офисов — с понятной ценой и быстрым ответом в удобном мессенджере.", primary: "Рассчитать стоимость", secondary: "Посмотреть услуги", hint: "Двигайте курсором по комнате", clean: "Чистый слой", reveal: "Что было до LumaClean"},
   proof: ["Сегодня — до 17:00, при наличии команды", "Все районы Белграда", "Можно без химии", "Работаем по выходным"],
   intro: {eyebrow: "Услуги", title: "Нужный уровень чистоты — без лишних пакетов", body: "Выберите сценарий, а детали и дополнительные услуги мы уточним перед выездом. Финальная цена всегда подтверждается заранее."},
@@ -52,7 +52,7 @@ const ru: SiteContent = {
 
 const sr: SiteContent = {
   ...ru,
-  nav: {services: "Usluge", prices: "Cene", process: "Kako radimo", faq: "FAQ", cta: "Izračunaj"},
+  nav: {services: "Usluge", prices: "Cene", process: "Uslovi", faq: "FAQ", cta: "Izračunaj"},
   hero: {eyebrow: "Čišćenje širom Beograda", title: "Čist dom.", accent: "Lakše se diše.", body: "Pažljivo čišćenje stanova, Airbnb apartmana i malih kancelarija — uz jasnu cenu i brz odgovor u omiljenom mesindžeru.", primary: "Izračunaj cenu", secondary: "Pogledaj usluge", hint: "Pomerajte kursor preko sobe", clean: "Čist sloj", reveal: "Pre LumaClean-a"},
   proof: ["Danas — pre 17:00, ako je tim dostupan", "Svi delovi Beograda", "Moguće bez hemije", "Rad vikendom"],
   intro: {eyebrow: "Usluge", title: "Pravi nivo čistoće — bez suvišnih paketa", body: "Izaberite scenario, a detalje i dodatne usluge potvrđujemo pre dolaska. Konačna cena se uvek dogovara unapred."},
@@ -81,7 +81,7 @@ const sr: SiteContent = {
 
 const en: SiteContent = {
   ...ru,
-  nav: {services: "Services", prices: "Prices", process: "How it works", faq: "FAQ", cta: "Estimate"},
+  nav: {services: "Services", prices: "Prices", process: "Terms", faq: "FAQ", cta: "Estimate"},
   hero: {eyebrow: "Cleaning across Belgrade", title: "Clean home.", accent: "Room to breathe.", body: "Careful cleaning for homes, Airbnb rentals and small offices — with transparent pricing and a fast reply in your preferred messenger.", primary: "Estimate the cost", secondary: "Explore services", hint: "Move your cursor across the room", clean: "Clean layer", reveal: "Before LumaClean"},
   proof: ["Same-day before 17:00, subject to availability", "All Belgrade districts", "Chemical-free option", "Weekends available"],
   intro: {eyebrow: "Services", title: "The right level of clean — no confusing packages", body: "Choose a scenario and we’ll confirm the details and extras before the visit. The final price is always agreed upfront."},

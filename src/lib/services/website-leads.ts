@@ -7,7 +7,7 @@ import {serviceDatePolicy,buildAgentTemporalContext} from "@/lib/agent/temporal"
 import { writeAudit } from "./audit";
 import {enqueueLeadReview} from './lead-notifications';
 import {limitNewWebsiteLead} from './lead-rate-limit';
-import {publishNotifications} from '@/lib/agent/notifications';
+import {publishNotifications,deliverNotification} from '@/lib/agent/notifications';
 export async function saveWebsiteLead(db: PrismaClient, payload: unknown, source?: string) {
   const input = websiteLeadSchema.parse(payload);
   input.extras = input.extras
@@ -108,9 +108,19 @@ export async function notifyWebsiteLead(
   // Retain the public helper signature for callers; all delivery goes through the outbox.
   void input; void send;
   try{
-    await workers.publish(db);
     const event=await db.notification.findUnique({where:{eventKey:`website-lead:${lead.id}:telegram`}});
+    if(!event)return;
+    await workers.publish(db,event.id);
+    const latest=await db.notification.findUnique({where:{id:event.id}});
     // The same leased worker can deliver after the HTTP response if the queue is down.
-    if(event?.deliveryState==='PENDING'&&!event.publishedAt&&event.lastErrorCode==='QUEUE_UNAVAILABLE')await workers.deliver(db,event.id);
-  }catch{/* Recovery reads committed PENDING rows. */}
+    if(latest?.deliveryState==='PENDING'&&!latest.publishedAt&&latest.lastErrorCode==='QUEUE_UNAVAILABLE')await workers.deliver(db,event.id);
+  }catch{console.error(JSON.stringify({msg:'lead_notification_recovery_pending'})); /* No contacts or upstream errors. */}
+}
+
+/** Close the after() crash window as far as possible without sending Telegram in HTTP intake. */
+export async function publishWebsiteLead(db:PrismaClient,leadId:string,publish=publishNotifications){
+  try{
+    const event=await db.notification.findUnique({where:{eventKey:`website-lead:${leadId}:telegram`},select:{id:true}});
+    if(event)await publish(db,event.id);
+  }catch{console.error(JSON.stringify({msg:'lead_notification_publication_pending'}));}
 }

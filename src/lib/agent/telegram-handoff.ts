@@ -1,3 +1,4 @@
+import {managerLink} from '@/lib/notification-links';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
 import { Prisma, type PrismaClient } from '@/generated/prisma/client';
@@ -46,7 +47,7 @@ export async function telegramInternalRequest(method: string, body: unknown, req
 export async function sendHandoffTelegram(text: string, handoffId: string, request: typeof fetch = fetch, conversationId?: string): Promise<DeliveryResult> {
   if (!handoffTelegramConfigured()) return { status: 'FAILED', errorCode: 'INTERNAL_TELEGRAM_UNCONFIGURED' };
   try {
-    const response = await request(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text: text.slice(0, 3900), protect_content: true, reply_markup: { inline_keyboard: [[{ text: 'Забрал клиента', callback_data: handoffCallbackData(handoffId) }], [{ text: 'Открыть чат', url: new URL(conversationId ? `/admin/messages/${encodeURIComponent(conversationId)}` : '/admin/messages', process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lumacleanrs.com').href }]] } }), signal: AbortSignal.timeout(10_000), cache: 'no-store' });
+    const response = await request(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text: text.slice(0, 3900), protect_content: true, reply_markup: { inline_keyboard: [[{ text: 'Забрал клиента', callback_data: handoffCallbackData(handoffId) }], [{ text: 'Открыть чат', url: managerLink(conversationId ? `/admin/messages/${encodeURIComponent(conversationId)}` : '/admin/messages') }]] } }), signal: AbortSignal.timeout(10_000), cache: 'no-store' });
     if (response.status >= 500) return { status: 'UNKNOWN', errorCode: 'DELIVERY_OUTCOME_UNKNOWN' };
     if (response.status === 429) return { status: 'FAILED', errorCode: 'TELEGRAM_RATE_LIMIT' };
     const parsed = z.object({ ok: z.boolean(), result: z.object({ message_id: z.number().int() }).optional() }).safeParse(await response.json());
@@ -56,7 +57,7 @@ export async function sendHandoffTelegram(text: string, handoffId: string, reque
 /** Called under the same conversation lock as Inbox/AI transitions. */
 export async function sendAdminLeadTelegram(text:string,leadId:string,request:typeof fetch=fetch):Promise<DeliveryResult>{
   if(!process.env.TELEGRAM_BOT_TOKEN||!process.env.TELEGRAM_CHAT_ID)return{status:'FAILED',errorCode:'INTERNAL_TELEGRAM_UNCONFIGURED',retryable:true};
-  try{const response=await request(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:process.env.TELEGRAM_CHAT_ID,text:text.slice(0,3900),protect_content:true,reply_markup:{inline_keyboard:[[{text:'Открыть заявку',url:new URL(`/admin/leads/${encodeURIComponent(leadId)}`,process.env.NEXT_PUBLIC_SITE_URL??'https://lumacleanrs.com').href}]]}}),signal:AbortSignal.timeout(10000),cache:'no-store'});
+  try{const response=await request(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:process.env.TELEGRAM_CHAT_ID,text:text.slice(0,3900),protect_content:true,reply_markup:{inline_keyboard:[[{text:'Открыть заявку',url:managerLink(`/admin/leads/${encodeURIComponent(leadId)}`)}]]}}),signal:AbortSignal.timeout(10000),cache:'no-store'});
     if(response.status>=500)return{status:'UNKNOWN',errorCode:'DELIVERY_OUTCOME_UNKNOWN'};
     if(response.status===429)return{status:'FAILED',errorCode:'TELEGRAM_RATE_LIMIT'};
     const body=z.object({ok:z.boolean(),result:z.object({message_id:z.number().int()}).optional()}).safeParse(await response.json());

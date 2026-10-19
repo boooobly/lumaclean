@@ -62,10 +62,10 @@ export async function handoffNotification(tx:Tx,conversationId:string,eventId:st
   }
 }
 /** Repeated publishing is harmless. Long reminders are refreshed by daily recovery. */
-export async function publishNotifications(db:PrismaClient){
+export async function publishNotifications(db:PrismaClient,notificationId?:string){
   if(process.env.VERCEL!=='1')return;
   const now=Date.now();
-  const rows=await db.notification.findMany({where:{deliveryState:'PENDING',publishedAt:null,scheduledAt:{lte:new Date(now+6*86400000)}},take:100,orderBy:{scheduledAt:'asc'}});
+  const rows=await db.notification.findMany({where:{...(notificationId?{id:notificationId}:{}),deliveryState:'PENDING',publishedAt:null,scheduledAt:{lte:new Date(now+6*86400000)}},take:100,orderBy:{scheduledAt:'asc'}});
   for(const row of rows){
     try{const due=Math.max(row.scheduledAt.getTime(),row.nextAttemptAt?.getTime()??0);
       await send('lumaclean-notifications',{notificationId:row.id},{idempotencyKey:`${row.id}:${row.attempts}:${Math.floor(now/86400000)}`,delaySeconds:Math.max(0,Math.ceil((due-now)/1000)),retentionSeconds:604800});

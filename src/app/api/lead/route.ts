@@ -6,6 +6,7 @@ import { getDatabase } from "@/lib/database/client";
 import {
   saveWebsiteLead,
   notifyWebsiteLead,
+  publishWebsiteLead,
 } from "@/lib/services/website-leads";
 import { CrmError } from "@/lib/domain/crm";
 import { articlePath, getPublishedArticles } from "@/lib/articles";
@@ -50,7 +51,9 @@ export async function POST(request: Request) {
   try {
     const db = getDatabase();
     const lead = await saveWebsiteLead(db, parsed.data, leadRequestSource(request));
-    after(()=>notifyWebsiteLead(db, lead, parsed.data));
+    await publishWebsiteLead(db,lead.id);
+    try{after(()=>notifyWebsiteLead(db, lead, parsed.data));}
+    catch{console.error(JSON.stringify({msg:'lead_notification_recovery_pending'}));}
     return NextResponse.json(
       { ok: true, reference: lead.reference },
       { headers: { "Cache-Control": "no-store" } },

@@ -79,7 +79,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
       const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, signal: AbortSignal.timeout(20000), body: JSON.stringify({...JSON.parse(submission.current.payload),submissionId:submission.current.id})});
       const result = await response.json().catch(() => null);
       const success = response.ok && result?.ok === true;
-      setStatus(success ? "success" : response.status === 400 ? "validation" : "error");
+      setStatus(success ? "success" : response.status===429?"limited":response.status === 400 ? "validation" : "error");
       trackEvent(success ? "generate_lead" : "lead_error", {locale, service, ...(success ? {} : {error_type: "server"})});
     } catch {
       setStatus("error");

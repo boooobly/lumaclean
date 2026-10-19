@@ -1,7 +1,7 @@
 import type {Locale} from "@/i18n/routing";
 
 const ru = {
-  nav: {services: "Услуги", prices: "Цены", process: "Как работаем", cta: "Получить расчёт", shortCta: "Расчёт", navLabel: "Основная навигация", languageLabel: "Выбор языка"},
+  nav: {services: "Услуги", prices: "Цены", process: "Условия", cta: "Получить расчёт", shortCta: "Расчёт", navLabel: "Основная навигация", languageLabel: "Выбор языка"},
   handoff: {kicker: "Маршрут 04 / 04 · Кухня", title: <>Теперь —<br/>по делу.</>, body: "Пространство уже рассказало, что мы чистим. Дальше — точный объём работ, прозрачная цена и понятный результат.", scroll: "Листайте, чтобы открыть сервисное досье"},
   scope: {number: "01 · Объём", title: <>Два уровня внимания<br/>к пространству.</>, body: "Поддерживающая подходит для регулярного ухода. Генеральная — когда нужно больше времени на кухню, санузел и труднодоступные зоны.", regular: "A", deep: "B"},
   rates: {number: "02 · Ведомость цен", title: <>Цена понятна<br/>до заявки.</>, body: "Выберите тип уборки и площадь. Получите понятный ориентир без скрытых пакетов и обязательных дополнений.", link: "Собрать свой расчёт", focus: "Выбранный ориентир", type: "Тип", area: "Площадь", service: "Услуга", swipe: "Проведите в сторону, чтобы увидеть все площади"},
@@ -15,7 +15,7 @@ const ru = {
 };
 
 const sr = {
-  nav: {services: "Usluge", prices: "Cene", process: "Kako radimo", cta: "Dobijte procenu", shortCta: "Procena", navLabel: "Glavna navigacija", languageLabel: "Izbor jezika"},
+  nav: {services: "Usluge", prices: "Cene", process: "Uslovi", cta: "Dobijte procenu", shortCta: "Procena", navLabel: "Glavna navigacija", languageLabel: "Izbor jezika"},
   handoff: {kicker: "Ruta 04 / 04 · Kuhinja", title: <>Sada —<br/>konkretno.</>, body: "Prostor je već pokazao šta čistimo. Sledi precizan obim rada, jasna cena i očekivani rezultat.", scroll: "Skrolujte da otvorite servisni dosije"},
   scope: {number: "01 · Obim", title: <>Dva nivoa pažnje<br/>prema prostoru.</>, body: "Održavajuće čišćenje je za redovnu negu. Generalno je za kuhinju, kupatilo i zahtevne zone kojima treba više vremena.", regular: "A", deep: "B"},
   rates: {number: "02 · Cenovnik", title: <>Cena je jasna<br/>pre upita.</>, body: "Izaberite vrstu čišćenja i kvadraturu. Dobićete jasan okvir bez skrivenih paketa i obaveznih dodataka.", link: "Sastavite svoj obračun", focus: "Izabrani okvir", type: "Vrsta", area: "Površina", service: "Usluga", swipe: "Prevucite u stranu da vidite sve kvadrature"},
@@ -29,7 +29,7 @@ const sr = {
 };
 
 const en = {
-  nav: {services: "Services", prices: "Prices", process: "How it works", cta: "Get an estimate", shortCta: "Estimate", navLabel: "Primary navigation", languageLabel: "Choose language"},
+  nav: {services: "Services", prices: "Prices", process: "Terms", cta: "Get an estimate", shortCta: "Estimate", navLabel: "Primary navigation", languageLabel: "Choose language"},
   handoff: {kicker: "Route 04 / 04 · Kitchen", title: <>Now —<br/>the details.</>, body: "The space has shown what we clean. Next comes the exact scope, transparent pricing and a clear outcome.", scroll: "Scroll to open the service dossier"},
   scope: {number: "01 · Scope", title: <>Two levels of care<br/>for your space.</>, body: "Regular cleaning is for ongoing care. Deep cleaning gives the kitchen, bathroom and difficult areas the extra time they need.", regular: "A", deep: "B"},
   rates: {number: "02 · Price ledger", title: <>See the price<br/>before you enquire.</>, body: "Choose a cleaning type and area for a clear guide with no hidden packages or compulsory extras.", link: "Build your estimate", focus: "Selected guide", type: "Type", area: "Area", service: "Service", swipe: "Swipe sideways to see every area range"},

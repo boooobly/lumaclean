@@ -1,3 +1,4 @@
+import {managerLink} from '@/lib/notification-links';
 import type {Prisma} from '@/generated/prisma/client';
 import {requestKindLabels,type RequestKind} from '@/lib/lead-intent';
 import {serviceLabels} from '@/lib/domain/crm';
@@ -11,7 +12,7 @@ export function websiteLeadNotificationText(lead:{id:string;reference:string|nul
     `Клиент: ${lead.name??'Имя не указано'}\nКонтакт: ${lead.phone}`,lead.locale?`Язык: ${lead.locale}`:null,
     lead.entrySource?`Источник (по браузеру): ${lead.entrySource}\nСтраница входа: ${lead.landingPage}`:null,
     lead.comment?`Комментарий: ${lead.comment}`:null,
-    `Открыть заявку → ${new URL(`/admin/leads/${encodeURIComponent(lead.id)}`,process.env.NEXT_PUBLIC_SITE_URL??'https://lumacleanrs.com').href}`,
+    `Открыть заявку → ${managerLink(`/admin/leads/${encodeURIComponent(lead.id)}`)}`,
     lead.estimateText,
   ].filter(Boolean).join('\n');
 }

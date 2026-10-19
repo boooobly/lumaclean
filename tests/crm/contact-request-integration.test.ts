@@ -20,7 +20,7 @@ test('homepage intake: persistence, consent, prices, notification, retry and his
       const lead=await db.lead.findUniqueOrThrow({where:{id:results[0].id},include:{extras:true,orders:true}});
       assert.equal(lead.name,null);assert.equal(lead.serviceId,null);assert.equal(lead.area,null);assert.equal(lead.estimatedPrice,null);assert.equal(lead.requestKind,'CONTACT_REQUEST');assert.equal(lead.channel,'WEBSITE');assert.equal(lead.locale,locale);assert(lead.consentAt);assert.equal(lead.entrySource,'google');assert.equal(lead.landingPage,`/${locale}`);assert.equal(lead.extras.length,0);assert.equal(lead.orders.length,0);assert.equal(lead.humanReviewRequired,true);assert.equal(lead.estimateText,null);
       assert.equal(await db.auditLog.count({where:{entityType:'Lead',entityId:lead.id,action:'LEAD_CREATED'}}),1);
-      const jobs=await db.notification.findMany({where:{eventKey:`website-lead:${lead.id}:telegram`}});assert.equal(jobs.length,1);assert.match(jobs[0].text,/обратный звонок/);assert(!jobs[0].text.includes('RSD'));
+      const jobs=await db.notification.findMany({where:{eventKey:`website-lead:${lead.id}:telegram`}});assert.equal(jobs.length,1);assert.match(jobs[0].text,/обратный звонок/i);assert(!jobs[0].text.includes('RSD'));
       let sent=0;await deliverNotification(db,jobs[0].id,async(_thread,text)=>{sent++;assert.match(text,/Услуга и площадь пока не указаны/);return{status:'SENT',externalMessageId:'synthetic'};});await deliverNotification(db,jobs[0].id,async()=>{throw Error('Duplicate send');});assert.equal(sent,1);assert.equal((await db.lead.findUniqueOrThrow({where:{id:lead.id}})).telegramStatus,'SENT');
       await assert.rejects(save({...input,phone:'+381601234568'}),{code:'IDEMPOTENCY'});
     });
