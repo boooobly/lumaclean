@@ -16,6 +16,7 @@ Audit baseline: READY Preview `lumaclean-8itggfkkk-vladislavs-projects-0eae0ea3.
 | Medium | Upholstery RSD heading was left aligned above right aligned prices; narrow CTA and uneven headline wrap. | Matching numeric column alignment, tabular figures, balanced heading and full-width mobile CTA using existing brand tokens. |
 | Low | Public upholstery colors/background depended on order of two global selectors. | Explicit page-scoped ink and existing textured paper; shared admin/form styles unaffected. |
 | Low | Mobile sticky estimate had a heavy shadow across the extras list. | Reduced shadow only on the homepage. |
+| Medium | At 601–680 px the homepage header was mobile but chat still floated over content. | Closed launcher follows the header's 680 px breakpoint. |
 
 The mini-form composition, service page content and article layout were visually acceptable and retained. No new content, controls, dependencies or animations were introduced. Hero, apartment, videos, scrubbing, JourneyHandoff, prices and all business code remain unchanged by this polish.
 

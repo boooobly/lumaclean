@@ -1,5 +1,5 @@
 {
-  "fingerprint": "7b5b13eb93b58f56bc35f11e00202a0e153cb44f5c3c9b985093c6bc30ae7680",
+  "fingerprint": "c6d994b891ee5c7affd013d91a0e727658bbd47980a83b2da3465f3f85b813d7",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -74,7 +74,7 @@
     "src/app/icon.svg": "01cde45ba72881463221bd30579e4cb1240bdd7b5eb8059f46edcc35da1d6e0f",
     "src/app/robots.ts": "d76d0417be060de32e5948a59bfcd5b886a9d2cca4ed429900cd089670d4d637",
     "src/app/sitemap.ts": "56be180c562ec64fce5203eab85076e99b00ba263b0848a95d430d2c819d4e04",
-    "src/app/styles/homepage-focused.css": "57e2b42333299fbe8ac38dc4c0bf9f6d0e8b920830b7478fb45267e365eb22a6",
+    "src/app/styles/homepage-focused.css": "4555fc97aaa96ba9d06b2dd418a1f98db7afde2224188d6044d4e40db802889c",
     "src/app/styles/seo-additions.css": "0277eb68bc6dcee536ec85d74ec752d23e1af5acaf61fa19be7cd461f122a644",
     "src/app/styles/site-base.css": "34c114a0066c2f3bfd9c25e96cbfa6fa0125730c219c2f46d8075d4e00852256",
     "src/app/styles/site-production.css": "475574360f0edc0fde7462f8a6469ba6fb108a54bf8b322c7b829b686cde1f0a",
@@ -350,7 +350,7 @@
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-19T19:14:02.859Z",
+  "checkedAt": "2026-10-19T19:16:25.036Z",
   "suites": [
     "916 existing agent/admin/CRM/finance/scheduling checks pass; 26 environment-dependent checks skipped. Current CSS-only UI polish also passes TypeScript, ESLint (two existing image warnings) and production build.",
     "Prior functional and isolated database verification is recorded in docs/homepage-focused-ux.md; those integrations were not rerun for this CSS-only change."
@@ -358,8 +358,8 @@
   "lintWarnings": "Two pre-existing next/no-img-element warnings in unchanged website-chat.tsx",
   "verificationScope": "CSS-only visual polish on the focused homepage UX branch: responsive header, price spacing, request select, compact closed chat, mobile terms and public upholstery page. No application logic, schema, migrations, business data, booking, AI configuration, prompts, provider or channel mode changed. Source inventory refreshed after the current regression checks. Owner visual approval and the existing production release gates remain required.",
   "previousVerification": {
-    "fingerprint": "60b645710a57544b91d27867abb911f7b3d6a4695f12eeb6abf17aeaeeeada3c",
-    "tests": 993,
-    "checkedAt": "2026-10-18T19:42:13.163Z"
+    "fingerprint": "7b5b13eb93b58f56bc35f11e00202a0e153cb44f5c3c9b985093c6bc30ae7680",
+    "tests": 916,
+    "checkedAt": "2026-10-19T19:14:02.859Z"
   }
 }

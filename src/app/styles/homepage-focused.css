@@ -87,10 +87,13 @@
 .site-home .contact-request p { margin:0; font-size:14px; }
 .site-home .contact-request [aria-invalid=true] { outline:2px solid #ffb5a7; outline-offset:3px; }
 /* Keep the closed chat in the form's outer gutter instead of across its CTA. */
+body:has(.site-home) .website-chat-launcher { width:44px; min-height:44px; justify-content:center; padding:10px; }
+body:has(.site-home) .chat-launcher-full { display:none; }
 @media(min-width:681px) {
   body:has(.site-home) .website-chat:has(.website-chat-launcher) { right:12px; }
-  body:has(.site-home) .website-chat-launcher { width:44px; min-height:44px; justify-content:center; padding:10px; }
-  body:has(.site-home) .chat-launcher-full { display:none; }
+}
+@media(max-width:680px) {
+  body:has(.site-home) .website-chat:has(.website-chat-launcher) { top:calc(9px + env(safe-area-inset-top,0px)); right:16px; bottom:auto; }
 }
 @media(max-width:1100px) { .site-home .homepage-estimate .estimate-form { padding:30px; } .site-home .estimate-focused .estimate-extra-group { grid-template-columns:1fr; } }
 @media(max-width:900px) {
