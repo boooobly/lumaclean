@@ -86,7 +86,7 @@ export default async function LeadPage({
               ["Создана", date(lead.createdAt)],
               [
                 "Telegram",
-                {
+                lead.notification?({PENDING:'Ожидает доставки / повторной попытки',SENDING:'Отправляется',SENT:'Отправлено',DELIVERED:'Отправлено, Telegram подтвердил приём',READ:'Прочитано',UNKNOWN:'Результат неизвестен — проверьте Telegram перед любыми действиями',FAILED:'Не отправлено — требуется восстановление',CANCELLED:'Отменено'}[lead.notification.deliveryState]??lead.notification.deliveryState):{
                   SENT: "Уведомление отправлено",
                   FAILED: "Уведомление не доставлено",
                   PENDING: "Доставка не подтверждена",
@@ -95,6 +95,8 @@ export default async function LeadPage({
               ],
             ]}
           />
+          {lead.notification&&<p className="crm-hint">Попыток: {lead.notification.attempts}{lead.notification.nextAttemptAt?` · Следующая попытка: ${date(lead.notification.nextAttemptAt)}`:''}{lead.notification.lastErrorCode?` · ${lead.notification.lastErrorCode}`:''}</p>}
+          {lead.notification?.deliveryState==='FAILED'&&['INTERNAL_TELEGRAM_UNCONFIGURED','TELEGRAM_RATE_LIMIT','TELEGRAM_REJECTED'].includes(lead.notification.lastErrorCode??'')&&<CrmForm command="lead-notification-retry" id={id} button="Повторить неотправленное уведомление"><p>Сначала устраните причину ошибки доставки.</p></CrmForm>}
           {lead.extras.length > 0 && (
             <>
               <h3>Дополнительные услуги</h3>

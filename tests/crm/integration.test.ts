@@ -1,3 +1,4 @@
+import {deliverNotification} from '../../src/lib/agent/notifications';
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { writeFileSync } from "node:fs";
@@ -172,7 +173,9 @@ test(
             if(oldToken===undefined)delete process.env.TELEGRAM_BOT_TOKEN;else process.env.TELEGRAM_BOT_TOKEN=oldToken;
             if(oldChat===undefined)delete process.env.TELEGRAM_CHAT_ID;else process.env.TELEGRAM_CHAT_ID=oldChat;
           }
-          assert.equal(sent,1);
+          assert.equal(sent,0);
+          const notification=await db.notification.findUniqueOrThrow({where:{eventKey:`website-lead:${leadId}:telegram`}});
+          await deliverNotification(db,notification.id,async()=>({status:'UNKNOWN',errorCode:'DELIVERY_OUTCOME_UNKNOWN'}));
           assert.equal(
             (await db.lead.findUniqueOrThrow({ where: { id: leadId } }))
               .telegramStatus,
@@ -185,9 +188,12 @@ test(
       await t.test("Telegram success sends the persisted reference and updates delivery status",async()=>{
         const oldToken=process.env.TELEGRAM_BOT_TOKEN,oldChat=process.env.TELEGRAM_CHAT_ID;
         process.env.TELEGRAM_BOT_TOKEN="fixture-only";process.env.TELEGRAM_CHAT_ID="fixture-only";
-        try{await notifyWebsiteLead(db,{id:leadId,reference:"LC-TEST-SUCCESS"},websiteLeadSchema.parse(website),async(_url,options)=>{
-          const message=JSON.parse(String(options?.body));assert(message.text.includes("LC-TEST-SUCCESS"));assert(message.text.includes("Поддерживающая уборка"));return Response.json({ok:true});
-        });assert.equal((await db.lead.findUniqueOrThrow({where:{id:leadId}})).telegramStatus,"SENT");}
+        try{
+          const saved=await saveWebsiteLead(db,{...website,submissionId:randomUUID()});
+          const n=await db.notification.findUniqueOrThrow({where:{eventKey:`website-lead:${saved.id}:telegram`}});
+          await deliverNotification(db,n.id,async(_thread,text)=>{assert(text.includes(saved.reference));assert(text.includes('Поддерживающая уборка'));return{status:'DELIVERED',externalMessageId:'synthetic'};});
+          assert.equal((await db.lead.findUniqueOrThrow({where:{id:saved.id}})).telegramStatus,'SENT');
+        }
         finally{if(oldToken===undefined)delete process.env.TELEGRAM_BOT_TOKEN;else process.env.TELEGRAM_BOT_TOKEN=oldToken;if(oldChat===undefined)delete process.env.TELEGRAM_CHAT_ID;else process.env.TELEGRAM_CHAT_ID=oldChat;}
       });
       await t.test(

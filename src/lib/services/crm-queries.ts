@@ -170,7 +170,8 @@ export async function getLead(id: string) {
     }),
   );
   if (!lead) notFound();
-  return lead;
+  const notification=await read(()=>db.notification.findUnique({where:{eventKey:`website-lead:${id}:telegram`},select:{deliveryState:true,lastErrorCode:true,attempts:true,nextAttemptAt:true}}));
+  return {...lead,notification};
 }
 export async function getClient(id: string) {
   await requireAdmin();

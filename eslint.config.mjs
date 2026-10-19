@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "src/generated/**",
     "artifacts/**",
+    "public/maplibre/**", // Copied vendor worker, not application source.
     "work/**",
   ]),
 ]);
