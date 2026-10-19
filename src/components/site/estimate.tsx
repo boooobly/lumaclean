@@ -44,7 +44,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
   const [phone, setPhone] = useState("");
   const [comment, setComment] = useState("");
   const [consent, setConsent] = useState(false);
-  const [status, setStatus] = useState<"idle" | "sending" | "success" | "validation" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "validation" | "error" | "limited">("idle");
 
   const calculation = useMemo(() => {
     const extras = [...countKeys.map(code => ({code, quantity:counts[code]})), ...toggleKeys.map(code => ({code, quantity:toggles[code] ? 1 : 0}))];
@@ -72,7 +72,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
       const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({...JSON.parse(payload),submissionId:submission.current.id})});
       const result = await response.json().catch(() => null);
       const success = response.ok && result?.ok === true;
-      setStatus(success ? "success" : "error");
+      setStatus(success ? "success" : response.status===429?"limited":"error");
       trackEvent(success ? "generate_lead" : "lead_error", {locale, service, ...(success ? {} : {error_type: "server"})});
     } catch {
       setStatus("error");
@@ -129,6 +129,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
           <button type="submit" disabled={status === "sending" || status === 'success'}>{status === "sending" ? copy.sending : hasUpholstery?e.send:copy.send}<span><ArrowIcon /></span></button>
           {status === "success" && <p className="site-form-status success" role="status">{hasUpholstery?e.success:copy.success}</p>}
           {status === "validation" && <p className="site-form-status error" role="alert">{copy.validation}</p>}
+          {status === "limited" && <p className="site-form-status error" role="alert">{locale==='ru'?'Слишком много заявок. Подождите немного и повторите попытку.':locale==='en'?'Too many enquiries. Please wait a little and try again.':'Previše upita. Sačekajte malo i pokušajte ponovo.'}</p>}
           {status === "error" && <p className="site-form-status error" role="alert">{copy.error}</p>}
         </div>
       </aside>

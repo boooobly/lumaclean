@@ -55,11 +55,12 @@ export async function sendHandoffTelegram(text: string, handoffId: string, reque
 }
 /** Called under the same conversation lock as Inbox/AI transitions. */
 export async function sendAdminLeadTelegram(text:string,leadId:string,request:typeof fetch=fetch):Promise<DeliveryResult>{
-  if(!process.env.TELEGRAM_BOT_TOKEN||!process.env.TELEGRAM_CHAT_ID)return{status:'FAILED',errorCode:'INTERNAL_TELEGRAM_UNCONFIGURED'};
+  if(!process.env.TELEGRAM_BOT_TOKEN||!process.env.TELEGRAM_CHAT_ID)return{status:'FAILED',errorCode:'INTERNAL_TELEGRAM_UNCONFIGURED',retryable:true};
   try{const response=await request(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:process.env.TELEGRAM_CHAT_ID,text:text.slice(0,3900),protect_content:true,reply_markup:{inline_keyboard:[[{text:'Открыть заявку',url:new URL(`/admin/leads/${encodeURIComponent(leadId)}`,process.env.NEXT_PUBLIC_SITE_URL??'https://lumacleanrs.com').href}]]}}),signal:AbortSignal.timeout(10000),cache:'no-store'});
     if(response.status>=500)return{status:'UNKNOWN',errorCode:'DELIVERY_OUTCOME_UNKNOWN'};
     if(response.status===429)return{status:'FAILED',errorCode:'TELEGRAM_RATE_LIMIT'};
     const body=z.object({ok:z.boolean(),result:z.object({message_id:z.number().int()}).optional()}).safeParse(await response.json());
+    if(response.ok&&(!body.success||body.data.ok&&!body.data.result))return{status:'UNKNOWN',errorCode:'DELIVERY_OUTCOME_UNKNOWN'};
     return response.ok&&body.success&&body.data.ok&&body.data.result?{status:'DELIVERED',externalMessageId:String(body.data.result.message_id)}:{status:'FAILED',errorCode:'TELEGRAM_REJECTED'};
   }catch{return{status:'UNKNOWN',errorCode:'DELIVERY_OUTCOME_UNKNOWN'};}
 }
@@ -76,7 +77,8 @@ export async function deliverHandoffNotification(db: PrismaClient, id: string, l
     const current = await tx.notification.findUniqueOrThrow({ where: { id } });
     if (current.leaseKey !== leaseKey || current.deliveryState !== 'SENDING') return { status: 'FAILED' as const, errorCode: 'HANDOFF_CANCELLED' };
     const payload = payloadSchema.parse(current.payload);
-    const [handoff, c] = await Promise.all([tx.humanHandoff.findUnique({ where: { id: payload.handoffId } }), tx.conversation.findUnique({ where: { id: row.conversationId! } })]);
+    const handoff = await tx.humanHandoff.findUnique({ where: { id: payload.handoffId } });
+    const c = await tx.conversation.findUnique({ where: { id: row.conversationId! } });
     if (!handoff || handoff.conversationId !== row.conversationId || handoff.resolvedAt || !c || !(c.control==='HUMAN_CONTROL'||c.control==='AI_CONTROL'&&handoff.reason.startsWith('SOFT:')) || c.ownerId) {
       await tx.notification.update({ where: { id }, data: { deliveryState: 'CANCELLED', status: 'CANCELLED', leaseKey: null, leaseUntil: null } });
       return { status: 'FAILED' as const, errorCode: 'HANDOFF_CANCELLED' };
@@ -106,7 +108,9 @@ export async function claimTelegramHandoff(db: PrismaClient, raw: unknown, reque
   if (!handoff) return 'EXPIRED';
   return db.$transaction(async tx => {
     await schedulingLock(tx, 'conversation', handoff.conversationId);
-    const [current, c, notification] = await Promise.all([tx.humanHandoff.findUniqueOrThrow({ where: { id } }), tx.conversation.findUniqueOrThrow({ where: { id: handoff.conversationId } }), tx.notification.findFirst({ where: { conversationId: handoff.conversationId, audience: 'ADMIN', kind: { in: handoffKinds }, eventKey: { startsWith: `handoff:${id}:telegram` } }, orderBy: { createdAt: 'asc' } })]);
+    const current = await tx.humanHandoff.findUniqueOrThrow({ where: { id } });
+    const c = await tx.conversation.findUniqueOrThrow({ where: { id: handoff.conversationId } });
+    const notification = await tx.notification.findFirst({ where: { conversationId: handoff.conversationId, audience: 'ADMIN', kind: { in: handoffKinds }, eventKey: { startsWith: `handoff:${id}:telegram` } }, orderBy: { createdAt: 'asc' } });
     if (current.resolvedAt || !(c.control==='HUMAN_CONTROL'||c.control==='AI_CONTROL'&&current.reason.startsWith('SOFT:')) || c.ownerId) return 'ALREADY_CLAIMED';
     const owner = notification?.userId ? await tx.user.findUnique({ where: { id: notification.userId }, select: { id: true, active: true, role: true } }) : null;
     if (!owner?.active || owner.role !== 'ADMIN') throw new AgentError('HANDOFF_OWNER_UNAVAILABLE');

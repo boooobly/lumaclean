@@ -205,6 +205,9 @@ export function CrmForm({
           reason: optional(f, "reason"),
         };
         break;
+      case "lead-notification-retry":
+        payload = {id};
+        break;
       case "lead-note":
         payload = { id, note: optional(f, "note") };
         break;

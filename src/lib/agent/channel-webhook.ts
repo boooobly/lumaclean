@@ -9,7 +9,7 @@ import {acceptChannelMessage,rateLimit} from './inbox';
 import {applyChannelStatus} from './channel-ingress';
 import {enqueueAgent} from './queue';
 import {drainAgentJobs} from './runner';
-export async function customerWebhook(request:Request,channel:CustomerChannel){
+export async function customerWebhook(request:Request,channel:CustomerChannel,wake:typeof enqueueAgent=enqueueAgent,defer:typeof after=after){
  if(!channelConfiguration(channel).configured)return NextResponse.json({ok:false,disabled:true},{status:503});
  try{
   if(channel==='TELEGRAM'&&!verifyWebhookSecret(request.headers.get('x-telegram-bot-api-secret-token')))return NextResponse.json({ok:false},{status:403});
@@ -23,11 +23,14 @@ export async function customerWebhook(request:Request,channel:CustomerChannel){
   for(const status of events.statuses)await applyChannelStatus(db,status);
   for(const event of events.messages){
    const accepted=await acceptChannelMessage(db,event);
-   const job=await db.agentJob.findUniqueOrThrow({where:{messageId:accepted.messageId}});
+   const job=await db.agentJob.findUnique({where:{messageId:accepted.messageId}});
    // Retry publication even for duplicate ingress, closing the commit/publish crash window.
-   if(!await enqueueAgent(db,job.conversationId))after(()=>drainAgentJobs(db,job.conversationId));
+   if(job&&['PENDING','RUNNING'].includes(job.status)){
+    try{if(!await wake(db,job.conversationId))defer(()=>drainAgentJobs(db,job.conversationId));}
+    catch{defer(()=>drainAgentJobs(db,job.conversationId)); /* DB recovery also retains the committed job. */}
+   }
   }
-  await db.$executeRaw`UPDATE "BusinessSettings" SET "customerChannelDiagnostics" = jsonb_set("customerChannelDiagnostics", ARRAY[${channel}], COALESCE("customerChannelDiagnostics" -> ${channel}, '{}'::jsonb) || jsonb_build_object('lastWebhookAt', ${new Date().toISOString()}::text), true) WHERE id='default'`;
+  try{await db.$executeRaw`UPDATE "BusinessSettings" SET "customerChannelDiagnostics" = jsonb_set("customerChannelDiagnostics", ARRAY[${channel}], COALESCE("customerChannelDiagnostics" -> ${channel}, '{}'::jsonb) || jsonb_build_object('lastWebhookAt', ${new Date().toISOString()}::text), true) WHERE id='default'`;}catch{/* Diagnostics must not reject committed messages. */}
   return NextResponse.json({ok:true});
  }catch(e){const code=e instanceof AgentError?e.code:e instanceof CrmError?e.code:'';return NextResponse.json({ok:false},{status:code==='TOO_LARGE'?413:code==='RATE_LIMIT'?429:e instanceof SyntaxError||e instanceof ZodError||['INVALID_TELEGRAM_UPDATE','PRIVATE_CHAT_REQUIRED','INBOUND_IDENTITY_CONFLICT','INVALID_CHANNEL_IDENTITY'].includes(code)?400:503});}
 }

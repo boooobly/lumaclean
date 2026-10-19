@@ -78,9 +78,11 @@ export async function deliverNotification(db:PrismaClient,id:string,deliver?:(th
   const row=await db.notification.findUnique({where:{id}});if(!row||['INTERNAL','SENT','READ','DELIVERED','CANCELLED','UNKNOWN','FAILED','LEGACY'].includes(row.deliveryState))return;
   const now=new Date();
   if(row.deliveryState==='SENDING'){
-    if(row.leaseUntil&&row.leaseUntil<now)await db.notification.updateMany({where:{id,deliveryState:'SENDING',leaseKey:row.leaseKey},data:{deliveryState:'UNKNOWN',status:'FAILED',lastErrorCode:'DELIVERY_OUTCOME_UNKNOWN'}});
-    else throw new AgentError('NOTIFICATION_LEASE_ACTIVE');
-    if(row.kind==='WEBSITE_LEAD'){const {leadId}=z.object({leadId:z.string()}).parse(row.payload);await db.lead.updateMany({where:{id:leadId},data:{telegramStatus:'FAILED'}});}
+    if(!row.leaseUntil||row.leaseUntil>=now)throw new AgentError('NOTIFICATION_LEASE_ACTIVE');
+    await db.$transaction(async tx=>{
+      const changed=await tx.notification.updateMany({where:{id,deliveryState:'SENDING',leaseKey:row.leaseKey},data:{deliveryState:'UNKNOWN',status:'FAILED',lastErrorCode:'DELIVERY_OUTCOME_UNKNOWN',leaseKey:null,leaseUntil:null}});
+      if(changed.count&&row.kind==='WEBSITE_LEAD'){const {leadId}=z.object({leadId:z.string()}).parse(row.payload);await tx.lead.updateMany({where:{id:leadId},data:{telegramStatus:'FAILED'}});}
+    });
     return;
   }
   if(row.scheduledAt>now||row.nextAttemptAt&&row.nextAttemptAt>now)throw new AgentError('NOTIFICATION_NOT_DUE');
@@ -117,10 +119,12 @@ export async function deliverNotification(db:PrismaClient,id:string,deliver?:(th
     }
   }
   const retry=result.status==='FAILED'&&(result.retryable||result.errorCode==='TELEGRAM_RATE_LIMIT')&&row.attempts<4;
-  await db.notification.updateMany({where:{id,leaseKey},data:{deliveryState:retry?'PENDING':result.status,status:['SENT','DELIVERED','READ'].includes(result.status)?'SENT':retry?'PENDING':'FAILED',lastErrorCode:result.errorCode??null,sentAt:['SENT','DELIVERED','READ'].includes(result.status)?new Date():null,nextAttemptAt:retry?new Date(Date.now()+Math.min(300000,30000*2**row.attempts)):null,publishedAt:retry?null:row.publishedAt,leaseKey:null,leaseUntil:null}});
+  await db.$transaction(async tx=>{
+  const changed=await tx.notification.updateMany({where:{id,leaseKey},data:{deliveryState:retry?'PENDING':result.status,status:['SENT','DELIVERED','READ'].includes(result.status)?'SENT':retry?'PENDING':'FAILED',lastErrorCode:result.errorCode??null,sentAt:['SENT','DELIVERED','READ'].includes(result.status)?new Date():null,nextAttemptAt:retry?new Date(Date.now()+Math.min(300000,30000*2**row.attempts)):null,publishedAt:retry?null:row.publishedAt,leaseKey:null,leaseUntil:null,...(row.kind==='WEBSITE_LEAD'&&result.externalMessageId?{payload:{...row.payload as object,telegramMessageId:result.externalMessageId}}:{})}});
+    if(changed.count&&row.kind==='WEBSITE_LEAD'){const {leadId}=z.object({leadId:z.string()}).parse(row.payload);await tx.lead.updateMany({where:{id:leadId},data:{telegramStatus:retry?'PENDING':['SENT','DELIVERED','READ'].includes(result.status)?'SENT':'FAILED'}});}
+  });
   if(['FAILED','UNKNOWN'].includes(result.status)&&c)await db.conversation.updateMany({where:{id:c.id,...(handoffKinds.includes(row.kind??'')?{control:'HUMAN_CONTROL',ownerId:null}:{})},data:{needsAttention:true}});
   if(retry)throw new AgentError('NOTIFICATION_RETRY');
-  if(row.kind==='WEBSITE_LEAD'){const {leadId}=z.object({leadId:z.string()}).parse(row.payload);await db.lead.updateMany({where:{id:leadId},data:{telegramStatus:['SENT','DELIVERED','READ'].includes(result.status)?'SENT':'FAILED'}});}
 }
 export async function recoverNotifications(db:PrismaClient){
   await db.notification.updateMany({where:{deliveryState:'PENDING',publishedAt:{lt:new Date(Date.now()-86400000)},scheduledAt:{lte:new Date(Date.now()+6*86400000)}},data:{publishedAt:null}});

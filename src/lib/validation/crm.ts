@@ -203,6 +203,7 @@ export const commandSchemas = {
       expectedUpdatedAt: z.string().datetime().optional(),
     })
     .strict(),
+  "lead-notification-retry": z.object({id:entityId}).strict(),
   "lead-note": z.object({ id: entityId, note: text() }).strict(),
   "lead-link": z.object({ id: entityId, clientId: entityId }).strict(),
   "client-create": z
