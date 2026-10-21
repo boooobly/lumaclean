@@ -102,6 +102,6 @@ export function outputAllowed(text:string,state:AgentState,factAmounts:number[]=
   if(state.booking)allowed.push(new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Belgrade",hour:"2-digit",minute:"2-digit"}).format(new Date(state.booking.start)));
   if(times.some(t=>!allowed.includes(t))&&text.split(/(?<=[.!?])\s+|\n+/u).some(s=>/\b\d{1,2}:\d{2}\b/u.test(s)&&!knowledgeTimeExplanation(s,knowledge)))return false;
   if(!allowed.length&&/(?:свободно|можем приехать|available (?:tomorrow|today|on)|слободно|slobodno)/i.test(text)&&!/провер|уточн|check|prover|провер/.test(text))return false;
-  if(/(?:забронирован|вы записаны|booking (?:is )?confirmed|successfully booked|rezervacija.{0,15}potvr|резервација.{0,15}потвр)/i.test(text)&&!state.booking)return false;
+  if(/(?:забронирован|вы записаны|записал[аи]?\s+(?:вас\s+)?на(?=\s|$)|booking (?:is )?confirmed|successfully booked|(?:i(?:'ve| have)?|you(?:'re| are))\s+booked|zakazala sam|заказала сам|rezervacija.{0,15}potvr|резервација.{0,15}потвр)/iu.test(text)&&!state.booking)return false;
   return true;
 }

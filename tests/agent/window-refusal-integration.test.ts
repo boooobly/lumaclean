@@ -46,6 +46,23 @@ test('window refusal persists through inbox and worker on the isolated RC databa
    assert.equal(result.error,'INPUT_CONTEXT_REQUIRED');
    assert.equal(ctx.state.nextInput,undefined);
   });
+  await t.test('short extras refusal is saved and qualification advances',async()=>{
+   const c=await fixture({draftFacts:{service:'regular',area:60,extras:[]},nextInput:'EXTRAS'});
+   await acceptMessage(db,c,{id:randomUUID(),text:'Не'});
+   await drainAgentJobs(db,c.id,[provider,provider]);
+   const saved=stateOf(await db.conversation.findUniqueOrThrow({where:{id:c.id}}));
+   assert.equal(saved.draftFacts?.extrasConfirmed,true);assert.equal(saved.nextInput,'SOIL_LEVEL');
+  });
+  await t.test('third identical post-quote reply hands off with a durable manager notification',async()=>{
+   const state:AgentState={draftFacts:{...facts,extras:[]},quote:{id:'fixture',serviceId:'fixture',input:{...facts,extras:[],urgent:false},total:8200,base:8200,discountPercent:0,requiresHumanReview:false,at:new Date().toISOString()}};
+   const c=await fixture(state);
+   const repeated:AIProvider={name:'synthetic',model:'test',complete:async()=>({provider:'synthetic',model:'test',text:'Ваш запрос сохранён.',toolCalls:[],inputTokens:1,cachedInputTokens:0,outputTokens:1,estimatedCostUsd:0,latencyMs:1})};
+   for(const text of ['Хорошо','Ага','Алло']){await acceptMessage(db,c,{id:randomUUID(),text});await drainAgentJobs(db,c.id,[repeated,repeated]);}
+   const live=await db.conversation.findUniqueOrThrow({where:{id:c.id}});
+   assert.equal(live.control,'HUMAN_CONTROL');assert.equal(live.orderId,null);
+   assert.equal(await db.humanHandoff.count({where:{conversationId:c.id,reason:'UNCERTAINTY'}}),1);
+   assert.equal(await db.notification.count({where:{conversationId:c.id,kind:'HANDOFF',audience:'ADMIN'}}),1);
+  });
   assert.equal(await db.order.count(),orders);
  }finally{
   await db.businessSettings.update({where:{id:'default'},data:{aiAgentMode:baseline.aiAgentMode,aiChannelModes:baseline.aiChannelModes!}});

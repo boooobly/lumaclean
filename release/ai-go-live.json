@@ -1,5 +1,5 @@
 {
-  "fingerprint": "59d6d70f6d9766de8d438a0c7698b6be23a2bf13a6784fbeee2b563d8ba175dc",
+  "fingerprint": "efbaa302460146c9b9d26e255f5a1380078bf4fc54cbac1045c83abbaa92278a",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -158,11 +158,11 @@
     "src/i18n/request.ts": "9e8c03ca10ec8022d7c4e46ecf5e25c4d9e723d9f7c9b04fc8a5401d00aead7a",
     "src/i18n/routing.ts": "68dfd0fa0c1ade7562be6a856caf3c410205dd654859cbeb2f7c5066842b4b50",
     "src/lib/agent/alternative-price.ts": "7ad5e081647e7e1076d14a287804f5d49467da1bacdc4213fc8fe42a10a64347",
-    "src/lib/agent/appliance-facts.ts": "3abb02f3333973bd71351ac584ea2e425ae99a4a719ca48a0e7a9100c3163a69",
+    "src/lib/agent/appliance-facts.ts": "a7116de51f0c18d0dc87db03fea18253ffd7e0ead6ad18fb5b380e71578e199e",
     "src/lib/agent/autonomy-corpus.ts": "3ff2f9937dc1f6a9da3de5c02ada6d9da87d6155dc96b0aac291f7229e34a46b",
     "src/lib/agent/autonomy-metrics.ts": "f0837699b20605c36e274849d0fe04fa236c314c7cd5d782da7f4b39e947c54e",
     "src/lib/agent/autonomy-preview.ts": "418219bde2344a57896a296b104fd361a6fb8a801ac230392da1d7d1ae37da2f",
-    "src/lib/agent/autonomy.ts": "8da766fc03cb19935655aa84ee6ead045658522b343c4cf73124c9f1a75e5329",
+    "src/lib/agent/autonomy.ts": "9e10e0691189eb61c0ad0b5fcbffed86bf670380d9fc4eb31ec63714b8a47557",
     "src/lib/agent/behavior-eval.ts": "58875967d9aebc564f9ecc67ec83768c4376a30e2591d735c10c8780b705a097",
     "src/lib/agent/behavior-telemetry.ts": "65b6f66b11127abbf6a29be0c69e56f544779477094dae99603fad5ece1d1242",
     "src/lib/agent/business-labels.ts": "aa9313bd859d8f565df06ecd3d16a0a559594a337a29d3bc75c250a88dce6f17",
@@ -181,7 +181,7 @@
     "src/lib/agent/conversation-preview.ts": "8dea853566cd5494bc7f09a74373a362719dbb9eba235decfe8b7c4b52e1e122",
     "src/lib/agent/conversation-recovery.ts": "c4f9d99403b2c825cc74e41470970c1eb3db795c15bb5151bd02030438d9b06e",
     "src/lib/agent/conversion-facts.ts": "dd572151c0c8d04f8e8d3ee514ea50ab292de71d0765a312f8a67e2be7459a15",
-    "src/lib/agent/conversion-intake.ts": "39903528cfbd6bfcc17a4ad0f0cb02e5248b11e665e240a1bff0f675dea2c6af",
+    "src/lib/agent/conversion-intake.ts": "f23367c17a12263bd60e656c32d7639180d04702bc593f24d3d083f4e2101081",
     "src/lib/agent/customer-channels.ts": "b6940d78f33831fb2e257efe57e3b243dc3f06ea1ebe729a2ce27fc22d6df3c5",
     "src/lib/agent/customer-facts.ts": "02aa802da942904b3c0c4b0272c249570ef1d30c4b8880d2d82f8bd068d0d090",
     "src/lib/agent/customer-text.ts": "e8892a70184683d7b46406906bfaca330935af122fc2f644dc429c60372f7419",
@@ -199,7 +199,7 @@
     "src/lib/agent/live-test.ts": "0f1582daf6610c84ca608a508c4ba3261d91da1f0318d68bf215831b3c3a54c1",
     "src/lib/agent/notifications.ts": "0c3489468ca6a260b45d062afdb09181c3d9b71369267b41915646f91c857cff",
     "src/lib/agent/persona.ts": "eed1e3cb5f5e62d6aa043c689d671be79c27d43dc35a88f989bfb87540794af3",
-    "src/lib/agent/policy.ts": "bb507dfaf62ac1e6e81ce407e3c715cc81c879e7e7a1b284bfbf66d9275e7cfd",
+    "src/lib/agent/policy.ts": "d60332cfcd488f0efe91da8c29b55c49409f2f6316e4b96d8268615ccedc5a0c",
     "src/lib/agent/providers.ts": "fbb8d7b8fb16b4ac5e287f7126a2848287fbc2b3b5b6c5a378d1bcfa5ab01da3",
     "src/lib/agent/queries.ts": "31883e6ba20713a2a97294056d48a0b03ebc57715efa9ba82c2312d3ad141655",
     "src/lib/agent/question-planning.ts": "b446bc0933d7017b1ac74c043adaa84e8f8557f6cab7141e74553383eb9bf395",
@@ -209,11 +209,11 @@
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
     "src/lib/agent/reliability-telemetry.ts": "b50d9c2b273a33b67d03cffbdfffee0a4512efba753fb501ea589dbcf9a725bb",
     "src/lib/agent/routine-faq.ts": "3fc0c31de2cd0f17c766889a5fb2043cfe46f350f95edc1c97c962cf45f5f912",
-    "src/lib/agent/runner.ts": "1a733b86de4608016f2a9321873182d6482c9385fb820f498ff7936dcfdf23f7",
+    "src/lib/agent/runner.ts": "da3c4c818c45ca0b6536e61f9de6f4d7f190c26517ff3a7c516626cda31c3872",
     "src/lib/agent/settings.ts": "bf18dc0f06eaa3bb5551f2a846bb1fed31966cace4815843a1919b671e550017",
     "src/lib/agent/telegram-handoff.ts": "d58951bb26a7b24988fcb6bb0f484e980c8a5e93c0dce204a4548d3dff2c76f9",
     "src/lib/agent/temporal.ts": "7dff9432c06f3dd3e9da30ece37add57aa50c2f434f5dec434de3769ec39ad05",
-    "src/lib/agent/tools.ts": "6e9be98593772f5c3636870f0dd2a42a77f6cbc8f6fb1fb2cfcea862cae19083",
+    "src/lib/agent/tools.ts": "e99234fb8d896a1d612acd29ba4eea2d11835616ae39fa1ceeb0f0c6840e07d0",
     "src/lib/analytics.ts": "ac20e7f318855188db315705788fff372d2375f33cb1114b48612fa30f839498",
     "src/lib/appliance-catalog.ts": "a489ccf44633d0b7afeee3c6c6218245c0a20f566a526d43bfaef6cd4734c711",
     "src/lib/articles/airbnb.ts": "6ac8861e9d41cadf626a26d54c10c2da58dd6bcfa376cb5cf40d35fd19952857",
@@ -349,29 +349,20 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 997,
-  "skipped": 28,
+  "tests": 937,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-21T17:13:43.524Z",
+  "checkedAt": "2026-10-21T18:25:39.711Z",
   "suites": [
-    "artifacts/ai-full-tests.txt",
-    "artifacts/ai-window-db.txt",
-    "artifacts/ai-lint.txt",
-    "artifacts/ai-typecheck.txt",
-    "artifacts/ai-build.txt"
+    "930 passing local agent/admin/CRM/finance/scheduling/reliability checks; 30 DB-dependent suites skipped without their fixture secrets",
+    "7 isolated RC database checks: window refusals, extras refusal, explicit selection and bounded repeat handoff with durable notification"
   ],
-  "verificationScope": "Website AI window-loop fix: 992 local tests passed plus 5 isolated PostgreSQL inbox/worker regression checks. The full local run skipped 29 credential-dependent tests; the new window database suite was then executed separately (5 pass), leaving 28 unrelated credential-dependent suites unexecuted. Lint, typecheck and build passed. No schema/migration changes: prior migration rehearsal retained, not rerun. No prices, model configuration, prompts or booking rules changed. This evidence does not assert a native booking proof or activate AI.",
+  "verificationScope": "Short contextual extras refusals, precise start time routed through existing calendar/crew/routing checks, missing-slot dependency guidance, progressive recovery and bounded manager handoff, and rejection of unsupported booking claims. Approved models, prompts, pricing, booking consent and channel modes unchanged. No schema changes: previous migration rehearsal retained. Paid native multi-turn results and a genuine final-source booking proof are independent evidence and must not be inferred from these regression checks.",
   "previousVerification": {
-    "fingerprint": "f4a07b824158764dc7f25b65759b54aaf0183f892b6b3bd3c84068dea378aa62",
-    "tests": 988,
-    "checkedAt": "2026-10-21T16:13:25.719Z",
-    "migrationEvidence": [
-      "artifacts/rc-suite.txt",
-      "artifacts/rc-reliability.txt",
-      "artifacts/rc-migration-chain.txt"
-    ]
+    "fingerprint": "59d6d70f6d9766de8d438a0c7698b6be23a2bf13a6784fbeee2b563d8ba175dc",
+    "tests": 997,
+    "checkedAt": "2026-10-21T17:13:43.524Z"
   }
 }

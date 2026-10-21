@@ -40,7 +40,14 @@ export function recoveryText(locale:AgentLocale){
 export function noSlotsText(locale:AgentLocale){return {ru:'На выбранное время свободных слотов не найдено. Какой другой день или интервал проверить?',en:'No slots were found for that time. Which other day or time window should I check?','sr-Latn':'Nema slobodnih termina za izabrano vreme. Koji drugi dan ili period da proverim?','sr-Cyrl':'Нема слободних термина за изабрано време. Који други дан или период да проверим?'}[locale];}
 export function safeRecovery(state:AgentState,locale:AgentLocale){
  if(state.booking)return ({ru:'Запись подтверждена: ','en':'Booking confirmed: ','sr-Latn':'Rezervacija je potvrđena: ','sr-Cyrl':'Резервација је потврђена: '}[locale])+state.booking.reference+'. '+state.booking.price+' RSD.';
- if(state.quote)return quoteText(state,locale);
+ if(state.quote){
+  if(state.review?.reasons.length||state.pending)return quoteText(state,locale)+'\n\n'+recoveryText(locale);
+  if(!state.address)return quoteText(state,locale)+'\n\n'+({ru:'Пришлите улицу и номер дома для проверки адреса.','en':'Please send the street and house number to check the address.','sr-Latn':'Pošaljite ulicu i broj zgrade da proverimo adresu.','sr-Cyrl':'Пошаљите улицу и број зграде да проверимо адресу.'}[locale]);
+  if(!state.draftFacts?.requestedDate)return quoteText(state,locale)+'\n\n'+({ru:'На какой день проверить свободное время?','en':'Which date should I check for availability?','sr-Latn':'Za koji datum da proverim termine?','sr-Cyrl':'За који датум да проверим термине?'}[locale]);
+  if(!state.slots?.length)return ({ru:'Запись ещё не подтверждена. На какое точное время начала проверить свободный слот?','en':'No booking is confirmed yet. Which exact start time should I check?','sr-Latn':'Rezervacija još nije potvrđena. Za koje tačno vreme početka da proverim termin?','sr-Cyrl':'Резервација још није потврђена. За које тачно време почетка да проверим термин?'}[locale]);
+  const intent=!state.name?'NAME':!state.phone?'PHONE':'SLOT_SELECTION';
+  state.nextInput=intent;return inputQuestion(intent,locale)!;
+ }
  const next=nextQualification(state);
  if(next){state.nextInput=next;return inputQuestion(next,locale)??recoveryText(locale);}
  return recoveryText(locale);

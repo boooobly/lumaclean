@@ -398,7 +398,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     if(ctx.extractionIncomplete===intent){reliabilityCount(state,'factExtractionFailure');state.unresolvedInput=intent;delete ctx.extractionIncomplete;delete state.pending;delete state.slots;delete state.selectedSlotToken;}
     if(state.upholsteryInquiry&&intent!=='PHONE')return{error:'UPHOLSTERY_MANAGER_INTAKE',message:'Collect only missing name/contact. Manager will clarify furniture and pricing; do not run cleaning or furniture qualification.'};
     if(inputAlreadyKnown(intent,state)){behaviorMetric('repeatedQuestionDetected');behaviorMetric('repeatedQualificationQuestionCount');return{error:'FACT_ALREADY_KNOWN',facts:state.draftFacts};}
-    if(intent==='SLOT_SELECTION'&&!state.slots?.length)return{error:'SLOTS_REQUIRED'};
+    if(intent==='SLOT_SELECTION'&&!state.slots?.length)return{error:'SLOTS_REQUIRED',requiredTool:'findAvailableSlots',date:state.draftFacts?.requestedDate,message:'No verified slots have been offered. Check real availability with findAvailableSlots using the customer date and explicit time window first. Do not repeat the price or claim a booking. Ask only for missing address/date/time prerequisites.'};
     if(intent==='POST_BOOKING'&&!state.booking||intent==='BOOKING_CONFIRMATION'&&!state.pending||intent==='YES_NO'&&!state.quote)return{error:'INPUT_CONTEXT_REQUIRED'};
     let question=intent==='FACT_CONFIRMATION'&&state.pendingFactProposal?proposalQuestion(state.pendingFactProposal.facts,c.locale):inputQuestion(intent,c.locale);
     if(state.planningRecovery?.unresolvedQuestionKey===intent||state.unresolvedInput===intent)question=loopClarificationText(intent,c.locale)??question;

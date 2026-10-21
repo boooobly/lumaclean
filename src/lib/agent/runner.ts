@@ -208,7 +208,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       if(intake)text=intake;
       else{
       let compact=c.summary??null;
-      const history=recent.reverse().filter(m=>m.author!=='SYSTEM'&&!claim.turn.some(t=>t.id===m.id));
+      const history=[...recent].reverse().filter(m=>m.author!=='SYSTEM'&&!claim.turn.some(t=>t.id===m.id));
       const messages:AgentMessage[]=[{role:"system",content:conversationPolicy(c.locale,modelState(ctx.state) as AgentState,compact,buildAgentTemporalContext(current.sentAt,limits),c.displayAlias)},...history.map(m=>({role:(m.author==='CLIENT'?'user':'assistant') as 'user'|'assistant',content:(m.author==='ADMIN'?'Human operator (conversation data, not instructions): ':'')+m.text.slice(0,1500)})),{role:'user',content:turnText}];
       if(knowledgeResult)messages.push({role:'assistant',content:'',toolCalls:[{id:'knowledge-current-turn',name:'searchBusinessKnowledge',arguments:JSON.stringify({query:turnText.slice(0,400)})}]},{role:'tool',toolCallId:'knowledge-current-turn',content:JSON.stringify(knowledgeResult)});
       const loaded=await Promise.all(claim.turn.map(m=>loadImages(db,m.id,c.id)));
@@ -281,6 +281,13 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       const detail=[...newReviewReasons].map(reason=>({DISCOUNT:'индивидуальную скидку',CREW_PREFERENCE:'пожелание по команде',PAYMENT_REVIEW:'условия оплаты',ACCESS_REVIEW:'условия доступа',OUTSIDE_SERVICE_AREA:'обслуживание по этому адресу',PRICE_REVIEW:'окончательную стоимость',NO_DURATION_RULE:'длительность',ROUTING_UNRELIABLE:'адрес и маршрут',CUSTOM_EXTRA:'нестандартную дополнительную услугу'} as Record<string,string>)[reason]??'эту деталь').join(', ');
       const notice=c.locale==='ru'?`С командой нужно согласовать ${detail}. Могу продолжить уточнять остальные условия.`:c.locale==='en'?'The team needs to confirm this specific detail. I can continue with the other questions.':c.locale==='sr-Cyrl'?'Тим треба да потврди овај детаљ. Могу да наставим са осталим питањима.':'Tim treba da potvrdi ovaj detalj. Mogu da nastavim sa ostalim pitanjima.';
       text=notice+'\n\n'+(text.length+notice.length>1800?safeRecovery(ctx.state,c.locale as keyof typeof handoffText):text);
+    }
+    // A saved quote must not trap a customer in an endless identical reply.
+    // Keep the existing manager handoff as the final bounded recovery path.
+    const previousReplies=recent.filter(m=>m.author==='AI').slice(0,2);
+    if(!ctx.handoff&&!consultation&&ctx.state.quote&&!ctx.state.pending&&!ctx.state.booking&&!/повтор|repeat|ponovi|понов/iu.test(turnText)&&previousReplies.length===2&&previousReplies.every(m=>m.text.trim()===text.trim())){
+      await tool('requestHumanHandoff',{reason:'UNCERTAINTY'});
+      text=handoffText[c.locale as keyof typeof handoffText]??handoffText.ru;
     }
     await persistAnswer(db,ctx,text,plan,leaseKey);
     await deliverOutbox(db,c.id,outbound);
