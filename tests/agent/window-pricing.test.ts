@@ -5,6 +5,15 @@ import { siteContent } from '../../src/lib/content';
 import { serviceSeoContent } from '../../src/lib/seo-services';
 import { businessKnowledge, knowledgeConsistency } from '../../src/lib/agent/knowledge/search';
 
+test('partial window guidance cannot quote the superseded full-window price', () => {
+  const partial=businessKnowledge.entries.find(e=>e.code==='ADD-WINDOW-010')!;
+  assert.equal(partial.price?.amount,600);
+  assert.equal(partial.autoBook,false);
+  assert.equal(partial.managerReview,true);
+  assert.doesNotMatch(partial.restrictions,/1[\s.,]?000/u);
+  assert.match(partial.restrictions,/без удвоения/u);
+});
+
 test('window knowledge preserves units, included scope and booking restrictions', () => {
   assert.deepEqual(knowledgeConsistency(), { ok: true, errors: [] });
   for (const [code, runtimeCode, amount, autoBook] of [

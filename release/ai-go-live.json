@@ -1,5 +1,5 @@
 {
-  "fingerprint": "e2b31d046845928c4e227879a93d8c2f06a1c20677cf60050d585ec45f005bf2",
+  "fingerprint": "f4a07b824158764dc7f25b65759b54aaf0183f892b6b3bd3c84068dea378aa62",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -73,7 +73,7 @@
     "src/app/globals.css": "b5c3edc1fcc2f480f1c7080920c7618a296a63ec53ed700b4d5a9629b59e93a4",
     "src/app/icon.svg": "01cde45ba72881463221bd30579e4cb1240bdd7b5eb8059f46edcc35da1d6e0f",
     "src/app/robots.ts": "d76d0417be060de32e5948a59bfcd5b886a9d2cca4ed429900cd089670d4d637",
-    "src/app/sitemap.ts": "4a6b164be71f6f62434916f19362b73c8d03e2b8bb98c6443c28bd115805f186",
+    "src/app/sitemap.ts": "13fd78d64dd4661e84d618eaea60a61a5c9c56bbf8519f38a209404f442b487b",
     "src/app/styles/homepage-focused.css": "bd0506f843bec12e10ca0125a9630e03a1816d433368609389e13d5059cafddb",
     "src/app/styles/seo-additions.css": "0277eb68bc6dcee536ec85d74ec752d23e1af5acaf61fa19be7cd461f122a644",
     "src/app/styles/site-base.css": "34c114a0066c2f3bfd9c25e96cbfa6fa0125730c219c2f46d8075d4e00852256",
@@ -192,7 +192,7 @@
     "src/lib/agent/knowledge/preview-whatsapp.ts": "9e78a9587f9db12582f49f0d60d82870bf3bd0a5b9d308048f28af76ea7c669e",
     "src/lib/agent/knowledge/schema.ts": "5884ed407ca1060ad5e7b4376ffdf842f523ee1234ac58a74b72be95ba13cdc5",
     "src/lib/agent/knowledge/search.ts": "340ce09612f4a8d1beb21bfe3ba326126b5b7cc287206d3ac77d44b6f66405b7",
-    "src/lib/agent/knowledge/snapshot.json": "7b8c3139192d9adca642212af659a1fcc104946c7de89654e2f4d04529f0cd68",
+    "src/lib/agent/knowledge/snapshot.json": "53fdb6f9b97b32cc64a70c5253d6ca492321f2b69407f147baf06e65c69a90ee",
     "src/lib/agent/knowledge/vocabulary.ts": "022836716f7fee2b01fa389b313a6b618ab3f1ff67b4abe5e9cb5df9e62300aa",
     "src/lib/agent/knowledge-scenarios.ts": "f818d9f46e2742022b05af64e7a9be78c5f7bd70d192e30e395b8eb4c63a52c1",
     "src/lib/agent/live-proof.ts": "ef6d87668d05e67ac93d9930d7110a2f31be35fe622583096b421b4bb8c566bf",
@@ -238,7 +238,7 @@
     "src/lib/auth/config.ts": "28dba83ac7eab10e89b6d89b85e090c14258fd6b79e2f9fc65bbd2d9b821c422",
     "src/lib/auth/session.ts": "86664bdf3bf7185cded8e4669f0b8f5c5bd57bc74142e86baf6285489ade6a27",
     "src/lib/contacts.ts": "b2f5b815d86728e39746ec12383eb0124c7157ff83d338f7292088eff0fe6a58",
-    "src/lib/content-revisions.ts": "f60ecbab9b383e651edd5a503d9bf6370d61d9187ccf847daabd9d2484b0e160",
+    "src/lib/content-revisions.ts": "eda825a46b03b9455288a064267ae64a698fc40c911902eeff3ffe25896a827e",
     "src/lib/content.ts": "f2c569c7ca09eddc1bd2baa29089228e589d214367ea32569349d13bef892cf8",
     "src/lib/database/client.ts": "bccdf4e4ac91597e892be8198d47328d51f701dd7ee62c2b8921b67f5172df6e",
     "src/lib/database/connection.ts": "ec0f01d6333eced2041052d6677e55338d8c76c344d264b530aff61cd9b8860b",
@@ -349,22 +349,28 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 1004,
+  "tests": 988,
   "skipped": 28,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-19T21:42:03.697Z",
+  "checkedAt": "2026-10-21T16:13:25.719Z",
   "suites": [
-    "artifacts/rc-suite.txt",
-    "artifacts/rc-reliability.txt",
-    "artifacts/rc-migration-chain.txt"
+    "artifacts/pricing-discovery-tests.txt",
+    "artifacts/pricing-discovery-lint.txt",
+    "artifacts/pricing-discovery-typecheck.txt",
+    "artifacts/pricing-discovery-build.txt"
   ],
-  "verificationScope": "Integrated PR21/23/24. Full local suite plus 17 isolated PostgreSQL HTTP/outbox regressions. Neon RC additive migration and historical fingerprints verified. Native live booking proof and real test Telegram remain separate BLOCKED release gates; this certificate does not assert them. Visual browser QA blocked by Work setting.",
+  "verificationScope": "Pricing discovery follow-up: 988 local tests passed, 28 credential-dependent tests skipped; lint, typecheck and build passed. No schema/migration changes: prior isolated migration rehearsal retained, not rerun. Only sitemap revision dates and one non-numeric knowledge restriction changed in runtime inputs; all prices, booking capabilities and AI configuration preserved. This certificate does not assert a fresh native live booking proof. Production master AI remains OFF as approved, pending separate AUTO restoration.",
   "previousVerification": {
     "fingerprint": "e2b31d046845928c4e227879a93d8c2f06a1c20677cf60050d585ec45f005bf2",
-    "tests": 1003,
-    "checkedAt": "2026-10-19T21:35:06.556Z"
+    "tests": 1004,
+    "checkedAt": "2026-10-19T21:42:03.697Z",
+    "migrationEvidence": [
+      "artifacts/rc-suite.txt",
+      "artifacts/rc-reliability.txt",
+      "artifacts/rc-migration-chain.txt"
+    ]
   }
 }

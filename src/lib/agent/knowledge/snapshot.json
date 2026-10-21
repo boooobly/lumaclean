@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2026-10-17.a8f10065e6bc",
+  "version": "2026-10-21.27806a198d6c",
   "sourceId": "1Xua3GrAYAgYfcbYUEWrU6I6cMZEA0IULLdSuKrbW4DY",
   "sourceHash": "3d4de44adf47b80e7528f8724688048bc10353dfb85e6cbe8f7228099e500bb7",
   "entries": [
@@ -2312,7 +2312,7 @@
       ],
       "includes": "",
       "excludes": "",
-      "restrictions": "Одна сторона стандартного окна; вместе 2 стороны заменять полной мойкой 1000.",
+      "restrictions": "Одна сторона стандартного окна; две стороны оплачиваются по тарифу полной мойки стандартного окна, без удвоения.",
       "standalone": "BY_AGREEMENT",
       "managerReview": true,
       "autoCalculate": false,

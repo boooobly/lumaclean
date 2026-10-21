@@ -2,6 +2,8 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {knowledgeSnapshotSchema,type KnowledgeEntry} from '../../src/lib/agent/knowledge/schema';
 import {knowledgeAliases} from '../../src/lib/agent/knowledge/vocabulary';
+import {extrasPrices} from '../../src/lib/pricing';
+import {contentLastModified} from '../../src/lib/content-revisions';
 
 // Input is a fresh, reviewed, range-limited export of tabs 01–06, never a workbook dump.
 // This command writes a reviewable local snapshot; it never contacts production or changes prices.
@@ -37,6 +39,10 @@ for(const tab of [2,3])for(const r of rows(tab)){
  if(!e.autoBook)e.managerReview=true;
  if(e.status!=='UNAVAILABLE'&&typeof c[5]==='number')e.price={amount:c[5],currency:'RSD',kind:c[5]===0?'included':e.unit==='%'?'percent':tab===3||/от|согласован/iu.test(value(c[4]))?'from':'fixed',unit:e.unit};
  if(e.price?.kind==='included')e.restrictions=clean(e.restrictions+' Входит только в соответствующую согласованную работу, не бесплатный самостоятельный выезд.');
+ // Approved public window prices override older spreadsheet exports.
+ if(e.price&&e.runtimeCode==='standardWindow')e.price.amount=extrasPrices.standardWindow;
+ if(e.price&&e.runtimeCode==='largeWindow')e.price.amount=extrasPrices.largeWindow;
+ if(e.code==='ADD-WINDOW-010')e.restrictions='Одна сторона стандартного окна; две стороны оплачиваются по тарифу полной мойки стандартного окна, без удвоения.';
  if(e.code==='UPH-SOFA-004')e.restrictions='Угловой диван до 4 посадочных мест. Каждое место сверх четырёх — 2 000 RSD по UPH-SOFA-006; окончательная цена после проверки ткани и состояния.';
  if(e.code==='UPH-SOFA-006')e.restrictions='За каждое посадочное место сверх четырёх у углового дивана. Не цена целого углового дивана.';
  if(e.code==='UPH-RULE-001'||e.code==='ADD-LOGISTICS-002')e.restrictions='Минимальная итоговая стоимость отдельного выезда на химчистку — 4 000 RSD. Это нижний предел суммы, не дополнительный сбор. При совместной уборке условия согласуются; минимум повторно не начисляется.';
@@ -124,6 +130,6 @@ for(const [code,description] of Object.entries(rules)){
 for(const e of entries){if(internal.test(JSON.stringify(e)))throw new Error(`Private source fragment in ${e.code}`);}
 if(new Set(entries.map(e=>e.code)).size!==entries.length)throw new Error('Duplicate stable code');
 if(rows(2).length!==280||rows(3).length!==94||rows(5).length!==108)throw new Error('Source row count changed; review the importer bounds');
-const snapshot=knowledgeSnapshotSchema.parse({schemaVersion:1,version:'2026-10-17.'+createHash('sha256').update(JSON.stringify(entries)).digest('hex').slice(0,12),sourceId:'1Xua3GrAYAgYfcbYUEWrU6I6cMZEA0IULLdSuKrbW4DY',sourceHash:createHash('sha256').update(JSON.stringify(source)).digest('hex'),entries});
+const snapshot=knowledgeSnapshotSchema.parse({schemaVersion:1,version:contentLastModified.knowledge+'.'+createHash('sha256').update(JSON.stringify(entries)).digest('hex').slice(0,12),sourceId:'1Xua3GrAYAgYfcbYUEWrU6I6cMZEA0IULLdSuKrbW4DY',sourceHash:createHash('sha256').update(JSON.stringify(source)).digest('hex'),entries});
 writeFileSync('src/lib/agent/knowledge/snapshot.json',JSON.stringify(snapshot,null,2)+'\n');
 console.log(JSON.stringify({version:snapshot.version,count:entries.length,statuses:Object.fromEntries(['OFFERED','BY_AGREEMENT','UNAVAILABLE'].map(s=>[s,entries.filter(e=>e.status===s).length]))}));
