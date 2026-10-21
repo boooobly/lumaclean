@@ -198,7 +198,7 @@ export default async function DashboardPage() {
             {data.latestLeads.map((lead) => (
               <li key={lead.id}>
                 <Link href={`/admin/leads/${lead.id}`}>
-                  {lead.name}
+                  {lead.name ?? "Имя не указано"}
                   <small>
                     {date(lead.createdAt)} ·{" "}
                     {lead.service?.name ?? "Услуга не указана"}

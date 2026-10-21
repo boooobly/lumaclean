@@ -35,7 +35,7 @@ export default async function LeadPage({
   return (
     <>
       <CrmHeader
-        title={lead.name}
+        title={lead.name ?? "Имя не указано"}
         subtitle={lead.reference ?? "Заявка"}
         back="/admin/leads"
         action={
@@ -49,11 +49,11 @@ export default async function LeadPage({
           <h2>
             Исходные данные <Chip status={lead.status} />
           </h2>
-          {leadRequestKind(lead)!=='CLEANING'&&lead.status!=='CONVERTED'&&<p className="crm-warning">Требуется уточнение химчистки</p>}
+          {['UPHOLSTERY','CLEANING_UPHOLSTERY'].includes(leadRequestKind(lead))&&lead.status!=='CONVERTED'&&<p className="crm-warning">Требуется уточнение химчистки</p>}
           <Facts secondary={["Язык", "Канал"]} technical={["Нормализованный телефон"]}
             items={[
               ["Тип обращения",requestKindLabels[leadRequestKind(lead)]],
-              ["Имя", lead.name],
+              ["Имя", lead.name ?? "Не указано"],
               [
                 "Телефон",
                 <a
@@ -76,7 +76,7 @@ export default async function LeadPage({
                   >
                 )[lead.locale ?? ""] ?? lead.locale,
               ],
-              ["Услуга", lead.service?.name],
+              ["Услуга", lead.service?.name ?? "Не указана"],
               ["Площадь", lead.area ? `${lead.area} м²` : "—"],
               [lead.upholsteryQuote?'Предыдущий расчёт услуг':leadRequestKind(lead)==='CLEANING_UPHOLSTERY'?'Уборка без химчистки':'Оценка', lead.estimatedPrice===null?'Цена после уточнения':money(lead.estimatedPrice)],
               ["Срочность", lead.urgent ? "Да" : "Нет"],
@@ -86,7 +86,7 @@ export default async function LeadPage({
               ["Создана", date(lead.createdAt)],
               [
                 "Telegram",
-                {
+                lead.notification?({PENDING:'Ожидает доставки / повторной попытки',SENDING:'Отправляется',SENT:'Отправлено',DELIVERED:'Отправлено, Telegram подтвердил приём',READ:'Прочитано',UNKNOWN:'Результат неизвестен — проверьте Telegram перед любыми действиями',FAILED:'Не отправлено — требуется восстановление',CANCELLED:'Отменено'}[lead.notification.deliveryState]??lead.notification.deliveryState):{
                   SENT: "Уведомление отправлено",
                   FAILED: "Уведомление не доставлено",
                   PENDING: "Доставка не подтверждена",
@@ -95,6 +95,8 @@ export default async function LeadPage({
               ],
             ]}
           />
+          {lead.notification&&<p className="crm-hint">Попыток: {lead.notification.attempts}{lead.notification.nextAttemptAt?` · Следующая попытка: ${date(lead.notification.nextAttemptAt)}`:''}{lead.notification.lastErrorCode?` · ${lead.notification.lastErrorCode}`:''}</p>}
+          {lead.canRecoverNotification&&<CrmForm command="lead-notification-retry" id={id} button="Восстановить доставку уведомления"><p>Сначала устраните причину ошибки доставки.</p></CrmForm>}
           {lead.extras.length > 0 && (
             <>
               <h3>Дополнительные услуги</h3>

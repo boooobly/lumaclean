@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": "2026-10-17.4ede733b908e",
+  "version": "2026-10-17.a8f10065e6bc",
   "sourceId": "1Xua3GrAYAgYfcbYUEWrU6I6cMZEA0IULLdSuKrbW4DY",
-  "sourceHash": "a0fac96ee0e6f864d36fe099f04c1cecb7e03231b12a11e1af5a1b1074428781",
+  "sourceHash": "3d4de44adf47b80e7528f8724688048bc10353dfb85e6cbe8f7228099e500bb7",
   "entries": [
     {
       "code": "ADD-BATH-001",
@@ -1996,7 +1996,7 @@
       "description": "Окно стандартное, две стороны",
       "unit": "окно",
       "price": {
-        "amount": 1000,
+        "amount": 700,
         "currency": "RSD",
         "kind": "fixed",
         "unit": "окно"
@@ -2031,7 +2031,7 @@
       "description": "Окно большое, две стороны",
       "unit": "окно",
       "price": {
-        "amount": 1500,
+        "amount": 1000,
         "currency": "RSD",
         "kind": "fixed",
         "unit": "окно"

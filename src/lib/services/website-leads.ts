@@ -1,13 +1,14 @@
 import { createHash, randomUUID } from "node:crypto";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { websiteLeadSchema } from "@/lib/validation/crm";
-import { normalizedPhone, CrmError, serviceLabels } from "@/lib/domain/crm";
+import { normalizedPhone, CrmError } from "@/lib/domain/crm";
 import { quote } from "@/lib/domain/crm-pricing";
 import {serviceDatePolicy,buildAgentTemporalContext} from "@/lib/agent/temporal";
 import { writeAudit } from "./audit";
 import {enqueueLeadReview} from './lead-notifications';
-import {publishNotifications} from '@/lib/agent/notifications';
-export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
+import {limitNewWebsiteLead} from './lead-rate-limit';
+import {publishNotifications,deliverNotification} from '@/lib/agent/notifications';
+export async function saveWebsiteLead(db: PrismaClient, payload: unknown, source?: string) {
   const input = websiteLeadSchema.parse(payload);
   input.extras = input.extras
     .filter((e) => e.quantity > 0)
@@ -34,15 +35,17 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
           created: false,
         };
       }
+      if(source)await limitNewWebsiteLead(tx,source);
       if(input.urgent){const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}}),now=new Date();const date=buildAgentTemporalContext(now,settings,now).nowLocalDate;if('error' in serviceDatePolicy(date,settings,now))throw new CrmError('VALIDATION','SAME_DAY_CUTOFF');}
       const standalone=requestKind==='UPHOLSTERY';
-      const service = await tx.service.findUnique({
+      const contact=requestKind==='CONTACT_REQUEST';
+      const service = contact?null:await tx.service.findUnique({
         where: { code: standalone?'upholstery':input.service! },
         select: { id: true, active: true },
       });
-      if (!service?.active)
+      if (!contact&&!service?.active)
         throw new CrmError("VALIDATION", "Service unavailable");
-      const calculated = standalone?null:quote(
+      const calculated = standalone||contact?null:quote(
         input.service!,
         input.area!,
         input.extras,
@@ -65,9 +68,9 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
           phone: input.phone,
           normalizedPhone: normalizedPhone(input.phone),
           locale: input.locale,
-          requestKind,upholsteryRequested,humanReviewRequired:upholsteryRequested,consentAt:new Date(),
-          serviceId: service.id,
-          area: standalone?null:input.area,
+          requestKind,upholsteryRequested,humanReviewRequired:upholsteryRequested||contact,consentAt:new Date(),
+          serviceId: service?.id??null,
+          area: standalone||contact?null:input.area,
           estimatedPrice: calculated?.total??null,
           urgent: input.urgent,
           comment: input.comment,
@@ -84,7 +87,7 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown) {
           },
         },
       });
-      if(upholsteryRequested)await enqueueLeadReview(tx,{...lead,service:input.service,area:input.area,estimatedPrice:calculated?.total??null});
+      await enqueueLeadReview(tx,{...lead,service:input.service,area:input.area,estimatedPrice:calculated?.total??null});
       await writeAudit(
         tx,
         { type: "SYSTEM", key: "website-intake" },
@@ -100,65 +103,24 @@ export async function notifyWebsiteLead(
   lead: { id: string; reference: string },
   input: ReturnType<typeof websiteLeadSchema.parse>,
   send: typeof fetch = fetch,
+  workers = {publish:publishNotifications,deliver:deliverNotification},
 ) {
-  if(input.upholsteryRequested){try{await publishNotifications(db);}catch{/* Durable pending notification is recovered by the existing worker. */}return;}
-  let sent = false;
-  try {
-    const token = process.env.TELEGRAM_BOT_TOKEN,
-      chatId = process.env.TELEGRAM_CHAT_ID;
-    if (!token || !chatId) throw new Error("unconfigured");
-    const text = [
-      "🧹 Новая заявка LumaClean",
-      `Номер: ${lead.reference}`,
-      `Имя: ${input.name}`,
-      `Телефон: ${input.phone}`,
-      `Язык: ${input.locale}`,
-      `Услуга: ${serviceLabels[input.service!]}`,
-      `Площадь: ${input.area} м²`,
-      input.attribution
-        ? `Источник (по браузеру): ${input.attribution.source}\nСтраница входа: ${input.attribution.landing}`
-        : "Источник: не определён",
-      input.comment ? `Комментарий: ${input.comment}` : "",
-      input.estimate ?? "",
-    ]
-      .filter(Boolean)
-      .join("\n");
-    const response = await send(
-      `https://api.telegram.org/bot${token}/sendMessage`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: chatId, text }),
-        cache: "no-store",
-        signal: AbortSignal.timeout(10000),
-      },
-    );
-    const body = await response.json().catch(() => null);
-    sent = response.ok && body?.ok === true;
-  } catch {
-    /* Persisted lead is the source of truth. Never log contacts, URLs or errors. */
-  }
-  if (!sent)
-    console.error(
-      JSON.stringify({
-        level: "error",
-        msg: "lead_delivery_failed",
-        route: "/api/lead",
-        leadReference: lead.reference,
-      }),
-    );
-  try {
-    await db.lead.update({
-      where: { id: lead.id },
-      data: { telegramStatus: sent ? "SENT" : "FAILED" },
-    });
-  } catch {
-    console.error(
-      JSON.stringify({
-        level: "error",
-        msg: "lead_notification_status_failed",
-        route: "/api/lead",
-      }),
-    );
-  }
+  // Retain the public helper signature for callers; all delivery goes through the outbox.
+  void input; void send;
+  try{
+    const event=await db.notification.findUnique({where:{eventKey:`website-lead:${lead.id}:telegram`}});
+    if(!event)return;
+    await workers.publish(db,event.id);
+    const latest=await db.notification.findUnique({where:{id:event.id}});
+    // The same leased worker can deliver after the HTTP response if the queue is down.
+    if(latest?.deliveryState==='PENDING'&&!latest.publishedAt&&latest.lastErrorCode==='QUEUE_UNAVAILABLE')await workers.deliver(db,event.id);
+  }catch{console.error(JSON.stringify({msg:'lead_notification_recovery_pending'})); /* No contacts or upstream errors. */}
+}
+
+/** Close the after() crash window as far as possible without sending Telegram in HTTP intake. */
+export async function publishWebsiteLead(db:PrismaClient,leadId:string,publish=publishNotifications){
+  try{
+    const event=await db.notification.findUnique({where:{eventKey:`website-lead:${leadId}:telegram`},select:{id:true}});
+    if(event)await publish(db,event.id);
+  }catch{console.error(JSON.stringify({msg:'lead_notification_publication_pending'}));}
 }

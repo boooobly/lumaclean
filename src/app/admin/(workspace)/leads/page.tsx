@@ -58,12 +58,12 @@ export default async function LeadsPage({
               <small>{date(r.createdAt)}</small>
             </td>
             <td>
-              {r.name}
+              {r.name ?? "Имя не указано"}
               <small>{r.phone}</small>
             </td>
             <td>
               {requestKindLabels[leadRequestKind(r)]}
-              {leadRequestKind(r)!=='CLEANING'&&r.status!=='CONVERTED'&&<small className="crm-warning">Требуется уточнение химчистки</small>}
+              {['UPHOLSTERY','CLEANING_UPHOLSTERY'].includes(leadRequestKind(r))&&r.status!=='CONVERTED'&&<small className="crm-warning">Требуется уточнение химчистки</small>}
               {r.area&&<small>{r.service?.name} · {String(r.area)} м²</small>}
               <small>{r.estimatedPrice===null?'Цена после уточнения':`${r.upholsteryQuote?'Предыдущий расчёт услуг: ':leadRequestKind(r)==='CLEANING_UPHOLSTERY'?'Уборка без химчистки: ':''}${money(r.estimatedPrice)}`}</small>
             </td>

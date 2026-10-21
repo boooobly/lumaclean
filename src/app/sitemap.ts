@@ -6,8 +6,9 @@ import {getServicePath} from "@/lib/seo-services";
 import {siteUrl} from "@/lib/seo";
 import {articleLanguages, articlePath, getPublishedArticles} from "@/lib/articles";
 
-// The revised price bands affect all homepage and service price tables.
-const pricingLastModified = new Date("2026-09-28");
+// Updated with the content revision, never with the sitemap request time.
+import {contentLastModified} from "@/lib/content-revisions";
+const pricingLastModified = new Date(contentLastModified.pricing);
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl;
@@ -22,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     };
     return routing.locales.map((locale) => ({
       url: `${base}${getServicePath(locale, service)}`,
-      lastModified: service==='upholstery'?new Date('2026-10-11'):pricingLastModified,
+      lastModified: service==='upholstery'?new Date(contentLastModified.upholstery):pricingLastModified,
       changeFrequency: "monthly" as const,
       priority: 0.9,
       alternates: {languages},

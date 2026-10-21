@@ -1,9 +1,12 @@
-import { NextResponse } from "next/server";
+import {leadRequestSource, LeadRateLimitError} from '@/lib/services/lead-rate-limit';
+import {boundedBody} from '@/lib/services/admin-http';
+import { after, NextResponse } from "next/server";
 import { websiteLeadSchema } from "@/lib/validation/crm";
 import { getDatabase } from "@/lib/database/client";
 import {
   saveWebsiteLead,
   notifyWebsiteLead,
+  publishWebsiteLead,
 } from "@/lib/services/website-leads";
 import { CrmError } from "@/lib/domain/crm";
 import { articlePath, getPublishedArticles } from "@/lib/articles";
@@ -22,7 +25,9 @@ const paths = new Set(
   ]),
 );
 export async function POST(request: Request) {
-  const raw = await request.text();
+  let raw:string;
+  try{raw=(await boundedBody(request,16000)).toString();}
+  catch(error){return NextResponse.json({ok:false},{status:error instanceof CrmError&&error.code==='TOO_LARGE'?413:400});}
   if (raw.length > 16000)
     return NextResponse.json({ ok: false }, { status: 413 });
   const parsed = websiteLeadSchema.safeParse(
@@ -45,13 +50,19 @@ export async function POST(request: Request) {
   }
   try {
     const db = getDatabase();
-    const lead = await saveWebsiteLead(db, parsed.data);
-    if (lead.created||parsed.data.upholsteryRequested) await notifyWebsiteLead(db, lead, parsed.data);
+    const lead = await saveWebsiteLead(db, parsed.data, leadRequestSource(request));
+    await publishWebsiteLead(db,lead.id);
+    try{after(()=>notifyWebsiteLead(db, lead, parsed.data));}
+    catch{console.error(JSON.stringify({msg:'lead_notification_recovery_pending'}));}
     return NextResponse.json(
       { ok: true, reference: lead.reference },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
+    if(error instanceof LeadRateLimitError){
+      const message={ru:'Слишком много заявок. Подождите немного и повторите попытку.',en:'Too many enquiries. Please wait a little and try again.',sr:'Previše upita. Sačekajte malo i pokušajte ponovo.'}[parsed.data.locale];
+      return NextResponse.json({ok:false,error:'RATE_LIMIT',message},{status:429,headers:{'Retry-After':String(error.retryAfter),'Cache-Control':'no-store'}});
+    }
     if (error instanceof CrmError)
       return NextResponse.json(
         { ok: false },

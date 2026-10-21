@@ -170,7 +170,10 @@ export async function getLead(id: string) {
     }),
   );
   if (!lead) notFound();
-  return lead;
+  const notification=await read(()=>db.notification.findUnique({where:{eventKey:`website-lead:${id}:telegram`},select:{deliveryState:true,lastErrorCode:true,attempts:true,nextAttemptAt:true,scheduledAt:true}}));
+    const now=Date.now();
+    const canRecoverNotification=!!notification&&((notification.deliveryState==='FAILED'&&['INTERNAL_TELEGRAM_UNCONFIGURED','TELEGRAM_RATE_LIMIT','TELEGRAM_REJECTED'].includes(notification.lastErrorCode??''))||(notification.deliveryState==='PENDING'&&notification.scheduledAt.getTime()<=now-120000&&(!notification.nextAttemptAt||notification.nextAttemptAt.getTime()<=now)));
+    return {...lead,notification,canRecoverNotification};
 }
 export async function getClient(id: string) {
   await requireAdmin();

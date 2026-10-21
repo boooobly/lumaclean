@@ -195,6 +195,21 @@ export async function runCrmCommand(
           { type: "USER", userId },
           { action, entityType, entityId, changes },
         );
+      if(command==='lead-notification-retry'){
+        const {id}=commandSchemas[command].parse(payload);
+        await leadForChange(tx,id);
+        const event=await tx.notification.findUnique({where:{eventKey:`website-lead:${id}:telegram`}});
+        const now=new Date(),staleBefore=new Date(now.getTime()-120000);
+        const definiteFailure=event?.deliveryState==='FAILED'&&['INTERNAL_TELEGRAM_UNCONFIGURED','TELEGRAM_RATE_LIMIT','TELEGRAM_REJECTED'].includes(event.lastErrorCode??'');
+        const stalled=event?.deliveryState==='PENDING'&&!event.leaseKey&&event.scheduledAt<=staleBefore&&(!event.nextAttemptAt||event.nextAttemptAt<=now);
+        if(!event||event.kind!=='WEBSITE_LEAD'||(!definiteFailure&&!stalled)||(event.payload as {telegramMessageId?:string}|null)?.telegramMessageId)
+          throw new CrmError('VALIDATION','Повтор разрешён только для подтверждённо неотправленного или ожидающего уведомления.');
+        const changed=await tx.notification.updateMany({where:{id:event.id,deliveryState:event.deliveryState,attempts:event.attempts,leaseKey:null},data:{deliveryState:'PENDING',status:'PENDING',...(definiteFailure?{attempts:0}:{}),publishedAt:null,nextAttemptAt:null,leaseKey:null,leaseUntil:null,lastErrorCode:null}});
+        if(!changed.count)throw new CrmError('STALE','Статус доставки изменился. Обновите страницу.');
+        await tx.lead.update({where:{id},data:{telegramStatus:'PENDING'}});
+        await audit('LEAD_NOTIFICATION_RETRIED','Lead',id);
+        return{id};
+      }
       if (command === "lead-create") {
         const v = commandSchemas[command].parse(payload);
         const service = await tx.service.findUnique({

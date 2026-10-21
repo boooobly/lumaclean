@@ -1,14 +1,15 @@
 import type {Locale} from '@/i18n/routing';
-export const requestKinds=['CLEANING','CLEANING_UPHOLSTERY','UPHOLSTERY'] as const;
+export const requestKinds=['CLEANING','CLEANING_UPHOLSTERY','UPHOLSTERY','CONTACT_REQUEST'] as const;
 export type RequestKind=typeof requestKinds[number];
 export function leadRequestKind(lead:{requestKind?:string;upholsteryRequested?:boolean;upholsteryQuote?:unknown;area?:unknown}):RequestKind {
+  if(lead.requestKind==='CONTACT_REQUEST')return 'CONTACT_REQUEST';
   const mode=(lead.upholsteryQuote as {input?:{mode?:string}}|null)?.input?.mode;
   if(lead.requestKind==='UPHOLSTERY'||mode==='STANDALONE')return 'UPHOLSTERY';
   if(lead.requestKind==='CLEANING_UPHOLSTERY')return 'CLEANING_UPHOLSTERY';
   if(lead.upholsteryRequested||lead.upholsteryQuote)return 'CLEANING_UPHOLSTERY';
   return 'CLEANING';
 }
-export const requestKindLabels={CLEANING:'Уборка',CLEANING_UPHOLSTERY:'Уборка + химчистка',UPHOLSTERY:'Только химчистка'};
+export const requestKindLabels={CLEANING:'Уборка',CLEANING_UPHOLSTERY:'Уборка + химчистка',UPHOLSTERY:'Только химчистка',CONTACT_REQUEST:'Обратный звонок'};
 export const upholsteryEnquiryPath=(locale:Locale)=>`/${locale}?request=upholstery#estimate`;
 export const enquiryCopy={
  ru:{kind:'Что вам нужно?',cleaning:'Уборка квартиры',only:'Только химчистка',checkbox:'Нужна химчистка мебели или ковров',hint:'Менеджер уточнит детали и рассчитает стоимость химчистки отдельно.',cleaningPrice:'Стоимость уборки без химчистки',pending:'Химчистка: стоимость уточнит менеджер.',agreed:'Окончательная сумма будет согласована до выезда.',onlyPrice:'Стоимость химчистки рассчитаем после уточнения деталей.',send:'Отправить заявку',placeholder:'Например: нужна химчистка дивана и ковра',success:'Спасибо! Заявку получили. Менеджер уточнит детали химчистки и согласует стоимость.',cta:'Оставить заявку на химчистку',articleCta:'Узнать стоимость химчистки',otherItems:'Матрасы и ковры: возможность обработки и стоимость уточним лично, с учётом материала и состояния.'},
