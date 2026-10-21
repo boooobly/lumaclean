@@ -32,6 +32,9 @@ test('upholstery capability questions do not create a booking intake',()=>{
  for(const text of ['Can you clean a sofa?','Could you clean a carpet?','Вы можете почистить диван?','Možete li oprati kauč?'])assert.equal(upholsteryBookingIntent(text),false,text);
  for(const text of ['I want sofa cleaning','Can you clean my sofa?','Хочу заказать химчистку дивана'])assert(upholsteryBookingIntent(text),text);
 });
+test('explicit inquiry-only wording is not an upholstery booking request',()=>{
+ for(const text of ['Вы умеете делать химчистку дивана? Сейчас только узнаю об услуге, заявку создавать не нужно.','Can you clean a sofa? I am only asking; do not create a booking.','Možete li oprati kauč? Samo pitam, ne želim rezervaciju.'])assert.equal(upholsteryBookingIntent(text),false,text);
+});
 test('Serbian nothing else is not the city Niš',()=>{
  for(const text of ['Ništa više','Ništa dodatno','Nisam siguran','Ништа више'])assert.equal(mandatoryHandoff(text),null,text);
  for(const text of ['Treba mi čišćenje u Niš','Adresa: Niš.','Nis','Novi Sad','Pančevu'])assert.equal(mandatoryHandoff(text),'OUTSIDE_SERVICE_AREA',text);

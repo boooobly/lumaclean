@@ -1,5 +1,5 @@
 {
-  "fingerprint": "870963f5a279614a919681d7eaeaf2e33de1384a85fad25a7e3e494f36332489",
+  "fingerprint": "76c03a6d8df5a6639831ef0a15556901730055f0a4d3ccaa7e8f92a97ebf3db5",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -209,7 +209,7 @@
     "src/lib/agent/release-verification.mjs": "b64166d4bd4f9dc05adf17b71d4951dee694d2a9af8061bac6cfd3ca700b6b5c",
     "src/lib/agent/reliability-telemetry.ts": "b50d9c2b273a33b67d03cffbdfffee0a4512efba753fb501ea589dbcf9a725bb",
     "src/lib/agent/routine-faq.ts": "3fc0c31de2cd0f17c766889a5fb2043cfe46f350f95edc1c97c962cf45f5f912",
-    "src/lib/agent/runner.ts": "5fcaaac4b6528f749f9f144f3317927a660d6e7ede69f478a210bdd586ccd479",
+    "src/lib/agent/runner.ts": "951fb779026d2f956b44ad13697a3d1ccefd316cc4ef57a98cc075857f6e16f3",
     "src/lib/agent/settings.ts": "bf18dc0f06eaa3bb5551f2a846bb1fed31966cace4815843a1919b671e550017",
     "src/lib/agent/telegram-handoff.ts": "d58951bb26a7b24988fcb6bb0f484e980c8a5e93c0dce204a4548d3dff2c76f9",
     "src/lib/agent/temporal.ts": "7dff9432c06f3dd3e9da30ece37add57aa50c2f434f5dec434de3769ec39ad05",
@@ -306,7 +306,7 @@
     "src/lib/services/website-leads.ts": "264ea091a131d14d35a158ad2b88981d2d35c1dc22d8ecc95d88d5520d3381db",
     "src/lib/site-content.tsx": "7b45e3029f824e9a6a0e4eae054c2c11b9215e2d204ce00ae3adb6d39e9b9a8a",
     "src/lib/upholstery-content.ts": "80a4060297737cab5d8026399dcc56a2956a5b5ee86af431dc14108d1b9c0803",
-    "src/lib/upholstery-intent.ts": "e2a51be99b564689732eed42f95b6a354f7100454f670951b748315bd2bdaad6",
+    "src/lib/upholstery-intent.ts": "60ee31195207c686c55cedbe5dfc5a6fd8135f42032a6db87725ae8aa938f666",
     "src/lib/upholstery.ts": "8da2e634b383fb39f7218dff31e5b11781b3af64031fdf2559ba99c1a10aff9b",
     "src/lib/validation/admin.ts": "9c1d0a705faffed2af3fd53cf4d5ec10713ba3d90d52769370288655b95f4a4f",
     "src/lib/validation/crm.ts": "d6c74202643e0ffb83fc5c2ccde8c9a44dd913ecfad5b0b4ee49c7b647887fad",
@@ -349,17 +349,17 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 945,
+  "tests": 947,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-21T22:48:33.710Z",
+  "checkedAt": "2026-10-21T23:07:08.245Z",
   "suites": [
-    "936 passing local agent/admin/CRM/finance/scheduling/reliability checks; 30 DB-dependent suites skipped without their fixture secrets",
-    "9 isolated RC database checks: window/extra refusals, explicit selection, partial-room scope handoff, FAQ refusal without intake restart, and bounded repeat handoff with durable notification"
+    "937 passing local agent/admin/CRM/finance/scheduling/reliability checks; 30 DB-dependent suites skipped without their fixture secrets",
+    "10 isolated RC database checks: window/extra refusals, explicit selection, partial-room scope handoff, FAQ refusal without intake restart, compound upholstery FAQ without a Lead or notification, and bounded repeat handoff with durable notification"
   ],
-  "verificationScope": "Contextual refusals, actual calendar checks for an explicitly intended start time (arrival/end intent is never inferred), progressive recovery, bounded manager handoff, unsupported booking claims with negative/conditional explanations preserved, Serbian city word boundaries, acknowledgement/name distinction, partial-room scope protection and read-only upholstery capability questions. Approved models, system prompts, pricing, booking consent and channel modes unchanged. No schema changes: previous migration rehearsal retained. Native paid evidence comprises 30 multi-turn OpenRouter dialogues and targeted replays of discovered issues; transient provider failures were recovered and are reported separately. A genuine final-source booking proof is an independent gate, not inferred from these regression checks.",
+  "verificationScope": "Contextual refusals, actual calendar checks for an explicitly intended start time (arrival/end intent is never inferred), progressive recovery, bounded manager handoff, unsupported booking claims with negative/conditional explanations preserved, Serbian city word boundaries, acknowledgement/name distinction, partial-room scope protection and read-only upholstery capability questions, including compound inquiry-only wording and refusal of booking. Approved models, system prompts, pricing, booking consent and channel modes unchanged. No schema changes: previous migration rehearsal retained. Native paid evidence comprises 30 multi-turn OpenRouter dialogues and targeted replays of discovered issues; transient provider failures were recovered and are reported separately. A genuine final-source booking proof is an independent gate, not inferred from these regression checks.",
   "previousVerification": {
     "fingerprint": "59d6d70f6d9766de8d438a0c7698b6be23a2bf13a6784fbeee2b563d8ba175dc",
     "tests": 997,
