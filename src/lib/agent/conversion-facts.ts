@@ -16,7 +16,8 @@ const number='(?:[0-9]{1,3}|'+Object.keys(numbers).join('|')+')';
 function count(value:string){return /^\d+$/u.test(value)?Number(value):numbers[value];}
 const large='(?:velik[a-z]*|panoramsk[a-z]*|large|big|panoramic|больш[а-я]*|панорамн[а-я]*|велик[а-я]*)';
 const standard='(?:mal[a-z]*|standard[a-z]*|small|standard|маленьк[а-я]*|мал[а-я]*|стандартн[а-я]*)';
-const windowWord=/prozor|прозор|окн|окон|window/iu;
+// JavaScript's window.origin/window[...] is not a window-washing selection.
+const windowWord=/prozor|прозор|окн|окон|\bwindows?\b(?!\s*[.\[])/iu;
 export function conversionFacts(text:string,at:Date,timezone:string,expected?:AgentState['nextInput'],state?:AgentState):Facts {
   const t=plain(text),f:Facts={};
   if(serviceNeedsConfirmation(text))f.serviceConfirmationRequired=true;
@@ -47,7 +48,9 @@ export function conversionFacts(text:string,at:Date,timezone:string,expected?:Ag
   const accessory=/ролл?ет|рольстав|rolet|shutter|москит|комарник|komarnik|mosquito|жалюз|blinds/iu.test(t);
   const explicitWindows=/(?:помыть|мыть|мойк[ау]|pranje|operi|wash|clean)\s+(?:все\s+|all\s+)?(?:окн|окон|prozor|прозор|windows?)|(?:окн[а-я]*|prozor[a-z]*|прозор[а-я]*|windows?)\s+(?:и|and|i|и)\s+(?:ролл?ет|рольстав|rolet|shutter|москит|комарник|komarnik|mosquito)|(?:ролл?ет[а-я]*|rolet[a-z]*|shutters?|komarnik[a-z]*)\s+(?:и|and|i)\s+(?:окн|окон|prozor|прозор|window)/iu.test(t);
   const windowContext=!catalogQuestion(text)&&(!accessory||explicitWindows)&&(windowWord.test(t)||expected==='WINDOW_COUNTS'||expected==='WINDOW_TYPE'||!!state?.draftFacts?.windowCleaning?.requested);
-  if(!catalogQuestion(text)&&/bez prozor|prozore necemo|ne treba.{0,20}(?:pranje )?prozor|without windows|no window cleaning|без окон|окна не (?:нужны|надо)|не нужно.{0,15}мыть окна/iu.test(t)) {
+  const windowAnswer=expected==='WINDOW_COUNTS'||expected==='WINDOW_TYPE';
+  const declinedWindowAnswer=windowAnswer&&/^(?:(?:нет|не нужно|не надо|не нужны|не требуются|не хочу|ноль|нуль|ни одного)|(?:no|none|zero|not needed|don't need (?:any|them))|(?:ne|ne treba|nisu potrebni|nijedan|nula)|(?:не|не треба|нису потребни|ниједан|нула)|0)[.!\s]*$/iu.test(t.trim());
+  if(!catalogQuestion(text)&&(declinedWindowAnswer||/bez prozor|prozore necemo|ne treba.{0,20}(?:pranje )?prozor|without windows|no window cleaning|(?:don't|do not) (?:need|want).{0,20}window|без окон|окна не (?:нужны|надо)|не (?:нужно|надо|хочу).{0,25}(?:мыть|мойк).{0,15}(?:окн|окон)/iu.test(t))) {
     f.windowCleaning={requested:false};f.declinedExtras=['standardWindow','largeWindow'];
   }else if(windowContext){
     const lc=t.match(new RegExp('('+number+')\\s*'+large,'iu')),sc=t.match(new RegExp('('+number+')\\s*'+standard,'iu'));
