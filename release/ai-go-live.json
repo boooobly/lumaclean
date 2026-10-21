@@ -1,5 +1,5 @@
 {
-  "fingerprint": "f4a07b824158764dc7f25b65759b54aaf0183f892b6b3bd3c84068dea378aa62",
+  "fingerprint": "59d6d70f6d9766de8d438a0c7698b6be23a2bf13a6784fbeee2b563d8ba175dc",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -180,7 +180,7 @@
     "src/lib/agent/conversation-memory.ts": "612e9a816cbfbf894600318831652cf9d96f1f4e2d6196c4a3388b4a5def9328",
     "src/lib/agent/conversation-preview.ts": "8dea853566cd5494bc7f09a74373a362719dbb9eba235decfe8b7c4b52e1e122",
     "src/lib/agent/conversation-recovery.ts": "c4f9d99403b2c825cc74e41470970c1eb3db795c15bb5151bd02030438d9b06e",
-    "src/lib/agent/conversion-facts.ts": "79fab16c9cd9a16c5fd070bce8d9f81bb03cfab8b8762ccdb451e1159ea5a10d",
+    "src/lib/agent/conversion-facts.ts": "dd572151c0c8d04f8e8d3ee514ea50ab292de71d0765a312f8a67e2be7459a15",
     "src/lib/agent/conversion-intake.ts": "39903528cfbd6bfcc17a4ad0f0cb02e5248b11e665e240a1bff0f675dea2c6af",
     "src/lib/agent/customer-channels.ts": "b6940d78f33831fb2e257efe57e3b243dc3f06ea1ebe729a2ce27fc22d6df3c5",
     "src/lib/agent/customer-facts.ts": "02aa802da942904b3c0c4b0272c249570ef1d30c4b8880d2d82f8bd068d0d090",
@@ -213,7 +213,7 @@
     "src/lib/agent/settings.ts": "bf18dc0f06eaa3bb5551f2a846bb1fed31966cace4815843a1919b671e550017",
     "src/lib/agent/telegram-handoff.ts": "d58951bb26a7b24988fcb6bb0f484e980c8a5e93c0dce204a4548d3dff2c76f9",
     "src/lib/agent/temporal.ts": "7dff9432c06f3dd3e9da30ece37add57aa50c2f434f5dec434de3769ec39ad05",
-    "src/lib/agent/tools.ts": "7286685370f5164239c3d836b089d48a0caa1a0bc88fe591b7c64cc526200f22",
+    "src/lib/agent/tools.ts": "6e9be98593772f5c3636870f0dd2a42a77f6cbc8f6fb1fb2cfcea862cae19083",
     "src/lib/analytics.ts": "ac20e7f318855188db315705788fff372d2375f33cb1114b48612fa30f839498",
     "src/lib/appliance-catalog.ts": "a489ccf44633d0b7afeee3c6c6218245c0a20f566a526d43bfaef6cd4734c711",
     "src/lib/articles/airbnb.ts": "6ac8861e9d41cadf626a26d54c10c2da58dd6bcfa376cb5cf40d35fd19952857",
@@ -349,24 +349,25 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 988,
+  "tests": 997,
   "skipped": 28,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-21T16:13:25.719Z",
+  "checkedAt": "2026-10-21T17:13:43.524Z",
   "suites": [
-    "artifacts/pricing-discovery-tests.txt",
-    "artifacts/pricing-discovery-lint.txt",
-    "artifacts/pricing-discovery-typecheck.txt",
-    "artifacts/pricing-discovery-build.txt"
+    "artifacts/ai-full-tests.txt",
+    "artifacts/ai-window-db.txt",
+    "artifacts/ai-lint.txt",
+    "artifacts/ai-typecheck.txt",
+    "artifacts/ai-build.txt"
   ],
-  "verificationScope": "Pricing discovery follow-up: 988 local tests passed, 28 credential-dependent tests skipped; lint, typecheck and build passed. No schema/migration changes: prior isolated migration rehearsal retained, not rerun. Only sitemap revision dates and one non-numeric knowledge restriction changed in runtime inputs; all prices, booking capabilities and AI configuration preserved. This certificate does not assert a fresh native live booking proof. Production master AI remains OFF as approved, pending separate AUTO restoration.",
+  "verificationScope": "Website AI window-loop fix: 992 local tests passed plus 5 isolated PostgreSQL inbox/worker regression checks. The full local run skipped 29 credential-dependent tests; the new window database suite was then executed separately (5 pass), leaving 28 unrelated credential-dependent suites unexecuted. Lint, typecheck and build passed. No schema/migration changes: prior migration rehearsal retained, not rerun. No prices, model configuration, prompts or booking rules changed. This evidence does not assert a native booking proof or activate AI.",
   "previousVerification": {
-    "fingerprint": "e2b31d046845928c4e227879a93d8c2f06a1c20677cf60050d585ec45f005bf2",
-    "tests": 1004,
-    "checkedAt": "2026-10-19T21:42:03.697Z",
+    "fingerprint": "f4a07b824158764dc7f25b65759b54aaf0183f892b6b3bd3c84068dea378aa62",
+    "tests": 988,
+    "checkedAt": "2026-10-21T16:13:25.719Z",
     "migrationEvidence": [
       "artifacts/rc-suite.txt",
       "artifacts/rc-reliability.txt",
