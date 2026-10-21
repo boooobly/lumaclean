@@ -13,7 +13,7 @@ const pricingLastModified = new Date(contentLastModified.pricing);
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl;
   const homeLanguages = {sr: `${base}/sr`, ru: `${base}/ru`, en: `${base}/en`, "x-default": `${base}/ru`};
-  const homePages = routing.locales.map((locale) => ({url: `${base}/${locale}`, lastModified: pricingLastModified, changeFrequency: "weekly" as const, priority: 1, alternates: {languages: homeLanguages}}));
+  const homePages = routing.locales.map((locale) => ({url: `${base}/${locale}`, lastModified: new Date(contentLastModified.homepage), changeFrequency: "weekly" as const, priority: 1, alternates: {languages: homeLanguages}}));
   const servicePages = ([...serviceIds,'upholstery'] as CatalogueServiceId[]).flatMap((service) => {
     const languages = {
       sr: `${base}${getServicePath("sr", service)}`,
