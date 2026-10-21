@@ -50,7 +50,7 @@ function detectedReason(text:string):HandoffReason|null{
   if(/картой|сч[её]т.{0,20}(?:компан|фирм)|безнал|\b(?:card|invoice|corporate invoice)\b|kartic|faktur|картиц|фактур/iu.test(text))return 'PAYMENT_REVIEW';
   if(/отмен.{0,25}(?:заказ|уборк|запис)|cancel.{0,25}(?:order|booking|cleaning)|otka[zž].{0,25}(?:termin|čiš|cis)|отка[зж].{0,25}(?:термин|чиш)/iu.test(text))return 'CANCELLATION';
   if(/где.{0,20}(?:клинер|уборщик)|когда.{0,20}(?:приедет|приедут|придет|придут)|where.{0,20}(?:cleaner|crew)|(?:cleaner|crew).{0,20}(?:eta|arriv)|gde.{0,20}(?:čista|cista)|где.{0,20}чиста/iu.test(text))return 'ARRIVAL_REVIEW';
-  if(/нови сад|ниш(?:е)?(?=\s|$|[,.!?])|загреб|панчево|\b(?:Novi Sad|Niš|Nis|Zagreb|Pančevo|Pancevo|Pančevu|Pancevu)\b|outside Belgrade|за пределами Белграда|van Beograda|ван Београда/iu.test(text))return 'OUTSIDE_SERVICE_AREA';
+  if(/нови сад|ниш(?:е)?(?=\s|$|[,.!?])|загреб|панчево|(?<![\p{L}\p{N}])(?:Novi Sad|Niš|Nis|Zagreb|Pančevo|Pancevo|Pančevu|Pancevu)(?![\p{L}\p{N}])|outside Belgrade|за пределами Белграда|van Beograda|ван Београда/iu.test(text))return 'OUTSIDE_SERVICE_AREA';
   if(/ignore (?:all |previous )?instructions|api.?key|system.?prompt|системн[а-яё]*.{0,10}промпт|executeSQL|updateAnything|игнорируй.{0,20}инструкц|(?:список|данные).{0,20}(?:всех|чужих).{0,20}(?:клиент|заказ)|list all (?:clients|orders)|other clients|internal function|секрет|routing.?token|отладк.{0,20}ключ/i.test(text))return "OUT_OF_SCOPE";
   return null;
 }
@@ -102,6 +102,11 @@ export function outputAllowed(text:string,state:AgentState,factAmounts:number[]=
   if(state.booking)allowed.push(new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Belgrade",hour:"2-digit",minute:"2-digit"}).format(new Date(state.booking.start)));
   if(times.some(t=>!allowed.includes(t))&&text.split(/(?<=[.!?])\s+|\n+/u).some(s=>/\b\d{1,2}:\d{2}\b/u.test(s)&&!knowledgeTimeExplanation(s,knowledge)))return false;
   if(!allowed.length&&/(?:свободно|можем приехать|available (?:tomorrow|today|on)|слободно|slobodno)/i.test(text)&&!/провер|уточн|check|prover|провер/.test(text))return false;
-  if(/(?:забронирован|вы записаны|записал[аи]?\s+(?:вас\s+)?на(?=\s|$)|booking (?:is )?confirmed|successfully booked|(?:i(?:'ve| have)?|you(?:'re| are))\s+booked|zakazala sam|заказала сам|rezervacija.{0,15}potvr|резервација.{0,15}потвр)/iu.test(text)&&!state.booking)return false;
+  if(!state.booking)for(const claim of text.matchAll(/(?:забронирован|вы записаны|записал[аи]?\s+(?:вас\s+)?на(?=\s|$)|booking (?:is )?confirmed|successfully booked|(?:i(?:'ve| have)?|you(?:'re| are))\s+booked|zakazala sam|заказала сам|rezervacija.{0,15}potvr|резервација.{0,15}потвр)/giu)){
+    const prefix=text.slice(Math.max(0,claim.index-30),claim.index);
+    const negative=/(?:^|\s)(?:no|not|never|не)\s*$/iu.test(prefix)||/^(?:rezervacija|резервација).{0,15}(?:nije|није).{0,8}(?:potvr|потвр)/iu.test(claim[0]);
+    const conditional=/\b(?:before|until|once|when|after)\s+(?:the\s+)?$/iu.test(prefix);
+    if(!negative&&!conditional)return false;
+  }
   return true;
 }

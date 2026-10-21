@@ -53,6 +53,20 @@ test('window refusal persists through inbox and worker on the isolated RC databa
    const saved=stateOf(await db.conversation.findUniqueOrThrow({where:{id:c.id}}));
    assert.equal(saved.draftFacts?.extrasConfirmed,true);assert.equal(saved.nextInput,'SOIL_LEVEL');
   });
+  await t.test('kitchen and balcony request cannot silently become an apartment package',async()=>{
+   const c=await fixture({});await acceptMessage(db,c,{id:randomUUID(),text:'Нужно убрать кухню и балкон. Квартира 50 м²'});
+   await drainAgentJobs(db,c.id,[provider,provider]);
+   const live=await db.conversation.findUniqueOrThrow({where:{id:c.id}});
+   assert.equal(live.control,'HUMAN_CONTROL');assert(live.leadId);assert.equal(stateOf(live).quote,undefined);assert.equal(live.orderId,null);
+   assert.equal(await db.notification.count({where:{conversationId:c.id,kind:'HANDOFF',audience:'ADMIN'}}),1);
+  });
+  await t.test('declining windows after a consultation does not restart apartment intake',async()=>{
+   const c=await fixture({});await acceptMessage(db,c,{id:randomUUID(),text:'Ne želim da dodam prozore'});
+   await drainAgentJobs(db,c.id,[provider,provider]);const live=await db.conversation.findUniqueOrThrow({where:{id:c.id}});
+   assert.equal(stateOf(live).nextInput,undefined);assert.equal(live.leadId,null);assert.equal(live.control,'AI_CONTROL');
+   const reply=await db.message.findFirstOrThrow({where:{conversationId:c.id,author:'AI'},orderBy:{sentAt:'desc'}});
+   assert.doesNotMatch(reply.text,/generalno|održavajuće|площадь|поддерживающ/iu);
+  });
   await t.test('third identical post-quote reply hands off with a durable manager notification',async()=>{
    const state:AgentState={draftFacts:{...facts,extras:[]},quote:{id:'fixture',serviceId:'fixture',input:{...facts,extras:[],urgent:false},total:8200,base:8200,discountPercent:0,requiresHumanReview:false,at:new Date().toISOString()}};
    const c=await fixture(state);

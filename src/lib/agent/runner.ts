@@ -26,7 +26,9 @@ import {persistOpenQuestion,loopSignal} from './question-planning';
 import {needsStructuredExtraction} from './extraction-planning';
 import {customerFactsSchema} from './contracts';
 import {reliabilityCount} from './reliability-telemetry';
+import {partialCleaningScope} from './conversion-facts';
 const consultationTools=['searchBusinessKnowledge','getBusinessInfo','findClient','calculateAlternativePrice','requestCustomerInput','recordKnowledgeRequest','createOrUpdateLead','reconcileHumanContext','requestReview','requestHumanHandoff'] as const;
+const faqTools=consultationTools.filter(name=>!(['recordKnowledgeRequest','createOrUpdateLead','requestReview'] as readonly string[]).includes(name));
 
 export function modelState(state:AgentState){
   const {reliability,lastDecision,...facts}=state;void reliability;void lastDecision;
@@ -176,6 +178,13 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
     const datePolicy=requestedDate?serviceDatePolicy(requestedDate,limits):null;
     if(forced&&reasonLevel(forced)==='HARD_HANDOFF'){await tool('createOrUpdateLead',{intent:'cleaning'});await tool("requestHumanHandoff",{reason:forced});text=handoffText[c.locale as keyof typeof handoffText]??handoffText.ru;}
     else if(disclosure)text=disclosure;
+    else if(!substantiveIntent(turnText)&&ctx.state.draftFacts?.windowCleaning?.requested===false&&!ctx.state.draftFacts.service&&!ctx.state.draftFacts.area&&!ctx.state.draftFacts.extras?.length&&!ctx.state.draftFacts.applianceScopePending?.length&&!ctx.state.questionContext&&!ctx.state.quote){
+      text=c.locale==='ru'?'Поняла, мойку окон не добавляю. Чем ещё могу помочь?':c.locale==='en'?'Understood, I will not add window washing. How else can I help?':c.locale==='sr-Cyrl'?'Разумем, не додајем прање прозора. Како још могу да помогнем?':'Razumem, ne dodajem pranje prozora. Kako još mogu da pomognem?';
+    }
+    else if(!ctx.state.draftFacts?.extras?.some(e=>e.code==='balcony')&&partialCleaningScope(turnText,ctx.state)){
+      await tool('createOrUpdateLead',{intent:'cleaning'});await tool('requestHumanHandoff',{reason:'UNCERTAINTY'});
+      text=handoffText[c.locale as keyof typeof handoffText]??handoffText.ru;
+    }
     else if(datePolicy&&'error' in datePolicy){
       if(datePolicy.error==='SAME_DAY_CUTOFF')behaviorMetric('sameDayCutoffRejected');
       text=c.locale==='ru'?'Сегодня мы уже не успеем выехать. Могу подобрать время начиная с завтра. Какой день вам удобнее?':c.locale==='en'?"We can no longer depart today. I can check availability from tomorrow. Which day works for you?":c.locale==='sr-Cyrl'?'Данас више не можемо да кренемо. Могу да проверим термине од сутра. Који дан вам одговара?':'Danas više ne možemo da krenemo. Mogu da proverim termine od sutra. Koji dan vam odgovara?';
@@ -183,7 +192,11 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
     }
     else{
       if(forced&&reasonLevel(forced)==='SOFT_REVIEW')await tool('requestReview',{reason:forced});
-      if(consultation&&!humanPending&&!hasPhotos)knowledgeResult=await tool('searchBusinessKnowledge',{query:turnText.slice(0,400)});
+      if(consultation&&!humanPending&&!hasPhotos){
+        const followup=/what.{0,30}manager.{0,30}confirm|что.{0,30}менеджер.{0,30}(?:уточн|провер)|šta.{0,30}(?:tim|menadžer).{0,30}potvrd/iu.test(turnText);
+        const context=followup?ctx.state.knowledgeContext?.codes.join(' ')??'':'';
+        knowledgeResult=await tool('searchBusinessKnowledge',{query:(turnText.slice(0,280)+' '+context).slice(0,400)});
+      }
       const extractionSource=!consultation&&!humanPending&&!hasPhotos&&!ctx.state.upholsteryInquiry?claim.turn.find(m=>{
         const metadata=m.structured as {inputIntent?:AgentState['nextInput'];factExtraction?:{accepted?:unknown}}|null;
         const incoming=customerFactsSchema.safeParse(metadata?.factExtraction?.accepted);
@@ -204,7 +217,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       if(!consultation&&!humanPending&&!hasPhotos&&loopSignal(ctx.state,turnText))await tool('recoverConversationFacts',{});
       if(!humanPending&&(substantiveIntent(turnText)||c.leadId||ctx.state.phone||ctx.state.draftFacts?.service))await tool('createOrUpdateLead',{intent:'cleaning',...(ctx.state.phone?{phone:ctx.state.phone}:{})});
       const faq=businessQuestion||humanPending||hasPhotos?undefined:await routineFaq(turnText,c.locale as keyof typeof handoffText,tool);
-      const intake=consultation?undefined:ctx.responseText??faq??(humanPending||hasPhotos||ctx.state.upholsteryInquiry?undefined:await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent));
+      const intake=consultation?undefined:ctx.responseText??faq??(humanPending||hasPhotos||ctx.state.upholsteryInquiry?undefined:await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,recent.find(m=>m.author==='AI')?.text));
       if(intake)text=intake;
       else{
       let compact=c.summary??null;
@@ -219,10 +232,10 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
       if(catalogRequest)imagePolicy+='\nCURRENT TURN: a catalog-service enquiry outside the automatic area calculator. Explain the requested work and verified unit/from price if available. Save an explicit supported request via recordKnowledgeRequest; do not turn mere inventory or a question into a selection. If the exact variant is ambiguous, ask ONE narrow question, never substitute the cheapest similar service. Use a Lead and soft review; no final total or autonomous booking. If upholsteryInquiry is already saved, the Lead and review already exist: do not repeat marking/review or start a technical questionnaire.';
       if(photos.count&&!photos.images.length)imagePolicy+='\nImages are unavailable to you. Do not make ANY visual claims. Ask the customer to describe them. An unavailable image alone is not a handoff.';
       for(let step=0;step<Math.min(8,Math.max(1,limits.aiMaxToolSteps))&&!signal.aborted;step++){
-        ctx.consultation=consultation;ctx.allowedTools=consultation?consultationTools:undefined;
+        ctx.consultation=consultation;ctx.allowedTools=businessQuestion?faqTools:consultation?consultationTools:undefined;
         // Reconcile critical state before every provider retry/fallback; providers never execute tools.
         if(mode==="AUTO"){const live=await db.conversation.findUniqueOrThrow({where:{id:c.id}});ctx.state=stateOf(live);compact=live.summary;}
-        messages[0]={role:"system",content:conversationPolicy(c.locale,modelState(ctx.state) as AgentState,compact,buildAgentTemporalContext(current.sentAt,limits),c.displayAlias)+imagePolicy,...(consultation?{allowedTools:consultationTools}:{})};
+        messages[0]={role:"system",content:conversationPolicy(c.locale,modelState(ctx.state) as AgentState,compact,buildAgentTemporalContext(current.sentAt,limits),c.displayAlias)+imagePolicy,...(ctx.allowedTools?{allowedTools:ctx.allowedTools}:{})};
         let answer:Completion;
         try{answer=await modelComplete(messages);if(messages.some(m=>m.images?.length)){await db.chatAttachment.updateMany({where:{messageId:{in:claim.turn.map(m=>m.id)}},data:{aiAnalysisStatus:'ANALYZED'}});}}
         catch(e){if(!(e instanceof AgentError)||e.code!=='PROVIDERS_UNAVAILABLE'||!messages.some(m=>m.images?.length))throw e;for(const m of messages)delete m.images;imagePolicy+='\nVISION UNAVAILABLE: You have only the attachment count. Never describe or claim to have seen any image. Ask for a description; image unavailability alone does not require handoff.';messages[0].content+=imagePolicy;await db.chatAttachment.updateMany({where:{messageId:{in:claim.turn.map(m=>m.id)}},data:{aiAnalysisStatus:'UNAVAILABLE'}});answer=await modelComplete(messages);}
@@ -251,7 +264,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
             // Resume the same deterministic intake used for a normal client turn after
             // operator corrections are reconciled. Do not spend the model step budget
             // repeating qualification, quotes and soft-review tools for known facts.
-            const intake=await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent);
+            const intake=await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,recent.find(m=>m.author==='AI')?.text);
             if(intake){
               ctx.responseText=intake;
               if(ctx.state.quote&&!ctx.state.nextInput){

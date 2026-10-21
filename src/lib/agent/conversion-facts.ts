@@ -50,7 +50,7 @@ export function conversionFacts(text:string,at:Date,timezone:string,expected?:Ag
   const windowContext=!catalogQuestion(text)&&(!accessory||explicitWindows)&&(windowWord.test(t)||expected==='WINDOW_COUNTS'||expected==='WINDOW_TYPE'||!!state?.draftFacts?.windowCleaning?.requested);
   const windowAnswer=expected==='WINDOW_COUNTS'||expected==='WINDOW_TYPE';
   const declinedWindowAnswer=windowAnswer&&/^(?:(?:нет|не нужно|не надо|не нужны|не требуются|не хочу|ноль|нуль|ни одного)|(?:no|none|zero|not needed|don't need (?:any|them))|(?:ne|ne treba|nisu potrebni|nijedan|nula)|(?:не|не треба|нису потребни|ниједан|нула)|0)[.!\s]*$/iu.test(t.trim());
-  if(!catalogQuestion(text)&&(declinedWindowAnswer||/bez prozor|prozore necemo|ne treba.{0,20}(?:pranje )?prozor|without windows|no window cleaning|(?:don't|do not) (?:need|want).{0,20}window|без окон|окна не (?:нужны|надо)|не (?:нужно|надо|хочу).{0,25}(?:мыть|мойк).{0,15}(?:окн|окон)/iu.test(t))) {
+  if(!catalogQuestion(text)&&(declinedWindowAnswer||/bez prozor|prozore necemo|(?:ne (?:treba|zelim|želim)|не (?:треба|желим)).{0,25}(?:pranje )?(?:prozor|прозор)|without windows|no window cleaning|(?:don't|do not) (?:need|want).{0,20}window|без окон|окна не (?:нужны|надо)|окна мыть не (?:нужно|надо)|не (?:нужно|надо|хочу).{0,25}(?:мыть|мойк|добав).{0,15}(?:окн|окон)/iu.test(t))) {
     f.windowCleaning={requested:false};f.declinedExtras=['standardWindow','largeWindow'];
   }else if(windowContext){
     const lc=t.match(new RegExp('('+number+')\\s*'+large,'iu')),sc=t.match(new RegExp('('+number+')\\s*'+standard,'iu'));
@@ -78,4 +78,13 @@ export function bookingReviewBlocked(state:AgentState){
   if(state.draftFacts?.applianceScopePending?.length)return true;
   if(state.upholsteryInquiry||state.knowledgeRequests?.length||(state.draftFacts?.bathroomCount??1)>1)return true;
   return !!state.review?.reasons.some(r=>r!=='CONTACT_PREFERENCE')||!!state.draftFacts?.reviewItems?.length||!!state.draftFacts?.serviceConfirmationRequired||windowQuantitiesMissing(state.draftFacts);
+}
+/** A room-only request must not silently become an apartment package quote. */
+export function partialCleaningScope(text:string,state?:AgentState){
+ const t=plain(text);
+ if(catalogQuestion(text)||/без балкон|балкон.{0,12}не (?:нуж|надо)|не (?:нужно|надо).{0,20}балкон|without.{0,15}balcon|no balcon|bez balkon/iu.test(t))return false;
+ const roomOnly=/(?:только|only|samo|само).{0,25}(?:кухн|kitchen|kuhinj|кухињ|балкон|balcon|balkon)/iu.test(t);
+ const kitchen=!state?.draftFacts?.service&&!/уборк[\p{L}]*.{0,30}(?:квартир|дом)|cleaning.{0,20}(?:apartment|flat)/iu.test(t)&&/(?:убрать|уберите|помыть|почистить).{0,15}кухн/iu.test(t);
+ const unscopedBalcony=/(?:убрать|нужно|надо|хочу|добав|помой|почист|i need|i want|please clean|treba|zelim|želim)[\s\S]{0,70}(?:балкон|balcon|balkon)/iu.test(t);
+ return roomOnly||kitchen||unscopedBalcony;
 }

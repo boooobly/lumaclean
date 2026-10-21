@@ -23,7 +23,7 @@ export function explicitCustomerFacts(text: string, sentAt: Date, timezone: stri
   const facts: CustomerFacts = conversionFacts(text,sentAt,timezone,expectedInput,state);
   const name=text.match(/(?:^|[\n;,])\s*(?:меня зовут|мо[её] имя|имя|my name is|name|zovem se|ime(?: je)?|ја се зовем|зовем се)[:\s]+([\p{L}][\p{L} .'-]{1,99})(?=$|[\n;,])/iu)?.[1];
   if(name)facts.name=name.trim();
-  if(!facts.name&&expectedInput==='NAME'&&/^[\p{L}][\p{L} .'-]{1,99}$/u.test(text.trim())&&!/^(?:да|нет|спасибо|позже|потом|не знаю|не хочу|yes|no|thanks|later|hvala|ne znam|не знам|я уже ответил|да я же написал|already answered|vec sam odgovorio)[.!\s]*$/iu.test(text.trim()))facts.name=text.trim();
+  if(!facts.name&&expectedInput==='NAME'&&/^[\p{L}][\p{L} .'-]{1,99}$/u.test(text.trim())&&!/^(?:да|нет|ага|угу|хорошо|ладно|ок|окей|понятно|ал[л]?о|ал[л]?ё|спасибо|позже|потом|не знаю|не хочу|yes|no|ok|okay|hello|thanks|later|da|ne|u redu|važi|vazi|важи|hvala|ne znam|не знам|я уже ответил|да я же написал|already answered|vec sam odgovorio)[.!\s]*$/iu.test(text.trim()))facts.name=text.trim();
   const namedPhones=[...text.matchAll(/(?:^|[\n;,])\s*(?:phone|телефон|telefon|tel)\s*[:=]?\s*([+0][\d ()-]{5,30})/giu)];
   if(namedPhones.length===1){const phone=normalizedPhone(namedPhones[0][1]);if(phone)facts.phone=phone;}
   const areaCorrection=state?.draftFacts?.area&&text.trim().match(/^(?:нет|не|ne|no)[,\s]+(\d{1,4}(?:[.,]\d+)?)[.!\s]*$/iu);
