@@ -19,7 +19,7 @@ const request=/нуж[а-яё]*|помы[а-яё]*|помой[а-яё]*|почи
 const question=/^(?:можно|а .{0,25}можно|вы |что |как |сколько |есть |can |do you|what |how |da li|mogu li|mozete li|да ли|могу ли|можете ли)/iu;
 const no=/(?:^|[^\p{L}])(?:без|не (?:надо|нуж[а-яё]*|мой|мыть|добав|чист)|убер[а-яё]*|убрат[а-яё]*|bez|ne treba|ukloni|without|don't|do not|remove|no )/iu;
 const yes=/^(?:да|yes|da|да)[,!.\s]*(?:добав[а-яё]*|please|molim|пожалуйста)?[!.\s]*$/iu;
-const bareNo=/^(?:нет|no|ne|не)[.!\s]*$/iu;
+const bareNo=/^(?:нет|не|не надо|не нужно|no(?: thanks)?|none|ne(?: treba)?|не треба)[.!\s]*$/iu;
 const normalized=normalizeCustomerText;
 function quantity(prefix:string){
  const tokens=prefix.trim().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
@@ -35,6 +35,7 @@ export function applianceFacts(text:string,expected:AgentState['nextInput'],stat
  const scope=state?.questionContext?.status==='OPEN'&&state.questionContext.scope==='appliance_inside'||expected==='EXTRAS';
  if(expected==='APPLIANCE_SCOPE'&&pending.length&&(yes.test(t)||/^(?:да[,\s]*)?(?:изнутри|внутри|inside|iznutra|изнутра)[.!\s]*$/iu.test(t))){return{extras:pending,extrasConfirmed:true,applianceScopePending:[]};}
  if(expected==='APPLIANCE_SCOPE'&&pending.length&&(bareNo.test(t)||outside.test(t))){return{declinedExtras:pending.map(e=>e.code),extrasConfirmed:true,applianceScopePending:[]};}
+ if(expected==='EXTRAS'&&bareNo.test(t))return{extras:[],extrasConfirmed:true};
  if(uncertain.test(t)||/(?:^|\s)(?:или|or|ili)(?:\s|$)/iu.test(t)||question.test(t)&&!/хочу|мне нужно|treba mi|zelim|i need|i want/iu.test(t))return facts;
  const mentions=applianceCodes.flatMap(code=>[...t.matchAll(patterns[code])].map(m=>({code,start:m.index!,end:m.index!+m[0].length}))).sort((a,b)=>a.start-b.start);
  const both=/оба|обе|обо[иё]х|both|oba|obe|обе/iu.test(t);

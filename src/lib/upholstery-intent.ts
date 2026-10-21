@@ -7,6 +7,6 @@ export function upholsteryIntent(text: string) {
 export function upholsteryBookingIntent(text:string){
  if(!upholsteryIntent(text))return false;
  if(/^(?:как|how|kako|како).{0,30}(?:заказ|book|order|zakaz|заказ)/iu.test(text.trim()))return false;
- if(/сколько|стоим|цен[аыу]|how much|price|cost|koliko|cena|колико|цена|занимаетесь|делаете|оказываете|выполняете|do you|da li|да ли/iu.test(text)&&!/нужн|хочу|заказ|вместе|need|want|book|together|treba|želim|zelim|zajedno|треба|желим|заједно/iu.test(text))return false;
+ if(/сколько|стоим|цен[аыу]|how much|price|cost|koliko|cena|колико|цена|занимаетесь|делаете|оказываете|выполняете|do you|can you|could you|вы можете|možete li|mozete li|можете ли|da li|да ли/iu.test(text)&&!/нужн|хочу|заказ|вместе|need|want|book|together|treba|želim|zelim|zajedno|треба|желим|заједно|please clean|my (?:sofa|couch|carpet|mattress)|(?<!\p{L})(?:мой|мою|моя|мо[её]|нашу)(?!\p{L})/iu.test(text))return false;
  return true;
 }

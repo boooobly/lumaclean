@@ -5,6 +5,7 @@ import {formatRsd,calculatePrice} from '@/lib/pricing';
 import {serviceDatePolicy} from './temporal';
 import {businessLabels,businessServiceLabel} from './business-labels';
 import {searchBusinessKnowledge} from './knowledge/search';
+import {Temporal} from '@js-temporal/polyfill';
 
 export function nextQualification(state:AgentState):AgentState['nextInput'] {
   const f=state.draftFacts;
@@ -53,7 +54,7 @@ export function quoteNeedsRefresh(state:AgentState,now=Date.now()){
  return now-Date.parse(q.at)>30*60000||current.base!==q.base||current.extras.some(e=>!q.breakdown?.some(b=>b.code===e.code&&b.quantity===e.quantity&&b.unitPrice===e.unitPrice));
 }
 /** Deterministic high-confidence qualification and partial quotes. Scheduling remains in the existing tools. */
-export async function conversionIntake(state:()=>AgentState,text:string,locale:string,tool:(name:ToolName,args:unknown)=>Promise<ToolResult>,previousInput?:AgentState['nextInput']):Promise<string|undefined>{
+export async function conversionIntake(state:()=>AgentState,text:string,locale:string,tool:(name:ToolName,args:unknown)=>Promise<ToolResult>,previousInput?:AgentState['nextInput'],previousPrompt?:string):Promise<string|undefined>{
   let s=state(),f=s.draftFacts;
   if(!f||s.booking)return;
   const priceQuestion=/сколько.{0,60}(?:сто|все|всё|вместе)|какая.{0,25}цен|what.{0,25}(?:price|cost)|how much|koliko.{0,35}(?:kosta|košta|sve|cena)|колико.{0,35}(?:кошта|све|цена)/iu.test(text);
@@ -100,5 +101,25 @@ export async function conversionIntake(state:()=>AgentState,text:string,locale:s
       s=state();if(!s.quote)return;
     }
     delete s.priceRequestPending;return quoteText(s,locale);
+  }
+  // A precise customer clock time must reach the real calendar, rather than
+  // asking the model to recover repeatedly from SLOT_SELECTION/SLOTS_REQUIRED.
+  const clock=text.trim().match(/^(?:(?:начать в|начало в|start at|početak u|pocetak u|почетак у|в|у|at|u)\s+)?([01]?\d|2[0-3]):([0-5]\d)[.!\s]*$/iu);
+  const explicitStart=/^(?:начать в|начало в|start at|početak u|pocetak u|почетак у)\s+/iu.test(text.trim());
+  const askedStart=/нач(?:ать|ал)|start|počet|pocet|почет/iu.test(previousPrompt??'')&&!/законч|заверш|finish|end by|arriv|прибы|при[её]х|dolaz|заврш|стиг/iu.test(previousPrompt??'');
+  if(clock&&(explicitStart||askedStart)&&s.quote&&s.duration&&s.address&&f?.requestedDate&&!s.slots?.length&&!s.pending&&!s.review?.reasons.length&&!s.upholsteryInquiry&&!s.timeClarificationRequired){
+    const start=Temporal.PlainDateTime.from(f.requestedDate+'T'+clock[1].padStart(2,'0')+':'+clock[2]);
+    const end=start.add({minutes:s.duration.minutes+s.duration.reserve});
+    if(end.toPlainDate().toString()!==f.requestedDate)return;
+    const result=await tool('findAvailableSlots',{date:f.requestedDate,from:start.toString({smallestUnit:'minute'}),to:end.toString({smallestUnit:'minute'}),timeIntent:'START_AT'});
+    if(result.error==='NO_SLOTS')return locale==='ru'?'На выбранное время свободных слотов не найдено. Какой другой день или интервал проверить?':locale==='en'?'No slots were found for that time. Which other day or time window should I check?':locale==='sr-Cyrl'?'Нема слободних термина за изабрано време. Који други дан или период да проверим?':'Nema slobodnih termina za izabrano vreme. Koji drugi dan ili period da proverim?';
+    if(result.error)return;
+    s=state();
+    if(s.slots?.length){
+      const input=await tool('requestCustomerInput',{intent:'SLOT_SELECTION'});
+      if(input.error)return;
+      const times=s.slots.map(slot=>new Intl.DateTimeFormat(locale,{timeZone:'Europe/Belgrade',dateStyle:'short',timeStyle:'short'}).format(new Date(slot.start))).join(', ');
+      return (locale==='ru'?'Проверенные варианты начала: ':locale==='en'?'Verified start times: ':locale==='sr-Cyrl'?'Проверени почеци: ':'Provereni počeci: ')+times+'.\n'+String(input.question);
+    }
   }
 }
