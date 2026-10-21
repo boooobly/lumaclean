@@ -215,7 +215,7 @@ export async function runClaimedJob(db:PrismaClient,claim:NonNullable<Awaited<Re
         if(!meaningful&&!ctx.responseText){ctx.extractionIncomplete=key;await tool('requestCustomerInput',{intent:key});}
       }
       if(!consultation&&!humanPending&&!hasPhotos&&loopSignal(ctx.state,turnText))await tool('recoverConversationFacts',{});
-      if(!humanPending&&(substantiveIntent(turnText)||c.leadId||ctx.state.phone||ctx.state.draftFacts?.service))await tool('createOrUpdateLead',{intent:'cleaning',...(ctx.state.phone?{phone:ctx.state.phone}:{})});
+      if(!humanPending&&(!businessQuestion&&substantiveIntent(turnText)||c.leadId||ctx.state.phone||ctx.state.draftFacts?.service))await tool('createOrUpdateLead',{intent:'cleaning',...(ctx.state.phone?{phone:ctx.state.phone}:{})});
       const faq=businessQuestion||humanPending||hasPhotos?undefined:await routineFaq(turnText,c.locale as keyof typeof handoffText,tool);
       const intake=consultation?undefined:ctx.responseText??faq??(humanPending||hasPhotos||ctx.state.upholsteryInquiry?undefined:await conversionIntake(()=>ctx.state,turnText,c.locale,tool,(claim.turn[0].structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,recent.find(m=>m.author==='AI')?.text));
       if(intake)text=intake;

@@ -77,6 +77,15 @@ test('window refusal persists through inbox and worker on the isolated RC databa
    assert.equal(await db.humanHandoff.count({where:{conversationId:c.id,reason:'UNCERTAINTY'}}),1);
    assert.equal(await db.notification.count({where:{conversationId:c.id,kind:'HANDOFF',audience:'ADMIN'}}),1);
   });
+  await t.test('compound upholstery FAQ with explicit refusal creates no Lead or review',async()=>{
+   const c=await fixture({});
+   const faqProvider:AIProvider={name:'synthetic',model:'test',complete:async()=>({provider:'synthetic',model:'test',text:'Да, выполняем химчистку диванов. Заявку не создаю.',toolCalls:[],inputTokens:1,cachedInputTokens:0,outputTokens:1,estimatedCostUsd:0,latencyMs:1})};
+   await acceptMessage(db,c,{id:randomUUID(),text:'Вы умеете делать химчистку дивана? Сейчас только узнаю об услуге, заявку создавать не нужно.'});
+   await drainAgentJobs(db,c.id,[faqProvider,faqProvider]);
+   const live=await db.conversation.findUniqueOrThrow({where:{id:c.id}});
+   assert.equal(live.leadId,null);assert.equal(live.orderId,null);assert.equal(stateOf(live).upholsteryInquiry,undefined);
+   assert.equal(await db.notification.count({where:{conversationId:c.id}}),0);
+  });
   assert.equal(await db.order.count(),orders);
  }finally{
   await db.businessSettings.update({where:{id:'default'},data:{aiAgentMode:baseline.aiAgentMode,aiChannelModes:baseline.aiChannelModes!}});
