@@ -1,0 +1,27 @@
+{
+  "generator": "Built-in image_gen",
+  "purpose": "Illustrative furniture category photography, not evidence of LumaClean jobs or before/after results. Disclosed below the gallery in RU/SR/EN.",
+  "encoding": "WebP quality 82; responsive next/image, hero preloaded, gallery lazy loaded",
+  "images": [
+    {
+      "file": "public/media/upholstery/sofa.webp",
+      "dimensions": "1536 × 1024",
+      "prompt": "Use case: photorealistic-natural. Asset type: premium upholstery cleaning website hero, landscape 3:2 interior editorial photograph. A beautiful believable contemporary Belgrade apartment living room, a generous warm ivory woven-linen three-seat sofa with softly rounded arms and three distinct seat cushions, one muted blue-green pillow and one natural linen pillow. Rich visible textile texture, subtle natural creases, softly raking afternoon window light from left, warm off-white plaster wall, cropped oak side table, minimal olive branches. Camera low at cushion level, sofa fills most of frame, quiet architectural composition, premium interiors magazine photography, restrained warm neutrals with muted teal. No people, no equipment, no text, no logos, no watermark. Natural and lived-in, never glossy CGI. This is an illustrative interior, not evidence of actual cleaning work."
+    },
+    {
+      "file": "public/media/upholstery/corner.webp",
+      "dimensions": "1200 × 800",
+      "prompt": "Photorealistic-natural editorial interior photography, landscape 3:2. A real elegant low L-shaped corner sofa with four seating places, warm greige woven fabric and a chaise on the right, in a quiet modern apartment. Soft side daylight, warm off-white plaster wall, oak parquet, a muted dark teal cushion, a single oak side table. Entire sofa visible with breathing room, natural textile wrinkles and seams, realistic proportions and understated lived-in styling. Premium furniture magazine image for upholstery care service, not a cleaning before-after or evidence of completed work. No people, no text, no logos, no watermark, no glossy CGI."
+    },
+    {
+      "file": "public/media/upholstery/armchair.webp",
+      "dimensions": "760 × 950",
+      "prompt": "Photorealistic-natural premium furniture editorial photograph, portrait 4:5. One beautifully made softly curved lounge armchair in muted deep petrol teal textured woven fabric, with slender dark oak legs, against a warm ivory plaster wall beside a tall window with natural linen curtains. Sunlight grazing the weave, real seams and slight indentations, natural unvarnished oak parquet. Quiet architectural composition, entire armchair visible, restrained interior styling, tactile and realistic, not CGI. Illustrative furniture photo for upholstery care website, not proof of actual cleaning work. No people, no text, no logos, no equipment."
+    },
+    {
+      "file": "public/media/upholstery/chair.webp",
+      "dimensions": "760 × 950",
+      "prompt": "Photorealistic-natural furniture editorial photograph, portrait 4:5. A contemporary oak dining chair with a fully upholstered warm sand linen seat and upholstered curved backrest, in a softly lit Belgrade apartment dining corner, a cropped round oak table at left, warm off-white plaster, muted sage ceramic vase. Entire chair leg structure realistically constructed and visible, detailed upholstery weave and natural seams, softly raking daylight. Professional interior magazine photography, slightly lived-in, quiet neutral palette, no CGI gloss. Illustrative furniture image, no people, no cleaning result claims, no text, no logos, no watermark."
+    }
+  ]
+}

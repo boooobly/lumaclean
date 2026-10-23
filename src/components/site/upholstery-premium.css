@@ -1,0 +1,302 @@
+/* Public upholstery page only. Shared enquiry and CRM styles stay in upholstery.css. */
+.upholstery-page .up-shell { width: min(1296px, calc(100% - 96px)); margin-inline: auto; }
+.upholstery-page :is(h1,h2,h3,p,figure) { margin: 0; }
+.upholstery-page :is(h1,h2,h3) { font-family: var(--lc-font-display); font-weight: 450; }
+.upholstery-page h2 { font-size: clamp(38px,4.4vw,64px); line-height: 1.02; letter-spacing: -.055em; white-space: pre-line; }
+.upholstery-page button { font-family: inherit; cursor: pointer; }
+.upholstery-page a { text-decoration: none; }
+.upholstery-page :is(a,button,input,select,textarea,summary):focus-visible { outline: 2px solid var(--lc-teal-ink); outline-offset: 4px; }
+.upholstery-page .up-kicker { display: flex; align-items: center; gap: 12px; font-size: 10px; font-weight: 600; letter-spacing: .12em; line-height: 1.6; text-transform: uppercase; }
+.upholstery-page .up-kicker > span { width: 27px; height: 1px; background: var(--lc-teal-ink); }
+.upholstery-page .up-hero { display: grid; grid-template-columns: .94fr 1.06fr; gap: 32px; padding-top: 120px; padding-bottom: 40px; }
+.upholstery-page .up-hero-copy { padding: 55px 0 30px; align-self: center; }
+.upholstery-page .up-hero h1 { margin: 30px 0; font-size: clamp(48px,5.1vw,76px); line-height: 1.02; letter-spacing: -.065em; }
+.upholstery-page .up-hero h1 > span { display: block; }
+html[lang="en"] .upholstery-page .up-hero h1 { font-size: clamp(43px,4.5vw,67px); }
+.upholstery-page .up-accent { color: var(--lc-teal-ink); }
+.upholstery-page .up-hero-intro { max-width: 425px; color: var(--lc-ink-soft); font-size: 16px; line-height: 1.7; }
+.upholstery-page .up-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; margin-top: 30px; }
+.upholstery-page .up-button { display: inline-flex; align-items: center; justify-content: space-between; gap: 28px; min-height: 56px; padding: 17px 22px; border: 1px solid var(--lc-teal-ink); border-radius: var(--lc-radius-sm); color: var(--lc-paper-bright); background: var(--lc-teal-ink); font-size: 13px; font-weight: 550; line-height: 1.5; transition: background .25s, transform .25s; }
+.upholstery-page .up-button:hover { background: var(--lc-ink); border-color: var(--lc-ink); transform: translateY(-2px); }
+.upholstery-page .up-button .site-arrow { width: 20px; height: 20px; }
+.upholstery-page .up-actions .upholstery-cta { display: inline-flex; min-height: 48px; align-items: center; padding: 9px 0; border: 0; border-bottom: 1px solid var(--lc-line); border-radius: 0; background: transparent!important; color: var(--lc-ink)!important; font-size: 13px; font-weight: 500; }
+.upholstery-page .up-actions .upholstery-cta:hover { color: var(--lc-teal-ink)!important; border-color: var(--lc-teal-ink); }
+.upholstery-page .up-hero-price { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: baseline; border-top: 1px solid var(--lc-line); padding-top: 24px; margin-top: 38px; font-size: 12px; color: var(--lc-ink-soft); }
+.upholstery-page .up-hero-price strong { color: var(--lc-ink); font-size: 19px; font-weight: 500; letter-spacing: -.035em; }
+.upholstery-page .up-hero-visual { min-height: 615px; position: relative; overflow: hidden; border-radius: 3px 3px 100px 3px; background: var(--lc-stone); }
+.upholstery-page .up-hero-visual > img { object-fit: cover; object-position: 57% center; }
+.upholstery-page .up-hero-visual figcaption { position: absolute; inset: auto 30px 28px; display: flex; justify-content: space-between; gap: 12px; color: white; font-size: 9px; letter-spacing: .12em; z-index: 1; }
+.upholstery-page .up-hero-visual::after { content: ""; position: absolute; inset: 65% 0 0; background: linear-gradient(transparent,rgba(16,37,43,.55)); }
+.upholstery-page .up-image-link { display: grid; place-items: center; position: absolute; right: 24px; top: 24px; z-index: 2; width: 48px; height: 48px; border: 1px solid rgba(255,255,255,.7); border-radius: 50%; color: white; background: rgba(16,37,43,.1); }
+.upholstery-page .up-facts { display: grid; grid-template-columns: repeat(3,1fr); border-top: 1px solid var(--lc-line); border-bottom: 1px solid var(--lc-line); }
+.upholstery-page .up-facts > div { display: flex; align-items: center; gap: 20px; padding: 24px 12px; font-size: 12px; line-height: 1.5; }
+.upholstery-page .up-facts > div + div { border-left: 1px solid var(--lc-line); padding-left: 30px; }
+.upholstery-page .up-facts span { color: var(--lc-teal-ink); font-size: 10px; }
+.upholstery-page .up-section { padding-top: 108px; padding-bottom: 100px; }
+.upholstery-page .up-section-heading { display: grid; grid-template-columns: 1.35fr 1fr; align-items: end; gap: 60px; margin-bottom: 44px; }
+.upholstery-page .up-section-heading h2 { margin-top: 20px; }
+.upholstery-page .up-section-heading > p { max-width: 390px; margin-bottom: 4px; font-size: 15px; line-height: 1.75; color: var(--lc-ink-soft); }
+.upholstery-page .up-gallery { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 36px 24px; }
+.upholstery-page .up-gallery-item { min-width: 0; padding: 0; border: 0; background: none; text-align: left; color: var(--lc-ink); }
+.upholstery-page .up-gallery-0, .upholstery-page .up-gallery-1 { grid-column: span 3; }
+.upholstery-page .up-gallery-2, .upholstery-page .up-gallery-3, .upholstery-page .up-gallery-4 { grid-column: span 2; }
+.upholstery-page .up-gallery-image { display: block; position: relative; overflow: hidden; aspect-ratio: 1.7; background: var(--lc-chrome); }
+.upholstery-page .up-gallery-1 .up-gallery-image { border-top-right-radius: 70px; }
+.upholstery-page .up-gallery-2 .up-gallery-image, .upholstery-page .up-gallery-3 .up-gallery-image, .upholstery-page .up-gallery-4 .up-gallery-image { aspect-ratio: 1.25; }
+.upholstery-page .up-gallery img { object-fit: cover; transition: transform .65s var(--lc-ease-out); }
+.upholstery-page .up-gallery-2 img, .upholstery-page .up-gallery-3 img { object-position: center 60%; }
+.upholstery-page .up-gallery-item:hover img { transform: scale(1.035); }
+.upholstery-page .up-gallery-caption { display: flex; justify-content: space-between; gap: 12px; padding-top: 18px; }
+.upholstery-page .up-gallery-caption strong { font-family: var(--lc-font-display); font-size: 24px; font-weight: 450; letter-spacing: -.045em; }
+.upholstery-page .up-gallery-caption small { display: block; margin-top: 6px; color: var(--lc-ink-soft); font-size: 11px; line-height: 1.5; }
+.upholstery-page .up-gallery-price { flex-shrink: 0; padding-top: 7px; font-size: 11px; line-height: 1.6; }
+.upholstery-page .up-gallery-price > span { display: block; margin-top: 8px; text-align: right; font-size: 21px; color: var(--lc-teal-ink); }
+.upholstery-page .up-image-note { max-width: 660px; margin-top: 27px; font-size: 10px; line-height: 1.6; color: var(--lc-ink-soft); }
+.upholstery-page .up-method { padding: 90px 0; background: var(--lc-ink); color: var(--lc-paper); }
+.upholstery-page .up-method-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 110px; }
+.upholstery-page .up-method h2 { margin: 22px 0; }
+.upholstery-page .up-method-intro > p:not(.up-kicker) { max-width: 380px; font-size: 14px; line-height: 1.8; color: var(--lc-chrome); }
+.upholstery-page .up-textile { position: relative; height: 195px; margin-top: 36px; overflow: hidden; border-radius: 0 52px 0 0; }
+.upholstery-page .up-textile img { object-fit: cover; }
+.upholstery-page .up-textile > span { position: absolute; inset: auto 18px 16px; font-size: 9px; letter-spacing: .05em; color: white; text-shadow: 0 1px 6px black; }
+.upholstery-page .up-steps { list-style: none; padding: 0; margin: 0; }
+.upholstery-page .up-steps li { display: grid; grid-template-columns: 28px 1fr 20px; gap: 20px; padding: 28px 0; border-top: 1px solid rgba(243,240,233,.25); }
+.upholstery-page .up-steps li:last-child { border-bottom: 1px solid rgba(243,240,233,.25); }
+.upholstery-page .up-steps li > span { padding-top: 6px; color: var(--lc-teal-light); font-size: 11px; }
+.upholstery-page .up-steps h3 { font-size: 25px; letter-spacing: -.035em; line-height: 1.25; }
+.upholstery-page .up-steps p { max-width: 400px; margin-top: 12px; font-size: 13px; line-height: 1.75; color: var(--lc-chrome); }
+.upholstery-page .up-steps .site-arrow { margin-top: 7px; color: var(--lc-teal-light); }
+.upholstery-page .up-pricing-grid { display: grid; grid-template-columns: 1.65fr 1fr; gap: 70px; }
+.upholstery-page .up-price-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.upholstery-page .up-price-table thead th { text-align: left; font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; padding: 0 0 20px; color: var(--lc-ink-soft); }
+.upholstery-page .up-price-table thead th:last-child { text-align: right; }
+.upholstery-page .up-price-table tbody th { text-align: left; font-weight: 450; padding: 23px 20px 23px 0; line-height: 1.5; }
+.upholstery-page .up-price-table tbody th > span { display: inline-block; width: 32px; color: var(--lc-ink-soft); font-size: 9px; vertical-align: middle; }
+.upholstery-page .up-price-table tr { border-bottom: 1px solid var(--lc-line); }
+.upholstery-page .up-price-table td { font-family: var(--lc-font-display); text-align: right; white-space: nowrap; font-size: 25px; letter-spacing: -.035em; font-variant-numeric: tabular-nums; }
+.upholstery-page .up-price-table td small { font-family: var(--lc-font-text); font-size: 11px; letter-spacing: 0; color: var(--lc-ink-soft); }
+.upholstery-page .up-price-extra { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; padding: 22px 0; font-size: 12px; border-bottom: 1px solid var(--lc-line); margin-bottom: 18px; }
+.upholstery-page .up-price-extra strong { font-weight: 500; white-space: nowrap; }
+.upholstery-page .up-minimum { padding: 30px; background: var(--lc-teal-ink); color: var(--lc-paper-bright); border-radius: 0 50px 0 0; }
+.upholstery-page .up-minimum > .site-arrow { display: block; margin-bottom: 26px; width: 30px; height: 30px; }
+.upholstery-page .up-minimum p { max-width: 200px; font-size: 14px; line-height: 1.5; }
+.upholstery-page .up-minimum strong { display: block; margin: 14px 0; font-family: var(--lc-font-display); font-size: 43px; font-weight: 450; letter-spacing: -.05em; }
+.upholstery-page .up-minimum small { display: block; font-size: 11px; line-height: 1.75; }
+.upholstery-page .up-combined { padding: 28px 0 0; }
+.upholstery-page .up-combined h3 { font-size: 25px; line-height: 1.2; letter-spacing: -.035em; }
+.upholstery-page .up-combined p { margin: 15px 0; font-size: 12px; line-height: 1.8; color: var(--lc-ink-soft); }
+.upholstery-page .up-combined a { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--lc-line); font-size: 12px; }
+.upholstery-page .up-price-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; padding-top: 30px; margin-top: 30px; border-top: 1px solid var(--lc-line); color: var(--lc-ink-soft); font-size: 12px; line-height: 1.8; }
+.upholstery-page .up-estimate-section { padding: 90px 0; background: rgba(16,37,43,.035); border-block: 1px solid var(--lc-line); }
+.upholstery-page .up-calculator { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); align-items: start; gap: 64px; }
+.upholstery-page .up-calculator fieldset { min-width: 0; padding: 0; margin: 0; border: 0; }
+.upholstery-page .up-form-heading { display: flex; align-items: baseline; gap: 14px; margin: 32px 0 22px; }
+.upholstery-page .up-form-heading > span { font-size: 10px; color: var(--lc-teal-ink); }
+.upholstery-page .up-form-heading h3 { font-size: 25px; letter-spacing: -.04em; }
+.upholstery-page .up-calc-controls > .up-form-heading:first-of-type { margin-top: 0; }
+.upholstery-page .up-calculator :is(input,select,textarea) { width: 100%; max-width: 100%; min-width: 0; min-height: 48px; padding: 12px; border: 1px solid var(--lc-line); border-radius: 5px; background: var(--lc-paper-bright); font: inherit; font-size: 14px; color: var(--lc-ink); }
+.upholstery-page .up-calculator input[type="checkbox"], .upholstery-page .up-calculator input[type="radio"] { width: 18px; height: 18px; min-height: 18px; flex: none; padding: 0; accent-color: var(--lc-teal-ink); }
+.upholstery-page .up-calculator input::placeholder, .upholstery-page .up-calculator textarea::placeholder { color: var(--lc-ink-soft); font-size: 12px; }
+.upholstery-page .up-calculator [aria-invalid="true"] { border-color: #a34329; }
+.upholstery-page .up-calculator label { display: flex; flex-direction: column; gap: 9px; min-width: 0; font-size: 11px; line-height: 1.5; }
+.upholstery-page .up-calculator .up-furniture { border-top: 1px solid var(--lc-line); padding-top: 20px; padding-bottom: 22px; }
+.upholstery-page .up-furniture legend { padding-right: 12px; color: var(--lc-ink-soft); font-size: 10px; }
+.upholstery-page .up-item-top { display: grid; grid-template-columns: minmax(0,1fr) 132px; gap: 18px; align-items: end; }
+.upholstery-page .up-counter > div { display: flex; border: 1px solid var(--lc-line); border-radius: 5px; margin-top: 9px; background: var(--lc-paper-bright); }
+.upholstery-page .up-counter button { width: 40px; min-height: 46px; flex: none; padding: 0; border: 0; background: transparent; color: var(--lc-ink); font-size: 22px; }
+.upholstery-page .up-counter input { border: 0; background: transparent; text-align: center; padding-inline: 0; min-height: 46px; appearance: textfield; -moz-appearance: textfield; }
+.upholstery-page .up-counter input::-webkit-inner-spin-button { appearance: none; }
+.upholstery-page .up-counter input[aria-invalid="true"] { outline: 1px solid #a34329; }
+.upholstery-page .up-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+.upholstery-page .up-full { grid-column: 1 / -1; }
+.upholstery-page .up-form-note { font-size: 11px; line-height: 1.75; color: var(--lc-ink-soft); }
+.upholstery-page .up-furniture > .up-form-note { margin-top: 12px; }
+.upholstery-page .up-warning { padding: 14px; border-left: 2px solid var(--lc-teal-ink); margin-top: 14px; background: rgba(20,117,126,.06); font-size: 12px; line-height: 1.7; }
+.upholstery-page .up-object-label { margin-top: 18px; }
+.upholstery-page .up-item-details { margin-top: 20px; }
+.upholstery-page .up-item-details summary { display: flex; gap: 12px; align-items: center; justify-content: space-between; min-height: 44px; cursor: pointer; font-size: 11px; border-top: 1px solid var(--lc-line); }
+.upholstery-page .up-item-details summary span { font-size: 20px; color: var(--lc-teal-ink); }
+.upholstery-page details[open] > summary > span { transform: rotate(45deg); }
+.upholstery-page .up-remove { min-height: 44px; margin-top: 10px; padding: 8px 0; border: 0; border-bottom: 1px solid var(--lc-line); color: var(--lc-ink-soft); background: none; font-size: 11px; }
+.upholstery-page .up-add { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 50px; border: 1px dashed var(--lc-teal-ink); border-radius: 5px; background: none; color: var(--lc-teal-ink); font-size: 12px; }
+.upholstery-page .up-add:hover { background: rgba(20,117,126,.05); }
+.upholstery-page .up-add > span { font-size: 23px; }
+.upholstery-page .up-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.upholstery-page .up-modes label { flex-direction: row; align-items: center; padding: 17px 12px; min-height: 65px; border: 1px solid var(--lc-line); border-radius: 5px; cursor: pointer; transition: border-color .2s, background .2s; }
+.upholstery-page .up-modes label.is-selected { border-color: var(--lc-teal-ink); background: rgba(20,117,126,.055); }
+.upholstery-page .up-modes label .site-arrow { margin-left: auto; color: var(--lc-teal-ink); }
+.upholstery-page .up-calc-summary { background: var(--lc-paper-bright); border: 1px solid var(--lc-line); border-radius: 4px; padding: 32px; box-shadow: 0 8px 24px rgba(16,37,43,.025); }
+.upholstery-page .up-receipt > .up-kicker { font-size: 9px; color: var(--lc-ink-soft); }
+.upholstery-page .up-receipt h3 { margin: 20px 0 26px; font-size: 29px; letter-spacing: -.045em; line-height: 1.15; }
+.upholstery-page .up-receipt-lines > div { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; padding: 14px 0; border-bottom: 1px solid var(--lc-line); font-size: 11px; line-height: 1.6; }
+.upholstery-page .up-receipt-lines strong { flex: none; font-weight: 500; }
+.upholstery-page .up-total { display: flex; flex-direction: column; gap: 10px; margin: 24px 0 18px; font-size: 11px; }
+.upholstery-page .up-total strong { font-family: var(--lc-font-display); font-size: clamp(27px,3vw,42px); font-weight: 450; letter-spacing: -.05em; line-height: 1.15; color: var(--lc-teal-ink); font-variant-numeric: tabular-nums; animation: up-cost-in .25s ease-out; }
+.upholstery-page .up-contact > label { margin-top: 16px; }
+.upholstery-page .up-contact .up-consent { flex-direction: row; align-items: flex-start; gap: 10px; margin-top: 20px; }
+.upholstery-page .up-consent input { margin-top: 2px; }
+.upholstery-page .up-privacy { display: inline-flex; align-items: center; min-height: 44px; margin-left: 28px; font-size: 10px; color: var(--lc-ink-soft); text-decoration: underline; text-underline-offset: 3px; }
+.upholstery-page .up-submit { width: 100%; margin-top: 12px; text-align: left; }
+.upholstery-page .up-review { margin-top: 16px; }
+.upholstery-page .up-form-status { font-size: 13px; line-height: 1.7; margin-top: 15px; overflow-wrap: anywhere; }
+.upholstery-page .up-form-status:empty { margin: 0; }
+.upholstery-page .up-form-status.success { padding: 14px; background: rgba(20,117,126,.07); color: var(--lc-teal-ink); }
+.upholstery-page .up-form-status:is(.validation,.limited,.error) { color: #8a3923; }
+.upholstery-page button:disabled { cursor: default; opacity: .5; transform: none; }
+.upholstery-page fieldset:disabled { opacity: .7; }
+.upholstery-page .up-faq { display: grid; grid-template-columns: 1fr 1.25fr; gap: 100px; }
+.upholstery-page .up-faq h2 { margin-top: 22px; }
+.upholstery-page .up-text-link { display: flex; align-items: center; gap: 25px; max-width: 300px; margin-top: 30px; min-height: 48px; padding-block: 12px; border-bottom: 1px solid var(--lc-line); font-size: 12px; line-height: 1.6; }
+.upholstery-page .up-faq details { border-top: 1px solid var(--lc-line); }
+.upholstery-page .up-faq details:last-child { border-bottom: 1px solid var(--lc-line); }
+.upholstery-page .up-faq summary { display: flex; justify-content: space-between; align-items: center; gap: 24px; min-height: 76px; padding-block: 20px; cursor: pointer; font-size: 15px; line-height: 1.5; list-style: none; }
+.upholstery-page summary::-webkit-details-marker { display: none; }
+.upholstery-page .up-faq summary > span { color: var(--lc-teal-ink); font-size: 24px; flex-shrink: 0; font-weight: 300; transition: transform .2s; }
+.upholstery-page .up-faq details p, .upholstery-page .up-faq details ul { margin: 0 35px 22px 0; color: var(--lc-ink-soft); font-size: 13px; line-height: 1.8; }
+.upholstery-page .up-faq details ul { padding-left: 18px; }
+.upholstery-page .up-faq details li { margin-bottom: 8px; }
+.upholstery-page .up-closing { padding: 65px 0 75px; background: var(--lc-ink); color: var(--lc-paper); }
+.upholstery-page .up-closing-grid { display: grid; grid-template-columns: 1.2fr 1fr; align-items: end; gap: 80px; margin-top: 30px; }
+.upholstery-page .up-closing-grid > div > p { max-width: 400px; font-size: 14px; line-height: 1.8; color: var(--lc-chrome); }
+.upholstery-page .up-closing .upholstery-cta { color: var(--lc-paper)!important; border-color: rgba(243,240,233,.4); }
+.upholstery-page .up-closing .up-button:hover { border-color: var(--lc-paper); }
+.upholstery-page .up-footer { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; padding-block: 30px 100px; font-size: 11px; }
+.upholstery-page .up-footer a { display: inline-flex; align-items: center; gap: 18px; min-height: 44px; }
+.upholstery-page .up-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@keyframes up-cost-in { from { opacity: .4; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .upholstery-page .up-hero-copy { animation: up-cost-in .6s var(--lc-ease-out); }
+}
+@media (max-width: 1100px) {
+  .upholstery-page .up-shell { width: calc(100% - 64px); }
+  .upholstery-page .up-hero { gap: 24px; }
+  .upholstery-page .up-hero h1 { font-size: 5.2vw; }
+  .upholstery-page .up-hero-visual { min-height: 560px; }
+  .upholstery-page .up-hero-intro { font-size: 14px; }
+  .upholstery-page .up-actions { gap: 12px 16px; }
+  .upholstery-page .up-method-grid { gap: 60px; }
+  .upholstery-page .up-pricing-grid { gap: 36px; }
+  .upholstery-page .up-calculator { gap: 30px; }
+  .upholstery-page .up-calc-summary { padding: 24px; }
+  .upholstery-page .up-modes { grid-template-columns: 1fr; }
+  .upholstery-page .up-modes label { min-height: 58px; }
+  .upholstery-page .up-faq { gap: 50px; }
+  .upholstery-page .up-gallery-caption strong { font-size: 21px; }
+}
+@media (min-width: 681px) and (max-width: 850px) {
+  .upholstery-page .up-hero h1 { font-size: 5.2vw; }
+  .upholstery-page .up-hero-visual { min-height: 565px; }
+  .upholstery-page .up-gallery-caption { flex-direction: column; }
+  .upholstery-page .up-gallery-price { display: flex; align-items: center; justify-content: space-between; padding-top: 0; }
+  .upholstery-page .up-gallery-price > span { display: inline; margin: 0; }
+  .upholstery-page .up-field-grid { grid-template-columns: 1fr; }
+  .upholstery-page .up-calculator { grid-template-columns: minmax(0,1fr) minmax(0,.9fr); gap: 22px; }
+  .upholstery-page .up-item-top { grid-template-columns: 1fr; }
+  .upholstery-page .up-counter > div { max-width: 132px; }
+  .upholstery-page .up-minimum { padding: 24px; }
+  .upholstery-page .up-minimum strong { font-size: 34px; }
+}
+@media (max-width: 680px) {
+  .upholstery-page .up-shell { width: calc(100% - 40px); }
+  .upholstery-page .site-header { height: 64px; padding-inline: 20px; }
+  .upholstery-page .site-header .header-cta { display: none; }
+  .upholstery-page .site-header .site-locales a { min-width: 36px; min-height: 44px; }
+  .upholstery-page .site-header .proto-brand { width: 140px; }
+  .upholstery-page .up-hero { grid-template-columns: minmax(0,1fr); gap: 0; padding-top: 106px; padding-bottom: 30px; }
+  .upholstery-page .up-hero-copy { display: contents; }
+  .upholstery-page .up-hero-copy > .up-kicker { order: 0; font-size: 8px; }
+  .upholstery-page .up-hero h1, html[lang="en"] .upholstery-page .up-hero h1 { order: 1; margin: 24px 0 28px; font-size: clamp(33px,10.7vw,56px); line-height: 1.02; letter-spacing: -.06em; }
+  .upholstery-page .up-hero-visual { order: 2; min-height: 0; height: auto; aspect-ratio: 1.15; border-radius: 2px 2px 65px 2px; margin-bottom: 24px; }
+  .upholstery-page .up-hero-visual > img { object-position: 57% 55%; }
+  .upholstery-page .up-hero-visual figcaption { inset-inline: 18px; bottom: 20px; font-size: 8px; }
+  .upholstery-page .up-image-link { width: 42px; height: 42px; right: 18px; top: 18px; }
+  .upholstery-page .up-hero-intro { order: 3; font-size: 14px; }
+  .upholstery-page .up-hero .up-actions { order: 4; margin-top: 22px; gap: 15px; }
+  .upholstery-page .up-hero .up-actions .up-button { flex: 1; }
+  .upholstery-page .up-button { padding: 16px; gap: 14px; font-size: 12px; min-height: 54px; }
+  .upholstery-page .up-actions .upholstery-cta { font-size: 11px; }
+  .upholstery-page .up-hero-price { order: 5; margin-top: 24px; padding-top: 18px; }
+  .upholstery-page .up-facts { grid-template-columns: 1fr; }
+  .upholstery-page .up-facts > div { padding: 15px 0; gap: 18px; font-size: 11px; }
+  .upholstery-page .up-facts > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--lc-line); }
+  .upholstery-page .up-section { padding-block: 64px; }
+  .upholstery-page h2 { font-size: clamp(34px,9.8vw,48px); }
+  .upholstery-page .up-section-heading { grid-template-columns: 1fr; gap: 22px; margin-bottom: 30px; }
+  .upholstery-page .up-section-heading > p { font-size: 13px; line-height: 1.75; }
+  .upholstery-page .up-kicker { font-size: 9px; letter-spacing: .08em; }
+  .upholstery-page .up-section-heading h2 { margin-top: 18px; }
+  .upholstery-page .up-gallery { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 26px 16px; }
+  .upholstery-page .up-gallery-0 { grid-column: 1 / -1; }
+  .upholstery-page .up-gallery-1, .upholstery-page .up-gallery-2, .upholstery-page .up-gallery-3, .upholstery-page .up-gallery-4 { grid-column: auto; }
+  .upholstery-page .up-gallery-1 .up-gallery-image, .upholstery-page .up-gallery-2 .up-gallery-image, .upholstery-page .up-gallery-3 .up-gallery-image, .upholstery-page .up-gallery-4 .up-gallery-image { aspect-ratio: 1; }
+  .upholstery-page .up-gallery-1 .up-gallery-image { border-top-right-radius: 40px; }
+  .upholstery-page .up-gallery-caption { flex-direction: column; gap: 6px; padding-top: 12px; }
+  .upholstery-page .up-gallery-caption strong { font-size: 20px; line-height: 1.2; }
+  .upholstery-page .up-gallery-caption small { font-size: 10px; }
+  .upholstery-page .up-gallery-price { display: flex; justify-content: space-between; align-items: center; padding-top: 0; font-size: 10px; }
+  .upholstery-page .up-gallery-price > span { display: inline; margin: 0; font-size: 18px; }
+  .upholstery-page .up-gallery-0 .up-gallery-caption { flex-direction: row; }
+  .upholstery-page .up-gallery-0 .up-gallery-price { flex-direction: column; align-items: flex-end; justify-content: flex-start; padding-top: 2px; gap: 5px; }
+  .upholstery-page .up-method { padding-block: 60px; }
+  .upholstery-page .up-method-grid { grid-template-columns: 1fr; gap: 36px; }
+  .upholstery-page .up-method-intro > p:not(.up-kicker) { font-size: 13px; }
+  .upholstery-page .up-textile { height: 160px; margin-top: 26px; }
+  .upholstery-page .up-steps li { grid-template-columns: 20px 1fr 16px; gap: 14px; padding: 23px 0; }
+  .upholstery-page .up-steps h3 { font-size: 23px; }
+  .upholstery-page .up-steps p { font-size: 12px; margin-top: 9px; }
+  .upholstery-page .up-pricing-grid { grid-template-columns: 1fr; gap: 32px; }
+  .upholstery-page .up-price-table { font-size: 12px; }
+  .upholstery-page .up-price-table tbody th { padding: 20px 10px 20px 0; }
+  .upholstery-page .up-price-table tbody th > span { display: none; }
+  .upholstery-page .up-price-table td { font-size: 21px; }
+  .upholstery-page .up-price-table td small { display: block; font-size: 9px; }
+  .upholstery-page .up-price-extra { font-size: 11px; gap: 14px; line-height: 1.7; }
+  .upholstery-page .up-minimum { padding: 28px; }
+  .upholstery-page .up-minimum > .site-arrow { float: right; }
+  .upholstery-page .up-minimum p { max-width: 180px; }
+  .upholstery-page .up-minimum strong { font-size: 43px; }
+  .upholstery-page .up-combined h3 { max-width: 290px; }
+  .upholstery-page .up-price-notes { grid-template-columns: 1fr; gap: 15px; font-size: 11px; padding-top: 24px; }
+  .upholstery-page .up-estimate-section { padding-block: 60px; }
+  .upholstery-page .up-calculator { grid-template-columns: 1fr; gap: 32px; }
+  .upholstery-page .up-item-top { grid-template-columns: minmax(0,1fr) 124px; gap: 12px; }
+  .upholstery-page .up-field-grid { grid-template-columns: minmax(0,1fr); gap: 16px; margin-top: 18px; }
+  .upholstery-page .up-calculator :is(input,select,textarea) { font-size: 16px; padding: 12px 10px; }
+  .upholstery-page .up-counter button { width: 38px; min-height: 48px; }
+  .upholstery-page .up-counter input { min-height: 48px; padding: 0; }
+  .upholstery-page .up-modes { grid-template-columns: 1fr 1fr; }
+  .upholstery-page .up-modes label { padding: 13px 10px; min-height: 70px; font-size: 11px; }
+  .upholstery-page .up-modes label .site-arrow { display: none; }
+  .upholstery-page .up-calc-summary { padding: 24px 20px; }
+  .upholstery-page .up-receipt h3 { font-size: 28px; }
+  .upholstery-page .up-total strong { font-size: 36px; }
+  .upholstery-page .up-form-heading h3 { font-size: 24px; }
+  .upholstery-page .up-submit { font-size: 12px; }
+  .upholstery-page .up-faq { grid-template-columns: 1fr; gap: 34px; }
+  .upholstery-page .up-faq summary { font-size: 14px; min-height: 72px; gap: 15px; }
+  .upholstery-page .up-faq details p, .upholstery-page .up-faq details ul { margin-right: 16px; font-size: 12px; }
+  .upholstery-page .up-closing { padding-block: 54px 60px; }
+  .upholstery-page .up-closing-grid { grid-template-columns: 1fr; gap: 26px; }
+  .upholstery-page .up-closing-grid > div > p { font-size: 13px; }
+  .upholstery-page .up-closing .up-actions { margin-top: 24px; }
+  .upholstery-page .up-footer { display: grid; grid-template-columns: 1fr; gap: 5px; padding-block: 24px 100px; }
+}
+@media (max-width: 359px) {
+  .upholstery-page .up-shell { width: calc(100% - 32px); }
+  .upholstery-page .site-header { padding-inline: 16px; }
+  .upholstery-page .site-header .proto-brand { width: 124px; }
+  .upholstery-page .site-header .site-locales a { min-width: 30px; }
+  .upholstery-page .up-hero .up-actions { align-items: stretch; flex-direction: column; gap: 5px; }
+  .upholstery-page .up-hero .upholstery-cta { align-self: flex-start; }
+  .upholstery-page .up-item-top { grid-template-columns: 1fr; }
+  .upholstery-page .up-counter > div { max-width: 132px; }
+  .upholstery-page .up-calc-summary { padding: 22px 16px; }
+  .upholstery-page .up-total strong { font-size: 32px; }
+  .upholstery-page .up-receipt-lines > div { gap: 10px; font-size: 10px; }
+  .upholstery-page .up-gallery-caption strong { font-size: 18px; }
+  .upholstery-page .up-modes { grid-template-columns: 1fr; }
+  .upholstery-page .up-modes label { min-height: 56px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .upholstery-page *, .upholstery-page *::before, .upholstery-page *::after { animation: none!important; transition: none!important; scroll-behavior: auto!important; }
+}
