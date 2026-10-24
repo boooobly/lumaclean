@@ -20,6 +20,7 @@ import {enquiryCopy} from '@/lib/lead-intent';
 import { upholsteryPremiumCopy } from "@/lib/upholstery-premium-content";
 import { UpholsteryGallery, UpholsteryCalculator } from "@/components/site/upholstery-calculator";
 import { UpholsteryPhotoButton } from "@/components/site/upholstery-photo-button";
+import { UpholsteryMotion } from "@/components/site/upholstery-motion";
 import { ArrowIcon } from "@/components/site/arrow-icon";
 import { siteUrl } from "@/lib/seo";
 import { articlePath, getPublishedArticles } from "@/lib/articles";
@@ -103,6 +104,7 @@ export default async function Page({ params }: Props) {
     <div
       className={`site-page upholstery-page ${display.variable} ${text.variable}`}
     >
+      <UpholsteryMotion />
       <SiteHeader
         locale={locale}
         copy={editorialContent[locale].nav}

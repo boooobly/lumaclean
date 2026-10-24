@@ -27,3 +27,11 @@ The unchanged server intake was executed with a mock database: it recomputes the
 Rerun the browser script using an available `playwright-core` package (for example the official `@playwright/cli@0.1.22` runtime), setting `PLAYWRIGHT_CORE_PATH` to its `index.mjs`, and `BASE_URL` to the test server. Run `node tests/browser/upholstery-premium.mjs`. Screenshots and machine-readable results go to ignored `artifacts/upholstery-premium/`.
 
 Image provenance and full generation prompts: `docs/upholstery-premium-media.json`. Four new illustrative WebP images, 739 KB total; existing textile image reused. Gallery disclosure is translated into all three languages.
+
+## Final UI and motion polish — 2026-10-24
+
+Approved page composition retained. Native select wrappers now have one decorative 14×8 chevron, 18 px from the right edge, vertically centred, with 48 px of text padding. Furniture uses stable UI keys, grouped paper cards and short add/remove transitions; UI keys never enter the API payload. Status messages and button labels reserve their space.
+
+`tests/browser/upholstery-polish.mjs`: **30 PASS** (Chrome and WebKit 26.6 × RU/SR/EN × 1440/1024/768/390/320). Expanded parameters, two items, corner seats, all fabric states, combined cleaning, native chevron geometry, validation/400/429/503/offline/timeout, loading/success, retry idempotency and stable removal checked with mocked APIs. No status-card height change. Normal/reduced motion, disabled JavaScript and a failing enhancement observer checked; scroll CLS below .01. No unexpected console/page errors.
+
+Typecheck/build/lint PASS (the same two existing chat image warnings). Seventeen focused upholstery pricing/intake tests PASS. No dependencies, media assets, backend, prices, CRM, AI, schema or migration changes in this polish. Browser output, before/after screenshots and recordings remain in ignored `artifacts/upholstery-polish/`.
