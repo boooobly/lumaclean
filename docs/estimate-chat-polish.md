@@ -1,5 +1,7 @@
 # LumaClean — форма заявки и полнота ответов чата
 
+Разделы 1–8 фиксируют первоначальную проверку до разрешения на выпуск. Итог выполненного production-релиза — в разделе 9.
+
 Дата: 25 октября 2026. Рабочая копия: `upholstery-premium`, ветка `codex/estimate-chat-polish`, база `22b5818` (объединённый PR #30). Копия была чистой до работы. Изменения из других копий не переносились. Production, push, deploy, миграции и seed не выполнялись.
 
 Проверяемый сервер: `http://localhost:3107`. Сервер запущен без DATABASE_URL, с существующим локальным fallback каталога. Все browser API и внешняя аналитика перехвачены до навигации. Это UI mocked, а не подтверждение доставки в CRM/Telegram.
@@ -120,3 +122,24 @@ Mocked pipeline проверяет 3/5 сообщений, конкурентн�
 ## 8. Готовность
 
 Изменения реализованы и готовы к ревью кода и визуальному согласованию. Автоматического деплоя нет. Полная готовность к production/AUTO **не сертифицирована**: существующая проверка `ai_release_source_mismatch` закономерно сообщает об изменённом исходном коде. Release manifest и source-bound live booking proof не подменялись и не обновлялись без соответствующей проверки. Перед выпуском нужны доступная изолированная PostgreSQL, проверка реальных провайдеров/очереди/доставки и штатная повторная сертификация источника.
+
+## 9. Production-выпуск по разрешению пользователя — 25 октября 2026
+
+**Опубликовано:** https://lumacleanrs.com. Домен проверен через Vercel Alias API и указывает на `dpl_9x7JQ4Rf8MNS4CgLRBa1bMQv6xiL` (`lumaclean-olq9fosag-vladislavs-projects-0eae0ea3.vercel.app`). Код зафиксирован локальным коммитом `f1972bf` в `codex/estimate-chat-polish`.
+
+Выпуск выполнен через production stage без назначения домена → проверка → штатный promote. GitHub main в рамках CLI-выпуска не изменялся. Для отката сохранён предыдущий production: `dpl_9EVfagm9Jq71W6gPc3XUnjEF6wdh`.
+
+- Повторный общий прогон: **1 029 PASS, 32 SKIP, 0 FAIL**, включая agent/CRM/admin/finance/scheduling/routing/reliability. Пропуски относятся к другим интеграционным средам.
+- На существующей изолированной Neon Preview проверены 9 сценариев continuity: bursts, конкурентный ingress, retry, человеческий контекст, исправления, stale jobs и safety/handoff. Первый полный прогон выявил сетевой timeout workstation→Neon и устаревшее ожидание объединённого text/photo user-сообщения. Увеличен timeout только тестового Prisma-клиента; фото сохраняют привязку к своему исходному сообщению. Два затронутых сценария повторены отдельно и прошли. Production timeout не менялся.
+- Release manifest обновлён из фактических логов. Схема и все миграции сверены по хешам с предыдущим подтверждённым выпуском; новых миграций нет.
+- Для удалённой сборки использован чистый runtime-пакет без tests/artifacts/служебных скриптов. Это устранило попадание provisioning test без его CLI-only helper в TypeScript-проверку Vercel. Отключение TypeScript и `ignoreBuildErrors` не применялись. Отпечаток пакета совпадает с рабочим исходником: `b8c083c02d1cf555af7cabfacbb35455769a704056a05ab1e9cb7fec4c6146b6`.
+- Реальные primary и fallback провайдеры прошли диагностику и в Preview, и в production. Places работает. Transit сохраняет действующий degraded walking/reserve режим; BusMaps остаётся необязательным, настройки не менялись.
+- Штатный **live Preview booking PASSED**: 8/8 шагов — AI qualification, цена, duration, адрес, маршрут, слот, повторная проверка и Order. Синтетический batch очищен (`cleaned=true`). Подписанный proof импортирован штатным admin API в production; проверка конфигурации прошла.
+- Production readiness: **18 проверок, 0 BLOCKS_AUTO**, текущий source verified, live booking proof действителен. Режимы AI и каналы не переключались.
+- На публичном production-домене выполнены **21 layout проверка RU/SR/EN**, 13 групп сценариев, 32 public URL и 25 mocked отправок. Неожиданных browser/page errors — 0. Тестовые Lead/Order в production и сообщения в мессенджеры не создавались.
+
+Секреты, cookies и файлы доступа не публиковались. Доступ администратора использован после отдельного явного разрешения пользователя. Deployment protection сохранена.
+
+Итоговые локальные доказательства: [release summary](../artifacts/estimate-chat-release/release-summary.json), [readiness](../artifacts/estimate-chat-release/readiness-summary.json), [production browser matrix](../artifacts/estimate-chat-release/production-browser/report.json), [production desktop](../artifacts/estimate-chat-release/production-browser/after-ru-1440.png), [production mobile](../artifacts/estimate-chat-release/production-browser/after-ru-390.png). Файлы с сессиями администратора в ссылки отчёта не включены.
+
+Оставшиеся ограничения: реальные Telegram/WhatsApp notifications, физические мобильные устройства и exhaustive accessibility/CWV не проверялись. Успех mocked UI не выдаётся за подтверждение внешней доставки.
