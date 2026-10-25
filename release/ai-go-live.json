@@ -1,5 +1,5 @@
 {
-  "fingerprint": "76c03a6d8df5a6639831ef0a15556901730055f0a4d3ccaa7e8f92a97ebf3db5",
+  "fingerprint": "d899cc771c09b3d3c28697dc2428ca8403070167f9b0da575c882a909b73d0f7",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -90,7 +90,7 @@
     "src/app/[locale]/services/[service]/page.tsx": "316e5a794483e55b2b541bce465b0ea02df39d7e369f98e711cedfd0b46b6dd5",
     "src/app/[locale]/services/[service]/service.css": "225bb4ad21327df1d52ebd7519d4c32fa14533066058f01cae4c4ae7b0f7f3dc",
     "src/app/[locale]/site.css": "f5eec0b9ddadc009e97cc4e7c9a054ab80214d5456b2a40c8f6b2ea66185998b",
-    "src/app/[locale]/[upholstery]/page.tsx": "7c79618d57a7f475f789c0d1c33134d0fb7fd740efcd91fb3171a01af947fc2f",
+    "src/app/[locale]/[upholstery]/page.tsx": "3ea19e044010d5fd33d135ef858980c28d90b1a646fdb9f7f5673c193f8a2fe6",
     "src/components/admin/address-autocomplete.tsx": "5371299b5eaba172b99055f3a98bd261b9bb8bfab85d99d9fe07ba19bd6a837c",
     "src/components/admin/agent-behavior-settings.tsx": "8bd258b539cf6ace1c3b6dd2937d4726dc27a3917a4707a44d75e9ff9a284a7f",
     "src/components/admin/agent-known-facts.tsx": "c65de01503e53a692e123f50b661db73ff26103149281e13f739f2c7bae6b125",
@@ -149,8 +149,11 @@
     "src/components/site/service-planning.tsx": "d8bfe885bad227fbed02e270326f635ee101420944d53c7789bdc3bdb04ac96f",
     "src/components/site/site-header.tsx": "40b257ab92716a999d835b74b9f0a7a05929f20be9cabb66093e96d41a9ea7b1",
     "src/components/site/upholstery-article-prices.tsx": "60956f70fbb31e8a7437970d2814bd964c411f1b8694105f333a7ddb32788b52",
+    "src/components/site/upholstery-calculator.tsx": "6b87f066864c5b0be9062c752ef40cc1ea61f214df1d39c0e2a5b2ce808cc21c",
     "src/components/site/upholstery-fields.tsx": "59f4d5a96276d564c9110af58c6a63f965521a8509430b5913b816b3d41c49a6",
+    "src/components/site/upholstery-motion.tsx": "fc73377bda40e2f6d70cfa1ef616e2017f749b1ba014555fe21a928746f07b4c",
     "src/components/site/upholstery-photo-button.tsx": "314b90e555af082ef005c5bda9ac6c67f70e828794d11a28ebb08930c85357b7",
+    "src/components/site/upholstery-premium.css": "d812fcb21bbeeeabbc5dbb704f2637d7c2dd2359b7e882eb657b4511313047c4",
     "src/components/site/upholstery-teaser.tsx": "433b1917269f340a61f530eac822a483622603a445ee5ee460eb20d06107dadb",
     "src/components/site/upholstery.css": "ff4f97a2413dd41a5659070d39501f7cc17d8bc89f337cfe5a26003e11a5293a",
     "src/components/site/website-chat.css": "59470fd58e6c7ffae8bcc78d28d377c196d04a166de64d1a578673fb04da0862",
@@ -307,6 +310,7 @@
     "src/lib/site-content.tsx": "7b45e3029f824e9a6a0e4eae054c2c11b9215e2d204ce00ae3adb6d39e9b9a8a",
     "src/lib/upholstery-content.ts": "80a4060297737cab5d8026399dcc56a2956a5b5ee86af431dc14108d1b9c0803",
     "src/lib/upholstery-intent.ts": "60ee31195207c686c55cedbe5dfc5a6fd8135f42032a6db87725ae8aa938f666",
+    "src/lib/upholstery-premium-content.ts": "d4d538f4eddb615f42e2a7d7cc9a8bcaab153c85d10f307f4b9d0276035fa645",
     "src/lib/upholstery.ts": "8da2e634b383fb39f7218dff31e5b11781b3af64031fdf2559ba99c1a10aff9b",
     "src/lib/validation/admin.ts": "9c1d0a705faffed2af3fd53cf4d5ec10713ba3d90d52769370288655b95f4a4f",
     "src/lib/validation/crm.ts": "d6c74202643e0ffb83fc5c2ccde8c9a44dd913ecfad5b0b4ee49c7b647887fad",
@@ -349,20 +353,22 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 947,
+  "tests": 38,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "checkedAt": "2026-10-21T23:07:08.245Z",
+  "checkedAt": "2026-10-25T14:04:16.265Z",
   "suites": [
-    "937 passing local agent/admin/CRM/finance/scheduling/reliability checks; 30 DB-dependent suites skipped without their fixture secrets",
-    "10 isolated RC database checks: window/extra refusals, explicit selection, partial-room scope handoff, FAQ refusal without intake restart, compound upholstery FAQ without a Lead or notification, and bounded repeat handoff with durable notification"
+    "17 upholstery pricing and mocked lead submission checks passed; no real requests sent",
+    "21 release/readiness checks passed; 1 database fixture check skipped",
+    "Typecheck, lint (0 errors; 2 existing website-chat image warnings), production build passed",
+    "Source 26ab3b8 previously verified on deployed Preview: 30 Chrome/WebKit RU/SR/EN viewport cases, calculator errors/retry, reduced motion and no-JavaScript fallback"
   ],
-  "verificationScope": "Contextual refusals, actual calendar checks for an explicitly intended start time (arrival/end intent is never inferred), progressive recovery, bounded manager handoff, unsupported booking claims with negative/conditional explanations preserved, Serbian city word boundaries, acknowledgement/name distinction, partial-room scope protection and read-only upholstery capability questions, including compound inquiry-only wording and refusal of booking. Approved models, system prompts, pricing, booking consent and channel modes unchanged. No schema changes: previous migration rehearsal retained. Native paid evidence comprises 30 multi-turn OpenRouter dialogues and targeted replays of discovered issues; transient provider failures were recovered and are reported separately. A genuine final-source booking proof is an independent gate, not inferred from these regression checks.",
+  "verificationScope": "Approved upholstery page presentation and calculator UI only. Application source differences are limited to five public-page files. Backend, prices, CRM, agent, schema, migrations and modes are unchanged; prior migration rehearsal retained. This records the 38 checks rerun for this release and does not claim the previous 947 tests were rerun. A genuine final-source native booking proof is a separate release gate.",
   "previousVerification": {
-    "fingerprint": "59d6d70f6d9766de8d438a0c7698b6be23a2bf13a6784fbeee2b563d8ba175dc",
-    "tests": 997,
-    "checkedAt": "2026-10-21T17:13:43.524Z"
+    "fingerprint": "76c03a6d8df5a6639831ef0a15556901730055f0a4d3ccaa7e8f92a97ebf3db5",
+    "tests": 947,
+    "checkedAt": "2026-10-21T23:07:08.245Z"
   }
 }
