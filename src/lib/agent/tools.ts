@@ -1,3 +1,4 @@
+import {messageReceivedTime} from './response-context';
 import { createHash, randomUUID } from "node:crypto";
 import { Prisma, type PrismaClient, type Conversation, type AgentMode } from "@/generated/prisma/client";
 import { siteContent } from "@/lib/content";
@@ -77,7 +78,7 @@ async function updateLead(tx:Tx,c:Conversation,ctx:ToolContext,input:ReturnType<
   if(!ctx.previewTestId&&(input.name&&input.name!==ctx.state.name||input.phone&&normalizedPhone(input.phone)!==ctx.state.phone)){
     const job=await tx.agentJob.findUniqueOrThrow({where:{id:ctx.jobId}}),turn=await currentClientTurn(tx,c.id,job.messageId);
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
-    const evidence=turn.map(m=>explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,ctx.state));
+    const evidence=turn.map(m=>explicitCustomerFacts(m.text,messageReceivedTime(m),settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,ctx.state));
     if(input.name&&input.name!==ctx.state.name&&!evidence.some(f=>f.name===input.name)||input.phone&&normalizedPhone(input.phone)!==ctx.state.phone&&!evidence.some(f=>f.phone===normalizedPhone(input.phone!)))return{error:'CUSTOMER_FACTS_REQUIRED',message:'Contact must match an explicit current customer statement or already recorded contact. Omit unknown fields; never use the assistant alias.'};
   }
   if(input.name&&input.name!==ctx.state.name)delete ctx.state.pending;
@@ -329,7 +330,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
     const source=turn.find(m=>{
       const snapshot=customerFactsSchema.safeParse((m.structured as {factExtraction?:{accepted?:unknown}}|null)?.factExtraction?.accepted);
-      const parsed=explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,state);
+      const parsed=explicitCustomerFacts(m.text,messageReceivedTime(m),settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,state);
       return m.text.includes(input.evidence)&&supportedFacts(input.facts,{...parsed,...(snapshot.success?snapshot.data:{})});
     });
     if(!source){
@@ -346,7 +347,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     // Evidence from an early message cannot undo a later explicit correction in this same burst.
     for(const m of turn.slice(turn.indexOf(source)+1)){
       const snapshot=customerFactsSchema.safeParse((m.structured as {factExtraction?:{accepted?:unknown}}|null)?.factExtraction?.accepted);
-      applyCustomerFacts(replay,{...explicitCustomerFacts(m.text,m.sentAt,settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,replay),...(snapshot.success?snapshot.data:{})});
+      applyCustomerFacts(replay,{...explicitCustomerFacts(m.text,messageReceivedTime(m),settings.timezone,(m.structured as {inputIntent?:AgentState['nextInput']}|null)?.inputIntent,replay),...(snapshot.success?snapshot.data:{})});
     }
     applyCustomerFacts(state,replay.draftFacts??{},buildAgentTemporalContext(source.sentAt,settings).nowLocalDate);
     return{facts:state.draftFacts};
@@ -373,7 +374,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     if(input.corrections.some(p=>!memory.reviewedHumanIds.includes(p.messageId)&&!pending.some(s=>s.id===p.messageId&&s.text.includes(p.evidence))))return{error:'HUMAN_CONTEXT_REQUIRED',pendingMessageIds:pendingIds,statements:pending,message:'Each new correction must reference a pending ID and an exact excerpt of its statement; combine factual fields or submit separate corrections for the same statement. Already reviewed corrections are ignored.'};
     const rows=await tx.message.findMany({where:{conversationId:c.id,OR:[{id:{in:ids}},{author:'CLIENT',sentAt:{gte:(await tx.message.findFirstOrThrow({where:{id:{in:ids}},orderBy:[{sentAt:'asc'},{id:'asc'}]})).sentAt}}]},orderBy:[{sentAt:'asc'},{id:'asc'}]});
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
-    if(input.corrections.some(p=>!memory.reviewedHumanIds.includes(p.messageId)&&!rows.some(m=>m.id===p.messageId&&m.author==='ADMIN'&&supportedFacts(p.facts,explicitCustomerFacts(m.text,m.sentAt,settings.timezone,undefined,state)))))return{error:'HUMAN_CONTEXT_REQUIRED',message:'Correction values must be explicitly supported by the attributed operator statement, not only its excerpt.'};
+    if(input.corrections.some(p=>!memory.reviewedHumanIds.includes(p.messageId)&&!rows.some(m=>m.id===p.messageId&&m.author==='ADMIN'&&supportedFacts(p.facts,explicitCustomerFacts(m.text,messageReceivedTime(m),settings.timezone,undefined,state)))))return{error:'HUMAN_CONTEXT_REQUIRED',message:'Correction values must be explicitly supported by the attributed operator statement, not only its excerpt.'};
     const edits=conversationMemory(c.summary).factEdits??[];
     const timeline=[...rows.map(m=>({at:m.sentAt,id:m.id,message:m,facts:undefined as AgentState['draftFacts']})),...edits.filter(edit=>new Date(edit.at)>=rows[0].sentAt).map(edit=>({at:new Date(edit.at),id:'',message:undefined,facts:edit.facts}))].sort((a,b)=>a.at.getTime()-b.at.getTime()||a.id.localeCompare(b.id));
     for(const event of timeline){
@@ -383,7 +384,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
       else if(m.author==='CLIENT'){
         const metadata=m.structured as {inputIntent?:AgentState['nextInput'];factExtraction?:{accepted?:unknown}}|null;
         const accepted=customerFactsSchema.safeParse(metadata?.factExtraction?.accepted);
-        applyCustomerFacts(state,{...explicitCustomerFacts(m.text,m.sentAt,settings.timezone,metadata?.inputIntent,state),...(accepted.success?accepted.data:{})});
+        applyCustomerFacts(state,{...explicitCustomerFacts(m.text,messageReceivedTime(m),settings.timezone,metadata?.inputIntent,state),...(accepted.success?accepted.data:{})});
       }
     }
     if(ctx.mode==='AUTO'&&(c.leadId||state.draftFacts?.service&&state.draftFacts.area))await updateLead(tx,c,ctx,{intent:'cleaning'});

@@ -12,6 +12,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import type { AgentLocale, BookingRecap } from "@/lib/agent/contracts";
+import {assistantDisclosure} from "@/lib/agent/persona";
 import { siteContent } from "@/lib/content";
 import { formatRsd } from "@/lib/pricing";
 import { ChatPhotos, prepareChatPhoto, type ChatPhoto } from "./chat-photos";
@@ -655,7 +656,7 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
               <p>
                 {chat?.control === "HUMAN_CONTROL"
                   ? words.human
-                  : locale==='ru'?'AI-администратор · Belgrade':locale==='en'?'AI assistant · Belgrade':locale==='sr-Cyrl'?'AI администратор · Београд':'AI administrator · Beograd'}
+                  : assistantDisclosure[locale]}
               </p>
             </div>
             <button

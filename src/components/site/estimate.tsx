@@ -4,7 +4,7 @@ import {isWebsitePhoneValid} from '@/lib/website-phone';
 import {homepageUxCopy} from '@/lib/homepage-ux-content';
 import Image from "next/image";
 import {Minus, Plus} from "lucide-react";
-import {Fragment, useEffect, useMemo, useRef, useState} from "react";
+import {Fragment, useEffect, useId, useMemo, useRef, useState} from "react";
 import type {Locale} from "@/i18n/routing";
 import type {SiteContent} from "@/lib/content";
 import {calculatePrice, extrasPrices, formatRsd, serviceIds, type ServiceId} from "@/lib/pricing";
@@ -13,6 +13,7 @@ import type {EditorialContent} from "@/lib/site-content";
 import {leadAttribution, trackEvent} from "@/lib/analytics";
 import {ArrowIcon} from "@/components/site/arrow-icon";
 import {enquiryCopy} from '@/lib/lead-intent';
+import {AnimatedPrice} from './animated-price';
 
 type CountExtra = "standardWindow" | "largeWindow" | "cabinets" | "ironing" | "fridge" | "oven" | "microwave" | "hood" | "dishwasher" | "washingMachine";
 type ToggleExtra = "balcony" | "steam" | "petHair" | "linen";
@@ -31,6 +32,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
   const ExtrasDisclosure=focused?"details":"div";
   const ExtraGroup=focused?"div":Fragment;
   const started = useRef(false);
+  const statusId=useId();
   const submitting = useRef(false);
   const submission = useRef<{id: string; fields: string; payload: string} | null>(null);
   const [service, setService] = useState<ServiceId>(initialService);
@@ -50,6 +52,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
   const [comment, setComment] = useState("");
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "validation" | "error" | "limited">("idle");
+  const [reference,setReference]=useState<string|null>(null);
 
   const calculation = useMemo(() => {
     const extras = [...countKeys.map(code => ({code, quantity:counts[code]})), ...toggleKeys.map(code => ({code, quantity:toggles[code] ? 1 : 0}))];
@@ -70,6 +73,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
       return;
     }
     submitting.current = true;
+    setReference(null);
     setStatus("sending");
     const details = calculation.lines.map((line) => `${line.label}: ${formatRsd(line.value, locale)}`).join("\n");
     const estimate = `${copy.calculation}\n${details}\n${hasUpholstery?e.cleaningPrice:copy.total}: ${formatRsd(calculation.total, locale)}${hasUpholstery?`\n${e.pending}\n${e.agreed}`:''}`;
@@ -79,6 +83,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
       const response = await fetch("/api/lead", {method: "POST", headers: {"Content-Type": "application/json"}, signal: AbortSignal.timeout(20000), body: JSON.stringify({...JSON.parse(submission.current.payload),submissionId:submission.current.id})});
       const result = await response.json().catch(() => null);
       const success = response.ok && result?.ok === true;
+      if(success&&typeof result.reference==='string')setReference(result.reference);
       setStatus(success ? "success" : response.status===429?"limited":response.status === 400 ? "validation" : "error");
       trackEvent(success ? "generate_lead" : "lead_error", {locale, service, ...(success ? {} : {error_type: "server"})});
     } catch {
@@ -90,9 +95,9 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
   const urgency=<>             <label className="site-urgent"><input type="checkbox" disabled={!sameDayAllowed} checked={urgent} onChange={(event) => setUrgent(event.target.checked)}/><span>{content.calculator.urgent}</span><small>+20%</small></label>{!sameDayAllowed&&<p role="status">{locale==='ru'?'Срочный выезд сегодня недоступен. Другой день согласуем после заявки.':locale==='en'?'Same-day departure is unavailable. We will agree another day after your enquiry.':'Dolazak danas nije dostupan. Drugi dan dogovaramo nakon upita.'}</p>} </>;
 
   return (
-    <form id={focused?'estimate':undefined} className={`estimate-sheet${focused?' estimate-focused':''}${onlyUpholstery?' estimate-enquiry-only':''}`} onSubmit={submit} onFocusCapture={() => { if (!started.current) { started.current = true; trackEvent("form_start", {locale, service}); } }} noValidate>
+    <form id={focused?'estimate':undefined} aria-busy={status==='sending'} className={`estimate-sheet${focused?' estimate-focused':''}${onlyUpholstery?' estimate-enquiry-only':''}`} onSubmit={submit} onFocusCapture={() => { if (!started.current) { started.current = true; trackEvent("form_start", {locale, service}); } }} noValidate>
       <div className="estimate-form" onChange={() => trackEvent("calculator_interaction", {locale, service})} onClick={(event) => { if ((event.target as HTMLElement).closest("button")) trackEvent("calculator_interaction", {locale, service}); }}>
-        <label className="estimate-request-kind"><span>{e.kind}</span><select name="requestKind" value={requestMode} onChange={event=>{const kind=event.target.value as 'CLEANING'|'UPHOLSTERY';setRequestMode(kind);if(kind==='UPHOLSTERY')setUpholsteryRequested(true);setStatus('idle');}}><option value="CLEANING">{e.cleaning}</option><option value="UPHOLSTERY">{e.only}</option></select></label>
+        <label className="estimate-request-kind"><span>{e.kind}</span><select name="requestKind" value={requestMode} onChange={event=>{const kind=event.target.value as 'CLEANING'|'UPHOLSTERY';setRequestMode(kind);if(kind==='UPHOLSTERY')setUpholsteryRequested(true);if(status!=='success'&&status!=='sending')setStatus('idle');}}><option value="CLEANING">{e.cleaning}</option><option value="UPHOLSTERY">{e.only}</option></select></label>
         {!onlyUpholstery&&<><fieldset>
           <legend>{copy.service}</legend>
           <div className="service-options">
@@ -102,13 +107,13 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
         </fieldset>
         <fieldset>
           <legend>{copy.area}<output>{area} m²</output></legend>
-          <input className="site-area-range" type="range" min="25" max="180" value={area} onChange={(event) => setArea(Number(event.target.value))} aria-label={copy.area} />
+          <input className="site-area-range" type="range" min="25" max="180" style={{'--area-progress':`${(area-25)/155*100}%`} as React.CSSProperties} value={area} onChange={(event) => setArea(Number(event.target.value))} aria-label={copy.area} />
         </fieldset>
         <a className="site-mobile-total" href="#receipt">
           <span>{hasUpholstery?e.cleaningPrice:copy.total}</span><strong>{formatRsd(calculation.total, locale)}</strong><i>{copy.toReceipt}<ArrowIcon direction="down" /></i>
         </a>
         <ExtrasDisclosure className={focused?"estimate-extras-disclosure":undefined}>
-          {focused&&<summary>{ux.extras}<span>{selectedExtras>0?`${ux.selected}: ${selectedExtras}`:"+"}</span></summary>}
+          {focused&&<summary>{ux.extras}<span>{selectedExtras>0?`${ux.selected}: ${selectedExtras}`:""}</span></summary>}
         <fieldset>
           <legend className={focused?"rate-sr-only":undefined}>{copy.extras}</legend>
           <div className="extra-options site-extra-options">
@@ -116,7 +121,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
             {keys.map((key) => (
               <div className="site-extra-counter" key={key}>
                 <span>{content.calculator.labels[key]}</span><small>+{formatRsd(extrasPrices[key], locale)}</small>
-                <div><button type="button" onClick={() => setCounts((current) => ({...current, [key]: Math.max(0, current[key] - 1)}))} aria-label={`${content.calculator.labels[key]}: −`}><Minus size={13}/></button><b>{counts[key]}</b><button type="button" onClick={() => setCounts((current) => ({...current, [key]: current[key] + 1}))} aria-label={`${content.calculator.labels[key]}: +`}><Plus size={13}/></button></div>
+                <div><button type="button" disabled={counts[key]===0} onClick={() => setCounts((current) => ({...current, [key]: Math.max(0, current[key] - 1)}))} aria-label={`${content.calculator.labels[key]}: −`}><Minus size={13}/></button><b>{counts[key]}</b><button type="button" onClick={() => setCounts((current) => ({...current, [key]: current[key] + 1}))} aria-label={`${content.calculator.labels[key]}: +`}><Plus size={13}/></button></div>
               </div>
             ))}
             </ExtraGroup>)}
@@ -134,19 +139,19 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
         <div className="receipt-body">
           {!onlyUpholstery&&<><div className="receipt-meta"><span>{copy.calculation}</span><span>{copy.city}</span></div>
           <div className="receipt-lines">{calculation.lines.map((line) => <div className="receipt-line" key={line.label}><span>{line.label}</span><span>{formatRsd(line.value, locale)}</span></div>)}</div>
-          <div className="receipt-total"><span>{hasUpholstery?e.cleaningPrice:copy.total}</span><strong>{formatRsd(calculation.total, locale)}</strong></div>
+          <div className="receipt-total"><span>{hasUpholstery?e.cleaningPrice:copy.total}</span>{focused?<><strong aria-hidden="true"><AnimatedPrice value={calculation.total} locale={locale}/><small>RSD</small></strong><output className="rate-sr-only" aria-live="polite" aria-atomic="true">{formatRsd(calculation.total,locale)}</output></>:<strong>{formatRsd(calculation.total, locale)}</strong>}</div>
           <p>{copy.note}</p></>}
           {hasUpholstery&&<div className="estimate-review-note"><p>{onlyUpholstery?e.onlyPrice:e.pending}</p><small>{e.agreed}</small></div>}
           <div className="site-lead-fields">
-            <label><span>{copy.name}</span><input name="name" value={name} onChange={(event) => setName(event.target.value)} placeholder={copy.name} autoComplete="name" maxLength={100} aria-invalid={status === "validation" && name.trim().length > 0 && name.trim().length < 2}/></label>
-            <label><span>{copy.phone}</span><input type="tel" name="phone" maxLength={40} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder={copy.phone} autoComplete="tel" inputMode="tel" required aria-invalid={status === "validation" && !isWebsitePhoneValid(phone)}/></label>
+            <label><span>{copy.name}</span><input name="name" value={name} onChange={(event) => setName(event.target.value)} placeholder={copy.name} autoComplete="name" maxLength={100} aria-describedby={status==='validation'?statusId:undefined} aria-invalid={status === "validation" && name.trim().length > 0 && name.trim().length < 2}/></label>
+            <label><span>{copy.phone}</span><input type="tel" name="phone" maxLength={40} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder={copy.phone} autoComplete="tel" inputMode="tel" required aria-describedby={status==='validation'?statusId:undefined} aria-invalid={status === "validation" && !isWebsitePhoneValid(phone)}/></label>
             {focused?<details className="site-comment"><summary>{copy.comment} · {ux.optional}</summary><label><span>{copy.comment}</span><textarea name="comment" value={comment} onChange={(event) => setComment(event.target.value)} placeholder={hasUpholstery?e.placeholder:copy.commentHint} maxLength={1000} rows={2}/></label></details>:<label className="site-comment"><span>{copy.comment}</span><textarea name="comment" value={comment} onChange={(event) => setComment(event.target.value)} placeholder={hasUpholstery?e.placeholder:copy.commentHint} maxLength={1000} rows={2}/></label>}
-            <label className="site-consent"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} required aria-invalid={status === "validation" && !consent}/><span>{copy.consent}</span></label>
+            <label className="site-consent"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} required aria-describedby={status==='validation'?statusId:undefined} aria-invalid={status === "validation" && !consent}/><span>{copy.consent}</span></label>
           </div>
           <p className="estimate-enquiry-note">{ux.enquiry}</p>
           <button type="submit" disabled={status === "sending" || status === 'success'}>{status === "sending" ? copy.sending : hasUpholstery?e.send:copy.send}<span><ArrowIcon /></span></button>
-          {status === "success" && <p className="site-form-status success" role="status">{hasUpholstery?e.success:copy.success}</p>}
-          {status === "validation" && <p className="site-form-status error" role="alert">{copy.validation}</p>}
+          {status === "success" && <div className="site-form-status success" role="status"><p>{hasUpholstery?e.success:copy.success}</p>{reference&&<p className="estimate-reference">{locale==='ru'?'Номер заявки':locale==='en'?'Enquiry reference':'Broj upita'}: <strong>{reference}</strong></p>}</div>}
+          {status === "validation" && <p id={statusId} className="site-form-status error" role="alert">{copy.validation}</p>}
           {status === "limited" && <p className="site-form-status error" role="alert">{locale==='ru'?'Слишком много заявок. Подождите немного и повторите попытку.':locale==='en'?'Too many enquiries. Please wait a little and try again.':'Previše upita. Sačekajte malo i pokušajte ponovo.'}</p>}
           {status === "error" && <p className="site-form-status error" role="alert">{copy.error}</p>}
         </div>

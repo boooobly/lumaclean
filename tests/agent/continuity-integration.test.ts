@@ -14,7 +14,9 @@ const url=process.env.CONTINUITY_TEST_DATABASE_URL;
 const completion=(text:string,toolCalls:ToolCall[]=[]):Completion=>({text,toolCalls,inputTokens:1,cachedInputTokens:0,outputTokens:1,latencyMs:1,provider:'synthetic',model:'test',estimatedCostUsd:0});
 test('native isolated Preview: human continuity and unanswered client bursts',{skip:!url},async t=>{
  assert(new URL(url!).hostname.startsWith('ep-wispy-river-b8xwqy9q'));process.env.AI_AGENT_ENABLED='true';
- const db=new PrismaClient({adapter:new PrismaPg({connectionString:pgConnectionString(url!),max:8})});
+ // The test client reaches remote Neon from a workstation, unlike the colocated
+ // Vercel runtime. Allow for network round trips; production timeouts are unchanged.
+ const db=new PrismaClient({adapter:new PrismaPg({connectionString:pgConnectionString(url!),max:8}),transactionOptions:{timeout:20000,maxWait:10000}});
  const baseline=await db.businessSettings.findUniqueOrThrow({where:{id:'default'}}),owned:string[]=[];
  assert.equal(baseline.aiAgentMode,'AUTO');assert.equal((baseline.aiChannelModes as Record<string,string>).WEBSITE,'AUTO');
  const owner=await db.user.findFirstOrThrow({where:{active:true,role:'ADMIN'}});
@@ -92,7 +94,7 @@ test('native isolated Preview: human continuity and unanswered client bursts',{s
    for(const photoFirst of [false,true]){const id=await fixture();const attachment=await db.chatAttachment.create({data:{conversationId:id,requestId:randomUUID(),storageKey:randomUUID(),thumbnailKey:randomUUID(),mimeType:'image/jpeg',byteSize:4,width:1,height:1,sha256:'0'.repeat(64)}});
     if(photoFirst){await send(id,'',{attachmentIds:[attachment.id]});await send(id,'Это кухня');}else{await send(id,'Вот состояние кухни');await send(id,'',{attachmentIds:[attachment.id]});}
     const c=await claim(id);observed=[];await runClaimedJob(db,c,[provider,provider],async(_db,messageId)=>({count:messageId===(await db.chatAttachment.findUniqueOrThrow({where:{id:attachment.id}})).messageId?1:0,images:messageId===(await db.chatAttachment.findUniqueOrThrow({where:{id:attachment.id}})).messageId?[{mimeType:'image/jpeg' as const,data:'AA=='}]:[]}));
-    const input=observed[0].findLast(m=>m.role==='user');assert(input?.content.includes('кухн'));assert.equal(input?.images?.length,1);assert.equal(await db.message.count({where:{conversationId:id,author:'AI'}}),1);assert.equal((await db.chatAttachment.findUniqueOrThrow({where:{id:attachment.id}})).aiAnalysisStatus,'ANALYZED');
+    const inputs=observed[0].filter(m=>m.role==='user');assert(inputs.some(m=>m.content.includes('кухн')));assert.equal(inputs.reduce((n,m)=>n+(m.images?.length??0),0),1);assert.equal(inputs[photoFirst?0:1].images?.length,1);assert.equal(await db.message.count({where:{conversationId:id,author:'AI'}}),1);assert.equal((await db.chatAttachment.findUniqueOrThrow({where:{id:attachment.id}})).aiAnalysisStatus,'ANALYZED');
    }
   });
   await check('inflight supersession cannot send stale output or execute stale tools',async()=>{

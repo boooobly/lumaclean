@@ -32,45 +32,6 @@
 .site-home .homepage-estimate .estimate-title h2 { font-size:clamp(44px,5.5vw,80px); }
 .site-home #estimate { scroll-margin-top:100px; }
 .site-home .homepage-estimate .estimate-title p { color:var(--lc-paper); }
-.site-home .homepage-estimate .estimate-sheet { min-height:0; border:0; border-radius:var(--lc-radius-sm); overflow:clip; background:var(--lc-paper-bright); color:var(--lc-ink); grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); }
-.site-home .homepage-estimate .estimate-form { padding:40px; gap:32px; }
-.site-home .estimate-focused .estimate-request-kind select { appearance:none; min-height:52px; padding:14px 44px 14px 16px; border-color:var(--lc-line); border-radius:var(--lc-radius-sm); background:var(--lc-paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%2310252b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 18px center; font-size:16px; }
-.site-home .estimate-focused .estimate-request-kind select:hover { border-color:var(--lc-teal-ink); }
-.site-home .estimate-focused .estimate-request-kind select:focus-visible { outline-color:var(--lc-teal-ink); }
-.site-home .homepage-estimate .receipt-body { padding:30px; }
-.site-home .homepage-estimate .receipt-lines { margin-top:24px; }
-.site-home .homepage-estimate .receipt-total { margin-top:24px; padding-top:0; }
-.site-home .homepage-estimate .receipt button { background:var(--lc-teal-light); border-color:var(--lc-teal-light); min-height:52px; }
-.site-home .homepage-estimate .receipt button:hover:not(:disabled) { background:var(--lc-paper-bright); border-color:var(--lc-paper-bright); }
-.estimate-extra-group { display:contents; }
-.site-home .estimate-focused .estimate-extra-group { display:grid; grid-template-columns:1fr 1fr; grid-column:1/-1; gap:0 16px; }
-.site-home .estimate-focused .estimate-extra-group h4 { grid-column:1/-1; margin:24px 0 8px; color:var(--lc-ink-soft); font-size:11px; font-weight:600; }
-.site-home .estimate-focused .site-extra-counter:nth-child(n) { padding:8px 0; border-right:0; gap:4px; }
-.site-home .estimate-focused .site-extra-counter button { min-width:36px; min-height:36px; }
-.site-home .estimate-focused .site-extra-counter > div { gap:6px; }
-.site-home .estimate-focused .site-extra-options { border:0; gap:0 16px; }
-.site-home .estimate-focused .site-extra-options label:nth-child(n) { padding:12px 0; border-right:0; }
-.site-home .estimate-extras-disclosure { border-block:1px solid var(--lc-line); }
-.site-home .estimate-extras-disclosure > summary { display:flex; justify-content:space-between; gap:16px; padding:20px 0; cursor:pointer; font-size:14px; font-weight:600; }
-.site-home .estimate-extras-disclosure > summary span { flex-shrink:0; align-self:center; color:var(--lc-teal-ink); font-size:12px; white-space:nowrap; }
-.site-home .estimate-other { margin-top:18px; font-size:12px; }
-.site-home .estimate-other summary { cursor:pointer; padding:10px 0; color:var(--lc-teal-ink); }
-.site-home .estimate-other .service-options { margin-top:8px; }
-.site-home .estimate-focused .service-options label { flex:1; }
-.site-home .estimate-focused .service-options span { text-align:center; min-height:48px; }
-.site-home .estimate-focused .service-options input:focus-visible + span { outline:2px solid var(--lc-teal-ink); outline-offset:3px; }
-.site-home .estimate-focused .estimate-urgency { font-size:12px; }
-.site-home .estimate-focused .estimate-urgency label { display:flex; gap:10px; align-items:center; }
-.site-home .estimate-focused .estimate-urgency small { margin-left:auto; white-space:nowrap; }
-.site-home .estimate-focused .estimate-urgency p { color:var(--lc-ink-soft); font-size:11px; line-height:1.6; }
-.site-home .estimate-focused .site-comment summary { cursor:pointer; padding-block:10px; color:var(--lc-paper); font-size:12px; }
-.site-home .estimate-focused .estimate-enquiry-note { color:var(--lc-paper); margin-block:16px 0; }
-.site-home .estimate-focused .site-lead-fields { grid-template-columns:1fr; }
-.site-home .estimate-focused .site-lead-fields label > span { color:var(--lc-paper); font-size:11px; }
-.site-home .estimate-focused .site-lead-fields :is(input,textarea)::placeholder { color:rgba(251,250,246,.68); }
-.site-home .estimate-focused .site-lead-fields .site-consent span { font-size:12px; }
-.site-home .estimate-focused .receipt-total span { color:var(--lc-paper); }
-.site-home .estimate-focused .receipt-body > p { color:var(--lc-paper); }
 .site-home .homepage-method-anchor { display:block; position:relative; top:-90px; visibility:hidden; }
 .site-home .homepage-contact { padding-block:100px; }
 .site-home .homepage-contact h2 { font-size:clamp(46px,5.5vw,88px); line-height:1; }
@@ -95,14 +56,8 @@ body:has(.site-home) .chat-launcher-full { display:none; }
 @media(max-width:680px) {
   body:has(.site-home) .website-chat:has(.website-chat-launcher) { top:calc(9px + env(safe-area-inset-top,0px)); right:16px; bottom:auto; }
 }
-@media(max-width:1100px) { .site-home .homepage-estimate .estimate-form { padding:30px; } .site-home .estimate-focused .estimate-extra-group { grid-template-columns:1fr; } }
 @media(max-width:900px) {
   .site-home .rate-controls { grid-template-columns:1fr 1fr; }
-  .site-home .homepage-estimate .estimate-sheet { grid-template-columns:1fr; }
-  .site-home .estimate-focused .estimate-extra-group { grid-template-columns:1fr 1fr; }
-  .site-home .homepage-estimate .estimate-form { padding:28px; }
-  .site-home .homepage-estimate .receipt { min-height:0; }
-  .site-home .homepage-estimate .receipt-body { padding:28px; }
   .site-home .homepage-contact .closing-grid { gap:40px; }
 }
 @media(max-width:520px) {
@@ -110,10 +65,6 @@ body:has(.site-home) .chat-launcher-full { display:none; }
   .site-home .rate-result strong { font-size:48px; gap:6px; }
   .site-home .rate-result strong small { font-size:15px; }
   .site-home .homepage-estimate { padding-block:68px; }
-  .site-home .homepage-estimate .estimate-form,.site-home .homepage-estimate .receipt-body { padding:24px 18px; }
-  .site-home .estimate-focused .estimate-extra-group { grid-template-columns:1fr; }
-  .site-home .estimate-focused .site-extra-counter button { min-width:44px; min-height:44px; }
-  .site-home .homepage-estimate .receipt-total strong { font-size:42px; }
   .site-home .homepage-contact { padding-block:68px; }
   .site-home .evidence-title { min-height:0; padding:28px 24px; }
   .site-home .evidence-title h2 { font-size:clamp(36px,10.7vw,44px); text-wrap:initial; }
