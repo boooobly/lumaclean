@@ -2,7 +2,7 @@
 
 Рабочая копия: `upholstery-premium`, ветка `codex/seo-lead-consistency`. **Production: DEPLOYED.** Выпущен commit `0f5cdeb79000071fd414cb5d49dbc08b8f448667`. Предыдущий этап: `docs/seo-audit/implementation-2026-10-26.md`.
 
-Deployment: `https://lumaclean-92oerdk5f-vladislavs-projects-0eae0ea3.vercel.app`, ID `dpl_CLhZAxcsDPBSB7oFRPgAZS8uyZAT`, Vercel READY. Домен `lumacleanrs.com` переведён штатным `vercel promote`, alias отдельно подтверждён Vercel API. Коммит сохранён локально; push в GitHub не подтверждён (штатный Git не получил доступ к origin); существующая публикация выполнена через Vercel CLI, как предыдущая production-версия.
+Deployment: `https://lumaclean-92oerdk5f-vladislavs-projects-0eae0ea3.vercel.app`, ID `dpl_CLhZAxcsDPBSB7oFRPgAZS8uyZAT`, Vercel READY. Домен `lumacleanrs.com` переведён штатным `vercel promote`, alias отдельно подтверждён Vercel API. Release-коммит и технический отчёт сохранены в GitHub-ветке `codex/seo-lead-consistency`; push подтверждён. Публикация выполнена через существующий процесс Vercel CLI. Первичная проблема Git была связана с разными владельцами checkout в sandbox и пользовательском процессе; использовано точечное safe.directory на конкретный вызов, глобальная защита Git не менялась.
 
 ## Проверки после публикации
 
@@ -24,6 +24,8 @@ Deployment: `https://lumaclean-92oerdk5f-vladislavs-projects-0eae0ea3.vercel.app
 5. Яндекс Вебмастер: после восстановления read-only сервиса переобойти sitemap (теперь 69 URL), связать созданный counter. Старый отчёт не равен текущим данным.
 6. Яндекс Бизнес: закончить проверку дублей в Сербии, определить допустимость карточки выездного сервиса без клиентского офиса; не использовать домашний адрес/фиктивный офис. Публикация карточки пока не выполнялась.
 7. Проверить production desktop/mobile в Chrome и при необходимости сохранить screenshots внешних изменений GA4/Метрики. Не трогать реальные заявки; TEST-reference выше оставить как явный след проверки.
+
+Собственные временные Next.js серверы и PostgreSQL остановлены после проверки; synthetic fixtures сохранены на диске.
 
 Доказательства в `artifacts/release-readiness/`: build/deploy/promote logs, release-evidence-summary.json, production-seo.json, production-redirects.json, production-smoke.json, production-smoke-readonly.json, production-auth.json, четыре browser reports. Общий machine-readable итог также сохранён в `outputs/production-release-2026-10-26/` рабочего корня.
 
