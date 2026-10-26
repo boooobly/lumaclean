@@ -1,6 +1,7 @@
 import type {NextConfig} from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import {sourceFingerprint,verifiedRelease} from './src/lib/agent/release-verification.mjs';
+import {legacyServiceRedirects} from './src/lib/legacy-service-redirects';
 const release=verifiedRelease();
 
 const nextConfig: NextConfig = {
@@ -44,6 +45,7 @@ const nextConfig: NextConfig = {
         destination: `/${locale}`,
         permanent: true,
       })),
+      ...legacyServiceRedirects,
     ];
   },
 };

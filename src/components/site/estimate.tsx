@@ -36,6 +36,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
   const submitting = useRef(false);
   const submission = useRef<{id: string; fields: string; payload: string} | null>(null);
   const [service, setService] = useState<ServiceId>(initialService);
+  const eventData = {locale, service: onlyUpholstery ? 'upholstery' : service, form_type: 'estimate'};
   const [area, setArea] = useState(55);
   const [counts, setCounts] = useState<Record<CountExtra, number>>({standardWindow: 0, largeWindow: 0, cabinets: 0, ironing: 0,fridge:0,oven:0,microwave:0,hood:0,dishwasher:0,washingMachine:0});
   const [toggles, setToggles] = useState<Record<ToggleExtra, boolean>>({balcony: false, steam: false, petHair: false, linen: false});
@@ -69,7 +70,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
     if (submitting.current || status === 'success') return;
     if ((name.trim().length > 0 && name.trim().length < 2) || !isWebsitePhoneValid(phone) || !consent) {
       setStatus("validation");
-      trackEvent("lead_error", {locale, service, error_type: "validation"});
+      trackEvent("lead_error", {...eventData, error_type: "validation"});
       return;
     }
     submitting.current = true;
@@ -85,18 +86,18 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
       const success = response.ok && result?.ok === true;
       if(success&&typeof result.reference==='string')setReference(result.reference);
       setStatus(success ? "success" : response.status===429?"limited":response.status === 400 ? "validation" : "error");
-      trackEvent(success ? "generate_lead" : "lead_error", {locale, service, ...(success ? {} : {error_type: "server"})});
+      trackEvent(success ? "generate_lead" : "lead_error", {...eventData, ...(success ? {} : {error_type: "server"})});
     } catch {
       setStatus("error");
-      trackEvent("lead_error", {locale, service, error_type: "network"});
+      trackEvent("lead_error", {...eventData, error_type: "network"});
     } finally { submitting.current = false; }
   }
 
   const urgency=<>             <label className="site-urgent"><input type="checkbox" disabled={!sameDayAllowed} checked={urgent} onChange={(event) => setUrgent(event.target.checked)}/><span>{content.calculator.urgent}</span><small>+20%</small></label>{!sameDayAllowed&&<p role="status">{locale==='ru'?'Срочный выезд сегодня недоступен. Другой день согласуем после заявки.':locale==='en'?'Same-day departure is unavailable. We will agree another day after your enquiry.':'Dolazak danas nije dostupan. Drugi dan dogovaramo nakon upita.'}</p>} </>;
 
   return (
-    <form id={focused?'estimate':undefined} aria-busy={status==='sending'} className={`estimate-sheet${focused?' estimate-focused':''}${onlyUpholstery?' estimate-enquiry-only':''}`} onSubmit={submit} onFocusCapture={() => { if (!started.current) { started.current = true; trackEvent("form_start", {locale, service}); } }} noValidate>
-      <div className="estimate-form" onChange={() => trackEvent("calculator_interaction", {locale, service})} onClick={(event) => { if ((event.target as HTMLElement).closest("button")) trackEvent("calculator_interaction", {locale, service}); }}>
+    <form id={focused?'estimate':undefined} aria-busy={status==='sending'} className={`estimate-sheet${focused?' estimate-focused':''}${onlyUpholstery?' estimate-enquiry-only':''}`} onSubmit={submit} onFocusCapture={() => { if (!started.current) { started.current = true; trackEvent("form_start", eventData); } }} noValidate>
+      <div className="estimate-form" onChange={() => trackEvent("calculator_interaction", eventData)} onClick={(event) => { if ((event.target as HTMLElement).closest("button")) trackEvent("calculator_interaction", eventData); }}>
         <label className="estimate-request-kind"><span>{e.kind}</span><select name="requestKind" value={requestMode} onChange={event=>{const kind=event.target.value as 'CLEANING'|'UPHOLSTERY';setRequestMode(kind);if(kind==='UPHOLSTERY')setUpholsteryRequested(true);if(status!=='success'&&status!=='sending')setStatus('idle');}}><option value="CLEANING">{e.cleaning}</option><option value="UPHOLSTERY">{e.only}</option></select></label>
         {!onlyUpholstery&&<><fieldset>
           <legend>{copy.service}</legend>

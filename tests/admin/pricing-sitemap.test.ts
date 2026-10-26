@@ -6,7 +6,7 @@ test('localized pricing pages advertise their real latest content revisions',()=
   const entries=sitemap();
   for(const locale of ['ru','sr','en']){
     const home=entries.find(e=>e.url===`https://lumacleanrs.com/${locale}`)!;
-    assert.equal(new Date(home.lastModified!).toISOString(),'2026-10-19T00:00:00.000Z');
+    assert.equal(new Date(home.lastModified!).toISOString(),'2026-10-26T00:00:00.000Z');
     const services=entries.filter(e=>e.url.startsWith(`https://lumacleanrs.com/${locale}/services/`));
     assert.equal(services.length,5);
     for(const entry of services)assert.equal(new Date(entry.lastModified!).toISOString(),'2026-10-18T00:00:00.000Z');

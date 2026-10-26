@@ -468,12 +468,12 @@ model UpholsterySettings {
   version           Int @default(1)
   catalog           Json
   extractorQuantity Int @default(1)
-  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
+  updatedAt         DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 }
 
 model OrderUpholstery {
   orderId           String @id
-  order             Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  order             Order @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   input             Json
   quote             Json
   cleaningBaseline  Json?
@@ -490,7 +490,7 @@ model OrderUpholstery {
   equipmentCleanerId String?
   logisticsNote     String?
   patchTestConfirmed Boolean @default(false)
-  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
+  updatedAt         DateTime @default(now()) @updatedAt @db.Timestamptz(3)
   @@index([equipmentUnit])
 }
 

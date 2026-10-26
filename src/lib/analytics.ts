@@ -1,6 +1,7 @@
-type EventName = "form_start" | "calculator_interaction" | "generate_lead" | "lead_error" | "messenger_click" | "article_to_service";
-type EventData = {locale?: string; service?: string; error_type?: string; channel?: string; destination?: string};
+type EventName = "form_start" | "calculator_interaction" | "generate_lead" | "lead_error" | "messenger_click" | "phone_click" | "article_to_service";
+type EventData = {locale?: string; service?: string; form_type?: string; error_type?: string; channel?: string; destination?: string};
 type TrackingWindow = Window & {lcTrack?: (name: EventName, data: EventData) => void};
+export const analyticsConsentKey = "lc-analytics-consent-v2";
 
 // Deliberately accepts no customer fields, form values, query strings or free text.
 export function trackEvent(name: EventName, data: EventData = {}) {
@@ -9,13 +10,13 @@ export function trackEvent(name: EventName, data: EventData = {}) {
 
 export function leadAttribution(): {landing: string; source: string} | undefined {
   try {
-    if (localStorage.getItem("lc-analytics-consent-v1") !== "yes") return;
+    if (localStorage.getItem(analyticsConsentKey) !== "yes") return;
     const entry = JSON.parse(sessionStorage.getItem("lc-analytics-entry") || "null");
     if (entry && typeof entry.landing === "string" && typeof entry.source === "string") return {landing: entry.landing, source: entry.source};
   } catch { /* A visitor can submit without analytics or storage. */ }
 }
 
-export const eventNames = ["form_start", "calculator_interaction", "generate_lead", "lead_error", "messenger_click", "article_to_service"] as const;
+export const eventNames = ["form_start", "calculator_interaction", "generate_lead", "lead_error", "messenger_click", "phone_click", "article_to_service"] as const;
 export const entrySources = ["google_business_profile", "google", "yandex", "bing", "internal", "referral", "direct_or_unknown"] as const;
 export type EntrySource = typeof entrySources[number];
 
@@ -35,11 +36,22 @@ export function acquisitionContext(source: EntrySource) {
 export function safeEventData(data: EventData, paths: readonly string[]) {
   const clean: Record<string, string> = {};
   if (["ru", "sr", "en"].includes(data.locale || "")) clean.locale = data.locale!;
-  if (["regular", "deep", "move", "airbnb", "office"].includes(data.service || "")) clean.service = data.service!;
+  if (["regular", "deep", "move", "airbnb", "office", "upholstery"].includes(data.service || "")) clean.service = data.service!;
+  if (["estimate", "contact", "upholstery"].includes(data.form_type || "")) clean.form_type = data.form_type!;
   if (["validation", "server", "network"].includes(data.error_type || "")) clean.error_type = data.error_type!;
   if (["telegram", "whatsapp", "viber"].includes(data.channel || "")) clean.channel = data.channel!;
   if (data.destination && paths.includes(data.destination)) clean.destination = data.destination;
   return clean;
+}
+
+// Return only a fixed event/channel, never a phone number or messenger URL.
+export function contactClickEvent(href: string, origin: string): {name: EventName; data: EventData} | undefined {
+  try {
+    const url = new URL(href, origin);
+    if (url.protocol === 'tel:') return {name: 'phone_click', data: {}};
+    const channel = url.protocol === 'viber:' ? 'viber' : url.protocol === 'https:' && url.hostname === 't.me' ? 'telegram' : url.protocol === 'https:' && ['wa.me', 'api.whatsapp.com'].includes(url.hostname) ? 'whatsapp' : undefined;
+    if (channel) return {name: 'messenger_click', data: {channel}};
+  } catch { /* Malformed links must not interfere with navigation. */ }
 }
 
 export function sourceFromReferrer(referrer: string): EntrySource {

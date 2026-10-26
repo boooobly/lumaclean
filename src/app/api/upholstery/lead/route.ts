@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { getDatabase } from "@/lib/database/client";
 import {
@@ -7,7 +7,7 @@ import {
   financeError,
 } from "@/lib/services/admin-http";
 import { saveUpholsteryLead } from "@/lib/services/upholstery-leads";
-import {publishNotifications} from '@/lib/agent/notifications';
+import {publishWebsiteLead, notifyWebsiteLead} from '@/lib/services/website-leads';
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   if (!request.headers.get("content-type")?.startsWith("application/json"))
@@ -20,13 +20,16 @@ export async function POST(request: Request) {
       "upholstery-lead",
       6,
     );
+    const db = getDatabase();
     const result = await saveUpholsteryLead(
-      getDatabase(),
+      db,
       JSON.parse((await boundedBody(request, 20000)).toString()),
     );
-    try{await publishNotifications(getDatabase());}catch{/* Saved lead and delivery event remain available to recovery. */}
+    await publishWebsiteLead(db, result.id);
+    try {after(() => notifyWebsiteLead(db, result));}
+    catch {console.error(JSON.stringify({msg: 'lead_notification_recovery_pending'}));}
     return NextResponse.json(
-      { ok: true, result },
+      { ok: true, result: {reference: result.reference} },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (e) {

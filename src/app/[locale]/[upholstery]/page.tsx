@@ -51,7 +51,7 @@ const languages = {
   sr: upholsteryPath("sr"),
   ru: upholsteryPath("ru"),
   en: upholsteryPath("en"),
-  "x-default": upholsteryPath("sr"),
+  "x-default": upholsteryPath("ru"),
 };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolve(params),

@@ -11,7 +11,7 @@ const output = path.resolve(process.env.ARTIFACT_DIR || "artifacts/upholstery-pr
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const context = await browser.newContext({ reducedMotion: "reduce" });
-await context.addInitScript(() => localStorage.setItem("lc-analytics-consent-v1", "no"));
+await context.addInitScript(() => localStorage.setItem("lc-analytics-consent-v2", "no"));
 const page = await context.newPage();
 const report = { base, date: new Date().toISOString(), layout: [], scenarios: [], consoleErrors: [], pageErrors: [], writes: [], mocked: true };
 let apiStatus = 200, failure = "", hold = null, intentionalFailure = false;

@@ -13,7 +13,7 @@ const browser = await drivers[engine].launch({...(engine==='chromium'?{channel:'
 const report = {mocked:true,engine,base,matrix:[],scenarios:[],errors:[],console:[],metadata:[],links:[]};
 const internalLinks=new Set();
 const context = await browser.newContext({viewport:{width:1440,height:1000}});
-await context.addInitScript(()=>localStorage.setItem('lc-analytics-consent-v1','no'));
+await context.addInitScript(()=>localStorage.setItem('lc-analytics-consent-v2','no'));
 const state = {writes:[],status:200,offline:false,hold:false,release:null,allowed:true};
 await context.route('**/*',async route=>{
   const request=route.request(),url=new URL(request.url());

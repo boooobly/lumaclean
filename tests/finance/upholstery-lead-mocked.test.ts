@@ -84,3 +84,26 @@ test("unsafe fabric or missing consent never reaches lead/outbox creation (mocke
   assert.equal(leads.size, 0);
   assert.equal(notifications.length, 0);
 });
+
+test('upholstery attribution reaches CRM and the durable notification, with stable retry identity (mocked)', async () => {
+  const {db, leads, notifications} = mockDatabase();
+  const input = {...payload(), attribution: {landing: '/sr/dubinsko-pranje-namestaja', source: 'google_business_profile'}};
+  const first = await saveUpholsteryLead(db, input);
+  assert.deepEqual(await saveUpholsteryLead(db, input), first);
+  const lead = [...leads.values()][0];
+  assert.equal(lead.entrySource, 'google_business_profile');
+  assert.equal(lead.landingPage, '/sr/dubinsko-pranje-namestaja');
+  assert.match(notifications[0].text!, /google_business_profile/);
+  assert.match(notifications[0].text!, /\/sr\/dubinsko-pranje-namestaja/);
+  assert.equal(leads.size, 1);
+  assert.equal(notifications.length, 1);
+});
+
+test('attribution rejects arbitrary URLs, query strings and personal data before persistence (mocked)', async () => {
+  for (const landing of ['https://example.com/private', '/ru?phone=PRIVATE', '/admin/leads/private']) {
+    const {db, leads, notifications} = mockDatabase();
+    await assert.rejects(saveUpholsteryLead(db, {...payload(), attribution: {landing, source: 'google'}}));
+    assert.equal(leads.size, 0);
+    assert.equal(notifications.length, 0);
+  }
+});

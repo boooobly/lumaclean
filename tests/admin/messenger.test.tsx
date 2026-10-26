@@ -1,7 +1,9 @@
 import React, { Fragment } from 'react';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { renderToStaticMarkup as render } from 'react-dom/server';
+import { renderToStaticMarkup } from 'react-dom/server';
+import {AppRouterContext, type AppRouterInstance} from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import {PathnameContext} from 'next/dist/shared/lib/hooks-client-context.shared-runtime';
 import { daySeparator, groupedMessages, initials, matchesConversation } from '../../src/lib/domain/messenger';
 import { ledgerRows } from '../../src/components/admin/responsive-ledger';
 import { DisclosureSection } from '../../src/components/admin/disclosure';
@@ -15,6 +17,13 @@ import { cleanerDay } from '../../src/lib/domain/cleaner-day';
 import { Temporal } from '@js-temporal/polyfill';
 import { clientSchema } from '../../src/lib/validation/crm';
 import { MessengerHistory } from '../../src/components/admin/messenger-history';
+
+// SSR markup fixtures need the same router context as the real admin layout.
+const unexpectedNavigation = () => assert.fail('SSR markup must not navigate');
+const router: AppRouterInstance = {back: unexpectedNavigation, forward: unexpectedNavigation, refresh: unexpectedNavigation, push: unexpectedNavigation, replace: unexpectedNavigation, prefetch: unexpectedNavigation, bfcacheId: 'fixture'};
+function render(children: React.ReactNode) {
+  return renderToStaticMarkup(<AppRouterContext.Provider value={router}><PathnameContext.Provider value="/admin/messages">{children}</PathnameContext.Provider></AppRouterContext.Provider>);
+}
 
 test('latest action on an older history page navigates to the current conversation', () => {
   const markup=render(<MessengerHistory older latestHref="/admin/messages/chat-a">Old history</MessengerHistory>);

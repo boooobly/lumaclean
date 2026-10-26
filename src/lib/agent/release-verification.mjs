@@ -26,6 +26,7 @@ export function sourceInventory(root=process.cwd()){
 export function verifiedRelease(root=process.cwd()){
   try{const evidence=JSON.parse(readFileSync(join(root,'release/ai-go-live.json'),'utf8')),actual=sourceFingerprint(root),matches=evidence.fingerprint===actual;
     if(!matches&&evidence.files){const files=sourceInventory(root);console.info(JSON.stringify({msg:'ai_release_source_mismatch',changed:[...new Set([...Object.keys(files),...Object.keys(evidence.files)])].filter(path=>files[path]!==evidence.files[path])}));}
-    return {verified:matches&&evidence.tests>0&&evidence.lint===true&&evidence.typecheck===true&&evidence.migration===true,count:evidence.tests};
+    // A manual-only website release is never permission to activate automatic AI.
+    return {verified:matches&&evidence.aiAutoReady!==false&&evidence.tests>0&&evidence.lint===true&&evidence.typecheck===true&&evidence.migration===true,count:evidence.tests};
   }catch{return{verified:false,count:0};}
 }

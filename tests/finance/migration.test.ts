@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { Client } from "pg";
 import test from "node:test";
+import {randomUUID} from 'node:crypto';
 const url = process.env.ADMIN_TEST_DATABASE_URL;
 test(
   "additive migration preserves existing CRM, schedule, expenses and duration versions",
@@ -12,9 +13,9 @@ test(
     assert.equal(parsed.pathname, "/lumaclean_admin_test");
     const control = new Client({ connectionString: url! });
     await control.connect();
-    await control.query("CREATE DATABASE lumaclean_finance_migration");
-    await control.end();
-    parsed.pathname = "/lumaclean_finance_migration";
+    const name = 'lumaclean_finance_migration_' + randomUUID().replaceAll('-','');
+    try {await control.query(`CREATE DATABASE "${name}"`);} finally {await control.end();}
+    parsed.pathname = '/' + name;
     const db = new Client({ connectionString: parsed.toString() });
     await db.connect();
     try {

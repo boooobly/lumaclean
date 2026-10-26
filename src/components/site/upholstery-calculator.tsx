@@ -9,6 +9,7 @@ import { calculateUpholstery, furnitureTypes, upholsteryRequestSchema, type Upho
 import { formatRsd, serviceIds, type ServiceId } from "@/lib/pricing";
 import { siteContent } from "@/lib/content";
 import { isWebsitePhoneValid } from "@/lib/website-phone";
+import {leadAttribution, trackEvent} from '@/lib/analytics';
 import { ArrowIcon } from "./arrow-icon";
 import { UpholsteryPhotoButton } from "./upholstery-photo-button";
 
@@ -66,7 +67,8 @@ export function UpholsteryCalculator({ locale, catalog, version }: { locale: Loc
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error" | "validation" | "limited">("idle");
   const [reference, setReference] = useState("");
   const pristine = useRef(true), sending = useRef(false), completed = useRef(false);
-  const submission = useRef<{ fields: string; id: string } | null>(null);
+  const started = useRef(false);
+  const submission = useRef<{ fields: string; id: string; payload: string } | null>(null);
   const form = useRef<HTMLFormElement>(null);
   const statusRef = useRef<HTMLParagraphElement>(null);
 
@@ -137,6 +139,7 @@ export function UpholsteryCalculator({ locale, catalog, version }: { locale: Loc
     if (sending.current || completed.current || removing.current || unsafe) return;
     if (!calculation || invalidName || invalidPhone || !consent) {
       setStatus("validation");
+      trackEvent('lead_error', {locale, service: 'upholstery', form_type: 'upholstery', error_type: 'validation'});
       requestAnimationFrame(() => {
         const target = !calculation ? form.current?.querySelector<HTMLInputElement | HTMLSelectElement>("[aria-invalid='true'], input:invalid") : invalidName ? form.current?.elements.namedItem("name") : invalidPhone ? form.current?.elements.namedItem("phone") : form.current?.elements.namedItem("consent");
         if (target instanceof HTMLElement) target.focus();
@@ -148,23 +151,31 @@ export function UpholsteryCalculator({ locale, catalog, version }: { locale: Loc
     setStatus("sending");
     try {
       const fields = JSON.stringify({ name: name.trim(), phone: phone.trim(), locale, consent: true, request: calculation.request });
-      if (!submission.current || submission.current.fields !== fields) submission.current = { fields, id: crypto.randomUUID() };
-      const response = await fetch("/api/upholstery/lead", { method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(20000), body: JSON.stringify({ ...JSON.parse(fields), submissionId: submission.current.id }) });
+      // Preserve attribution and idempotency together when retrying an uncertain response.
+      if (!submission.current || submission.current.fields !== fields) submission.current = { fields, id: crypto.randomUUID(), payload: JSON.stringify({...JSON.parse(fields), attribution: leadAttribution()}) };
+      const response = await fetch("/api/upholstery/lead", { method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(20000), body: JSON.stringify({ ...JSON.parse(submission.current.payload), submissionId: submission.current.id }) });
       const result = await response.json().catch(() => null);
       if (response.ok && result?.ok === true) {
         completed.current = true;
         setReference(typeof result.result?.reference === "string" ? result.result.reference : "");
         setStatus("success");
-      } else setStatus(response.status === 429 ? "limited" : response.status === 400 ? "validation" : "error");
-    } catch { setStatus("error"); }
+        trackEvent('generate_lead', {locale, service: 'upholstery', form_type: 'upholstery'});
+      } else {
+        setStatus(response.status === 429 ? "limited" : response.status === 400 ? "validation" : "error");
+        trackEvent('lead_error', {locale, service: 'upholstery', form_type: 'upholstery', error_type: 'server'});
+      }
+    } catch {
+      setStatus("error");
+      trackEvent('lead_error', {locale, service: 'upholstery', form_type: 'upholstery', error_type: 'network'});
+    }
     finally {
       sending.current = false;
       requestAnimationFrame(() => statusRef.current?.focus());
     }
   }
 
-  return <form ref={form} className="up-calculator" onSubmit={submit} noValidate aria-label={c.estimate} aria-busy={status === "sending"}>
-    <fieldset disabled={locked} className="up-calc-controls">
+  return <form ref={form} className="up-calculator" onSubmit={submit} onFocusCapture={() => {if (!started.current) {started.current = true; trackEvent('form_start', {locale, service: 'upholstery', form_type: 'upholstery'});}}} noValidate aria-label={c.estimate} aria-busy={status === "sending"}>
+    <fieldset disabled={locked} className="up-calc-controls" onChange={() => trackEvent('calculator_interaction', {locale, service: 'upholstery', form_type: 'upholstery'})}>
       <legend className="up-sr-only">{p.furnitureStep}</legend>
       <div className="up-form-heading"><span>01</span><h3>{p.furnitureStep}</h3></div>
       {mixed && <p className="up-form-note">{p.objectNote}</p>}

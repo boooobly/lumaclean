@@ -33,16 +33,17 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   const {locale} = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({locale, namespace: "Metadata"});
+  const description = t('description', {price: formatRsd(priceMatrix.regular[0], locale)});
   const openGraphLocale = {ru: "ru_RU", sr: "sr_RS", en: "en_US"}[locale];
   return {
     title: t("title"),
-    description: t("description"),
+    description,
     alternates: {
       canonical: `/${locale}`,
       languages: {sr: "/sr", ru: "/ru", en: "/en", "x-default": "/ru"},
     },
-    openGraph: {title: t("title"), description: t("description"), type: "website", locale: openGraphLocale, siteName: "LumaClean", url: `/${locale}`, images: [{url: "/media/apartment-journey-poster.jpg", width: 1280, height: 720, alt: "LumaClean — cleaning in Belgrade"}]},
-    twitter: {card: "summary_large_image", title: t("title"), description: t("description"), images: ["/media/apartment-journey-poster.jpg"]},
+    openGraph: {title: t("title"), description, type: "website", locale: openGraphLocale, siteName: "LumaClean", url: `/${locale}`, images: [{url: "/media/apartment-journey-poster.jpg", width: 1280, height: 720, alt: "LumaClean — cleaning in Belgrade"}]},
+    twitter: {card: "summary_large_image", title: t("title"), description, images: ["/media/apartment-journey-poster.jpg"]},
     other: {"geo.region": "RS-00", "geo.placename": "Belgrade"},
   };
 }

@@ -22,7 +22,7 @@ import {orderNotifications,deliverNotification} from '../../src/lib/agent/notifi
 import {quote} from '../../src/lib/domain/crm-pricing';
 const url=process.env.AI_TEST_DATABASE_URL;
 test('real database agent boundaries, booking and concurrency',{skip:!url},async t=>{
-  assert.equal(new URL(url!).hostname,'127.0.0.1');assert.equal(new URL(url!).port,'55439');assert.equal(new URL(url!).pathname,'/lumaclean_ai_test');
+  assert.equal(new URL(url!).hostname,'127.0.0.1');assert(['55439','55449'].includes(new URL(url!).port));assert.equal(new URL(url!).pathname,'/lumaclean_ai_test');
   process.env.AI_AGENT_ENABLED='true';process.env.BETTER_AUTH_SECRET='local-ai-verification-secret-with-over-32-characters';process.env.GOOGLE_MAPS_SERVER_API_KEY='';process.env.PRIMARY_AGENT_MODEL='test';process.env.FALLBACK_AGENT_MODEL='backup';
   const db=new PrismaClient({adapter:new PrismaPg({connectionString:url!,max:8})});
   const ownerId=randomUUID(),password=randomUUID()+'Aa!7';const owner=await db.user.create({data:{id:ownerId,name:'AI verification owner',email:`ai-${ownerId}@example.test`,role:'ADMIN',emailVerified:true,accounts:{create:{accountId:ownerId,providerId:'credential',password:await hashPassword(password)}}}});

@@ -7,6 +7,8 @@ import { CrmError, normalizedPhone } from "@/lib/domain/crm";
 import { writeAudit } from "./audit";
 import {enqueueLeadReview} from './lead-notifications';
 import {quote as cleaningQuote} from '@/lib/domain/crm-pricing';
+import {leadAttributionSchema} from '@/lib/validation/lead-attribution';
+import {publicLeadPaths} from '@/lib/public-paths';
 export const upholsteryLeadSchema = z
   .object({
     submissionId: z.uuid(),
@@ -22,6 +24,7 @@ export const upholsteryLeadSchema = z
     request: upholsteryRequestSchema,
     requestedDate: z.iso.date().optional(),
     comment: z.string().trim().max(1500).default(""),
+    attribution: leadAttributionSchema.refine(value => publicLeadPaths.includes(value.landing), 'Unknown public landing page').optional(),
   })
   .strict();
 export async function saveUpholsteryLead(db: PrismaClient, payload: unknown) {
@@ -47,7 +50,7 @@ export async function saveUpholsteryLead(db: PrismaClient, payload: unknown) {
           "IDEMPOTENCY",
           "Запрос уже отправлен с другими условиями",
         );
-      return { reference: old.reference };
+      return { id: old.id, reference: old.reference! };
     }
     const service = await tx.service.findUniqueOrThrow({
       where: { code: "upholstery" },
@@ -62,6 +65,8 @@ export async function saveUpholsteryLead(db: PrismaClient, payload: unknown) {
         phone: v.phone,
         normalizedPhone: normalizedPhone(v.phone),
         locale: v.locale,
+        entrySource: v.attribution?.source,
+        landingPage: v.attribution?.landing,
         requestKind:v.request.mode==='STANDALONE'?'UPHOLSTERY':'CLEANING_UPHOLSTERY',upholsteryRequested:true,humanReviewRequired:true,consentAt:new Date(),
         channel: "WEBSITE",
         serviceId: service.id,
@@ -90,6 +95,6 @@ export async function saveUpholsteryLead(db: PrismaClient, payload: unknown) {
         entityId: lead.id,
       },
     );
-    return { reference: lead.reference };
+    return { id: lead.id, reference: lead.reference! };
   });
 }

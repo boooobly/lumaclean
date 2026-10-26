@@ -14,7 +14,7 @@ const report = { base, matrix: [], scenarios: [], errors: [], mocked: true };
 async function setup(browser, options = {}) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "no-preference", ...options });
   await context.addInitScript(() => {
-    localStorage.setItem("lc-analytics-consent-v1", "no");
+    localStorage.setItem("lc-analytics-consent-v2", "no");
     window.__upCls = 0;
     if ("PerformanceObserver" in window && PerformanceObserver.supportedEntryTypes.includes("layout-shift")) {
       new PerformanceObserver(list => list.getEntries().forEach(entry => { if (!entry.hadRecentInput) window.__upCls += entry.value; })).observe({ type: "layout-shift", buffered: true });
