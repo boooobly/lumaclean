@@ -1,6 +1,31 @@
 # LumaClean — production release, 26 октября 2026
 
-Рабочая копия: `upholstery-premium`, ветка `codex/seo-lead-consistency`. Статус выпуска: проверка перед публикацией. Предыдущий этап: `docs/seo-audit/implementation-2026-10-26.md`.
+Рабочая копия: `upholstery-premium`, ветка `codex/seo-lead-consistency`. **Production: DEPLOYED.** Выпущен commit `0f5cdeb79000071fd414cb5d49dbc08b8f448667`. Предыдущий этап: `docs/seo-audit/implementation-2026-10-26.md`.
+
+Deployment: `https://lumaclean-92oerdk5f-vladislavs-projects-0eae0ea3.vercel.app`, ID `dpl_CLhZAxcsDPBSB7oFRPgAZS8uyZAT`, Vercel READY. Домен `lumacleanrs.com` переведён штатным `vercel promote`, alias отдельно подтверждён Vercel API. Коммит сохранён локально; push в GitHub не подтверждён (штатный Git не получил доступ к origin); существующая публикация выполнена через Vercel CLI, как предыдущая production-версия.
+
+## Проверки после публикации
+
+- `https://lumacleanrs.com/ru`, `/sr`, `/en` — HTTP 200; correct locale/canonical, оба публичных ID счётчиков присутствуют. В опубликованном JS подтверждены consent v2 и выключенные webvisor/accurateTrackBounce. Это доказательство установки, а не получения событий.
+- Production SEO: 69 страниц / 19 проверок HTTP, **0 issues**. Семь historical 404 теперь дают **308 → эквивалентная страница 200**, проверены без цепочек.
+- Пустое тело форм ordinary/upholstery отвергнуто HTTP 400. Анонимная CRM требует входа (307 на login), CRM и AI settings POST возвращают 401. Новые заявки этими негативными проверками не создавались.
+- Replay того же TEST `4acbcbe1-7702-4961-ab89-61833351a8b6` после публикации: HTTP 200, прежний reference `UP-LEAD-364AD5AB`; Neon подтвердил **Lead 1 / Notification 1 / attempts 1 / DELIVERED / Telegram message 52**. sentAt остался `2026-10-26T14:15:32.298Z`; повторного сообщения нет.
+- Счётчики Order 20, Client 10, Expense 4, CleanerPayout 27 совпали до/после. Production-миграции/seed не запускались, существующие клиенты/заказы не редактировались.
+- Deployment собирался в Vercel с npm ci, Prisma generate, Next production build и TypeScript; READY без source-mismatch. Финальная подпись исходников `e204473deb1ee2b56c47c9baa311341f4c9827f6784b50002d89c803898e20cf`; release evidence 1136 PASS (1044 + 15 + 43 + 16 + 18), AI AUTO gate остаётся закрытым.
+- Браузерная проверка опубликованной версии после promote не выполнена: Local browser use перестал работать. Пользователь попросил закончить доступное без браузера и продолжить кабинеты после перезагрузки. Последние локальные desktop/mobile проверки выполнялись на production-сборке, изменения после них касались точечных редиректов и закрытого AI-допуска.
+- Полностью изолированная БД + реальный Telegram в одной среде отдельно не подтверждены: локальный PostgreSQL прошёл проверки с mocked транспортом, реальная Queue/Telegram проверена единственным разрешённым production TEST. Секреты административного бота не выгружались; невозможно заявить более широкий E2E scope.
+
+## Продолжение после перезагрузки
+
+1. Включить/восстановить Chrome browser use. Повторная публикация сайта и повторное разрешение деплоя не нужны.
+2. В существующем GA4 resource 554368271 проверить `generate_lead`, phone_click, messenger_click через Realtime/DebugView. `generate_lead` уже key event, `form_type` создан; не создавать новый resource/stream. Только успешная подтверждённая заявка считается lead. Новое реальное сообщение не разрешено: выделенный лимит **одно TEST** уже использован. Можно проверить page_view и contact clicks без отправки и обсудить отдельное разрешение, только если понадобится ещё одна новая реальная заявка.
+3. В существующей Метрике **113807461** создать JS-цели `generate_lead`, `phone_click`, `messenger_click`, проверить фактическое получение событий после согласия. Не создавать второй счётчик. Вебвизор, карты и формы оставить выключенными.
+4. GSC: повторно отправить существующий sitemap, проверить exact URL Inspection коммерческих RU/SR/EN и canonical Google; для семи historical 404 запустить «Проверить исправление». Не объявлять запрос индексации результатом индексации.
+5. Яндекс Вебмастер: после восстановления read-only сервиса переобойти sitemap (теперь 69 URL), связать созданный counter. Старый отчёт не равен текущим данным.
+6. Яндекс Бизнес: закончить проверку дублей в Сербии, определить допустимость карточки выездного сервиса без клиентского офиса; не использовать домашний адрес/фиктивный офис. Публикация карточки пока не выполнялась.
+7. Проверить production desktop/mobile в Chrome и при необходимости сохранить screenshots внешних изменений GA4/Метрики. Не трогать реальные заявки; TEST-reference выше оставить как явный след проверки.
+
+Доказательства в `artifacts/release-readiness/`: build/deploy/promote logs, release-evidence-summary.json, production-seo.json, production-redirects.json, production-smoke.json, production-smoke-readonly.json, production-auth.json, четыре browser reports. Общий machine-readable итог также сохранён в `outputs/production-release-2026-10-26/` рабочего корня.
 
 ## План отката до публикации
 
