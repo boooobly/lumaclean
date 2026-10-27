@@ -26,4 +26,21 @@
 
 Fingerprint выпуска: `2ecdf4baa2560acbe3603fa41f09ea44c95514e1c0eab8843e71eb99a00ea2be`. Проверенные новые assets: 21 файл с SHA-256 в manifest.
 
-Сначала создаётся production deployment с `--skip-domain`; после READY и smoke-проверки тот же build переводится на `lumacleanrs.com`. Предыдущий deployment сохранён как rollback candidate. Результат публикации и финальная проверка домена будут записаны после завершения.
+## Production: опубликовано и проверено
+
+Код выпуска: `7d935331a954e67c1f57504e4844fad141d8528c`, сохранён в GitHub-ветке `codex/public-pages-release-20261027`. Production deployment: **`dpl_8RLGhZb79GMoiHH3jfxwVDSL1Jvf`**, адрес `https://lumaclean-ctysf6fgp-vladislavs-projects-0eae0ea3.vercel.app`. Vercel READY; remote build прошёл без source mismatch.
+
+Сборка сначала создана штатным Vercel CLI с `--prod --skip-domain`. Защищённый адрес проверен через авторизованный Vercel connector: HTTP 200 на главной RU/SR/EN, химчистке RU/SR/EN и пяти RU-услугах; новые assets, canonical и FAQ присутствуют. После этого тот же deployment продвинут через Vercel API. Alias `lumacleanrs.com` и остальные существующие домены подтверждены на новом deployment. DNS, переменные окружения, защита проекта и базы данных не менялись.
+
+На **https://lumacleanrs.com** выполнен браузерный smoke:
+
+- **21 страница × 5 ширин = 105 PASS:** три главные, три химчистки и 15 языковых страниц услуг; ширины 1440/1024/768/390/320 px.
+- Проверены язык, canonical/hreflang, отсутствие горизонтального скролла, загрузка новых изображений и FAQ услуг.
+- Все **14 фотокарточек PASS**, кнопка закрытия не меньше 44 px. Сценарий явно перемещает мышь после Escape: автоскролл под неподвижным указателем при активном клавиатурном фокусе намеренно не открывает новую карточку.
+- **SPOT PASS** на RU/SR/EN: выбор добавляет правильный предмет и использует новую миниатюру.
+- **Ошибок страницы/консоли: 0. Отправок заявок: 0.** Все API и внешняя аналитика перехвачены до навигации; это UI mocked, а не новая проверка доставки CRM/Telegram.
+- Production robots возвращает HTTP 200, `Allow: /` и правильный sitemap.
+
+Отчёт: `artifacts/final-review/production/report.json`, лог `production.log`, desktop/mobile screenshots в той же папке. Проверяющий сценарий: `tests/browser/public-release-smoke.mjs`; он использует tracked список URL и не зависит от локального config artifact. Предыдущий deployment `dpl_CLhZAxcsDPBSB7oFRPgAZS8uyZAT` сохранён для штатного rollback без отката БД.
+
+Ревью и выпуск завершены. Ограничения: 33 теста отдельных окружений пропущены, две старые lint-подсказки, физические устройства и экранные считыватели не проверялись; реальные заявки не создавались, AI AUTO остаётся выключенным. После сохранения отчёта выполняется отдельно разрешённое выключение ПК без принудительного закрытия несохранённых приложений.
