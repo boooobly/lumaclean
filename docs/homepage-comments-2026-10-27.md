@@ -20,3 +20,11 @@
 - Реальные заявки и внешние уведомления не отправлялись; браузерные API перехвачены. Физические устройства и screen reader отдельно не проверялись.
 
 Скриншоты до/после, hover-состояния и JSON-отчёты: `artifacts/homepage-comments/`; WebKit — подкаталоги `webkit/` и `extras-webkit/`. Тесты: `tests/browser/homepage-comments.mjs`, `tests/browser/extras-ledger.mjs`.
+
+## Публикация и проверка рабочего домена
+
+Опубликован application commit `595298b`, deployment `dpl_H269kvDF2KjhEBHhPz5Bo5vd643g`. Vercel build — READY; после защищённой HTTP-проверки RU/SR/EN тот же build переключён на `lumacleanrs.com` и `www.lumacleanrs.com`. Резервный предыдущий deployment: `dpl_8RLGhZb79GMoiHH3jfxwVDSL1Jvf`.
+
+На `https://lumacleanrs.com` повторно пройдены Chrome: 15 адаптивных сочетаний, все 84 hover-состояния (14 услуг × две desktop-ширины × три языка) и переход мыши через вторую колонку. Ошибок страницы нет. Фото и нужные углы проверены на реально опубликованной версии. Скриншоты/JSON: `artifacts/homepage-comments/production/`, лог `production.log`.
+
+WebKit полностью прошёл локальную проверку production build. Повтор на публичном HTTPS-домене остановился до загрузки страницы с `SSL peer certificate or SSH remote key was not OK` в данном Windows runtime; проверка сертификатов не отключалась. Это ограничение дополнительного production-прогона WebKit, а не объявленная успешной проверка. Chrome на публичном домене прошёл с обычной проверкой TLS.
