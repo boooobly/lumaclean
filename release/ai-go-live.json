@@ -1,5 +1,5 @@
 {
-  "fingerprint": "e204473deb1ee2b56c47c9baa311341f4c9827f6784b50002d89c803898e20cf",
+  "fingerprint": "2ecdf4baa2560acbe3603fa41f09ea44c95514e1c0eab8843e71eb99a00ea2be",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -74,8 +74,8 @@
     "src/app/icon.svg": "01cde45ba72881463221bd30579e4cb1240bdd7b5eb8059f46edcc35da1d6e0f",
     "src/app/robots.ts": "d76d0417be060de32e5948a59bfcd5b886a9d2cca4ed429900cd089670d4d637",
     "src/app/sitemap.ts": "13fd78d64dd4661e84d618eaea60a61a5c9c56bbf8519f38a209404f442b487b",
-    "src/app/styles/estimate-focused.css": "8147d9e382db62c570d7a3723db645cde5bd59f564655e3ba75e680a0e2e51cc",
-    "src/app/styles/homepage-focused.css": "d80b5b92888a268a598d245aeaaf1d7e5aee0a78a69560fb7d025ddff7dbcd8c",
+    "src/app/styles/estimate-focused.css": "69e95b52aa23546ca12c40549e25ae2e99df1260706a3abccb460f040c882b91",
+    "src/app/styles/homepage-focused.css": "aca601409b0c3ce19dd22efae2872040527797b1a206745ca5f67a34360bf4cd",
     "src/app/styles/seo-additions.css": "0277eb68bc6dcee536ec85d74ec752d23e1af5acaf61fa19be7cd461f122a644",
     "src/app/styles/site-base.css": "34c114a0066c2f3bfd9c25e96cbfa6fa0125730c219c2f46d8075d4e00852256",
     "src/app/styles/site-production.css": "475574360f0edc0fde7462f8a6469ba6fb108a54bf8b322c7b829b686cde1f0a",
@@ -86,12 +86,12 @@
     "src/app/[locale]/articles/[slug]/page.tsx": "f573571605f27e92498da65279ea93242ab8b5ccdbc248e3d3810c40fef736da",
     "src/app/[locale]/data-deletion/page.tsx": "cc85c7559aba68b99ad1b87b2b35b7655b09a8c7e89bec3b2fe5c05172a28298",
     "src/app/[locale]/layout.tsx": "671d46be045270ded40fb732bdc6be0aed83f6616ba975f2dd6ce60769afe7b0",
-    "src/app/[locale]/page.tsx": "234d790a8167012d4fc5a2458e98187089fbab088097e706f523e62516ef77a1",
+    "src/app/[locale]/page.tsx": "aadb36f38694e6e61b29abecb711d405a0632e92d3e24cb2a2d0cb5f570636aa",
     "src/app/[locale]/privacy-policy/page.tsx": "b52d5cc5c2c223ef5a9b1a92fde812688e0a169ec11ab6ad11940db9771ead72",
-    "src/app/[locale]/services/[service]/page.tsx": "316e5a794483e55b2b541bce465b0ea02df39d7e369f98e711cedfd0b46b6dd5",
-    "src/app/[locale]/services/[service]/service.css": "225bb4ad21327df1d52ebd7519d4c32fa14533066058f01cae4c4ae7b0f7f3dc",
+    "src/app/[locale]/services/[service]/page.tsx": "4dbe06e97b92a938c10f14a581695700bb22a6517e4d9c7b7099d85d7cfceb5b",
+    "src/app/[locale]/services/[service]/service.css": "0bce00cb72f3fae8346ef069ba5e61bff814f5cafdc1643ffab1f980e7464313",
     "src/app/[locale]/site.css": "c63a6dac5c0cc88814cda322ae8ba20186c3c2dfa76ea70097f4dab3643bb416",
-    "src/app/[locale]/[upholstery]/page.tsx": "5909d3f02d68aba4391b5a1dfd83c13a0635abbf3ddeca648815c6f4c4f801b9",
+    "src/app/[locale]/[upholstery]/page.tsx": "48f2dc16e3c025f348d4408e17172e75078d39d6888596e502409ef4c2c8b89d",
     "src/components/admin/address-autocomplete.tsx": "5371299b5eaba172b99055f3a98bd261b9bb8bfab85d99d9fe07ba19bd6a837c",
     "src/components/admin/agent-behavior-settings.tsx": "8bd258b539cf6ace1c3b6dd2937d4726dc27a3917a4707a44d75e9ff9a284a7f",
     "src/components/admin/agent-known-facts.tsx": "c65de01503e53a692e123f50b661db73ff26103149281e13f739f2c7bae6b125",
@@ -141,20 +141,22 @@
     "src/components/site/chat-photos.tsx": "15cf8449b47625f5e097a46f25619aca7140443d3e5af77fcb85fc4e85a21b7d",
     "src/components/site/contact-request.tsx": "be3829eca1873f7ac1b92d5717efae05f768c248687da6daf61d47e7d29cadac",
     "src/components/site/estimate.tsx": "0e9fb844a850055449d9c948175150aed3d9669cabfee88931812855782b9429",
+    "src/components/site/extras-ledger.tsx": "0a17c6663f64eb4ac244c94d1d8d78467444a1397ce568655a358b102ed73c43",
     "src/components/site/google-profile-links.module.css": "68b9667bc02da1087c32600f1dfd65a722e10ef4f1215e9a27292976cfd0f3f5",
     "src/components/site/google-profile-links.tsx": "cf276374eb0dc502d611d59449976a86544d4d12b2da75790d450b09d33c0e40",
     "src/components/site/journey-handoff.tsx": "fbcba643fefe56e160e6a39e412fb7ee841a53ee5d8fba8615b5b47550bac281",
     "src/components/site/legal-page.css": "b2491e6ee011e16ae3e0f2641cdd067eac61e27f8e4c3d82067b67827fe80c88",
     "src/components/site/legal-page.tsx": "64486f54053a6ad304f1bbbf2a56cd63702dfd07a6e6eae3bf66e3fec2046572",
     "src/components/site/rates.tsx": "8ad4b8a406c422605333cb58281cce15372ea018441e407caedf60fd489bb472",
+    "src/components/site/service-motion.tsx": "740ca01e9795f11f6d3e2e50f37329ef073078b785616f84bf3f7727c34197e4",
     "src/components/site/service-planning.tsx": "d8bfe885bad227fbed02e270326f635ee101420944d53c7789bdc3bdb04ac96f",
     "src/components/site/site-header.tsx": "40b257ab92716a999d835b74b9f0a7a05929f20be9cabb66093e96d41a9ea7b1",
     "src/components/site/upholstery-article-prices.tsx": "60956f70fbb31e8a7437970d2814bd964c411f1b8694105f333a7ddb32788b52",
-    "src/components/site/upholstery-calculator.tsx": "6be353bb2e65dbddb0e9713deaf800480a398f262df7b915f259411ea8a69623",
+    "src/components/site/upholstery-calculator.tsx": "9216d14501bf4f2ac05a577eea2c67c0a03ce22aa20faaff0d31616f9f13174b",
     "src/components/site/upholstery-fields.tsx": "59f4d5a96276d564c9110af58c6a63f965521a8509430b5913b816b3d41c49a6",
     "src/components/site/upholstery-motion.tsx": "fc73377bda40e2f6d70cfa1ef616e2017f749b1ba014555fe21a928746f07b4c",
     "src/components/site/upholstery-photo-button.tsx": "314b90e555af082ef005c5bda9ac6c67f70e828794d11a28ebb08930c85357b7",
-    "src/components/site/upholstery-premium.css": "d812fcb21bbeeeabbc5dbb704f2637d7c2dd2359b7e882eb657b4511313047c4",
+    "src/components/site/upholstery-premium.css": "1859916141d006df7e417e584e5402dfdd10708d1de9da665ad2197e45c8c6b6",
     "src/components/site/upholstery-teaser.tsx": "433b1917269f340a61f530eac822a483622603a445ee5ee460eb20d06107dadb",
     "src/components/site/upholstery.css": "ff4f97a2413dd41a5659070d39501f7cc17d8bc89f337cfe5a26003e11a5293a",
     "src/components/site/website-chat.css": "59470fd58e6c7ffae8bcc78d28d377c196d04a166de64d1a578673fb04da0862",
@@ -268,7 +270,8 @@
     "src/lib/domain/scheduling-types.ts": "17afde61b4bd2db3aad761d7602ee38400b1a1ea164972ba3bcb126ec8957f74",
     "src/lib/domain/scheduling.ts": "1c24d107f1c49a3101fc6f05aab7ca209d0c1973dd5c486738f217c5a9dffc1f",
     "src/lib/domain/time.ts": "6852e763fccd511e6f6a0fa6d9819cfaff8cd4643a9bb4f762e44e93cc6d0b8c",
-    "src/lib/homepage-ux-content.ts": "bbb01fac92255223296f52676e9c9bf57088e8072189399da6214c0f85c5f8fd",
+    "src/lib/extras-info.ts": "992b10476f1947df706192dd86c8ac47786237cf5efb6f3a2215d2252dd36d66",
+    "src/lib/homepage-ux-content.ts": "1865c8e3f36f45e7fabeb34c628515df9f7ffa129b21d77aa63f465f24298c4c",
     "src/lib/infrastructure/busmaps-contract.ts": "d0c24f56d129e139a7e0fb6d91f53dbd551aa8e277b3215e63b0b965d7854da0",
     "src/lib/infrastructure/busmaps-status.ts": "180f13fb8db8c7604e513b7c1fa4ad9a22947dedfa948c671e67c8838d946272",
     "src/lib/infrastructure/busmaps-transit.ts": "c0d5ef6d46aa0e1fae40eed2b369c0e806353076079cace327234a46866423b5",
@@ -285,6 +288,7 @@
     "src/lib/seo-services.ts": "9c887b247b1f83caec8c00e0e7c8e4adc635fa0f2730d68dc88bfd142c8ecd7c",
     "src/lib/seo.ts": "0757f8d416b211cd9dbdf72363343ceff849b9846883a49b9786cb1172f06865",
     "src/lib/service-planning.ts": "de0b537a4eecefc27041012cea5ea86511079304349da998743fd51e91353df1",
+    "src/lib/service-visuals.ts": "669c0aba1bf1e2baa7fb167ac6d25222280809532ef8ce4817b8cb3ce2731ad6",
     "src/lib/services/admin-dashboard.ts": "c08c6d87f484e0866b9ffa2a19a17042b12bc5c32ec1a36d48a1c3ab140999cb",
     "src/lib/services/admin-http.ts": "74150c1b9b7114448c7bcdfee4c8eaeb127e6cfccb7e011d97d8537d69a191b2",
     "src/lib/services/audit.ts": "554f19b97c77c47a249e6944a9fd2444b5b976676cee81c174287a02d0dd9bd0",
@@ -314,7 +318,7 @@
     "src/lib/site-content.tsx": "6c607b9b52724c7b004eec745399ddcf36f50bd862fced7cfe8e82dd4eb22b5d",
     "src/lib/upholstery-content.ts": "80a4060297737cab5d8026399dcc56a2956a5b5ee86af431dc14108d1b9c0803",
     "src/lib/upholstery-intent.ts": "60ee31195207c686c55cedbe5dfc5a6fd8135f42032a6db87725ae8aa938f666",
-    "src/lib/upholstery-premium-content.ts": "d4d538f4eddb615f42e2a7d7cc9a8bcaab153c85d10f307f4b9d0276035fa645",
+    "src/lib/upholstery-premium-content.ts": "b5df01644d3cf84f1caae578b27c11d700ee4b4b09bcbd61fa43b05b3288e03e",
     "src/lib/upholstery.ts": "8da2e634b383fb39f7218dff31e5b11781b3af64031fdf2559ba99c1a10aff9b",
     "src/lib/validation/admin.ts": "9c1d0a705faffed2af3fd53cf4d5ec10713ba3d90d52769370288655b95f4a4f",
     "src/lib/validation/crm.ts": "493d0737e629a7e9de32e8260c325278e746253f1f38ae1b4ef48ffb39c5cba1",
@@ -358,30 +362,113 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 1136,
+  "assets": {
+    "public/media/extras/balcony.webp": {
+      "bytes": 98538,
+      "sha256": "1f86b24adf43bfb5cdaeb4d402321a581f448351e6c7d1ae17e8430f5c2692a6"
+    },
+    "public/media/extras/cabinets.webp": {
+      "bytes": 52490,
+      "sha256": "2b6ca60e49c86b171e125e7d164a1a8f2670ee2f6f05959ae2ee403aeaeba634"
+    },
+    "public/media/extras/dishwasher.webp": {
+      "bytes": 76246,
+      "sha256": "f3fe881643d5b3cf7cc0dbd8803cdc5d5c33cf9e438fcfc010207e4eff74629a"
+    },
+    "public/media/extras/fridge.webp": {
+      "bytes": 42732,
+      "sha256": "52a55fdc57979544ad454021620da0966043426cb5c7a3717a4c871cbb135b0c"
+    },
+    "public/media/extras/hood.webp": {
+      "bytes": 72128,
+      "sha256": "e7608e2c3601c346a5979ab81874b2624fd36789ae191a02ce112b71150d029f"
+    },
+    "public/media/extras/ironing.webp": {
+      "bytes": 45158,
+      "sha256": "297b561d93e805ffbaf21267f0d427051735f0d445142481fcae64c7a69134a6"
+    },
+    "public/media/extras/large-window.webp": {
+      "bytes": 83462,
+      "sha256": "06b2e80069db5a24b28060a1c0392dfd30349f677ae82cc7c6a4dc0fe49ae8a7"
+    },
+    "public/media/extras/linen.webp": {
+      "bytes": 89606,
+      "sha256": "a9062c6f49aa410f4b47aa3f21024a9a100ffbe186a90ec434f59f390799ceda"
+    },
+    "public/media/extras/microwave.webp": {
+      "bytes": 48146,
+      "sha256": "5760620e3997185aa9e2d94cb12db3b405c91f0abd895c2d687dfd2e784a574f"
+    },
+    "public/media/extras/oven.webp": {
+      "bytes": 67394,
+      "sha256": "b583c3e4bc05186bbd5fcefd655c0b3852e3ded64f5b58eee6e19cf1e9c5b473"
+    },
+    "public/media/extras/pet-hair.webp": {
+      "bytes": 92732,
+      "sha256": "de979a80c20db4870ab08c83beac591e4b5ac5edcdb43b5ef79b87efbe24527a"
+    },
+    "public/media/extras/standard-window.webp": {
+      "bytes": 70732,
+      "sha256": "c404d6ef03a655691fd18db7d538b7931197f5a12069cdc9bfb8e240700c79a3"
+    },
+    "public/media/extras/steam.webp": {
+      "bytes": 42586,
+      "sha256": "13cc2baaf97231978766469876323ebeecde6f67c0e0acc7e569c900cad91488"
+    },
+    "public/media/extras/washing-machine.webp": {
+      "bytes": 55242,
+      "sha256": "410df52e0e67f33c302e429ba8723f544a93ec6c3718c4e8728d4720950174c0"
+    },
+    "public/media/services/airbnb.webp": {
+      "bytes": 143242,
+      "sha256": "a746db48ef49b871fae54043c7b164ac2fc2044a16a450883d40fafe57fb974d"
+    },
+    "public/media/services/deep.webp": {
+      "bytes": 65144,
+      "sha256": "78fd963cb5fa5aa408b2bce731c08391b69978f89bee4de69da594ae361a355b"
+    },
+    "public/media/services/move.webp": {
+      "bytes": 77178,
+      "sha256": "935379b97eaa7a2117779f16377dde86ee622c1983e7048981d8898de96a05fa"
+    },
+    "public/media/services/office.webp": {
+      "bytes": 99210,
+      "sha256": "c4e8cfa02fbf24901cac4277be97ff72052254497dcd9e0ee68dc8c2fe71c695"
+    },
+    "public/media/services/regular.webp": {
+      "bytes": 66216,
+      "sha256": "bfc13b529b7e751d61400427af33b4bf1e0db81316e17089abab31f254fac20a"
+    },
+    "public/media/upholstery/spot-cleaning.webp": {
+      "bytes": 101998,
+      "sha256": "109cb842ccaa2a72b22ed34850e0e389af2e71962780ca77c3af53f1ae384b23"
+    },
+    "public/media/upholstery/fabric-check.webp": {
+      "bytes": 188728,
+      "sha256": "7cc0aba7cd06e32620d5bdb520b82f61c26089e405f16e4994655c6d6073fd7d"
+    }
+  },
+  "tests": 1059,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
   "aiAutoReady": false,
   "releaseProfile": "WEBSITE_MANUAL_AI_OFF",
-  "checkedAt": "2026-10-26T14:59:21.481Z",
+  "checkedAt": "2026-10-27T07:20:37.532Z",
   "checks": {
     "unit": 1044,
-    "client": 15,
-    "admin": 43,
-    "finance": 16,
-    "reliability": 18
+    "client": 15
   },
   "suites": [
-    "Full unit suite: 1044 PASS, 33 environment-dependent skips; 15 client SSR tests PASS",
-    "Isolated PostgreSQL: 43 admin/CRM/scheduling/routing, 16 finance and 18 reliability/upholstery tests PASS",
-    "93 desktop/mobile layout checks RU/SR/EN; 135 calculator cases; mocked browser writes; 69-page SEO check"
+    "1044 passing unit assertions; 33 environment-dependent tests skipped without isolated databases",
+    "15 client SSR assertions passed",
+    "Reviewed homepage stages 1–2, upholstery stage 3 and five service pages stage 4; RU/SR/EN, responsive matrix, links, native forms, extras and SPOT; browser writes mocked"
   ],
-  "verificationScope": "Website-only release with AI_AGENT_ENABLED=false. New upholstery HTTP intake verified against disposable loopback PostgreSQL and current approved catalogue. One separately authorized production synthetic enquiry reached existing outbox, Queue and administrative Telegram (message 52); no client messages or real customer changes. Schema annotations reconciled to existing migration DDL; 25 migrations replayed on five local databases with zero drift, production migrations untouched. AI automatic-booking legacy integration run: 28 PASS / 27 FAIL, so aiAutoReady=false keeps AI_VERIFIED_RELEASE=false even when this source fingerprint matches. No live AI booking or provider readiness claimed. Google/Yandex account verification and actual analytics receipt documented separately.",
+  "verificationScope": "Public-page presentation and local optimized images only. All application/infrastructure source changes are explicitly allowlisted and reviewed. Pricing, CRM, API, agent implementation, booking, schema and migration hashes are identical to the previous production-certified source. migration=true records that unchanged inventory; no migration, seed or production enquiry was run. Prior database and live-delivery checks remain historical evidence, not newly executed checks. AI AUTO remains disabled; no provider or native booking readiness is certified. Staged production HTTP/browser smoke and domain promotion are separate recorded release steps.",
   "previousVerification": {
-    "fingerprint": "b8c083c02d1cf555af7cabfacbb35455769a704056a05ab1e9cb7fec4c6146b6",
-    "tests": 1038,
-    "checkedAt": "2026-10-25T18:59:11.758Z"
+    "fingerprint": "e204473deb1ee2b56c47c9baa311341f4c9827f6784b50002d89c803898e20cf",
+    "tests": 1136,
+    "checkedAt": "2026-10-26T14:59:21.481Z"
   }
 }

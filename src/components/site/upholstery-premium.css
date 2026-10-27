@@ -45,6 +45,7 @@ html[lang="en"] .upholstery-page .up-hero h1 { font-size: clamp(43px,4.5vw,67px)
 .upholstery-page .up-gallery-2 .up-gallery-image, .upholstery-page .up-gallery-3 .up-gallery-image, .upholstery-page .up-gallery-4 .up-gallery-image { aspect-ratio: 1.25; }
 .upholstery-page .up-gallery img { object-fit: cover; transition: transform .65s var(--lc-ease-out); }
 .upholstery-page .up-gallery-2 img, .upholstery-page .up-gallery-3 img { object-position: center 60%; }
+.upholstery-page .up-gallery-4 img { object-position: 52% 55%; }
 .upholstery-page .up-gallery-item:hover img { transform: scale(1.035); }
 .upholstery-page .up-gallery-caption { display: flex; justify-content: space-between; gap: 12px; padding-top: 18px; }
 .upholstery-page .up-gallery-caption strong { font-family: var(--lc-font-display); font-size: 24px; font-weight: 450; letter-spacing: -.045em; }
@@ -54,10 +55,11 @@ html[lang="en"] .upholstery-page .up-hero h1 { font-size: clamp(43px,4.5vw,67px)
 .upholstery-page .up-image-note { max-width: 660px; margin-top: 27px; font-size: 10px; line-height: 1.6; color: var(--lc-ink-soft); }
 .upholstery-page .up-method { padding: 90px 0; background: var(--lc-ink); color: var(--lc-paper); }
 .upholstery-page .up-method-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 110px; }
+.upholstery-page .up-method-intro { display: flex; flex-direction: column; min-width: 0; }
 .upholstery-page .up-method h2 { margin: 22px 0; }
 .upholstery-page .up-method-intro > p:not(.up-kicker) { max-width: 380px; font-size: 14px; line-height: 1.8; color: var(--lc-chrome); }
-.upholstery-page .up-textile { position: relative; height: 195px; margin-top: 36px; overflow: hidden; border-radius: 0 52px 0 0; }
-.upholstery-page .up-textile img { object-fit: cover; }
+.upholstery-page .up-textile { position: relative; flex: 1 1 auto; min-height: 280px; margin-top: 28px; overflow: hidden; border-radius: 3px 3px 56px 3px; }
+.upholstery-page .up-textile img { object-fit: cover; object-position: 52% 53%; }
 .upholstery-page .up-textile > span { position: absolute; inset: auto 18px 16px; font-size: 9px; letter-spacing: .05em; color: white; text-shadow: 0 1px 6px black; }
 .upholstery-page .up-steps { list-style: none; padding: 0; margin: 0; }
 .upholstery-page .up-steps li { display: grid; grid-template-columns: 28px 1fr 20px; gap: 20px; padding: 28px 0; border-top: 1px solid rgba(243,240,233,.25); }
@@ -239,8 +241,9 @@ html[lang="en"] .upholstery-page .up-hero h1 { font-size: clamp(43px,4.5vw,67px)
   .upholstery-page .up-gallery-0 .up-gallery-price { flex-direction: column; align-items: flex-end; justify-content: flex-start; padding-top: 2px; gap: 5px; }
   .upholstery-page .up-method { padding-block: 60px; }
   .upholstery-page .up-method-grid { grid-template-columns: 1fr; gap: 36px; }
+  .upholstery-page .up-method-intro { display: block; }
   .upholstery-page .up-method-intro > p:not(.up-kicker) { font-size: 13px; }
-  .upholstery-page .up-textile { height: 160px; margin-top: 26px; }
+  .upholstery-page .up-textile { height: clamp(240px,68vw,340px); min-height: 0; margin-top: 26px; border-bottom-right-radius: 36px; }
   .upholstery-page .up-steps li { grid-template-columns: 20px 1fr 16px; gap: 14px; padding: 23px 0; }
   .upholstery-page .up-steps h3 { font-size: 23px; }
   .upholstery-page .up-steps p { font-size: 12px; margin-top: 9px; }

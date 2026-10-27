@@ -136,7 +136,7 @@ export default async function Page({ params }: Props) {
         </section>
 
         <section className="up-method" id="process" aria-labelledby="up-method-title"><div className="up-shell up-method-grid">
-          <div className="up-method-intro"><p className="up-kicker">02 / {p.methodLabel}</p><h2 id="up-method-title">{p.methodTitle}</h2><p>{p.methodIntro}</p><div className="up-textile"><Image src="/media/material-textile.webp" alt={p.galleryAlts[4]} fill sizes="(max-width: 680px) 90vw, 33vw" /><span>KÄRCHER · {u.name}</span></div></div>
+          <div className="up-method-intro"><p className="up-kicker">02 / {p.methodLabel}</p><h2 id="up-method-title">{p.methodTitle}</h2><p>{p.methodIntro}</p><div className="up-textile"><Image src="/media/upholstery/fabric-check.webp" alt={p.methodAlt} fill sizes="(max-width: 680px) calc(100vw - 40px), 42vw" /><span>KÄRCHER · {u.name}</span></div></div>
           <ol className="up-steps">{p.steps.map(([title, body], i) => <li key={title}><span>0{i + 1}</span><div><h3>{title}</h3><p>{body}</p></div><ArrowIcon direction="down-right" /></li>)}</ol>
         </div></section>
 

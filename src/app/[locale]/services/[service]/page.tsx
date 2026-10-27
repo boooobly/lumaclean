@@ -19,6 +19,8 @@ import {siteUrl} from "@/lib/seo";
 import {articlePath, articleUi, getServiceArticles, getVisibleArticles} from "@/lib/articles";
 import {servicePlanningUi} from "@/lib/service-planning";
 import {ArrowIcon} from "@/components/site/arrow-icon";
+import {ServiceMotion} from "@/components/site/service-motion";
+import {serviceVisuals} from "@/lib/service-visuals";
 import "../../site.css";
 import "./service.css";
 
@@ -73,6 +75,7 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
   setRequestLocale(locale);
 
   const {id, content} = match;
+  const visual = serviceVisuals[id];
   const ui = servicePageUi[locale];
   const planningUi = servicePlanningUi[locale];
   const pageContent = siteContent[locale];
@@ -112,13 +115,11 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
   };
 
   return (
-    <div id="top" className={`site-page service-page ${displayFont.variable} ${textFont.variable}`}>
+    <div id="top" className={`site-page service-page ${displayFont.variable} ${textFont.variable}`} data-service={id}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(schema).replace(/</g, "\\u003c")}}/>
       <SiteHeader articlesLabel={getVisibleArticles().length ? articleUi[locale].all : undefined} locale={locale} copy={editorial.nav} homeHref={`/${locale}`} estimateHref="#estimate" localeHrefs={localeHrefs}/>
       <main>
         <section className="service-hero">
-          <Image src={content.image} alt={content.imageAlt} fill preload sizes="100vw"/>
-          <div className="service-hero-shade"/>
           <div className="shell service-hero-shell">
             <nav className="service-breadcrumbs" aria-label="Breadcrumb">
               <Link href={`/${locale}`}>{ui.home}</Link><span>/</span><Link href={`/${locale}#scope`}>{ui.services}</Link><span>/</span><b>{pageContent.pricing.serviceNames[id]}</b>
@@ -129,6 +130,7 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
               <p>{content.lead}</p>
               <div className="service-hero-actions"><a href="#estimate">{ui.estimate}<i><ArrowIcon direction="down-right" /></i></a><small>{ui.allBelgrade}</small></div>
             </div>
+            <div className="service-hero-image"><Image src={visual.hero} alt={visual.heroAlt[locale]} fill preload sizes="(max-width: 900px) calc(100vw - 40px), (max-width: 1440px) 43vw, 590px"/></div>
           </div>
         </section>
 
@@ -153,7 +155,10 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
           <div className="shell">
             <div className="section-number">02 · {ui.included}</div>
             <div className="service-section-heading"><h2>{ui.included}</h2><p>{ui.includedLead}</p></div>
-            <ol className="service-included-list">{content.included.map((item, index) => <li key={item}><span>{String(index + 1).padStart(2, "0")}</span><strong>{item}</strong></li>)}</ol>
+            <div className="service-scope-grid">
+              <div className="service-scope-visual"><Image src={visual.scope} alt={visual.scopeAlt[locale]} fill sizes="(max-width: 680px) calc(100vw - 40px), 33vw"/></div>
+              <ol className="service-included-list">{content.included.map((item, index) => <li key={item}><span>{String(index + 1).padStart(2, "0")}</span><strong>{item}</strong></li>)}</ol>
+            </div>
             <div className="service-suitable"><h3>{ui.suitable}</h3><ul>{content.suitable.map((item) => <li key={item}><ArrowIcon direction="down-right" /><span>{item}</span></li>)}</ul></div>
           </div>
         </section>
@@ -168,9 +173,11 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
         <ServiceBrief locale={locale} service={id}/>
 
         <section className="service-faq">
-          <div className="shell">
+          <div className="shell service-faq-grid">
+            <div className="service-faq-intro">
             <div className="section-number">05 · FAQ</div>
             <div className="service-section-heading"><h2>{ui.faq}</h2><p>{content.description}</p></div>
+            </div>
             <div className="site-faq-list">{content.faq.map((item, index) => <details key={item.q} open={index === 0}><summary><span>{String(index + 1).padStart(2, "0")}</span><strong>{item.q}</strong><i aria-hidden="true">+</i></summary><p>{item.a}</p></details>)}</div>
           </div>
         </section>
@@ -205,6 +212,7 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
         </section>
       </main>
       <footer className="site-footer"><div className="shell"><Link href={`/${locale}`}><Image src="/brand/logo-primary.svg" alt="LumaClean" width={622} height={132}/></Link><span>{editorial.footer}</span><div className="site-footer-locales">{routing.locales.map((item) => <Link className={item === locale ? "active" : ""} href={localeHrefs[item]} key={item}>{item.toUpperCase()}</Link>)}</div><div className="service-footer-contacts">{messengerLinks.map((contact) => <a href={contact.href} key={contact.id} target={contact.id === "viber" ? undefined : "_blank"} rel={contact.id === "viber" ? undefined : "noreferrer"}>{contact.label}</a>)}</div><GoogleProfileLinks locale={locale}/></div></footer>
+      <ServiceMotion key={`${locale}:${id}`}/>
     </div>
   );
 }

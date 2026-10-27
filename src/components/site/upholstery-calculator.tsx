@@ -17,8 +17,8 @@ type Furniture = UpholsteryRequest["items"][number];
 const freshItem = (type: Furniture["type"] = "SOFA3"): Furniture => ({ type, quantity: 1, ...(type === "CORNER" ? { seats: 4 } : {}), soil: "NORMAL", fabric: "UNKNOWN", size: "standard", material: "", notes: "" });
 const selectionEvent = "lumaclean:upholstery-select";
 const galleryTypes = ["SOFA3", "CORNER", "ARMCHAIR", "CHAIR", "SPOT"] as const;
-const galleryImages = ["sofa", "corner", "armchair", "chair", "texture"];
-const furnitureImage = (type: Furniture["type"]) => type === "SPOT" ? "/media/material-textile.webp" : `/media/upholstery/${({ SOFA3: "sofa", SOFA2: "sofa", CORNER: "corner", ARMCHAIR: "armchair", CHAIR: "chair" } as const)[type]}.webp`;
+const galleryImages = ["sofa", "corner", "armchair", "chair", "spot-cleaning"];
+const furnitureImage = (type: Furniture["type"]) => type === "SPOT" ? "/media/upholstery/spot-cleaning.webp" : `/media/upholstery/${({ SOFA3: "sofa", SOFA2: "sofa", CORNER: "corner", ARMCHAIR: "armchair", CHAIR: "chair" } as const)[type]}.webp`;
 
 function SelectControl({ children, ...props }: ComponentProps<"select">) {
   return <span className="up-select"><select {...props}>{children}</select><svg className="up-select-chevron" width="14" height="8" viewBox="0 0 14 8" fill="none" aria-hidden="true" focusable="false"><path d="m1 1 6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span>;
@@ -41,7 +41,7 @@ export function UpholsteryGallery({ locale, prices }: { locale: Locale; prices: 
           item?.querySelector<HTMLSelectElement>(".up-type select")?.focus({ preventScroll: true });
         });
       }} aria-label={`${p.addLabel}: ${p.galleryNames[i]}`}>
-        <span className="up-gallery-image"><Image src={i === 4 ? "/media/material-textile.webp" : `/media/upholstery/${galleryImages[i]}.webp`} alt={p.galleryAlts[i]} fill sizes={i === 0 || i === 1 ? "(max-width: 680px) 90vw, 46vw" : "(max-width: 680px) 44vw, 30vw"} /></span>
+        <span className="up-gallery-image"><Image src={`/media/upholstery/${galleryImages[i]}.webp`} alt={p.galleryAlts[i]} fill sizes={i === 0 || i === 1 ? "(max-width: 680px) 90vw, 46vw" : "(max-width: 680px) 44vw, 30vw"} /></span>
         <span className="up-gallery-caption"><span><strong>{p.galleryNames[i]}</strong><small>{p.galleryNotes[i]}</small></span><span className="up-gallery-price">{c.from} {formatRsd(prices[i], locale)}<span aria-hidden="true"><ArrowIcon direction="down-right" /></span></span></span>
       </button>)}
     </div>

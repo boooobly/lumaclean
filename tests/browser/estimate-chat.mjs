@@ -97,8 +97,8 @@ try{
           const s=getComputedStyle(el);
           return {corners:[s.borderTopLeftRadius,s.borderTopRightRadius,s.borderBottomLeftRadius,s.borderBottomRightRadius],overflow:document.documentElement.scrollWidth>innerWidth};
         });
-        assert.deepEqual(geometry.corners.slice(0,3),['0px','0px','0px']);
-        assert.equal(geometry.corners[3],width>900?'100px':width>600?'72px':'48px');
+        assert.deepEqual([geometry.corners[0],geometry.corners[1],geometry.corners[3]],['0px','0px','0px']);
+        assert.equal(geometry.corners[2],width>900?'90px':width>600?'64px':'48px');
         assert.equal(geometry.overflow,false,`${locale}/${width} overflow`);
         const checks=await form.locator('input[type="checkbox"]').evaluateAll(els=>els.map(el=>{
           const s=getComputedStyle(el);return [s.width,s.height,s.borderRadius,s.borderWidth];
