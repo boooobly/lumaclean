@@ -111,6 +111,7 @@ try{
       // than WebKit's asynchronous compositor scroll between off-screen targets.
       await rows.nth(7).evaluate(el=>el.scrollIntoView({block:'end',behavior:'instant'}));
       for(const index of [2,3,4,5,6,7]){const box=await rows.nth(index).boundingBox();await page.mouse.move(box.x+100,box.y+box.height/2);}
+      await page.waitForFunction(title=>document.querySelector('.extra-info-card h3')?.textContent===title,baseline.content[locale].rows[7].title);
       await readyCard();assert.equal(await page.locator('.extra-info-card h3').textContent(),baseline.content[locale].rows[7].title);
       await page.keyboard.press('Escape');
       // First row near the bottom: use an inline fallback rather than cover the photos.

@@ -28,25 +28,44 @@ export function ExtrasLedger({items,hint,closeLabel}:{items:ExtraItem[];hint:str
   const restoreFocusTo=useRef<HTMLButtonElement|null>(null);
   const lastPointer=useRef<{x:number;y:number}|null>(null);
   const timer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  const hoverTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  const hoverCandidate=useRef<string|null>(null);
   const active=items.find(item=>item.id===activeId);
 
+  const cancelHover=useCallback(()=>{
+    if(hoverTimer.current!==null)clearTimeout(hoverTimer.current);
+    hoverTimer.current=null;
+    hoverCandidate.current=null;
+  },[]);
   const cancelClose=useCallback(()=>{
     if(timer.current!==null)clearTimeout(timer.current);
     timer.current=null;
   },[]);
   const close=useCallback((restoreFocus=false)=>{
     cancelClose();
+    cancelHover();
     const button=currentId.current?buttons.current.get(currentId.current):undefined;
     restoreFocusTo.current=restoreFocus&&button?button:null;
     currentId.current=null;
     pinned.current=false;
     setActiveId(null);
-  },[cancelClose]);
+  },[cancelClose,cancelHover]);
   const show=(id:string,keepOpen=false)=>{
     cancelClose();
+    cancelHover();
     pinned.current=keepOpen;
     currentId.current=id;
     setActiveId(id);
+  };
+  const hover=(id:string)=>{
+    cancelClose();
+    if(currentId.current===id){cancelHover();return;}
+    if(!currentId.current){show(id);return;}
+    // Wait until the mouse rests on a new row. Crossing the second column
+    // on the way to an open photo must not replace that photo mid-journey.
+    cancelHover();
+    hoverCandidate.current=id;
+    hoverTimer.current=setTimeout(()=>show(id),140);
   };
   const scheduleClose=()=>{
     if(pinned.current)return;
@@ -54,7 +73,7 @@ export function ExtrasLedger({items,hint,closeLabel}:{items:ExtraItem[];hint:str
     timer.current=setTimeout(()=>close(),180);
   };
 
-  useEffect(()=>()=>cancelClose(),[cancelClose]);
+  useEffect(()=>()=>{cancelClose();cancelHover();},[cancelClose,cancelHover]);
   useEffect(()=>{
     const track=(event:PointerEvent)=>{if(event.pointerType==='mouse')lastPointer.current={x:event.clientX,y:event.clientY};};
     document.addEventListener('pointermove',track,{passive:true});
@@ -146,7 +165,7 @@ export function ExtrasLedger({items,hint,closeLabel}:{items:ExtraItem[];hint:str
   },[activeId,floating,close]);
 
   return (
-    <div className="extras-experience" ref={root} data-floating-enabled={floating} onPointerEnter={cancelClose} onPointerLeave={scheduleClose}>
+    <div className="extras-experience" ref={root} data-floating-enabled={floating} onPointerEnter={cancelClose} onPointerLeave={()=>{cancelHover();scheduleClose();}}>
       <p className="extras-ledger-hint">{hint}</p>
       <div className="extras-ledger extras-ledger-interactive">
         {items.map((item,index)=>{
@@ -162,8 +181,10 @@ export function ExtrasLedger({items,hint,closeLabel}:{items:ExtraItem[];hint:str
                   const keyboardFocus=root.current?.contains(document.activeElement)&&document.activeElement?.matches(':focus-visible');
                   const point=lastPointer.current;
                   const stationary=point&&Math.abs(point.x-event.clientX)<2&&Math.abs(point.y-event.clientY)<2;
-                  if(floating&&event.pointerType==='mouse'&&!(keyboardFocus&&stationary))show(item.id);
+                  if(floating&&event.pointerType==='mouse'&&!(keyboardFocus&&stationary))hover(item.id);
                 }}
+                onPointerMove={event=>{if(event.pointerType==='mouse'&&hoverCandidate.current===item.id)hover(item.id);}}
+                onPointerLeave={()=>{if(hoverCandidate.current===item.id)cancelHover();}}
                 onFocus={event=>{
                   if(floating&&!ignoreFocus.current&&event.currentTarget.matches(':focus-visible')){
                     event.currentTarget.scrollIntoView({block:'nearest',behavior:'instant'});
@@ -177,7 +198,7 @@ export function ExtrasLedger({items,hint,closeLabel}:{items:ExtraItem[];hint:str
               </button>
               <span id={`${buttonId}-description`} className="rate-sr-only">{item.description}</span>
               {expanded&&active&&<section key={item.id} ref={card} className="extra-info-card" id={`${prefix}-preview`} aria-labelledby={`${buttonId}-title`}
-                onPointerEnter={cancelClose} onFocusCapture={()=>{cancelClose();pinned.current=true;}}>
+                onPointerEnter={()=>{cancelClose();cancelHover();}} onFocusCapture={()=>{cancelClose();cancelHover();pinned.current=true;}}>
                 <Image src={active.image} alt="" fill sizes="(max-width: 600px) calc(100vw - 36px), 480px" loading="eager"/>
                 <div className="extra-info-caption"><h3 id={`${buttonId}-title`}>{active.title}</h3><p>{active.description}</p></div>
                 <button type="button" className="extra-info-close" aria-label={closeLabel} onClick={()=>close(true)}>×</button>
