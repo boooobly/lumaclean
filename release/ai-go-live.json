@@ -1,5 +1,5 @@
 {
-  "fingerprint": "15eaf360170fe5e5a4e04e061eeb37e869f8fd8c58e8da26128f5d5840f2e328",
+  "fingerprint": "9d165a37c70481d2eabf1db77d72d410d15222bc1553547a464b9788726f1735",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -78,7 +78,7 @@
     "src/app/styles/homepage-focused.css": "dc9c9a4077856fbb1e11b7c5568b388b2ffbcd89dd0304ba139f17bfc9b092ba",
     "src/app/styles/seo-additions.css": "0277eb68bc6dcee536ec85d74ec752d23e1af5acaf61fa19be7cd461f122a644",
     "src/app/styles/site-base.css": "34c114a0066c2f3bfd9c25e96cbfa6fa0125730c219c2f46d8075d4e00852256",
-    "src/app/styles/site-production.css": "475574360f0edc0fde7462f8a6469ba6fb108a54bf8b322c7b829b686cde1f0a",
+    "src/app/styles/site-production.css": "9cf975ce1ea1a21994a611da0f54e7dfca5900c3638e73a2592c35eee5c6574a",
     "src/app/styles/tokens.css": "063a64ba9dbcba6fec6298c366b340044cdb2ea7db1c6b48e0ada66bc2fe3f08",
     "src/app/[locale]/articles/articles.css": "57ffe965393896f0bbb5200eb0f63ba9f7a706f85f13aaac39f42fc55e56f30f",
     "src/app/[locale]/articles/layout.tsx": "298f68c0324d3598bd2f0b66d59bd78e03d095ff05f0d6543e413cd94b4539b4",
@@ -91,7 +91,7 @@
     "src/app/[locale]/services/[service]/page.tsx": "4dbe06e97b92a938c10f14a581695700bb22a6517e4d9c7b7099d85d7cfceb5b",
     "src/app/[locale]/services/[service]/service.css": "0bce00cb72f3fae8346ef069ba5e61bff814f5cafdc1643ffab1f980e7464313",
     "src/app/[locale]/site.css": "c63a6dac5c0cc88814cda322ae8ba20186c3c2dfa76ea70097f4dab3643bb416",
-    "src/app/[locale]/[upholstery]/page.tsx": "48f2dc16e3c025f348d4408e17172e75078d39d6888596e502409ef4c2c8b89d",
+    "src/app/[locale]/[upholstery]/page.tsx": "4c8c20b6d6043159a099900e156e4d7454390cb8054dbd7fd658b8f05c606710",
     "src/components/admin/address-autocomplete.tsx": "5371299b5eaba172b99055f3a98bd261b9bb8bfab85d99d9fe07ba19bd6a837c",
     "src/components/admin/agent-behavior-settings.tsx": "8bd258b539cf6ace1c3b6dd2937d4726dc27a3917a4707a44d75e9ff9a284a7f",
     "src/components/admin/agent-known-facts.tsx": "c65de01503e53a692e123f50b661db73ff26103149281e13f739f2c7bae6b125",
@@ -318,7 +318,7 @@
     "src/lib/site-content.tsx": "6c607b9b52724c7b004eec745399ddcf36f50bd862fced7cfe8e82dd4eb22b5d",
     "src/lib/upholstery-content.ts": "80a4060297737cab5d8026399dcc56a2956a5b5ee86af431dc14108d1b9c0803",
     "src/lib/upholstery-intent.ts": "60ee31195207c686c55cedbe5dfc5a6fd8135f42032a6db87725ae8aa938f666",
-    "src/lib/upholstery-premium-content.ts": "b5df01644d3cf84f1caae578b27c11d700ee4b4b09bcbd61fa43b05b3288e03e",
+    "src/lib/upholstery-premium-content.ts": "de888f43112c8e494acea320da3af693a9eca267bdebb41f4626d680abcacc52",
     "src/lib/upholstery.ts": "8da2e634b383fb39f7218dff31e5b11781b3af64031fdf2559ba99c1a10aff9b",
     "src/lib/validation/admin.ts": "9c1d0a705faffed2af3fd53cf4d5ec10713ba3d90d52769370288655b95f4a4f",
     "src/lib/validation/crm.ts": "493d0737e629a7e9de32e8260c325278e746253f1f38ae1b4ef48ffb39c5cba1",
@@ -446,6 +446,10 @@
     "public/media/upholstery/fabric-check.webp": {
       "bytes": 188728,
       "sha256": "7cc0aba7cd06e32620d5bdb520b82f61c26089e405f16e4994655c6d6073fd7d"
+    },
+    "public/media/upholstery/hero-extraction.webp": {
+      "bytes": 218576,
+      "sha256": "8aa46e6c99985ff259f4a1d4fdc83bda948e2757dd181d7b48922cedb72300e9"
     }
   },
   "tests": 1059,
@@ -455,7 +459,7 @@
   "build": true,
   "aiAutoReady": false,
   "releaseProfile": "WEBSITE_MANUAL_AI_OFF",
-  "checkedAt": "2026-10-28T14:42:47.702Z",
+  "checkedAt": "2026-10-28T15:57:13.398Z",
   "checks": {
     "unit": 1044,
     "client": 15
@@ -463,12 +467,12 @@
   "suites": [
     "1044 unit assertions passed; 33 environment-dependent tests skipped",
     "15 client SSR assertions passed",
-    "Estimate comments: 18 localized layouts including 2265px, one-line desktop note, heading removal, 14px labels and unchanged 20% surcharge; estimate/chat regression 13 groups, 21 layouts, 25 mocked writes"
+    "Public header/hero: 11 pages × six widths in Chrome and WebKit, hover, keyboard focus, both header themes and reduced motion; upholstery RU/SR/EN × five widths, SPOT repeat/addon selection unchanged"
   ],
-  "verificationScope": "Three homepage estimate presentation corrections only: remove 350px note width limit, omit focused receipt heading label, remove duplicate percentage from focused urgency label and match its 14px font. Exactly two source files differ from previous production inventory; all pricing, API, CRM, booking, AI, schema, migrations and infrastructure hashes are unchanged. No real enquiry, migration, seed or notification was sent. AI AUTO remains disabled; migration=true refers solely to the unchanged migration inventory. Browser form submission tests are mocked. Published domain verification recorded separately.",
+  "verificationScope": "Public header CSS transitions and new optimized upholstery hero photo with localized alt and Open Graph image only. Exactly three application source files differ from the preceding certified production inventory; pricing, catalogue, API, CRM, booking, AI implementation, schema, migrations and infrastructure hashes are unchanged. Existing asset hashes match; one generated WebP added. migration=true denotes unchanged migration inventory, no migration or seed was run. Browser API traffic mocked; no real enquiries or notifications sent. AI AUTO remains disabled. Production promotion and public smoke recorded separately.",
   "previousVerification": {
-    "fingerprint": "072ba5f1e9ce80ff371f718258e6e7e3db6328bf02ae72875fa9e7f95844a596",
+    "fingerprint": "15eaf360170fe5e5a4e04e061eeb37e869f8fd8c58e8da26128f5d5840f2e328",
     "tests": 1059,
-    "checkedAt": "2026-10-27T19:40:43.016Z"
+    "checkedAt": "2026-10-28T14:42:47.702Z"
   }
 }

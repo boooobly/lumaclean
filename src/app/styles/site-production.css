@@ -46,6 +46,41 @@
   .site-header-actions { gap: 12px; }
 }
 .site-page .header-cta i { display: grid; place-items: center; color: var(--lc-teal); font-size: 18px; font-style: normal; }
+/* Shared public header: short, quiet transitions without moving the layout. */
+.site-page .site-header {
+  --header-accent: var(--lc-teal-light);
+  --header-hover-surface: rgba(251,250,246,.1);
+}
+.site-page .site-header.is-paper {
+  --header-accent: var(--lc-teal-ink);
+  --header-hover-surface: rgba(184,170,152,.14);
+}
+.site-page .site-header nav a { transition: color 180ms ease; }
+.site-page .site-header :is(nav a,.site-locales a) { position: relative; }
+.site-page .site-header :is(nav a,.site-locales a)::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 1px;
+  background: currentColor; transform: scaleX(0); transform-origin: left;
+  transition: transform 220ms var(--lc-ease-out);
+}
+.site-page .site-header .site-locales a::after { left: 7px; right: 7px; bottom: 5px; }
+.site-page .site-header .header-cta {
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+.site-page .site-header .header-cta i { transition: transform 220ms var(--lc-ease-out), color 180ms ease; }
+.site-page .site-header :is(nav a,.site-locales a):focus-visible::after { transform: scaleX(1); }
+.site-page .site-header nav a:focus-visible { color: var(--header-accent); }
+.site-page .site-header .header-cta:focus-visible { color: var(--header-accent); border-color: var(--header-accent); background-color: var(--header-hover-surface); }
+@media (hover:hover) and (pointer:fine) {
+  .site-page .site-header nav a:hover { color: var(--header-accent); }
+  .site-page .site-header :is(nav a,.site-locales a):hover::after { transform: scaleX(1); }
+  .site-page .site-header .header-cta:hover { color: var(--header-accent); border-color: var(--header-accent); background-color: var(--header-hover-surface); }
+  .site-page .site-header .header-cta:hover i { color: inherit; transform: translate(2px,2px); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .site-page .site-header :is(nav a,.site-locales a,.header-cta,.header-cta i),
+  .site-page .site-header :is(nav a,.site-locales a)::after { transition: none; }
+  .site-page .site-header .header-cta:hover i { transform: none; }
+}
 .site-cta-short { display: none; }
 .journey-mobile-description { display: none; }
 
