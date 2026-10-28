@@ -13,3 +13,7 @@
 Регрессия `tests/browser/estimate-chat.mjs`: 21 адаптивное состояние, 13 групп сценариев, 25 mocked-запросов, 0 ошибок страницы. Проверены валидация, состав расчёта, success/reference, ошибки API и повторная отправка. Реальные заявки и уведомления не отправлялись. TypeScript, production build — PASS. ESLint — 0 ошибок, два прежних предупреждения `<img>`. Unit — 1044 PASS / 33 SKIP (требуется отдельное окружение), client SSR — 15 PASS.
 
 Скриншоты до/после и JSON: `artifacts/estimate-comments/`. Проверка ограничена этими правками и регрессией формы; физические устройства, screen reader и внешняя доставка сообщений не проверялись.
+
+Опубликован commit `b81778b`, Vercel deployment `dpl_B4G7MSCSBReXiSgmhh1FmNDweKuP` (READY). После защищённой HTTP-проверки трёх языков тот же build назначен на рабочие домены. Предыдущий deployment для возврата: `dpl_H269kvDF2KjhEBHhPz5Bo5vd643g`.
+
+На `https://lumacleanrs.com` в Chrome повторно проверены все 18 сочетаний RU/SR/EN × шесть ширин и расчёт срочности 6000 → 7200 → 6000. Итог: PASS, 0 ошибок страницы/консоли. Скриншоты опубликованной формы и JSON: `artifacts/estimate-comments/production/`.
