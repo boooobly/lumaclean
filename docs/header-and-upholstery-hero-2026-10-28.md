@@ -26,3 +26,9 @@ Asset: `public/media/upholstery/hero-extraction.webp`, **1254×1254 px, 218576 b
 - Unit — 1044 PASS, 33 SKIP (нужно отдельное окружение); client SSR — 15 PASS.
 
 API в браузере перехвачены, реальные заявки/уведомления не отправлялись. Физические устройства, screen reader и живая доставка отдельно не проверялись. Скриншоты до/после, состояния шапки и JSON: `artifacts/header-hero/`.
+
+## Публикация
+
+Application commit `912435a`, deployment `dpl_57x9rf1TQNZVCYSA4XjPY855qZX1` — READY. Защищённая HTTP-проверка трёх языков подтвердила новое фото; тот же build назначен на `lumacleanrs.com` и `www.lumacleanrs.com`. Предыдущий deployment: `dpl_B4G7MSCSBReXiSgmhh1FmNDweKuP`.
+
+На рабочем домене в Chrome повторно пройдены все 66 сочетаний, обе темы шапки, hover меню/языков/CTA, клавиатурный фокус, reduced motion и загрузка нового hero в трёх языках — PASS, 0 ошибок. Скриншоты реальной опубликованной страницы: `artifacts/header-hero/production/`, JSON `after.json`. WebKit проверен локально; публичный HTTPS-прогон WebKit не повторялся из-за известного ограничения сертификатов Windows runtime, зафиксированного в предыдущем отчёте.
