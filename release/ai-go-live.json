@@ -1,5 +1,5 @@
 {
-  "fingerprint": "072ba5f1e9ce80ff371f718258e6e7e3db6328bf02ae72875fa9e7f95844a596",
+  "fingerprint": "15eaf360170fe5e5a4e04e061eeb37e869f8fd8c58e8da26128f5d5840f2e328",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -74,7 +74,7 @@
     "src/app/icon.svg": "01cde45ba72881463221bd30579e4cb1240bdd7b5eb8059f46edcc35da1d6e0f",
     "src/app/robots.ts": "d76d0417be060de32e5948a59bfcd5b886a9d2cca4ed429900cd089670d4d637",
     "src/app/sitemap.ts": "13fd78d64dd4661e84d618eaea60a61a5c9c56bbf8519f38a209404f442b487b",
-    "src/app/styles/estimate-focused.css": "69e95b52aa23546ca12c40549e25ae2e99df1260706a3abccb460f040c882b91",
+    "src/app/styles/estimate-focused.css": "cc2b43f1f8d7937522e00f0199e1a4b2ce5a14a5b0c21bce4f8114d8eab38513",
     "src/app/styles/homepage-focused.css": "dc9c9a4077856fbb1e11b7c5568b388b2ffbcd89dd0304ba139f17bfc9b092ba",
     "src/app/styles/seo-additions.css": "0277eb68bc6dcee536ec85d74ec752d23e1af5acaf61fa19be7cd461f122a644",
     "src/app/styles/site-base.css": "34c114a0066c2f3bfd9c25e96cbfa6fa0125730c219c2f46d8075d4e00852256",
@@ -140,7 +140,7 @@
     "src/components/site/article-data-table.tsx": "c1dc2f13055eb0946d5c28d187188ffc10a9af38e90e8800e3c6ed45e16dc96c",
     "src/components/site/chat-photos.tsx": "15cf8449b47625f5e097a46f25619aca7140443d3e5af77fcb85fc4e85a21b7d",
     "src/components/site/contact-request.tsx": "be3829eca1873f7ac1b92d5717efae05f768c248687da6daf61d47e7d29cadac",
-    "src/components/site/estimate.tsx": "0e9fb844a850055449d9c948175150aed3d9669cabfee88931812855782b9429",
+    "src/components/site/estimate.tsx": "fa9e23c61f95b6a293042981fc1729488059a6388e3aff0c01fb90167cfac7cd",
     "src/components/site/extras-ledger.tsx": "11b206eb974f7119dc5334bc7817b6e74f530fa6bb640d26d833b2b06546486e",
     "src/components/site/google-profile-links.module.css": "68b9667bc02da1087c32600f1dfd65a722e10ef4f1215e9a27292976cfd0f3f5",
     "src/components/site/google-profile-links.tsx": "cf276374eb0dc502d611d59449976a86544d4d12b2da75790d450b09d33c0e40",
@@ -455,7 +455,7 @@
   "build": true,
   "aiAutoReady": false,
   "releaseProfile": "WEBSITE_MANUAL_AI_OFF",
-  "checkedAt": "2026-10-27T19:40:43.016Z",
+  "checkedAt": "2026-10-28T14:42:47.702Z",
   "checks": {
     "unit": 1044,
     "client": 15
@@ -463,12 +463,12 @@
   "suites": [
     "1044 unit assertions passed; 33 environment-dependent tests skipped",
     "15 client SSR assertions passed",
-    "Homepage RU/SR/EN × five widths, Chrome and WebKit; 14 photos × two desktop widths × three languages in both engines; touch, keyboard, rapid switching and crossing the second column; API requests mocked"
+    "Estimate comments: 18 localized layouts including 2265px, one-line desktop note, heading removal, 14px labels and unchanged 20% surcharge; estimate/chat regression 13 groups, 21 layouts, 25 mocked writes"
   ],
-  "verificationScope": "Incremental homepage presentation correction only: two columns from 768px, three image corner changes, pointer hover intent. Exactly two application source files differ from the previous production inventory; all other source, pricing, CRM, API, agent, booking, Prisma and infrastructure hashes are identical. Existing 21 image assets match their previous SHA256 hashes. migration=true is retained solely for unchanged schema/migration inventory; no migration or production enquiry was run. AI AUTO remains disabled. Production promotion and public smoke are recorded separately.",
+  "verificationScope": "Three homepage estimate presentation corrections only: remove 350px note width limit, omit focused receipt heading label, remove duplicate percentage from focused urgency label and match its 14px font. Exactly two source files differ from previous production inventory; all pricing, API, CRM, booking, AI, schema, migrations and infrastructure hashes are unchanged. No real enquiry, migration, seed or notification was sent. AI AUTO remains disabled; migration=true refers solely to the unchanged migration inventory. Browser form submission tests are mocked. Published domain verification recorded separately.",
   "previousVerification": {
-    "fingerprint": "2ecdf4baa2560acbe3603fa41f09ea44c95514e1c0eab8843e71eb99a00ea2be",
+    "fingerprint": "072ba5f1e9ce80ff371f718258e6e7e3db6328bf02ae72875fa9e7f95844a596",
     "tests": 1059,
-    "checkedAt": "2026-10-27T07:20:37.532Z"
+    "checkedAt": "2026-10-27T19:40:43.016Z"
   }
 }

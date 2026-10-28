@@ -92,7 +92,7 @@
 .site-home .estimate-focused .site-extra-options label:nth-child(n) { grid-template-columns:20px minmax(0,1fr) auto; column-gap:12px; padding:14px 0; border-right:0; font-size:12px; line-height:1.5; }
 .site-home .estimate-focused .site-extra-options label small { font-size:11px; white-space:nowrap; }
 .site-home .estimate-focused .estimate-urgency { font-size:12px; line-height:1.6; }
-.site-home .estimate-focused .estimate-urgency label { display:flex; align-items:flex-start; gap:12px; cursor:pointer; }
+.site-home .estimate-focused .estimate-urgency label { display:flex; align-items:flex-start; gap:12px; cursor:pointer; font-size:14px; }
 .site-home .estimate-focused .estimate-urgency small { margin-left:auto; white-space:nowrap; }
 .site-home .estimate-focused .estimate-urgency p { color:var(--lc-ink-soft); font-size:11px; margin-bottom:0; }
 .site-home .estimate-focused .estimate-upholstery-request { padding-top:24px; border-color:var(--lc-line); }
@@ -103,7 +103,6 @@
 .site-home .homepage-estimate .receipt { min-width:0; min-height:0; }
 .site-home .estimate-focused .receipt-head { padding:32px; }
 .site-home .estimate-focused .receipt-head img { width:150px; }
-.site-home .estimate-focused .receipt-head > span { color:var(--lc-chrome); }
 .site-home .homepage-estimate .receipt-body { padding:28px 32px 64px; }
 .site-home .estimate-focused .receipt-meta { gap:16px; color:var(--lc-chrome); line-height:1.6; }
 .site-home .estimate-focused .receipt-lines { margin-top:20px; }
@@ -125,7 +124,7 @@
 .site-home .estimate-focused .site-comment summary { cursor:pointer; padding:8px 0; color:var(--lc-paper); font-size:12px; line-height:1.5; }
 .site-home .estimate-focused .site-consent { align-items:flex-start; gap:12px!important; margin-top:4px; cursor:pointer; }
 .site-home .estimate-focused .site-lead-fields .site-consent span { font-size:12px; }
-.site-home .estimate-focused .estimate-enquiry-note { margin:20px 0 0; }
+.site-home .estimate-focused .estimate-enquiry-note { max-width:none; margin:20px 0 0; }
 .site-home .homepage-estimate .receipt button {
   display:grid; grid-template-columns:24px minmax(0,1fr) 24px; align-items:center; gap:8px;
   min-height:54px; margin-top:24px; padding:16px; border-radius:var(--estimate-control-radius);

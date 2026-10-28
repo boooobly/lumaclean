@@ -93,7 +93,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
     } finally { submitting.current = false; }
   }
 
-  const urgency=<>             <label className="site-urgent"><input type="checkbox" disabled={!sameDayAllowed} checked={urgent} onChange={(event) => setUrgent(event.target.checked)}/><span>{content.calculator.urgent}</span><small>+20%</small></label>{!sameDayAllowed&&<p role="status">{locale==='ru'?'Срочный выезд сегодня недоступен. Другой день согласуем после заявки.':locale==='en'?'Same-day departure is unavailable. We will agree another day after your enquiry.':'Dolazak danas nije dostupan. Drugi dan dogovaramo nakon upita.'}</p>} </>;
+  const urgency=<>             <label className="site-urgent"><input type="checkbox" disabled={!sameDayAllowed} checked={urgent} onChange={(event) => setUrgent(event.target.checked)}/><span>{focused?content.calculator.urgent.replace(/\s*\(\+20%\)$/u,''):content.calculator.urgent}</span><small>+20%</small></label>{!sameDayAllowed&&<p role="status">{locale==='ru'?'Срочный выезд сегодня недоступен. Другой день согласуем после заявки.':locale==='en'?'Same-day departure is unavailable. We will agree another day after your enquiry.':'Dolazak danas nije dostupan. Drugi dan dogovaramo nakon upita.'}</p>} </>;
 
   return (
     <form id={focused?'estimate':undefined} aria-busy={status==='sending'} className={`estimate-sheet${focused?' estimate-focused':''}${onlyUpholstery?' estimate-enquiry-only':''}`} onSubmit={submit} onFocusCapture={() => { if (!started.current) { started.current = true; trackEvent("form_start", eventData); } }} noValidate>
@@ -136,7 +136,7 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
         <div className="estimate-upholstery-request"><label><input type="checkbox" name="upholsteryRequested" checked={upholsteryRequested} onChange={event=>setUpholsteryRequested(event.target.checked)}/><span>{e.checkbox}</span></label><p>{e.hint}</p></div></>}
       </div>
       <aside className="receipt" id="receipt">
-        <div className="receipt-head"><Image src="/brand/logo-light.svg" alt="LumaClean" width={622} height={132}/><span>{copy.reference}</span></div>
+        <div className="receipt-head"><Image src="/brand/logo-light.svg" alt="LumaClean" width={622} height={132}/>{!focused&&<span>{copy.reference}</span>}</div>
         <div className="receipt-body">
           {!onlyUpholstery&&<><div className="receipt-meta"><span>{copy.calculation}</span><span>{copy.city}</span></div>
           <div className="receipt-lines">{calculation.lines.map((line) => <div className="receipt-line" key={line.label}><span>{line.label}</span><span>{formatRsd(line.value, locale)}</span></div>)}</div>
