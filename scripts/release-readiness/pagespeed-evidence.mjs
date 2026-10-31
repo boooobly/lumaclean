@@ -16,7 +16,8 @@ const estimate=json('estimate/report.json');assert.equal(estimate.scenarios.leng
 const up=json('upholstery-final/polish-report.json');assert.equal(up.status,'PASS');assert.equal(up.matrix.length,30);assert.deepEqual(up.errors.filter(e=>!e.intentional),[]);
 const services=json('services/after.json');assert.equal(services.status,'PASS');assert.equal(services.switches.length,30);assert.deepEqual(services.errors,[]);
 assert.equal(json('dependency-audit.json').metadata.vulnerabilities.high,0);assert.equal(json('dependency-audit.json').metadata.vulnerabilities.critical,0);
-const previous=JSON.parse(readFileSync('release/ai-go-live.json','utf8'));
+// Always compare to the actual pre-release deployment, including on a retry.
+const previous=JSON.parse(readFileSync(root+'previous-release-evidence.json','utf8'));
 assert.equal(previous.aiAutoReady,false);assert.equal(previous.releaseProfile,'WEBSITE_MANUAL_AI_OFF');
 const allowed=new Set(['next.config.ts','package.json','package-lock.json','src/app/[locale]/layout.tsx','src/app/[locale]/[upholstery]/page.tsx','src/app/[locale]/articles/[slug]/page.tsx','src/app/[locale]/services/[service]/page.tsx','src/app/globals.css','src/app/styles/homepage-focused.css','src/app/styles/site-production.css','src/components/apartment-experience.tsx','src/components/site/article-components.tsx','src/components/site/journey-handoff.tsx','src/components/site/upholstery-calculator.tsx']);
 const files=sourceInventory(),changed=[...new Set([...Object.keys(previous.files),...Object.keys(files)])].filter(p=>previous.files[p]!==files[p]);

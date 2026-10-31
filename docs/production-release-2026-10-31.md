@@ -8,13 +8,13 @@
 - Ветка: `codex/public-pages-release-20261027`, исходное основание `523cad63886fbdd31772a5ac7fb419ebbf65da13`.
 - GitHub: `boooobly/lumaclean`, main `22b58184e0fdb0242ec5d2ae9d0e3b8850411fa2`; remote release-ветка совпадала с основанием. Последующие публичные релизы 27–28 октября сохранены.
 - Vercel project: `prj_Q4nkQeWNwBIFz1AsthDvyEeJ5BeZ`, team `team_cwlPNVZFs6PwR6BhDE7gU1eq`, Node.js `24.x`.
-- Next.js: **16.4.3**, React **19.2.4**. Локальные проверки выполнены Node.js 25.9.0; production remote build проверяет фактический runtime проекта.
+- Next.js: **16.4.3**, React **19.2.4**. После обнаружения автоматического выбора Node 26 широкий engines заменён на **24.x**; unit/client и production build повторены на Node **24.22.2**.
 - Предыдущий исправный deployment для отката: **`dpl_57x9rf1TQNZVCYSA4XjPY855qZX1`**, `https://lumaclean-c82jrn8hd-vladislavs-projects-0eae0ea3.vercel.app`. Привязка `lumacleanrs.com` подтверждена Vercel Alias API перед выпуском. Его application commit по предыдущему отчёту — `912435a`; deployment создан CLI и не хранит Git SHA. SHA1 опубликованного release evidence совпал с локальным исходным файлом.
 - Переменные окружения проверены по именам/target/type, без вывода значений: production DATABASE_URL/DIRECT_URL/auth, Blob, Telegram, WhatsApp, routing, AI и аналитика присутствуют. Секреты/домены/DNS/настройки тарифов не изменялись. Само наличие ключа не доказывает исправность внешнего сервиса.
 
 Схема Prisma, все 25 миграций, API/CRM/агент/очереди/цены совпадают с предыдущим deployed inventory. **Production-миграции и seed не требуются и не выполнялись.** Локальный schema diff: No difference detected.
 
-Evidence обновлено штатно: fingerprint `9be8193cc5767a8e45d20f06aab92aedd3537cc1e7e1a81b6a8e44b30711914f`, 14 изменённых fingerprinted файлов явно проверены. `aiAutoReady: false`, профиль `WEBSITE_MANUAL_AI_OFF`, `AI_VERIFIED_RELEASE=false`. Совпадение fingerprint не активирует AUTO. Старые доказательства live-доставки/бронирования не выданы за новые.
+Evidence обновлено штатно: fingerprint `36854a1f22cbc51ed679ab4e50de403d4f7bfd9657e072c69be72f27b3d3de07`, 14 изменённых fingerprinted файлов явно проверены. `aiAutoReady: false`, профиль `WEBSITE_MANUAL_AI_OFF`, `AI_VERIFIED_RELEASE=false`. Совпадение fingerprint не активирует AUTO. Старые доказательства live-доставки/бронирования не выданы за новые.
 
 ## Б. PageSpeed и Lighthouse
 

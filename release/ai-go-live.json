@@ -1,5 +1,5 @@
 {
-  "fingerprint": "9be8193cc5767a8e45d20f06aab92aedd3537cc1e7e1a81b6a8e44b30711914f",
+  "fingerprint": "36854a1f22cbc51ed679ab4e50de403d4f7bfd9657e072c69be72f27b3d3de07",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -356,8 +356,8 @@
     "prisma/migrations/migration_lock.toml": "1db17a8d051aa136110736752c5e1f8b7ed92b6ea8e803112fbbe2497047c210",
     "prisma/schema.prisma": "e002af648463944744364d37821a2c676527350d04050a7268c7a2d68d089f0d",
     "next.config.ts": "0e125723b187f77deb46a55b34811de9a75dcf92187af63ed8dcfc8d68e71b3c",
-    "package.json": "a2f1debefc4f7d5b062aa36c8c89de02359b1bc2335eab7232e582c541fa6063",
-    "package-lock.json": "2afef34fac5821d49ba0aa8a98c3b205105ec32336b6e21cb90b0f7878b197f9",
+    "package.json": "a8dc844bf75a2299ecc05986b4c879338997456f7726ace055193045fe7c2380",
+    "package-lock.json": "5d1c08fce73279be08abb41152cb7f7da768ae968f7e3ed1bd4e14e07e7bb103",
     "scripts/copy-maplibre-worker.mjs": "b2493c39cf2b5a4d274af5db25cc5ce66f0583cae275e2219e0db994b9dcfe7e",
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
@@ -467,7 +467,7 @@
   "build": true,
   "aiAutoReady": false,
   "releaseProfile": "WEBSITE_MANUAL_AI_OFF",
-  "checkedAt": "2026-10-31T17:22:41.795Z",
+  "checkedAt": "2026-10-31T17:30:50.774Z",
   "checks": {
     "unit": 1044,
     "client": 15,

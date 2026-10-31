@@ -4,7 +4,7 @@
   "description": "Multilingual LumaClean service website for Belgrade.",
   "private": true,
   "engines": {
-    "node": "^22.13.0 || >=24.0.0"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "next dev",
