@@ -123,7 +123,7 @@ export default async function Page({ params }: Props) {
             <div className="up-hero-price"><span>{p.sofaNote}</span><strong>{u.from} {formatRsd(catalog.sofa3Normal, locale)}</strong></div>
           </div>
           <figure className="up-hero-visual">
-            <Image src="/media/upholstery/hero-extraction.webp" alt={p.heroAlt} fill preload sizes="(max-width: 680px) calc(100vw - 36px), (max-width: 1024px) 50vw, (max-width: 1440px) 55vw, 670px" />
+            <Image src="/media/upholstery/hero-extraction.webp" alt={p.heroAlt} fill loading="eager" fetchPriority="high" sizes="(max-width: 680px) calc(100vw - 36px), (max-width: 1024px) 50vw, (max-width: 1440px) 55vw, 670px" />
             <figcaption><span>01 / LUMACLEAN</span><span>TEXTILE CARE</span></figcaption>
             <a className="up-image-link" href="#furniture" aria-label={p.galleryTitle.replace("\n", " ")}><ArrowIcon direction="down" /></a>
           </figure>

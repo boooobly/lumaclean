@@ -10,7 +10,9 @@ import {WebsiteChat} from "@/components/site/website-chat";
 import {publicLeadPaths} from '@/lib/public-paths';
 import "../globals.css";
 
-const geist = Geist({subsets: ["latin", "cyrillic"], variable: "--font-geist"});
+// Public page templates use Onest/Golos; retain Geist as a fallback without
+// competing with the visible fonts and LCP image for preload bandwidth.
+const geist = Geist({subsets: ["latin", "cyrillic"], variable: "--font-geist", preload: false});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({locale}));

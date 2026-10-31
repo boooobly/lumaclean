@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@js-temporal/polyfill": "0.5.1",
-    "@next/env": "16.3.8",
+    "@next/env": "16.4.3",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
     "@vercel/blob": "^2.8.0",
@@ -43,14 +43,14 @@
     "libphonenumber-js": "1.13.14",
     "lucide-react": "^1.24.0",
     "maplibre-gl": "6.11.2",
-    "next": "16.3.8",
+    "next": "16.4.3",
     "next-intl": "^4.13.2",
     "pg": "8.23.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "server-only": "0.0.1",
     "sharp": "^0.35.5",
-    "zod": "^4.4.3"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@inquirer/prompts": "8.7.2",
@@ -59,12 +59,15 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.8",
+    "eslint-config-next": "16.4.3",
     "prisma": "7.10.0",
     "tsx": "4.23.15",
     "typescript": "^5"
   },
   "overrides": {
+    "@vercel/cli-config": {
+      "zod": "$zod"
+    },
     "@prisma/config": {
       "deepmerge-ts": "8.0.2"
     },

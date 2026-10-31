@@ -51,7 +51,7 @@ export function JourneyHandoff({copy}: {copy: EditorialContent["handoff"]}) {
           <picture>
             <source media="(min-width: 681px), (orientation: landscape)" srcSet="/media/journey-v5/stills/032-desktop.webp" />
             <source media="(max-width: 680px) and (orientation: portrait)" srcSet="/media/journey-v5/stills/032-mobile.webp" />
-            <img src="/media/journey-v5/stills/032-mobile.webp" alt="" width={608} height={1080} loading="eager" />
+            <img src="/media/journey-v5/stills/032-mobile.webp" alt="" width={608} height={1080} loading="lazy" decoding="async" />
           </picture>
         </figure>
         <div ref={copyRef} className="handoff-copy">

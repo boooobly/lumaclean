@@ -40,11 +40,12 @@ export function UpholsteryGallery({ locale, prices }: { locale: Locale; prices: 
           item?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
           item?.querySelector<HTMLSelectElement>(".up-type select")?.focus({ preventScroll: true });
         });
-      }} aria-label={`${p.addLabel}: ${p.galleryNames[i]}`}>
+      }} aria-describedby="up-gallery-action" aria-pressed={selected === type}>
         <span className="up-gallery-image"><Image src={`/media/upholstery/${galleryImages[i]}.webp`} alt={p.galleryAlts[i]} fill sizes={i === 0 || i === 1 ? "(max-width: 680px) 90vw, 46vw" : "(max-width: 680px) 44vw, 30vw"} /></span>
         <span className="up-gallery-caption"><span><strong>{p.galleryNames[i]}</strong><small>{p.galleryNotes[i]}</small></span><span className="up-gallery-price">{c.from} {formatRsd(prices[i], locale)}<span aria-hidden="true"><ArrowIcon direction="down-right" /></span></span></span>
       </button>)}
     </div>
+    <span id="up-gallery-action" className="up-sr-only">{p.addLabel}</span>
     <p className="up-image-note">{p.illustration}</p>
     <span className="up-sr-only" role="status">{announcement}</span>
   </>;

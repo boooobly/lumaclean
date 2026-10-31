@@ -130,7 +130,7 @@ export default async function ServicePage({params}: {params: Promise<Params>}) {
               <p>{content.lead}</p>
               <div className="service-hero-actions"><a href="#estimate">{ui.estimate}<i><ArrowIcon direction="down-right" /></i></a><small>{ui.allBelgrade}</small></div>
             </div>
-            <div className="service-hero-image"><Image src={visual.hero} alt={visual.heroAlt[locale]} fill preload sizes="(max-width: 900px) calc(100vw - 40px), (max-width: 1440px) 43vw, 590px"/></div>
+            <div className="service-hero-image"><Image src={visual.hero} alt={visual.heroAlt[locale]} fill loading="eager" fetchPriority="high" sizes="(max-width: 900px) calc(100vw - 40px), (max-width: 1440px) 43vw, 590px"/></div>
           </div>
         </section>
 

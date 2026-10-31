@@ -66,6 +66,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .journey-clean {
   z-index: 0;
 }
+.journey-hero:focus-visible {
+  outline: 3px solid #5fc5cc;
+  outline-offset: -5px;
+}
 .journey-dirty {
   z-index: 1;
   opacity: 0;

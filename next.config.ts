@@ -11,7 +11,14 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
-      {source: "/admin/:path*", headers: [{key: "X-Robots-Tag", value: "noindex, nofollow, noarchive"}, {key: "Cache-Control", value: "private, no-store"}, {key: "X-Frame-Options", value: "DENY"}, {key: "Referrer-Policy", value: "same-origin"}]},
+      {source: "/:path*", headers: [
+        {key: "X-Content-Type-Options", value: "nosniff"},
+        {key: "Referrer-Policy", value: "strict-origin-when-cross-origin"},
+        {key: "X-Frame-Options", value: "SAMEORIGIN"},
+        {key: "Content-Security-Policy", value: "base-uri 'self'; object-src 'none'; frame-ancestors 'self'"},
+        {key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups"},
+      ]},
+      {source: "/admin/:path*", headers: [{key: "X-Robots-Tag", value: "noindex, nofollow, noarchive"}, {key: "Cache-Control", value: "private, no-store"}, {key: "X-Frame-Options", value: "DENY"}, {key: "Content-Security-Policy", value: "base-uri 'self'; object-src 'none'; frame-ancestors 'none'"}, {key: "Referrer-Policy", value: "same-origin"}]},
       {source: "/api/auth/:path*", headers: [{key: "X-Robots-Tag", value: "noindex, nofollow"}, {key: "Cache-Control", value: "private, no-store"}]},
       {source: "/api/admin/:path*", headers: [{key:"X-Robots-Tag",value:"noindex, nofollow, noarchive"},{key:"Cache-Control",value:"private, no-store"},{key:"X-Frame-Options",value:"DENY"}]},
       ...(process.env.VERCEL_ENV === "preview" || (process.env.VERCEL_ENV !== "production" && !process.env.VERCEL && process.env.ARTICLES_PREVIEW === "1") ? [{source: "/:path*", headers: [{key: "X-Robots-Tag", value: "noindex, nofollow"}]}] : []),

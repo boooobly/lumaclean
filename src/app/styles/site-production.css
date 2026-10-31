@@ -111,7 +111,7 @@
   .site-home .journey-infographic { text-shadow: none; }
   .site-home .infographic-eyebrow { color: var(--lc-ink-soft); }
   .site-home .infographic-eyebrow::before { background: var(--lc-teal); }
-  .site-home .infographic-item > span { color: var(--lc-teal); border-color: var(--lc-line); }
+  .site-home .infographic-item > span { color: var(--lc-teal-ink); border-color: var(--lc-line); }
   .site-home .faucet-infographic { border-radius: 0; box-shadow: none; backdrop-filter: none; }
   .site-home .kitchen-feature { background: transparent; border-color: var(--lc-line); box-shadow: none; backdrop-filter: none; }
   .site-home .kitchen-feature :is(strong,span) { color: var(--lc-ink); }
