@@ -10,7 +10,12 @@ try{
   const page=await browser.newPage({viewport:{width:1440,height:1000}});
   const key=route.replaceAll('/','_');
   try{
-   await page.goto('https://pagespeed.web.dev/analysis?url='+encodeURIComponent('https://lumacleanrs.com'+route),{waitUntil:'domcontentloaded',timeout:60000});
+   await page.goto('https://pagespeed.web.dev/',{waitUntil:'domcontentloaded',timeout:60000});
+   await page.locator('input[name="url"]').fill('https://lumacleanrs.com'+route);
+   const analyze=page.getByRole('button',{name:/Analyze|Анализировать/});
+   if(await analyze.count())await analyze.click();
+   await page.waitForFunction(()=>document.querySelector('[role="tab"]')||/Unable to (resolve|navigate)|Не удалось перейти/.test(document.body.innerText),{},{timeout:180000});
+   if(!await page.getByRole('tab').count())throw Error((await page.locator('body').innerText()).match(/(?:Unable to (?:resolve|navigate)|Не удалось перейти)[^\n]*/)?.[0]||'PSI did not return a report');
    await page.getByRole('tab',{name:/Mobile|Мобильные/}).waitFor({timeout:180000});
    for(const device of ['mobile','desktop']){
     await page.getByRole('tab',{name:device==='mobile'?/Mobile|Мобильные/:/Desktop|Компьютер/}).click();
