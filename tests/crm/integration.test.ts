@@ -64,7 +64,9 @@ test(
       locale: "ru",
       service: "regular",
       area: 55,
-      urgent: true,
+      // Ordinary intake is independent of the wall-clock same-day cutoff.
+      // Urgent prices/cutoff are covered by pricing and temporal regression tests.
+      urgent: false,
       extras: [{ code: "standardWindow", quantity: 2 }],
       consent: true,
       comment: "Fixture comment",
@@ -130,7 +132,7 @@ test(
           });
           assert.equal(lead.service?.code, "regular");
           assert.equal(lead.normalizedPhone, "+381641234567");
-          assert.equal(Number(lead.estimatedPrice), 8900);
+          assert.equal(Number(lead.estimatedPrice), 7400);
           assert.equal(lead.extras.length, 1);
           assert.equal(
             await db.auditLog.count({

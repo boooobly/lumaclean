@@ -4,13 +4,13 @@ import path from 'node:path';
 import pg from 'pg';
 import {spawnSync} from 'node:child_process';
 import {writeFileSync} from 'node:fs';
-import {isolatedEnvironment} from './environment.mjs';
+import {isolatedEnvironment,localClusterDirectory} from './environment.mjs';
 const env=isolatedEnvironment();env.__NEXT_PROCESSED_ENV='true';
 const control=new pg.Client({connectionString:'postgresql://postgres@127.0.0.1:55449/postgres'});
 await control.connect();
 try {
   const directory=(await control.query('SHOW data_directory')).rows[0].data_directory;
-  assert.equal(directory.replaceAll('\\','/').toLowerCase(),path.resolve('artifacts/release-readiness/pgdata').replaceAll('\\','/').toLowerCase());
+  assert.equal(directory.replaceAll('\\','/').toLowerCase(),localClusterDirectory().replaceAll('\\','/').toLowerCase());
   for(const name of ['lumaclean_admin_test','lumaclean_admin_bootstrap_test','lumaclean_migration_test','lumaclean_reliability_test','lumaclean_ai_test']) {
     assert.equal((await control.query('SELECT count(*)::int AS n FROM pg_stat_activity WHERE datname=$1',[name])).rows[0].n,0);
     const backup=name+'_before_audit_20261101';

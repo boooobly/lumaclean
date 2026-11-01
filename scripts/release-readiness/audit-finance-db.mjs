@@ -3,13 +3,13 @@ import path from 'node:path';
 import pg from 'pg';
 import {spawnSync} from 'node:child_process';
 import {writeFileSync} from 'node:fs';
-import {isolatedEnvironment} from './environment.mjs';
+import {isolatedEnvironment,localClusterDirectory} from './environment.mjs';
 const env=isolatedEnvironment();env.__NEXT_PROCESSED_ENV='true';env.PATH=path.dirname(process.execPath)+path.delimiter+env.PATH;
 const db=new pg.Client({connectionString:'postgresql://postgres@127.0.0.1:55449/postgres'});await db.connect();
 try {
  const actual=(await db.query('SHOW data_directory')).rows[0].data_directory.replaceAll('\\','/').toLowerCase();
- assert.equal(actual,path.resolve('artifacts/release-readiness/pgdata').replaceAll('\\','/').toLowerCase());
- const name='lumaclean_admin_test',backup=name+'_after_admin_audit_20261101';
+ assert.equal(actual,localClusterDirectory().replaceAll('\\','/').toLowerCase());
+ const name='lumaclean_admin_test',backup=name+'_before_finance_'+Date.now();
  assert.equal((await db.query('SELECT 1 FROM pg_database WHERE datname=$1',[backup])).rowCount,0);
  assert.equal((await db.query('SELECT count(*)::int AS n FROM pg_stat_activity WHERE datname=$1',[name])).rows[0].n,0,'Wait for local test connections to close');
  await db.query(`ALTER DATABASE "${name}" RENAME TO "${backup}"`);

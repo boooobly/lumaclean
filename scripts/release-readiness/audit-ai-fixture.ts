@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import path from 'node:path';
+import {localClusterDirectory} from './environment.mjs';
 import {randomUUID} from 'node:crypto';
 import {writeFileSync} from 'node:fs';
 import {hashPassword} from 'better-auth/crypto';
@@ -17,7 +17,7 @@ const db=new PrismaClient({adapter:new PrismaPg({connectionString:u.toString(),m
 db.$on('query',()=>queries++);
 try {
  const dir=await db.$queryRawUnsafe<{data_directory:string}[]>('SHOW data_directory');
- assert.equal(dir[0].data_directory.replaceAll('\\','/').toLowerCase(),path.resolve('artifacts/release-readiness/pgdata').replaceAll('\\','/').toLowerCase());
+ assert.equal(dir[0].data_directory.replaceAll('\\','/').toLowerCase(),localClusterDirectory().replaceAll('\\','/').toLowerCase());
  const id=randomUUID(),email=`audit-${id}@example.test`,password=randomUUID()+'Aa!7';
  await db.user.create({data:{id,name:'Synthetic audit owner',email,emailVerified:true,role:'ADMIN',accounts:{create:{accountId:id,providerId:'credential',password:await hashPassword(password)}}}});
  writeFileSync('artifacts/admin/ai-local-owner.json',JSON.stringify({email,password}));
