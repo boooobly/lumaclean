@@ -1,4 +1,10 @@
 import {readdirSync, readFileSync} from 'node:fs';
+import path from 'node:path';
+
+// Dedicated PostgreSQL18 cluster for the Website activation regression, never production.
+export function localClusterDirectory() {
+  return path.resolve('artifacts/vercel-pro-20261101/pgdata');
+}
 
 // Blank every dotenv key so Next/Prisma cannot silently restore local live settings.
 export function isolatedEnvironment(database = 'lumaclean_admin_test', port = 3100) {
