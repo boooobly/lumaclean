@@ -2,7 +2,7 @@
 
 Дата: 1 ноября 2026. Ветка: `codex/vercel-pro-optimization-20261101`. Рабочая копия: `vercel-pro-optimization/`.
 
-Изменения подготовлены локально. Production deployment, merge, push, изменения production DB, Firewall и платных услуг не выполнялись. Локальные тестовые БД содержат только синтетические данные. Внешняя доставка уведомлений заменялась заглушками.
+Первоначальный этап подготовлен локально; ниже сохранены его измерения. Продолжение release verification описано в разделах16–23: protected cloud Preview и отдельная synthetic DB подготовлены на существующих ресурсах. Production deployment/promotion, merge, изменения production DB/Firewall/Team budget/add-ons не выполнялись. Telegram сообщения не отправлялись.
 
 ## 1. Фактическая конфигурация и исходное состояние
 
@@ -59,7 +59,7 @@ Fluid Compute и pool integration, регион рядом с БД, CDN/image op
 
 ## 5. Изменения кода
 
-- `src/lib/services/website-notification-recovery.ts`: выбирает только due WEBSITE_LEAD / ADMIN / TELEGRAM, включая истёкшие SENDING lease; использует прежний `deliverNotification`. До 10 событий, порядок scheduledAt/id, 30 s на начало следующей обработки. Другие уведомления/AI jobs не запускает. Существующие CAS lease, retries, terminal states и согласие не заменены.
+- `src/lib/services/website-notification-recovery.ts`: выбирает только due WEBSITE_LEAD / ADMIN / TELEGRAM, связанные с Lead.channel=WEBSITE (исправлено при release verification), включая истёкшие SENDING lease; использует прежний `deliverNotification`. До 10 событий, порядок scheduledAt/id, 30 s на начало следующей обработки. Другие уведомления/AI jobs не запускает. Существующие CAS lease, retries, terminal states и согласие не заменены.
 - `/api/notifications/recover`: `CRON_SECRET`, maxDuration 60 s, no-store, агрегаты выбранной партии без персональных данных. Cron `*/5 * * * *`; прежний AI Cron не учащается. Это резервный интервал, не SLA: backlog, DB outage и terminal UNKNOWN могут потребовать владельца.
 - `cron-auth.ts`: общий byte-safe guard для нового и существующего recovery endpoints.
 - `database/client.ts`: idle-error handler. Он не маскирует ошибки SQL-запросов и не меняет размеры пула.
@@ -257,3 +257,78 @@ DB suites требуют только собственных localhost fixtures 
 7. Повторить тот же production Lighthouse suite и отслеживать реальные CWV после накопления данных. Через 7 дней проверить цену нового Cron, DB usage, queue age и расходы всей Team.
 
 Состояние результата: локальная ветка с ограниченными улучшениями и доказательствами; разрешение на production и завершённая cloud release verification остаются отдельным решением.
+
+## 16. Продолжение release verification — статус BLOCKED
+
+Работа продолжена строго из6d9ef0f в той же ветке. Production повторно подтверждён544da11/dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH; main22b5818 отстаёт на18production commits. Ветка Pro содержит только один первоначальный commit поверх production. Audit094ae45, Sofija10625b2, RC5c4e98d и release574d055 изучены read-only, массового merge нет. Source SQL/schema/pricing/duration/SEO/agent runtime идентичны production; общий byte-safe guard существующего agent recovery — первоначальная инфраструктурная правка Pro, не смена AI-политики. Readonly merge-tree с release574d055 не выявил конфликта; это не разрешение на merge. Выпускать явный SHA Pro, не main/latest и не произвольную локальную папку.
+
+Новый подтверждённый дефект: Sofija staging route использует enqueueLeadReview и тот же kind=WEBSITE_LEAD, но Lead.channel=OTHER. Старый recovery обработал voice fixture (red:5PASS/2FAIL, включая parent). Исправление website-notification-recovery.ts связывает Notification.payload.leadId с Lead и фильтрует channel=WEBSITE **до LIMIT10**. После исправления7/7PG18 PASS; voice event остаётся PENDING, чужой HANDOFF/terminal/future event и AI jobs не запускаются. Действующий deliverNotification/CAS/lease/UNKNOWN/retry не заменён. Изменений Sofija не переносили.
+
+## 17. Фактическая изоляция cloud Preview
+
+CLI авторизован официальным device flow, владелец подтвердил вход. Token не запрашивался сообщением, не печатался и не вошёл в Git. CLI cache/config находятся в ignored artifacts. Новые проекты/branches/compute/Blob stores/add-ons не создавались.
+
+В существующем Neon RC branch br-rough-bread-b8y7ehd6 / compute ep-icy-smoke-b8pu84zj создана **новая пустая** lumaclean_vercel_pro_20261101, PostgreSQL18.6. Production branch br-noisy-bar-b8vmyqyi не менялся. Первичный public_tables=0, Client/Lead/Order/Message=0; parent-data в эту БД не копировались. Runtime lumaclean_pro_runtime_20261101: NOSUPERUSER/NOCREATEDB/NOCREATEROLE/NOREPLICATION/NOBYPASSRLS, не member neon_superuser, DDL denied. Metadata privileges на neondb проверены без чтения records: SELECT Client/Lead/Order=false. App получает только собственную pooled connection; direct/migration credentials в deployment не передавались.
+
+Neon API создал managed роли lumaclean_pro_migrator_20261101 и lumaclean_pro_app_20261101 с расширенными provider privileges. Обычный SQL не разрешил снять их; runtime использует отдельно созданную SQL-роль без этих прав. Managed app-role не используется. Обе managed роли/пустая test DB сохранены, ничего автоматически не удалялось; владельцу передан точный inventory для последующего cleanup. Их пароли не опубликованы/не переданы приложению.
+
+Cloud Windows Prisma schema engine не установил соединение (FAIL сохранён). Поэтому cloud схема получена явным исполнением25 неизменённых SQL через pg с TLS, затем synthetic catalogue seed. Это **SQL replay, не Prisma migrate-deploy PASS**; metadata production не изменялась, resolve/reset не использованы. Локально те же25 миграций проходят штатный Prisma deploy+zero drift на3 fresh PG18 DB.
+
+В Preview нет Blob token: upload намеренно disabled, отсутствие доступа — граница изоляции, не PASS загрузки. Telegram/admin/customer bot/chat и WhatsApp/Viber/AI/Maps credentials blank; AI server=false и все DB channels/global OFF. Production analytics IDs blank, внешняя аналитика блокировалась браузером. Deployment Vercel Authentication сохраняется. В source есть2cron definitions, но scheduler исполняет production deployments, **не эти Preview**; private config попытка crons=[] не изменила build-derived definitions, поэтому не заявляем, что definitions отсутствуют. Production config cron5min сохранён отдельно SHA256 в release evidence.
+
+## 18. Cloud и локальные результаты
+
+Первый protected Preview nadvzh9tv: RU/SR/EN/booking-policy PASS, auth503 из-за отсутствия BETTER_AUTH_URL. Ошибка окружения сохранена, не названа PASS. Далее g7cibwox0: actual UI формы3locale PASS, auth/session/login/admin/leads/clients/calendar PASS. Конфиг origin исправлен только для deployment; исходный auth-код уже использует фактический VERCEL_URL в Preview.
+
+На первой фактической API серии6POST (3видa×повтор) созданы3Lead/3outbox; browser серия добавила3syntheticLead. 0Orders/0AIInvocation/0AgentJob, никакого client messaging. Recovery с правильным test CRON_SECRET возвращает200 и агрегаты, без авторизации401/no-store. Но sent=0, pending/errors>0 при отключённом Telegram — это не delivery PASS.
+
+Native Queue пока **не подтверждён**: приложение попыталось публикацию, затем сработал существующий QUEUE_UNAVAILABLE fallback; publishedAt=null, успешный callback не доказан. Локальный дополнительный SDK probe отказался выполняться, потому что официальный env pull выдаёт development OIDC, а цель Preview; environment guard не обходился. Нельзя считать ручной recovery или after() доказательством Queue.
+
+Финальный Preview после Website/voice scope fix: [protected Preview](https://lumaclean-release-candidate-oizippdef.vercel.app). Его окончательный smoke/source identity фиксируется в vercel-pro-release-readiness-2026-11.json; предыдущий PASS не переносится автоматически на новый source.
+
+Локально после scope fix:1049unit PASS/0FAIL/34SKIP;15SSR;40admin/CRM/calendar/routing;15finance;17intake/reliability;7Website recovery. Types/lint/build/Prisma validate PASS, lint2img warnings.9negativeHTTP;7healthy/concurrent recovery checks;4actualDB-down checks (валидный bearer503, неправильный401), повтор после DB restart200.225layouts/75pages,13formgroups,30upholstery layouts,4recap locales,6axe cases PASS с mocked API/external transport. Старые guard fixtures и failed runs сохранены; исправлены test-only env empty/unset и отсутствующий recipient, gates не ослаблялись. Нового масштабного performance аудита нет; исходные Lighthouse медианы раздела6 сохраняют первоначальный scope.
+
+## 19. Source-bound release evidence
+
+Предусмотренный механизм sourceFingerprint/sourceInventory применён через vercel-pro-evidence.mjs с явным allowlist12 application paths, fresh logs и исходным production baseline. Pricing/duration/SEO/AI/schema/migration hashes не менялись. release/ai-go-live.json обновлён как **WEBSITE_MANUAL_AI_OFF**, aiAutoReady=false, verifiedRelease().verified=false. Нет fingerprint mismatch после обновления; это совпадение проверенного source, а не AI certificate. Source fingerprint: 3299f1e5e735dc13e2dd87ff57db4650dac01d56c51fc2bdc7b51cd952453d4a. vercel.json hash закреплён отдельно, поскольку build platform его преобразует. Native/cloud ограничения перечислены явно; productionReady=false.
+
+## 20. Все24moderate зависимости
+
+Свежий npm audit --json:24moderate/0high/0critical, --omit=dev:9moderate. Это24 dependency records одного root advisory [minimatch globparts amplification](https://github.com/advisories/GHSA-g3hv-75wg-m249), не24независимых CVE. Полная per-package классификация: [dependency evidence](vercel-pro-dependencies-2026-11.json).
+
+Runtime graph9: @vercel/queue, exceljs, archiver, archiver-utils, glob, minimatch, readdir-glob, rimraf, zip-stream. Queue SDK minimatch использует repository-controlled function patterns в dev mapping; публичный arbitrary glob в просмотренных callsites не найден. ExcelJS доступен через ADMIN+origin+2MB XLSX+1000ZIPentries/20MB expansion guards; приложение читает workbook, archive-glob export не используется в просмотренном пути. Это анализ достижимости, не доказательство полной неэксплуатируемости transitive code.
+
+Dev-only15: @eslint-community/eslint-utils, @eslint/config-array, @eslint/eslintrc, @next/eslint-plugin-next, @typescript-eslint/eslint-plugin/parser/type-utils/typescript-estree/utils, eslint, eslint-config-next, eslint-plugin-import/jsx-a11y/react, typescript-eslint. Нужны upstream-compatible fixes и отдельная regression. Предложенные audit downgrades Queue0.1.1/ESLint4/config-next0.2.4 не применялись, major override/force fix не выполнялись. Lockfile и зависимости этого scope неизменны.
+
+## 21. Цена Cron5min
+
+288invocations/day;8640за30дней или8928за31день. При текущем iad1 тарифе [Vercel Fluid](https://vercel.com/docs/functions/usage-and-pricing): CPU$0.128/hour, memory$0.0106/GB-hour, invocation$0.60/M. Формула gross до credit: N×0.60/1e6 + CPU_seconds/3600×0.128 + memory_GB_seconds/3600×0.0106. Иллюстрация, **не измеренная котировка**:8640empty ticks по10msCPU/200mslife/2GB≈$0.0184; при20msCPU/1slife≈$0.0622. Cold starts/нагрузка/backlog увеличивают значения; CPU/memory instance pooling требует фактического Usage.
+
+Более существенный риск — Neon: запрос каждые5мин может мешать scale-to-zero. В API suspend_timeout_seconds=0; точное effective provider default не предполагается. При условно постоянном0.25CU получается180CU-hours/30days; это может быть до$19.08наLaunch или$39.96наScale до credits, либо исчерпать Free quota. Это worst-case относительно полностью спящей БД, не обещание такого прироста: production уже активен и другие workload могут держать compute awake. См. [Neon scale-to-zero](https://neon.com/docs/introduction/scale-to-zero) и [plans](https://neon.com/docs/introduction/plans). Подтвердить фактический plan/active hours до approval и сравнить через24ч/7дней. Периодичность/compute/Team budget не менялись в production, новых add-ons нет.
+
+## 22. Точный порядок выпуска и rollback
+
+1. Зафиксировать exact commit этой ветки и fingerprint, повторно проверить lumacleanrs.com→deployment→544da11. Diff только production544da11→Pro; не собирать main22b5818, audit, Sofija или RC source по названию папки. Не запускать migrations/seed в production: schema не меняется и исторические checksum discrepancies не исправляются этим релизом.
+2. Проверить final protected Preview на отдельной БД/role, source hashes, auth/forms/idempotency/outbox/recovery. Закрыть native Queue block. Для Telegram сначала отдельные bot/chat, exact recipient proof и явное разрешение максимум3synthetic messages; 0реальных клиентов/звонков.
+3. Передать владельцу commit+readiness+cloud evidence+cost assumptions. **Отдельное разрешение A**: staged production build без назначения доменов, CLI --prod --skip-domain (не выполнялся), с production env AI_AGENT_ENABLED=false и тем же config hash. Preview promotion не заменяет проверку production artifact/env.
+4. Проверить staged identity/Node24/iad1/headers/auth/read-only public pages/source evidence; не вызывать valid recovery на рабочейБД как read-only smoke. Зафиксировать eligible rollback dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH и существующий backup/SLA, без копирования PII в тест.
+5. **Отдельное разрешение B**: promotion конкретного staged deployment. Проверить alias, GitSHA, manual release profile и enabled Cron definitions, новый5min path и прежнийdaily agent. Только после одобренной тестовой отправки подтверждать Telegram receipt.
+6. Rollback при потере/дублировании заявок/отправок, auth/PII regression, неверном source, устойчивых5xx или DB outage: owner-approved Instant Rollback на зафиксированный deployment. [Vercel](https://vercel.com/docs/instant-rollback) восстанавливает cron definitions target, но Disable Cron Jobs flag сохраняется; проверить обе вещи, а не предполагать cron состояние. Запущенные/pinned Queue deliveries могут завершаться отдельно: сохранить rows/leases, не reset attempts/publishedAt/UNKNOWN и не делать массовый retry. Новых schema changes нет; приложение rollback не означает DB rollback. Заявки/уведомления/audit не удалять.
+
+## 23. Наблюдение60мин /24ч /7дней
+
+| Окно | Проверка | Действие/порог |
+|---|---|---|
+|0–60мин|Сразу после promotion и каждые5мин: HTTP5xx, APIp95/latency, notification oldestPENDING/lease/UNKNOWN, Queue receive/delete/redeliveries, Cron status, database_idle_connection_failed|Любая потеря/дубликат/PII — stop/rollback review; UNKNOWN>0 — ручное расследование, без retry; backlog age>10мин или два ожидаемых тика без успешного Cron — owner alert; p95>2×baseline15мин — расследовать|
+|24ч|Сравнить created=true/false и реальный Lead/outbox counts,6языковыхpublic/mobile checks,5xxrate, Queue backlog/terminalstates,≈288cron requests, DBactivehours/connections и Usage|Ручные сохранённые заявки не чистить. Проверить обработку каждого FAILED/UNKNOWN; сопоставить Function/Neon compute с baseline, не месяц Team subtotal|
+|7дней|Недельный Cron success ratio/lag, DB connection errors, Queue duplicates/retry caps, Vercel/Neon costs, mobile lab на тех же конфигурациях, CrUX при наличииsamples|Не подменять INP величинойTBT; при cost росте из-за autosuspend предложить cadence/архитектуру отдельно, без автоматического budget/add-on изменения|
+
+У пустой партии приложение сейчас не пишет success console log: для Cron deadman использовать provider request/status logs, а не отсутствие application messages. HTTP200 summary.errors>0 не означает доставку; наблюдать pending/failed/unknown/errors раздельно. Логи новых обработчиков содержат только counters/static event codes, без contacts/IDs/текста/секретов.
+
+### Финальный readback продолжения
+
+Final protected Preview **dpl_6kFF76oAiBYzJQup4cUXwmy8jk1B**, READY, Node24/iad1. **365/365 immutable application/migration inputs и manual release evidence совпали byte-for-byte по deployment file SHA1; differences=[]**.24унаследованных optimized assets совпали SHA256 с production evidence. Финальный cloud smoke PASS_SCOPED:RU/SR/EN, auth/CRM, concurrent GET recovery; synthetic OTHER/voice event остаётся PENDING/attempts0. Всего7syntheticLeads (6Website+1OTHERscope),0Orders/0AIinvocations/0AgentJobs. Native Queue и Telegram остаются BLOCKED, не входят в PASS_SCOPED.
+
+Source-bound mismatch устранён штатным обновлением manual evidence после actual проверок; исходники и release JSON финального Preview совпали. AI_AUTO admission=false сохранён. Повторное production чтение:544da11/dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH READY; main22b5818, protection off. Staged production/production promotion не выполнялись.
+
+**Итог: BLOCKED**, а не READY FOR PRODUCTION APPROVAL: нужен successful native Queue publish+consumer на RC с правильным Preview OIDC (не development-token), согласованный test recipient и отдельное разрешение до≤3Telegram messages. Оба production этапа требуют раздельного approval после review конкретного commit и стоимости Neon. Exact commit фиксируется в передаче результата; документы/дополнительный release-summary после Preview не меняют его проверенные365immutable inputs.

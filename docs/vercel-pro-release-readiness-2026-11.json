@@ -1,0 +1,593 @@
+{
+  "at": "2026-11-01T22:37:04.188Z",
+  "status": "BLOCKED",
+  "base": "544da114d0a129e9dd9c0f73c047a574af776fd6",
+  "main": "22b58184e0fdb0242ec5d2ae9d0e3b8850411fa2",
+  "initialCommit": "6d9ef0f6441096862fbcfb59528a21194fabe56a",
+  "source": {
+    "fingerprint": "3299f1e5e735dc13e2dd87ff57db4650dac01d56c51fc2bdc7b51cd952453d4a",
+    "changed": [
+      "src/app/api/agent/recover/route.ts",
+      "src/app/api/lead/route.ts",
+      "src/app/api/notifications/recover/route.ts",
+      "src/app/[locale]/layout.tsx",
+      "src/app/[locale]/[upholstery]/page.tsx",
+      "src/components/site/upholstery-calculator.tsx",
+      "src/components/site/website-chat.tsx",
+      "src/lib/chat-recap-copy.ts",
+      "src/lib/database/client.ts",
+      "src/lib/services/cron-auth.ts",
+      "src/lib/services/website-notification-recovery.ts",
+      "next.config.ts"
+    ],
+    "manualSourceMatches": true,
+    "aiAutoReady": false,
+    "verifiedAiAdmission": false,
+    "checks": {
+      "unit": {
+        "pass": 1049,
+        "fail": 0,
+        "skip": 34
+      },
+      "client": {
+        "pass": 15,
+        "fail": 0,
+        "skip": 0
+      },
+      "admin": {
+        "pass": 40,
+        "fail": 0,
+        "skip": 0
+      },
+      "finance": {
+        "pass": 15,
+        "fail": 0,
+        "skip": 0
+      },
+      "reliability": {
+        "pass": 17,
+        "fail": 0,
+        "skip": 0
+      },
+      "recovery": {
+        "pass": 7,
+        "fail": 0,
+        "skip": 0
+      }
+    },
+    "productionReady": false,
+    "configHash": "11f88831828ecb594a68991940aa02fce6ab763595ec274b515e73c40427f295"
+  },
+  "branches": {
+    "audit": "094ae45bd5c722449b7ace7b339e526a4adb05fd",
+    "sofija": "10625b213c8e27ad217aefb0f73663123ac3b9ae",
+    "releaseCandidate": "5c4e98d4065af12fec51b31293cc27c35756a5fd",
+    "release": "574d0550682032f0c7bbc129cb20f924f2f34996",
+    "merged": false
+  },
+  "cloudIsolation": {
+    "scope": "Actual isolated cloud PostgreSQL18; explicit25 SQL replay, not Prisma migrate-deploy; no native delivery",
+    "host": "ep-icy-smoke-b8pu84zj.c-14.us-east-1.aws.neon.tech",
+    "branch": "br-rough-bread-b8y7ehd6",
+    "database": "lumaclean_vercel_pro_20261101",
+    "role": "lumaclean_pro_runtime_20261101",
+    "postgres": 180006,
+    "clients": "0",
+    "leads": "0",
+    "orders": "0",
+    "messages": "0",
+    "sqlFilesReplayed": 25,
+    "prismaCloudEngine": "BLOCKED_CONNECTION",
+    "ddlDenied": true,
+    "metadataDenied": true,
+    "aiMode": "OFF",
+    "blobAccess": "DISABLED: no token supplied",
+    "testTelegram": "DISABLED: no bot/chat supplied",
+    "newComputeCreated": false,
+    "existingCustomerDataCopied": false
+  },
+  "cloudFirstSmoke": {
+    "scope": "Actual protected cloud Preview HTTP/PostgreSQL; no Telegram/AI/Blob credentials",
+    "base": "https://lumaclean-release-candidate-nadvzh9tv.vercel.app",
+    "gets": [
+      {
+        "path": "/ru",
+        "status": 200,
+        "lang": "ru"
+      },
+      {
+        "path": "/sr",
+        "status": 200,
+        "lang": "sr"
+      },
+      {
+        "path": "/en",
+        "status": 200,
+        "lang": "en"
+      },
+      {
+        "path": "/api/booking-policy",
+        "status": 200,
+        "noStore": true
+      },
+      {
+        "path": "/api/admin/clients",
+        "status": 401,
+        "noStore": true
+      },
+      {
+        "path": "/api/notifications/recover",
+        "status": 401,
+        "noStore": true
+      }
+    ],
+    "intakes": [
+      {
+        "kind": "CLEANING",
+        "requests": 2,
+        "leads": 1,
+        "outbox": 1,
+        "status": 200
+      },
+      {
+        "kind": "CONTACT_REQUEST",
+        "requests": 2,
+        "leads": 1,
+        "outbox": 1,
+        "status": 200
+      },
+      {
+        "kind": "UPHOLSTERY",
+        "requests": 2,
+        "leads": 1,
+        "outbox": 1,
+        "status": 200
+      }
+    ],
+    "recovery": [
+      {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "selected": 2,
+          "processed": 2,
+          "deferred": 0,
+          "errors": 2,
+          "sent": 0,
+          "pending": 2,
+          "failed": 0,
+          "unknown": 0,
+          "durationMs": 654
+        }
+      },
+      {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "selected": 0,
+          "processed": 0,
+          "deferred": 0,
+          "errors": 0,
+          "sent": 0,
+          "pending": 0,
+          "failed": 0,
+          "unknown": 0,
+          "durationMs": 4
+        }
+      }
+    ],
+    "errors": [],
+    "outbox": [
+      {
+        "deliveryState": "PENDING",
+        "attempts": 1,
+        "published": false,
+        "lastErrorCode": "INTERNAL_TELEGRAM_UNCONFIGURED"
+      },
+      {
+        "deliveryState": "PENDING",
+        "attempts": 1,
+        "published": false,
+        "lastErrorCode": "INTERNAL_TELEGRAM_UNCONFIGURED"
+      },
+      {
+        "deliveryState": "PENDING",
+        "attempts": 1,
+        "published": false,
+        "lastErrorCode": "INTERNAL_TELEGRAM_UNCONFIGURED"
+      }
+    ],
+    "counts": {
+      "leads": 3,
+      "orders": 0,
+      "invocations": 0,
+      "jobs": 0
+    },
+    "status": "PASS",
+    "telegramDelivery": "NOT_RUN_DISABLED"
+  },
+  "cloudBrowser": {
+    "base": "https://lumaclean-release-candidate-g7cibwox0.vercel.app",
+    "scope": "Actual protected cloud HTTP/browser/PG18; external analytics/AI/Telegram/Blob disabled",
+    "pages": [
+      {
+        "locale": "ru",
+        "status": 200
+      },
+      {
+        "locale": "sr",
+        "status": 200
+      },
+      {
+        "locale": "en",
+        "status": 200
+      }
+    ],
+    "forms": [
+      {
+        "locale": "ru",
+        "status": "PASS",
+        "transport": "ACTUAL",
+        "syntheticLead": true
+      },
+      {
+        "locale": "sr",
+        "status": "PASS",
+        "transport": "ACTUAL",
+        "syntheticLead": true
+      },
+      {
+        "locale": "en",
+        "status": "PASS",
+        "transport": "ACTUAL",
+        "syntheticLead": true
+      }
+    ],
+    "auth": [
+      {
+        "path": "get-session",
+        "status": 200
+      },
+      {
+        "path": "/admin",
+        "status": 200
+      },
+      {
+        "path": "/admin/leads",
+        "status": 200
+      },
+      {
+        "path": "/admin/clients",
+        "status": 200
+      },
+      {
+        "path": "/admin/calendar",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "recovery": {
+      "ok": true,
+      "selected": 3,
+      "processed": 3,
+      "deferred": 0,
+      "errors": 3,
+      "sent": 0,
+      "pending": 3,
+      "failed": 0,
+      "unknown": 0,
+      "durationMs": 673
+    },
+    "counts": {
+      "leads": 6,
+      "orders": 0,
+      "ai": 0,
+      "jobs": 0
+    },
+    "status": "PASS"
+  },
+  "previewFinal": {
+    "id": "dpl_6kFF76oAiBYzJQup4cUXwmy8jk1B",
+    "state": "READY",
+    "project": "prj_Dzc8yXL61u8r8vmKewjRtK9ZrTdk",
+    "target": null,
+    "source": "cli",
+    "node": "24.x",
+    "crons": [
+      {
+        "path": "/api/agent/recover",
+        "schedule": "0 6 * * *"
+      },
+      {
+        "path": "/api/notifications/recover",
+        "schedule": "*/5 * * * *"
+      }
+    ],
+    "protected": true,
+    "functions": [
+      "src/app/api/queues/notifications/route.ts",
+      "src/app/api/queues/agent/route.ts"
+    ],
+    "region": [
+      "iad1"
+    ],
+    "url": "https://lumaclean-release-candidate-oizippdef.vercel.app",
+    "smoke": {
+      "base": "https://lumaclean-release-candidate-oizippdef.vercel.app",
+      "deployment": "dpl_6kFF76oAiBYzJQup4cUXwmy8jk1B",
+      "scope": "Actual final protected Preview/PG18; no Telegram/native AI/Blob",
+      "pages": [
+        {
+          "locale": "ru",
+          "status": 200
+        },
+        {
+          "locale": "sr",
+          "status": 200
+        },
+        {
+          "locale": "en",
+          "status": 200
+        }
+      ],
+      "auth": [
+        {
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "path": "/admin/leads",
+          "status": 200
+        },
+        {
+          "path": "/admin/clients",
+          "status": 200
+        },
+        {
+          "path": "/admin/calendar",
+          "status": 200
+        }
+      ],
+      "errors": [],
+      "voiceExcluded": true,
+      "recovery": [
+        {
+          "ok": true,
+          "selected": 0,
+          "processed": 0,
+          "deferred": 0,
+          "errors": 0,
+          "sent": 0,
+          "pending": 0,
+          "failed": 0,
+          "unknown": 0,
+          "durationMs": 613
+        },
+        {
+          "ok": true,
+          "selected": 0,
+          "processed": 0,
+          "deferred": 0,
+          "errors": 0,
+          "sent": 0,
+          "pending": 0,
+          "failed": 0,
+          "unknown": 0,
+          "durationMs": 632
+        }
+      ],
+      "counts": {
+        "leads": 7,
+        "orders": 0,
+        "ai": 0,
+        "jobs": 0
+      },
+      "status": "PASS_SCOPED",
+      "nativeQueue": "BLOCKED_NO_SUCCESSFUL_RECEIPT",
+      "telegram": "NOT_RUN_DISABLED"
+    },
+    "sourceParity": {
+      "deployment": "dpl_6kFF76oAiBYzJQup4cUXwmy8jk1B",
+      "fingerprint": "3299f1e5e735dc13e2dd87ff57db4650dac01d56c51fc2bdc7b51cd952453d4a",
+      "immutableFiles": 365,
+      "matched": 365,
+      "differences": [],
+      "vercelConfigSeparatelyHashBound": true
+    },
+    "autoCronExecution": false,
+    "scope": "Scoped cloud PASS; native Queue receipt and Telegram delivery still BLOCKED"
+  },
+  "nativeQueue": {
+    "status": "FAIL_PUBLICATION_UNCONFIRMED_CONSUMPTION",
+    "evidence": "App fallback path persisted and recovered synthetic Leads. publishedAt remained null. No successful callback proof. Local OIDC probe refused environment=development; no token/environment spoof."
+  },
+  "telegram": {
+    "status": "BLOCKED_OWNER",
+    "realMessagesSent": 0,
+    "required": "Dedicated bot/chat, verify recipient, then separate owner permission for at most3 test messages"
+  },
+  "dependencies": {
+    "allModerate": 24,
+    "productionGraph": 9,
+    "devOnly": 15,
+    "high": 0,
+    "critical": 0,
+    "forceFix": false
+  },
+  "local": {
+    "unit": {
+      "pass": 1049,
+      "fail": 0,
+      "skip": 34
+    },
+    "client": {
+      "pass": 15,
+      "fail": 0
+    },
+    "adminCrmSchedulingRouting": {
+      "pass": 40,
+      "fail": 0
+    },
+    "finance": {
+      "pass": 15,
+      "fail": 0
+    },
+    "intakeReliability": {
+      "pass": 17,
+      "fail": 0
+    },
+    "websiteRecovery": {
+      "pass": 7,
+      "fail": 0
+    },
+    "httpNegative": 9,
+    "httpRecoveryHealthy": 7,
+    "httpDbOutage": 4,
+    "layouts": 225,
+    "formGroups": 13,
+    "upholsteryLayouts": 30,
+    "recapLocales": 4,
+    "axeCases": 6
+  },
+  "sourceMatches": true,
+  "aiAutoReady": false,
+  "productionDatabaseChanged": false,
+  "productionDeployed": false,
+  "teamBudgetChanged": false,
+  "remaining": [
+    "Prove native Queue publish and consumer on the final source/config",
+    "Owner-approved bounded Telegram receipt",
+    "Separate staged production build approval",
+    "Separate promotion approval"
+  ],
+  "assets": {
+    "baseline": "544da11",
+    "checked": 24,
+    "allMatch": true,
+    "rows": [
+      {
+        "path": "public/media/extras/balcony.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/cabinets.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/dishwasher.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/fridge.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/hood.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/ironing.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/large-window.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/linen.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/microwave.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/oven.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/pet-hair.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/standard-window.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/steam.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/extras/washing-machine.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/services/airbnb.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/services/deep.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/services/move.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/services/office.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/services/regular.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/upholstery/spot-cleaning.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/upholstery/fabric-check.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/upholstery/hero-extraction.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/journey-v5/stills/000-portrait.webp",
+        "match": true
+      },
+      {
+        "path": "public/media/journey-v5/stills/000-before-portrait.webp",
+        "match": true
+      }
+    ]
+  },
+  "cloudPrisma": "Windows engine connection failed; exact25 SQL replay succeeded. This is not migrate-deploy PASS.",
+  "productionUnchangedAtFinalRead": {
+    "deployment": "dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH",
+    "source": "544da114d0a129e9dd9c0f73c047a574af776fd6",
+    "main": "22b58184e0fdb0242ec5d2ae9d0e3b8850411fa2"
+  },
+  "temporaryResourceInventory": {
+    "project": "patient-butterfly-42300600",
+    "branch": "br-rough-bread-b8y7ehd6",
+    "database": "lumaclean_vercel_pro_20261101",
+    "runtimeRole": "lumaclean_pro_runtime_20261101",
+    "managedRoles": [
+      "lumaclean_pro_migrator_20261101",
+      "lumaclean_pro_app_20261101"
+    ],
+    "cleanup": "Owner review; no automatic deletion; no deployment uses the elevated managed app role"
+  },
+  "productionCronSecret": {
+    "metadataConfigured": true,
+    "valueVerified": false,
+    "reason": "Sensitive production value not exported or rotated; unauthorized checks never prove an authorized scheduler receipt. Require post-approved-rollout Cron receipt; never call valid production recovery as read-only test."
+  },
+  "previewCron": {
+    "definitions": 2,
+    "autoExecution": false,
+    "reason": "Final deployment is Preview; production target and scheduler settings were not changed."
+  }
+}
