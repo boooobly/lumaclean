@@ -8,5 +8,8 @@
       "experimentalTriggers": [{"type":"queue/v2beta","topic":"lumaclean-agent","retryAfterSeconds":200}]
     }
   },
-  "crons": [{"path":"/api/agent/recover","schedule":"0 6 * * *"}]
+  "crons": [
+    {"path":"/api/agent/recover","schedule":"0 6 * * *"},
+    {"path":"/api/notifications/recover","schedule":"*/5 * * * *"}
+  ]
 }

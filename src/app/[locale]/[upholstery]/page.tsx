@@ -1,3 +1,4 @@
+import {siteContent} from "@/lib/content";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -152,7 +153,7 @@ export default async function Page({ params }: Props) {
 
         <section className="up-estimate-section" id="estimate" aria-labelledby="up-estimate-title"><div className="up-shell">
           <div className="up-section-heading"><div><p className="up-kicker">04 / {p.calculatorLabel}</p><h2 id="up-estimate-title">{p.calculatorTitle}</h2></div><p>{p.calculatorIntro}</p></div>
-          <UpholsteryCalculator locale={locale} catalog={catalog} version={version} />
+          <UpholsteryCalculator locale={locale} catalog={catalog} version={version} serviceNames={siteContent[locale].pricing.serviceNames} />
         </div></section>
 
         <section className="up-section up-shell up-faq" aria-labelledby="up-faq-title"><div><p className="up-kicker">05 / {p.faqLabel}</p><h2 id="up-faq-title">{p.faqTitle}</h2>{article && <Link className="up-text-link" href={articlePath(article, locale)}>{u.readArticle}<ArrowIcon direction="down-right" /></Link>}</div><div>

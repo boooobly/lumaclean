@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import type { AgentLocale, BookingRecap } from "@/lib/agent/contracts";
 import {assistantDisclosure} from "@/lib/agent/persona";
-import { siteContent } from "@/lib/content";
+import type {ChatRecapCopy} from '@/lib/chat-recap-copy';
 import { formatRsd } from "@/lib/pricing";
 import { ChatPhotos, prepareChatPhoto, type ChatPhoto } from "./chat-photos";
 import "./website-chat.css";
@@ -201,16 +201,18 @@ const copy = {
 function Recap({
   value,
   locale,
+  copy,
 }: {
   value: BookingRecap;
   locale: AgentLocale;
+  copy: ChatRecapCopy;
 }) {
   const lang = locale.startsWith("sr") ? "sr" : locale === "en" ? "en" : "ru",
-    content = siteContent[lang];
+    content = copy[lang];
   return (
     <dl className="website-chat-recap">
       <div>
-        <dt>{content.calculator.service}</dt>
+        <dt>{content.service}</dt>
         <dd>
           {content.services.find((s) => s.id === value.service)?.name ??
             value.service}{" "}
@@ -260,12 +262,12 @@ function Recap({
       </div>
       {value.extras.length > 0 && (
         <div>
-          <dt>{content.calculator.extras}</dt>
+          <dt>{content.extras}</dt>
           <dd>
             {value.extras
               .map(
                 (e) =>
-                  `${content.calculator.labels[e.code] ?? e.code} × ${e.quantity}`,
+                  `${content.labels[e.code] ?? e.code} × ${e.quantity}`,
               )
               .join(", ")}
           </dd>
@@ -275,7 +277,7 @@ function Recap({
   );
 }
 
-export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
+export function WebsiteChat({ locale: pageLocale, recapCopy }: { locale: string; recapCopy: ChatRecapCopy }) {
   const [open, setOpen] = useState(false),
     [locale, setLocale] = useState<AgentLocale>(
       pageLocale === "sr" ? "sr-Latn" : pageLocale === "en" ? "en" : "ru",
@@ -800,7 +802,7 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
             {chat?.confirmation && (
               <div className="website-chat-confirmation">
                 <h3>{words.recap}</h3>
-                <Recap value={chat.confirmation.recap} locale={locale} />
+                <Recap value={chat.confirmation.recap} locale={locale} copy={recapCopy} />
                 <button
                   type="button"
                   disabled={busy}
@@ -817,7 +819,7 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
                   {words.booked} <Check size={17} />
                 </h3>
                 <small>{chat.booking.reference}</small>
-                <Recap value={chat.booking.recap} locale={locale} />
+                <Recap value={chat.booking.recap} locale={locale} copy={recapCopy} />
                 <button type="button" onClick={() => input.current?.focus()}>
                   {d.question}
                 </button>

@@ -1,0 +1,73 @@
+{
+  "scope": "Local manual release candidate; this is not AI AUTO admission or cloud deployment approval",
+  "checkedAt": "2026-11-01T19:26:39.641Z",
+  "productionBase": "544da114d0a129e9dd9c0f73c047a574af776fd6",
+  "branch": "codex/vercel-pro-optimization-20261101",
+  "fingerprint": "60922a161950097df1040a8d9bdc5b9ae3aed77aac33d0754c70f70b2639b988",
+  "node": "24.22.2",
+  "build": true,
+  "typecheck": true,
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 2
+  },
+  "tests": {
+    "unit": {
+      "pass": 1046,
+      "skip": 34,
+      "fail": 0
+    },
+    "clientSSR": {
+      "pass": 15,
+      "fail": 0
+    },
+    "newPostgresRecovery": {
+      "pass": 7,
+      "fail": 0
+    },
+    "isolatedIntake": {
+      "pass": 15,
+      "fail": 0
+    },
+    "adminCrmScheduling": {
+      "pass": 27,
+      "fail": 0
+    },
+    "financeCleanFixture": {
+      "pass": 15,
+      "fail": 0
+    }
+  },
+  "browser": {
+    "pages": 75,
+    "viewports": 225,
+    "internalLinks": 75,
+    "unexpectedErrors": 0,
+    "formScenarioGroups": 13,
+    "mockedFormSubmissions": 25,
+    "upholsteryLayouts": 30,
+    "axePages": 6,
+    "bookingRecapLocales": 4
+  },
+  "lighthouse": {
+    "productionRuns": 60,
+    "localBeforeRuns": 12,
+    "localAfterRuns": 12,
+    "fieldCWV": null,
+    "apiAndTelemetryMocked": true
+  },
+  "schemaChanges": false,
+  "productionDatabaseTouched": false,
+  "realNotificationsSent": false,
+  "cloudPreviewVerified": false,
+  "productionReady": false,
+  "aiAutoReady": false,
+  "remaining": [
+    "Confirm isolated cloud Preview DB/Blob/provider settings and run cloud verification",
+    "Refresh ordinary manual release evidence for final source; retain separate AI admission gate",
+    "Obtain separate production release approval"
+  ],
+  "report": "docs/vercel-pro-optimization-2026-11.md",
+  "vercelConfigSha256": "252605f6c593a19ff3ce260e4930172f0bd08a7a946a5c1a15d4ffc33ff13e43",
+  "runtimeNotes": "Build, types, unit, client SSR, PostgreSQL recovery/intake/CRM/finance and final browser regression verified with Node 24.22.2. Comparable Lighthouse pair used Node 25.9.0 for both runs."
+}
