@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": "2026-10-21.27806a198d6c",
+  "version": "2026-11-01.50167f823b9b",
   "sourceId": "1Xua3GrAYAgYfcbYUEWrU6I6cMZEA0IULLdSuKrbW4DY",
-  "sourceHash": "3d4de44adf47b80e7528f8724688048bc10353dfb85e6cbe8f7228099e500bb7",
+  "sourceHash": "bd6a8796e18a3e4ce0658a9f513a2d8a8a7c3fa03b372abe6de5fad2efd39662",
   "entries": [
     {
       "code": "ADD-BATH-001",
@@ -16332,6 +16332,30 @@
       }
     },
     {
+      "code": "RULE-GENERAL-008",
+      "name": "Округление общей стоимости",
+      "aliases": [],
+      "category": "rule",
+      "status": "OFFERED",
+      "description": "Итоговая смета округляется вверх до 100 RSD один раз после всех согласованных работ и надбавок. Промежуточные позиции отдельно не округляются.",
+      "unit": "правило обслуживания",
+      "price": null,
+      "tariffs": [],
+      "appliesTo": [],
+      "includes": "",
+      "excludes": "",
+      "restrictions": "Итоговая смета округляется вверх до 100 RSD один раз после всех согласованных работ и надбавок. Промежуточные позиции отдельно не округляются.",
+      "standalone": "NO",
+      "managerReview": true,
+      "autoCalculate": false,
+      "autoBook": false,
+      "runtimeCode": null,
+      "source": {
+        "tab": 4,
+        "row": 12
+      }
+    },
+    {
       "code": "RULE-GENERAL-009",
       "name": "Первый полный санузел включён в базовый тариф",
       "aliases": [
@@ -17412,6 +17436,90 @@
       "source": {
         "tab": 4,
         "row": 103
+      }
+    },
+    {
+      "code": "RULE-PAY-017",
+      "name": "Принимаем криптовалюту",
+      "aliases": [
+        "криптовалюта",
+        "криптой",
+        "crypto payment",
+        "cryptocurrency",
+        "kripto",
+        "kriptovaluta",
+        "криптовалута"
+      ],
+      "category": "rule",
+      "status": "OFFERED",
+      "description": "Оплата криптовалютой доступна по согласованию с надбавкой 5%. Актив, сеть и окончательную сумму подтверждает команда до оплаты. Это не автоматическое подтверждение платежа.",
+      "unit": "правило обслуживания",
+      "price": null,
+      "tariffs": [],
+      "appliesTo": [],
+      "includes": "",
+      "excludes": "",
+      "restrictions": "Оплата криптовалютой доступна по согласованию с надбавкой 5%. Актив, сеть и окончательную сумму подтверждает команда до оплаты. Это не автоматическое подтверждение платежа.",
+      "standalone": "NO",
+      "managerReview": true,
+      "autoCalculate": false,
+      "autoBook": false,
+      "runtimeCode": null,
+      "source": {
+        "tab": 4,
+        "row": 104
+      }
+    },
+    {
+      "code": "RULE-PAY-018",
+      "name": "Надбавка при оплате криптовалютой",
+      "aliases": [
+        "payment",
+        "plaćanje",
+        "плаћање"
+      ],
+      "category": "rule",
+      "status": "OFFERED",
+      "description": "При выборе криптовалюты применяется 5% после единой надбавки за срочность или праздник. При других способах оплаты эта надбавка не применяется. Итог согласует команда.",
+      "unit": "правило обслуживания",
+      "price": null,
+      "tariffs": [],
+      "appliesTo": [],
+      "includes": "",
+      "excludes": "",
+      "restrictions": "При выборе криптовалюты применяется 5% после единой надбавки за срочность или праздник. При других способах оплаты эта надбавка не применяется. Итог согласует команда.",
+      "standalone": "NO",
+      "managerReview": true,
+      "autoCalculate": false,
+      "autoBook": false,
+      "runtimeCode": null,
+      "source": {
+        "tab": 4,
+        "row": 105
+      }
+    },
+    {
+      "code": "RULE-PAY-022",
+      "name": "Порядок применения надбавок",
+      "aliases": [],
+      "category": "rule",
+      "status": "OFFERED",
+      "description": "Срочность и праздник вместе дают одну надбавку 20%. Затем при криптооплате применяется 5%: общий множитель 1.26. Округление итоговой суммы вверх до 100 RSD выполняется один раз. Праздник и криптооплату согласует команда: стандартный калькулятор их автоматически не учитывает.",
+      "unit": "правило обслуживания",
+      "price": null,
+      "tariffs": [],
+      "appliesTo": [],
+      "includes": "",
+      "excludes": "",
+      "restrictions": "Срочность и праздник вместе дают одну надбавку 20%. Затем при криптооплате применяется 5%: общий множитель 1.26. Округление итоговой суммы вверх до 100 RSD выполняется один раз. Праздник и криптооплату согласует команда: стандартный калькулятор их автоматически не учитывает.",
+      "standalone": "NO",
+      "managerReview": true,
+      "autoCalculate": false,
+      "autoBook": false,
+      "runtimeCode": null,
+      "source": {
+        "tab": 4,
+        "row": 109
       }
     }
   ]

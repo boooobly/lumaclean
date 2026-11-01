@@ -1,5 +1,5 @@
 import type {buildAgentTemporalContext} from "./temporal";
-import {contextualReason,repeatedQualification} from './autonomy';
+import {contextualReason,repeatedQualification,cryptoPaymentChoice} from './autonomy';
 import { type AgentLocale, type AgentState, type HandoffReason, type BookingRecap } from "./contracts";
 import type {KnowledgeEntry} from './knowledge/schema';
 import {knowledgeAmounts,knowledgeTimeExplanation,minimumExplanation,normalizeClockTimes,unsupportedKnowledgeClaim} from './knowledge/grounding';
@@ -35,6 +35,7 @@ export function substantiveIntent(text:string){
 }
 export function mandatoryHandoff(text:string):HandoffReason|null{return contextualReason(text,detectedReason(text));}
 function detectedReason(text:string):HandoffReason|null{
+  if(cryptoPaymentChoice(text))return 'PAYMENT_REVIEW';
   if(/pokvari|oštet|ostet|nadoknad|kompenzacij|накнад|компенсац|compensation|reimbursement/iu.test(text))return 'COMPLAINT';
   if(/(?:желим|позовите|повежите).{0,35}(?:оператер|човек)/iu.test(text))return 'CLIENT_REQUEST';
   if(/(?:хочу|позовите|соедините).{0,25}(?:человека|оператора)|(?:speak|talk).{0,20}(?:human|operator)|(?:zelim|želim|pozovite).{0,25}(?:operater|covek|čovek)/iu.test(text))return 'CLIENT_REQUEST';

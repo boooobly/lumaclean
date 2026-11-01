@@ -20,7 +20,10 @@ export const channelNames=['WEBSITE','TELEGRAM','WHATSAPP','VIBER'] as const;
 export function effectiveMode(s:Pick<BusinessSettings,'aiAgentMode'|'aiChannelModes'>,channel:Channel):AgentMode {
   const scope=(s.aiChannelModes as Record<string,string>)[channel]??'OFF';
   if(process.env.AI_AGENT_ENABLED!=='true'||s.aiAgentMode==='OFF'||scope==='OFF')return 'OFF';
-  return s.aiAgentMode==='AUTO'&&scope==='AUTO'?'AUTO':'SHADOW';
+  // Persisted AUTO can outlive a manual-only deployment. Apply the source-bound
+  // release gate at every runtime check, including replies, tools and outbox.
+  if(s.aiAgentMode==='AUTO'&&scope==='AUTO')return process.env.AI_VERIFIED_RELEASE==='true'?'AUTO':'OFF';
+  return 'SHADOW';
 }
 function fingerprint(){
   return createHash('sha256').update(JSON.stringify(['POYO_API_KEY','OPENROUTER_API_KEY','PRIMARY_AGENT_MODEL','FALLBACK_AGENT_MODEL','PRIMARY_AGENT_PROVIDER','FALLBACK_AGENT_PROVIDER','LUMACLEAN_ROUTING_PROVIDER','LUMACLEAN_ROUTING_URL','LUMACLEAN_ROUTING_TOKEN','BUSMAPS_STATUS','BUSMAPS_API_KEY','TELEGRAM_CUSTOMER_BOT_TOKEN'].map(k=>process.env[k]??''))).digest('hex');

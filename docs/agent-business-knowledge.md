@@ -23,7 +23,7 @@ Consultation turns advertise a bounded tool subset to both existing providers an
 - RULE-GENERAL-008 says round upward; existing approved runtime rounds the 100+ calculation to the nearest 100. Do not export a conflicting rounding promise; `calculatePrice` remains authoritative.
 - Draft internal travel buffers and labour norms are not customer facts and do not change scheduling.
 - Holiday +20% and unsupported extras are informational/manual review only, never a fictitious complete server quote.
-- Card and fiscal receipt remain unconfirmed. Current rules confirm cash RSD/EUR and bank transfer RUB at the owner's 1:1 payment rule. No unsupported cryptocurrency promise is added.
+- Card and fiscal receipt remain unconfirmed. Rules read on 2026-11-01 confirm cash RSD/EUR, bank transfer RUB at the owner's 1:1 payment rule, and cryptocurrency by agreement with +5%. Asset, network and final amount require the team; the standard calculator does not apply cryptocurrency or holiday modifiers automatically. Urgency/holiday is one 20% surcharge, then crypto 5%; the final RSD estimate rounds up to 100 once.
 
 Existing calculator extras and existing upholstery keys are checked against runtime defaults, then active database tariffs at retrieval time. An existing-code mismatch returns `PRICE_CATALOG_MISMATCH`, not a stale price. All five area bands are validated. Order totals still require the shared deterministic server tool; knowledge cannot synthesize new quote lines. Output guards bind informational amounts to retrieved facts and keep slot/confirmation/refund restrictions.
 
