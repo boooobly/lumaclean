@@ -4,6 +4,8 @@
 
 Первоначальный этап подготовлен локально; ниже сохранены его измерения. Продолжение release verification описано в разделах16–23: protected cloud Preview и отдельная synthetic DB подготовлены на существующих ресурсах. Production deployment/promotion, merge, изменения production DB/Firewall/Team budget/add-ons не выполнялись. Telegram сообщения не отправлялись.
 
+**Обновление 02.11.2026: PRODUCTION DEPLOYED + LIVE CHECKS PASS (scope ниже).** По отдельному разрешению владельца опубликован `b9a16f69` / `dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe` на [lumacleanrs.com](https://lumacleanrs.com). Native Queue подтверждён на exact-source Preview;3Telegram messages получены владельцем. После promotion RU/SR/EN/API/auth gates/идемпотентность PASS, первый настоящий Cron GET200. AI AUTO OFF. Owner-authenticated production CRM UI и длительное наблюдение не заявляются как PASS; ограничения описаны в конце раздела24.
+
 ## 1. Фактическая конфигурация и исходное состояние
 
 | Объект | Подтверждённое состояние |
@@ -332,3 +334,45 @@ Final protected Preview **dpl_6kFF76oAiBYzJQup4cUXwmy8jk1B**, READY, Node24/iad1
 Source-bound mismatch устранён штатным обновлением manual evidence после actual проверок; исходники и release JSON финального Preview совпали. AI_AUTO admission=false сохранён. Повторное production чтение:544da11/dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH READY; main22b5818, protection off. Staged production/production promotion не выполнялись.
 
 **Итог: BLOCKED**, а не READY FOR PRODUCTION APPROVAL: нужен successful native Queue publish+consumer на RC с правильным Preview OIDC (не development-token), согласованный test recipient и отдельное разрешение до≤3Telegram messages. Оба production этапа требуют раздельного approval после review конкретного commit и стоимости Neon. Exact commit фиксируется в передаче результата; документы/дополнительный release-summary после Preview не меняют его проверенные365immutable inputs.
+
+## 24. Завершение Queue verification — 02.11.2026
+
+Проверка повторена непосредственно на защищённом Preview `dpl_6kFF76oAiBYzJQup4cUXwmy8jk1B` ([Preview](https://lumaclean-release-candidate-oizippdef.vercel.app)), чьи365immutable inputs совпадают с `b9a16f69a669b064884df96d1c688013bf6b7b5b`. Существующий authenticated CRM lead-note инициировал настоящий SDK publish; зарегистрированный `/api/queues/notifications` consumer изменил синтетическое событие: PENDING/attempts0/published=false → PENDING/attempts0/published=true → INTERNAL/attempts1/published=true. Канал события WEBSITE намеренно исключал Telegram. Повторный CRM retry вернул400, attempts остался1. Это **native Queue PASS**, не mocked транспорт и не прямой вызов recovery. Полная безопасная последовательность сохранена в `nativeQueue` существующего readiness JSON; приватные идентификаторы остаются в игнорируемых artifacts.
+
+Первопричина прежнего неверного вывода: `publishedAt` сбрасывается при retry из-за отсутствующих в изолированном Preview Telegram credentials. Отсутствие успешного callback в application-only logs также не доказывало отсутствие invocation: request logs содержат реальные POST200. Временный диагностический log удалён; production-код Queue не изменён. На точном release Preview проверка выше независимо прошла повторно.
+
+Повторное чтение production подтвердило прежние `544da114` / `dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH` READY. CLI58.4.4/Node24 выполнил только `deploy --dry --json --prod --skip-domain` для основного проекта:596files,0artifacts/env/private auth files в upload inventory; deployment не создавался. Предусмотрены runtime и build overrides `AI_AGENT_ENABLED=false`; цены, дизайн, SEO, Sofija и другие ветки не включены.
+
+Владелец выбрал основной административный Telegram. Sensitive bot/chat значения Vercel возвращает замаскированными; они не копируются в Preview. Подготовлен ограниченный E2E через действующий production API: ровно3синтетические заявки (уборка, обратный звонок, химчистка), уникальные сохранённые submissionId, повтор каждого запроса для проверки idempotency, максимум3сообщения,0Orders/звонков. Прямые SQL проверки только read-only. Отдельное разрешение на эти production записи и отправки ожидается; отправлено0сообщений. После promotion будут повторены те же submissionId, без новых Lead/сообщений. Записи не удаляются, UNKNOWN не переотправляется.
+
+### Telegram E2E после отдельного разрешения владельца
+
+Получено явное разрешение на3синтетические production-заявки и максимум3сообщения. Первый запрос вернул400 из-за query marker в landing URL; read-only проверка доказала0Lead/0отправок. Исправлена только fixture: разрешённый `/ru`; callback содержит тестовый номер без имени/комментария согласно существующей schema. Production API/validation не менялись.
+
+Затем CLEANING, CONTACT_REQUEST, UPHOLSTERY вернули200; в каждом случае ровно1Lead/1outbox, DELIVERED, telegramStatus=SENT, attempts=1, отдельный подтверждённый Telegram messageId,0Orders. Повтор каждого запроса вернул тот же reference. Итого3Lead/3Telegram messages, без дублей. Это реальная доставка через прежний production transport (его код в кандидате неизменён), а не доказательство будущего staged runtime. Подтверждение владельцем отображения трёх сообщений в чате ожидается. Записи и аудит сохранены; секреты Telegram не извлекались.
+
+Для staged подготовлен отдельный source artifact через `git archive` точного `b9a16f69`, без незакоммиченных отчётов. Его fingerprint совпал с manual evidence. CLI dry-run подтвердил539source files; различия с596files рабочей копии — только генерируемые Prisma types, Next env types, MapLibre worker files и пустой directory marker. Они генерируются существующими postinstall/prebuild; приватные файлы не входят в artifact. Команда создания ещё не выполнялась.
+
+### Staged production по разрешению владельца
+
+Владелец подтвердил получение всех3сообщений и отдельно разрешил staged deployment без promotion. Создан **dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe**, [staged deployment](https://lumaclean-nprbmysqp-vladislavs-projects-0eae0ea3.vercel.app), production target, READY, Node24/iad1, `autoAssignCustomDomains=false`. Runtime/build request явно содержит `AI_AGENT_ENABLED=false`. Миграции/seed не запускались, дополнительных валидных заявок и сообщений нет.
+
+Проверены **539/539 uploaded files и365/365 immutable inputs** по SHA1 относительно `git archive b9a16f69`, differences=[]; fingerprint и отдельный config SHA256 совпали. CLI унаследовал gitDirty metadata родительской рабочей копии с обновляемыми отчётами, но сами загруженные539файлов целиком совпали с архивом коммита: чужих изменений нет.
+
+Staged smoke PASS:12page/viewport cases (RU/SR/EN home+upholstery,390/1440),200/lang/h1/без horizontal overflow,0pageerrors;3CRM routes защищены редиректом на login; anonymous auth session200/null; оба Cron endpoints без/с неверным bearer дают401/no-store; invalid lead даёт400/no-store до сохранения. Authenticated CRM на этом production artifact не проверялся: изолированный cloud CRM и40локальных CRM/calendar/routing tests подтверждены ранее; этот staged smoke подтверждает login gate, не owner session.
+
+`lumacleanrs.com` всё ещё указывает на `dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH` /544da114. Project Cron definitions всё ещё привязаны к нему (только daily agent recovery); новый5min schedule существует в staged config, но не активирован. Подтверждённый rollback target — тот же старый READY deployment. Откат должен сохранять все Lead/outbox/audit rows и UNKNOWN/leases.
+
+Текущий статус **READY_FOR_PRODUCTION_APPROVAL**. Требуется отдельное разрешение на promotion конкретного deployment; AI AUTO остаётся OFF. После promotion планируются RU/SR/EN/API/auth smoke, повтор тех же3submissionId без новых заявок/сообщений, read-only проверка записей и provider Cron/Queue request logs. В первые60мин наблюдать5xx/backlog/UNKNOWN/DB errors; через24ч/7дней — usage и надёжность по разделу23. Документальные обновления не меняют проверенный release artifact.
+
+### Выпущено: promotion и первые live checks
+
+Владелец отдельно разрешил promotion и rollback на прежний deployment при регрессии. Promotion завершён **02.11.2026 00:24:17 GMT+1** (01.11.2026 23:24:17 UTC). API платформы подтвердил `lumacleanrs.com` → `dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe`, commit **b9a16f69a669b064884df96d1c688013bf6b7b5b**, READY. Выпущены ранее подготовленные recovery5min, API no-store, idle-error handler и сокращение client payload. Цены/длительности/SEO/дизайн/Sofija/AI logic/schema не менялись; migrations/seed не запускались. AI AUTO выключен явными runtime/build overrides и не сертифицирован.
+
+На основном домене повторены12page/viewport cases RU/SR/EN и9HTTP checks: PASS,0pageerrors. Три прежних submissionId повторно вернули200 и те же reference; read-only PostgreSQL сравнение подтвердило1Lead/1outbox на каждый, DELIVERED/attempts1, прежний Telegram receipt,0Orders. Дополнительных Lead/уведомлений/сообщений после promotion не создано. В read-only aggregate все8Website/admin/Telegram events DELIVERED, pending/failed/unknown отсутствуют; AIInvocation после promotion=0.
+
+Project Cron переключён на новый deployment; enabled, daily agent recovery сохранён, notification recovery `*/5 * * * *`. **Первый настоящий provider invocation `/api/notifications/recover`: GET200 в23:25:40 UTC**. Валидный bearer вручную не вызывался, секрет не раскрывался: это native scheduled proof корректности GET и CRON_SECRET. В7полученных serverless request records после23:25UTC нет5xx. Это ограниченное окно, не доказательство60минут/24часов/7дней. Долгосрочный план раздела23 сохраняется.
+
+Production CRM auth gate PASS; authenticated isolated cloud CRM и40локальных CRM/calendar/routing tests PASS. Попытка проверить существующую сессию владельца завершена без действий с записями: Chrome открыл login, а Computer Use для рабочего браузера был остановлен инструментом из-за неподдерживаемого browser URL policy enforcement. Ограничение не обходилось. **Owner-authenticated production CRM UI: BLOCKED**, а не PASS. Native Queue publish/consumer PASS относится к exact-source Preview; после promotion дополнительный production Queue wake не внедрялся ради соблюдения лимита отправок.
+
+Итог доступных live checks: **PASS_SCOPED**, production опубликован, регрессий в проверенных сценариях нет, rollback не потребовался.1143unit/SSR/DB regression tests PASS,34environment SKIP сохраняются; ранее указанные browser/HTTP checks и24moderate dependency records не переименованы в полный PASS. Исторические разделы выше сохраняют прежние результаты. Финальное machine-readable evidence — `docs/vercel-pro-release-readiness-2026-11.json`; документационный commit после выпуска не входит в опубликованный artifact b9a16f69.

@@ -1,6 +1,6 @@
 {
-  "at": "2026-11-01T22:37:04.188Z",
-  "status": "BLOCKED",
+  "at": "2026-11-01T23:30:30.234Z",
+  "status": "PRODUCTION_DEPLOYED_LIVE_CHECKS_PASS_SCOPED",
   "base": "544da114d0a129e9dd9c0f73c047a574af776fd6",
   "main": "22b58184e0fdb0242ec5d2ae9d0e3b8850411fa2",
   "initialCommit": "6d9ef0f6441096862fbcfb59528a21194fabe56a",
@@ -383,7 +383,7 @@
         "jobs": 0
       },
       "status": "PASS_SCOPED",
-      "nativeQueue": "BLOCKED_NO_SUCCESSFUL_RECEIPT",
+      "nativeQueue": "PASS_NATIVE_QUEUE",
       "telegram": "NOT_RUN_DISABLED"
     },
     "sourceParity": {
@@ -395,16 +395,94 @@
       "vercelConfigSeparatelyHashBound": true
     },
     "autoCronExecution": false,
-    "scope": "Scoped cloud PASS; native Queue receipt and Telegram delivery still BLOCKED"
+    "scope": "PASS_SCOPED: source/forms/auth/DB/recovery and actual native Queue; Telegram verified separately on existing production transport"
   },
   "nativeQueue": {
-    "status": "FAIL_PUBLICATION_UNCONFIRMED_CONSUMPTION",
-    "evidence": "App fallback path persisted and recovered synthetic Leads. publishedAt remained null. No successful callback proof. Local OIDC probe refused environment=development; no token/environment spoof."
+    "scope": "Actual native Queue publish through existing authenticated CRM -> registered consumer -> real PG transition; notification channel WEBSITE deliberately prevents Telegram",
+    "deployment": "dpl_6kFF76oAiBYzJQup4cUXwmy8jk1B",
+    "callbackPath": "/api/queues/notifications",
+    "telegramMessages": 0,
+    "states": [
+      {
+        "deliveryState": "PENDING",
+        "attempts": 0,
+        "published": false
+      },
+      {
+        "deliveryState": "PENDING",
+        "attempts": 0,
+        "published": true
+      },
+      {
+        "deliveryState": "PENDING",
+        "attempts": 0,
+        "published": true
+      },
+      {
+        "deliveryState": "INTERNAL",
+        "attempts": 1,
+        "published": true
+      }
+    ],
+    "status": "PASS_NATIVE_QUEUE",
+    "consumerCommitted": true,
+    "duplicateBlocked": true,
+    "codeChanged": false,
+    "previousDiagnosis": "Incorrect: publishedAt was reset on unconfigured Telegram retry; request-level callback logs were absent from the earlier application-log view.",
+    "sourceFingerprint": "3299f1e5e735dc13e2dd87ff57db4650dac01d56c51fc2bdc7b51cd952453d4a"
   },
   "telegram": {
-    "status": "BLOCKED_OWNER",
-    "realMessagesSent": 0,
-    "required": "Dedicated bot/chat, verify recipient, then separate owner permission for at most3 test messages"
+    "status": "PASS_TRANSPORT_RECEIPTS",
+    "recipient": "Existing main administrative Telegram chosen by owner",
+    "ownerApproved": true,
+    "realMessagesSent": 3,
+    "ordersCreated": 0,
+    "ownerReceiptConfirmation": "CONFIRMED_ALL_THREE",
+    "cases": [
+      {
+        "kind": "CLEANING",
+        "httpStatus": 200,
+        "duplicateSameReference": true,
+        "leadCount": 1,
+        "outboxCount": 1,
+        "state": "DELIVERED",
+        "telegramStatus": "SENT",
+        "attempts": 1,
+        "orders": 0,
+        "providerReceiptPresent": true
+      },
+      {
+        "kind": "CONTACT_REQUEST",
+        "httpStatus": 200,
+        "duplicateSameReference": true,
+        "leadCount": 1,
+        "outboxCount": 1,
+        "state": "DELIVERED",
+        "telegramStatus": "SENT",
+        "attempts": 1,
+        "orders": 0,
+        "providerReceiptPresent": true
+      },
+      {
+        "kind": "UPHOLSTERY",
+        "httpStatus": 200,
+        "duplicateSameReference": true,
+        "leadCount": 1,
+        "outboxCount": 1,
+        "state": "DELIVERED",
+        "telegramStatus": "SENT",
+        "attempts": 1,
+        "orders": 0,
+        "providerReceiptPresent": true
+      }
+    ],
+    "scope": "Three owner-confirmed real production messages before promotion; after promotion replay of the same three submissionIds preserved all Telegram receipts and attempts=1. No fourth message sent.",
+    "initialAttempt": {
+      "status": 400,
+      "leadCount": 0,
+      "messages": 0,
+      "cause": "Test-only landing URL query marker rejected by existing public-path allowlist; fixed fixture only. Callback carries synthetic number without name/comment as required by contact schema."
+    }
   },
   "dependencies": {
     "allModerate": 24,
@@ -451,15 +529,10 @@
   },
   "sourceMatches": true,
   "aiAutoReady": false,
-  "productionDatabaseChanged": false,
-  "productionDeployed": false,
+  "productionDatabaseChanged": true,
+  "productionDeployed": true,
   "teamBudgetChanged": false,
-  "remaining": [
-    "Prove native Queue publish and consumer on the final source/config",
-    "Owner-approved bounded Telegram receipt",
-    "Separate staged production build approval",
-    "Separate promotion approval"
-  ],
+  "remaining": [],
   "assets": {
     "baseline": "544da11",
     "checked": 24,
@@ -589,5 +662,472 @@
     "definitions": 2,
     "autoExecution": false,
     "reason": "Final deployment is Preview; production target and scheduler settings were not changed."
+  },
+  "releaseCandidate": "b9a16f69a669b064884df96d1c688013bf6b7b5b",
+  "stagedDryRun": {
+    "status": "PASS_NO_DEPLOYMENT_CREATED",
+    "fileCount": 539,
+    "forbiddenFiles": 0,
+    "aiAgentEnabled": false,
+    "project": "prj_Q4nkQeWNwBIFz1AsthDvyEeJ5BeZ",
+    "skipDomain": true
+  },
+  "productionWriteScope": "Exactly three owner-approved synthetic Leads, three durable Notification events and associated intake/rate-limit/audit records; no Orders/deletes/migrations",
+  "staged": {
+    "id": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
+    "url": "https://lumaclean-nprbmysqp-vladislavs-projects-0eae0ea3.vercel.app",
+    "status": "READY",
+    "ownerApproved": true,
+    "customDomainsAssigned": false,
+    "mainDomainStillOn": "dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH",
+    "node": "24.x",
+    "regions": [
+      "iad1"
+    ],
+    "aiAgentEnabled": false,
+    "aiOffOverrideScope": "Explicit build and runtime CLI overrides; manual source certificate rejects AI AUTO",
+    "source": {
+      "deployment": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
+      "commit": "b9a16f69a669b064884df96d1c688013bf6b7b5b",
+      "uploadedFiles": 539,
+      "matched": 539,
+      "immutableFiles": 365,
+      "immutableMatched": 365,
+      "sourceFingerprint": "3299f1e5e735dc13e2dd87ff57db4650dac01d56c51fc2bdc7b51cd952453d4a",
+      "sourceMatches": true,
+      "aiAutoReady": false,
+      "differences": [],
+      "status": "PASS"
+    },
+    "smoke": {
+      "deployment": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
+      "commit": "b9a16f69a669b064884df96d1c688013bf6b7b5b",
+      "scope": "Staged production artifact read-only public/auth/Cron smoke; invalid lead rejected before DB; no valid submissions/messages",
+      "pages": [
+        {
+          "path": "/ru",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/ru/himchistka-mebeli",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/sr",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/sr/dubinsko-pranje-namestaja",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/en",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/en/upholstery-cleaning",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/ru",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/ru/himchistka-mebeli",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/sr",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/sr/dubinsko-pranje-namestaja",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/en",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/en/upholstery-cleaning",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        }
+      ],
+      "http": [
+        {
+          "path": "/admin",
+          "status": 200,
+          "unauthenticatedRedirect": "/admin/login"
+        },
+        {
+          "path": "/admin/leads",
+          "status": 200,
+          "unauthenticatedRedirect": "/admin/login"
+        },
+        {
+          "path": "/admin/calendar",
+          "status": 200,
+          "unauthenticatedRedirect": "/admin/login"
+        },
+        {
+          "path": "/api/auth/get-session",
+          "status": 200,
+          "session": null,
+          "noStore": true
+        },
+        {
+          "path": "/api/notifications/recover",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "path": "/api/notifications/recover",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "path": "/api/agent/recover",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "path": "/api/agent/recover",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "path": "/api/lead",
+          "invalidPayloadStatus": 400,
+          "noStore": true
+        }
+      ],
+      "errors": [],
+      "newLeads": 0,
+      "newMessages": 0,
+      "status": "PASS"
+    },
+    "cronActiveDeploymentBeforePromotion": "dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH",
+    "rollbackTarget": "dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH"
+  },
+  "productionReady": true,
+  "releaseProfile": "WEBSITE_MANUAL_AI_OFF",
+  "promotion": {
+    "action": "promote",
+    "status": "PASS",
+    "from": "dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH",
+    "to": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
+    "at": "2026-11-01T23:24:17.238Z",
+    "databaseReset": false,
+    "recordsDeleted": false,
+    "ownerApproved": true,
+    "rollbackOwnerApproved": true,
+    "rollbackPerformed": false,
+    "rollbackTarget": "dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH"
+  },
+  "live": {
+    "deployment": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
+    "url": "https://lumacleanrs.com",
+    "commit": "b9a16f69a669b064884df96d1c688013bf6b7b5b",
+    "smoke": {
+      "deployment": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
+      "commit": "b9a16f69a669b064884df96d1c688013bf6b7b5b",
+      "scope": "Promoted public production read-only public/auth/Cron smoke; invalid lead rejected before DB; no valid submissions/messages",
+      "pages": [
+        {
+          "path": "/ru",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/ru/himchistka-mebeli",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/sr",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/sr/dubinsko-pranje-namestaja",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/en",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/en/upholstery-cleaning",
+          "width": 390,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/ru",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/ru/himchistka-mebeli",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/sr",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/sr/dubinsko-pranje-namestaja",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/en",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        },
+        {
+          "path": "/en/upholstery-cleaning",
+          "width": 1440,
+          "status": 200,
+          "language": true,
+          "h1": true,
+          "noHorizontalOverflow": true
+        }
+      ],
+      "http": [
+        {
+          "path": "/admin",
+          "status": 200,
+          "unauthenticatedRedirect": "/admin/login"
+        },
+        {
+          "path": "/admin/leads",
+          "status": 200,
+          "unauthenticatedRedirect": "/admin/login"
+        },
+        {
+          "path": "/admin/calendar",
+          "status": 200,
+          "unauthenticatedRedirect": "/admin/login"
+        },
+        {
+          "path": "/api/auth/get-session",
+          "status": 200,
+          "session": null,
+          "noStore": true
+        },
+        {
+          "path": "/api/notifications/recover",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "path": "/api/notifications/recover",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "path": "/api/agent/recover",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "path": "/api/agent/recover",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "path": "/api/lead",
+          "invalidPayloadStatus": 400,
+          "noStore": true
+        }
+      ],
+      "errors": [],
+      "newLeads": 0,
+      "newMessages": 0,
+      "status": "PASS"
+    },
+    "idempotency": {
+      "deployment": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
+      "scope": "Replay only the three already delivered, owner-approved submissionIds through promoted site; direct SQL read-only",
+      "cases": [
+        {
+          "kind": "CLEANING",
+          "status": 200,
+          "sameReference": true,
+          "leadCount": 1,
+          "outboxCount": 1,
+          "deliveryState": "DELIVERED",
+          "attempts": 1,
+          "sameTelegramReceipt": true,
+          "orders": 0
+        },
+        {
+          "kind": "CONTACT_REQUEST",
+          "status": 200,
+          "sameReference": true,
+          "leadCount": 1,
+          "outboxCount": 1,
+          "deliveryState": "DELIVERED",
+          "attempts": 1,
+          "sameTelegramReceipt": true,
+          "orders": 0
+        },
+        {
+          "kind": "UPHOLSTERY",
+          "status": 200,
+          "sameReference": true,
+          "leadCount": 1,
+          "outboxCount": 1,
+          "deliveryState": "DELIVERED",
+          "attempts": 1,
+          "sameTelegramReceipt": true,
+          "orders": 0
+        }
+      ],
+      "newLeads": 0,
+      "newNotifications": 0,
+      "newOrders": 0,
+      "newMessages": 0,
+      "status": "PASS"
+    },
+    "db": {
+      "scope": "Read-only aggregate production DB health; no rows/contacts/text copied",
+      "host": "ep-bitter-mode-b8r8ruag-pooler.c-14.us-east-1.aws.neon.tech",
+      "database": "neondb",
+      "connection": "PASS_VERIFY_FULL",
+      "websiteNotificationStates": [
+        {
+          "deliveryState": "DELIVERED",
+          "count": 8
+        }
+      ],
+      "aiInvocationsSincePromotion": 0,
+      "checkedAt": "2026-11-01T23:26:04.980Z",
+      "status": "PASS"
+    },
+    "cron": {
+      "status": "PASS_NATIVE_SCHEDULED_GET",
+      "receipts": [
+        {
+          "path": "/api/notifications/recover",
+          "method": "GET",
+          "status": 200,
+          "at": "2026-11-01T23:25:40.127Z"
+        }
+      ],
+      "definitions": [
+        {
+          "host": "lumaclean-nprbmysqp-vladislavs-projects-0eae0ea3.vercel.app",
+          "path": "/api/agent/recover",
+          "schedule": "0 6 * * *"
+        },
+        {
+          "host": "lumaclean-nprbmysqp-vladislavs-projects-0eae0ea3.vercel.app",
+          "path": "/api/notifications/recover",
+          "schedule": "*/5 * * * *"
+        }
+      ],
+      "secret": "Provider scheduled200 validates bearer authentication; secret was not exposed"
+    },
+    "serverlessLogWindow": {
+      "querySince": "2026-11-01T23:25:00Z",
+      "records": 7,
+      "http5xx": 0,
+      "scope": "Retrieved request records; not a60-minute availability guarantee"
+    },
+    "newSyntheticMessagesAfterPromotion": 0
+  },
+  "limitations": {
+    "authenticatedProductionCrm": "BLOCKED_COMPUTER_USE_BROWSER_URL_POLICY: owner session UI could not be tested. Production auth gate PASS; isolated authenticated cloud CRM and40 local CRM/calendar/routing tests PASS.",
+    "nativeQueue": "PASS actual publish/consumer on exact-source protected Preview. No extra production wake/message injected after promotion.",
+    "unitEnvironmentSkips": 34,
+    "aiAuto": "OFF; not certified or enabled",
+    "monitoring": "Initial live checks and first scheduled Cron verified. Full60-minute/24-hour/7-day observation is future work under the existing monitoring plan, not completed evidence.",
+    "dependencies": "24 moderate dependency records remain under the documented reachability/upstream assessment; no force updates."
   }
 }

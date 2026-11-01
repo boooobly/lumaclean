@@ -57,17 +57,12 @@
     "apiAndTelemetryMocked": true
   },
   "schemaChanges": false,
-  "productionDatabaseTouched": false,
-  "realNotificationsSent": false,
-  "cloudPreviewVerified": false,
-  "productionReady": false,
+  "productionDatabaseTouched": true,
+  "realNotificationsSent": true,
+  "cloudPreviewVerified": true,
+  "productionReady": true,
   "aiAutoReady": false,
-  "remaining": [
-    "Prove native Queue publish and consumer on the final source/config",
-    "Owner-approved bounded Telegram receipt",
-    "Separate staged production build approval",
-    "Separate promotion approval"
-  ],
+  "remaining": [],
   "report": "docs/vercel-pro-optimization-2026-11.md",
   "vercelConfigSha256": "11f88831828ecb594a68991940aa02fce6ab763595ec274b515e73c40427f295",
   "runtimeNotes": "Build, types, unit, client SSR, PostgreSQL recovery/intake/CRM/finance and final browser regression verified with Node 24.22.2. Comparable Lighthouse pair used Node 25.9.0 for both runs.",
@@ -75,5 +70,31 @@
   "preview": "https://lumaclean-release-candidate-oizippdef.vercel.app",
   "previewDeployment": "dpl_6kFF76oAiBYzJQup4cUXwmy8jk1B",
   "previewImmutableFilesMatched": 365,
-  "cloudPreviewScope": "PASS_SCOPED: source/forms/auth/DB/recovery; Queue and Telegram not certified"
+  "cloudPreviewScope": "PASS_SCOPED: source/forms/auth/DB/recovery and actual native Queue; Telegram verified separately on existing production transport",
+  "nativeQueueVerified": true,
+  "nativeQueueDeployment": "dpl_6kFF76oAiBYzJQup4cUXwmy8jk1B",
+  "productionWriteScope": "Exactly three owner-approved synthetic Leads, three durable Notification events and associated intake/rate-limit/audit records; no Orders/deletes/migrations",
+  "realNotificationsCount": 3,
+  "telegramStatus": "PASS_TRANSPORT_RECEIPTS",
+  "productionDeployed": true,
+  "productionDeployment": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
+  "productionCommit": "b9a16f69a669b064884df96d1c688013bf6b7b5b",
+  "productionUrl": "https://lumacleanrs.com",
+  "liveChecks": "PASS_SCOPED",
+  "liveCron": [
+    {
+      "path": "/api/notifications/recover",
+      "method": "GET",
+      "status": 200,
+      "at": "2026-11-01T23:25:40.127Z"
+    }
+  ],
+  "limitations": {
+    "authenticatedProductionCrm": "BLOCKED_COMPUTER_USE_BROWSER_URL_POLICY: owner session UI could not be tested. Production auth gate PASS; isolated authenticated cloud CRM and40 local CRM/calendar/routing tests PASS.",
+    "nativeQueue": "PASS actual publish/consumer on exact-source protected Preview. No extra production wake/message injected after promotion.",
+    "unitEnvironmentSkips": 34,
+    "aiAuto": "OFF; not certified or enabled",
+    "monitoring": "Initial live checks and first scheduled Cron verified. Full60-minute/24-hour/7-day observation is future work under the existing monitoring plan, not completed evidence.",
+    "dependencies": "24 moderate dependency records remain under the documented reachability/upstream assessment; no force updates."
+  }
 }
