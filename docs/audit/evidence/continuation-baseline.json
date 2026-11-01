@@ -1,0 +1,26 @@
+{
+  "at": "2026-11-01T18:40:14.820Z",
+  "project": "prj_Q4nkQeWNwBIFz1AsthDvyEeJ5BeZ",
+  "gitConnected": false,
+  "productionBranch": null,
+  "deployment": "dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH",
+  "state": "READY",
+  "sha": "544da114d0a129e9dd9c0f73c047a574af776fd6",
+  "url": "lumaclean-9n6g1f3u3-vladislavs-projects-0eae0ea3.vercel.app",
+  "metadataKeys": [
+    "githubCommitRef",
+    "githubCommitSha",
+    "githubCommitMessage",
+    "githubRepo",
+    "githubOrg"
+  ],
+  "productionWrites": false,
+  "main": "22b58184e0fdb0242ec5d2ae9d0e3b8850411fa2",
+  "mainProtected": false,
+  "baselineDraftPR": 33,
+  "baselineDraftHead": "7758faa72bd97ce70628c99d5fbb5eeb6d9c1c0b",
+  "baselineMergeable": true,
+  "auditDraftPR": 32,
+  "auditPublishedHeadBeforeContinuation": "e5ac759d1a259a72140cb2f5c0fe99464eeb5960",
+  "readonly": true
+}

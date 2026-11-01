@@ -1,0 +1,28 @@
+{
+  "method": "Reconstructed only EOL bytes; exact SHA256 equals read-only production history; no SQL command or production metadata change",
+  "restored": [
+    {
+      "name": "20261001090000_admin_foundation",
+      "sha256": "37eea79653b621c8e0fec806152b32c79ed0e9cca5342a39246ba49cb9d2965a",
+      "normalizedSqlUnchanged": true,
+      "reconstruction": "LF body + final CRLF",
+      "productionMetadataChanged": false
+    },
+    {
+      "name": "20261001210000_admin_ai_agent",
+      "sha256": "20266ae604922c407b5cb934155b9abc026252381e7ad6a14cdf16b5cdffcb6c",
+      "normalizedSqlUnchanged": true,
+      "reconstruction": "LF body, last internal separator and final separator CRLF",
+      "productionMetadataChanged": false
+    },
+    {
+      "name": "20261003130000_address_coordinate_confirmation",
+      "sha256": "7700ea24580aa9f8fd53fa1eeb5530ec554fabb52defe8b4044e666f0251e06b",
+      "normalizedSqlUnchanged": true,
+      "reconstruction": "CRLF throughout",
+      "productionMetadataChanged": false
+    }
+  ],
+  "foundationDeployment": "dpl_8F6gkVhByHeK94XffVWxoc3cUPPc",
+  "foundationOriginalSha1": "d979d989ff30959a7ebe737404fbb7f6da1e7661"
+}

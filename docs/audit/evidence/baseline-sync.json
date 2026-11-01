@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-01",
+  "production": "544da114d0a129e9dd9c0f73c047a574af776fd6",
+  "mainRemote": "22b58184e0fdb0242ec5d2ae9d0e3b8850411fa2",
+  "releaseHead": "574d0550682032f0c7bbc129cb20f924f2f34996",
+  "syncBranch": "codex/production-baseline-sync-20261101",
+  "syncHead": "7758faa72bd97ce70628c99d5fbb5eeb6d9c1c0b",
+  "pr": "https://github.com/boooobly/lumaclean/pull/33",
+  "draft": true,
+  "mergeableAtRead": true,
+  "releaseAncestor": true,
+  "commitsAheadRemoteMain": 20,
+  "mainMerged": false,
+  "gitConnectedToVercel": false,
+  "vercelProductionBranch": null,
+  "warning": "Local main is older than remote main; all comparisons use the explicit remotely verified SHA, not local branch name.",
+  "requiredCheck": "quality",
+  "protectionPayload": ".github/main-protection.json",
+  "protectionApplied": false,
+  "independentReviewerRequired": true,
+  "preserveAncestry": "Merge commit; do not squash/rebase the full existing release history",
+  "productionWrites": false,
+  "prospectiveAuditMerge": {
+    "readonlyMergeTree": true,
+    "conflicts": [
+      ".github/workflows/quality.yml"
+    ],
+    "kind": "add/add",
+    "resolution": "Keep reviewed audit workflow: original quality plus independent isolated ai-integration job; rerun exact-head CI",
+    "actualMergePerformed": false
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "scope": "CI evidence at publication boundary; check latest PR head through live check links, not an old PASS",
+  "auditPR": "https://github.com/boooobly/lumaclean/pull/32/checks",
+  "baselinePR": "https://github.com/boooobly/lumaclean/pull/33/checks",
+  "lastCompletedAuditBeforeContinuation": {
+    "head": "e5ac759d1a259a72140cb2f5c0fe99464eeb5960",
+    "run": "https://github.com/boooobly/lumaclean/actions/runs/41327934603",
+    "conclusion": "success"
+  },
+  "baseline": {
+    "head": "7758faa72bd97ce70628c99d5fbb5eeb6d9c1c0b",
+    "run": "https://github.com/boooobly/lumaclean/actions/runs/41333250402",
+    "conclusion": "success"
+  },
+  "continuation": {
+    "result": "VERIFY_AFTER_PUBLICATION",
+    "requiredJobsForRecordedRegression": ["quality", "ai-integration"],
+    "syntheticAiNative": false,
+    "note": "Exact continuation head/run/result recorded in the PR body and ignored local artifacts after publication; avoid a self-referential CI-result commit loop. A previous run does not certify a new head."
+  },
+  "branchProtectionEnforced": false,
+  "productionDeployed": false
+}

@@ -9,4 +9,6 @@ Live Google Sheets и production DurationRule не редактировалис�
 
 LC-10 закрыт как бизнес-блокер, остаётся P2 синхронизации текста источника. LC-07 разрешён только в части духовки; остальные duration gates открыты.
 
-Проверки после решения: unit 1055 PASS / 0 FAIL / 33 SKIP, client SSR 16/16 (поле духовки 45 и отсутствие auto activation), TypeScript, ESLint (два прежних img warnings) и production build PASS. Изолированные DB/HTTP, браузерные и Lighthouse результаты основного аудита сохранены как исторические для этого follow-up; внешний транспорт и production не проверялись повторными записями.
+Дополнение владельца в продолжении работы: на вопрос о фактической длительности на 50 м² двумя исполнителями при обычном загрязнении без допуслуг, от начала до окончания на объекте без дороги, ответ — «2 часа и 6 часов». Поддерживающая: 120 elapsed minutes; генеральная: 360 elapsed minutes. Подтверждение относится к точке 50 м², не автоматически ко всему диапазону 40–60 или 1–100. Новые CRM-шаблоны имеют minArea=maxArea=referenceArea=50, crew=2; active остаётся false. Старые правила и Order snapshots не изменены. Остальные диапазоны — предложения в PRICING_PARITY.
+
+Исторический первый follow-up oven45: unit1055PASS/0FAIL/33SKIP, SSR16/16, types/lint/buildPASS. После ответа120/360 выполнена новая PG18/HTTP/браузерная регрессия: unit1057PASS/0FAIL/34SKIP, AI57/57isolated, остальные результаты в RELEASE_READINESS и verification.json. Lighthouse не повторялся; production/внешние отправки не выполнялись.

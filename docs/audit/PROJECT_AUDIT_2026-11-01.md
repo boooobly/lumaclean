@@ -1,6 +1,6 @@
 # LumaClean: технический аудит и релизная готовность — 01.11.2026
 
-**Итог: полный release пока BLOCKED.** Подтверждённые локальные дефекты исправлены в отдельной ветке; production не изменён. Главные незакрытые области: main/release reconciliation, текущий native AI/booking proof, согласование базовых duration/holiday/crypto правил, изоляция remote Preview, live delivery и backup recovery. Владелец после аудита подтвердил духовку 45 человеко-минут и сохранение скачка 100 м²: [решения](OWNER_DECISIONS_2026-11-01.md). Этот отчёт не является «100% готово» или разрешением на deploy.
+**Итог продолжения: ручной A BLOCKED по инфраструктурным подтверждениям; AI AUTO B BLOCKED отдельно.** Закрыты legacy AI suite (57/57 isolated/mocked), raw migration parity25/25, linen quantities; подготовлены PG18 staging/least-privilege и synthetic backup restore. Main/production ещё не синхронизированы, live delivery и remote staging не подтверждены, защита main не включена, hosting требует действия владельца. Владельцем подтверждены oven45, скачок100м², regular120/deep360 elapsed на50м² для двух человек. Production не менялся; это не разрешение на deploy.
 
 Артефакты: [реестр P0–P3](FINDINGS.md), [readiness](RELEASE_READINESS.md), [инфраструктура](INFRASTRUCTURE_MAP.md), [прайс](PRICING_PARITY.md), [rollout/rollback](RELEASE_PLAN.md), [финальный протокол](evidence/verification.json). Статусы и ограничения каждого теста важнее суммарного числа PASS.
 
@@ -48,7 +48,7 @@ Steam в БД active, но оборудование не подтвержден�
 
 Свежий финансовый прогон сначала воспроизвёл загрязнение общего тестового fixture после CRM suite: 24500 вместо ожидаемого 12000 в агрегате. Старая synthetic БД сохранена, отдельная чистая подготовлена; 15/15 financial checks прошли. Ошибка стенда не объявлена production bug и не скрыта. Аналогично старые AI fixtures не «исправлялись» снятием gates.
 
-На локальных пяти БД replay всех 25 migrations и schema diff — zero drift. Отдельные preservation tests проверяют historical Lead/Order/finance/crew/time snapshots. Remote main: 25 finished migrations, 0 unfinished, только read-only. **Однако независимая проверка checksum выявила 2 неизвестных расхождения из 25**: foundation и ai_agent; одна другая разница объясняется CRLF. Применённые версии первых двух не найдены в fetched Git history. Это LC-21, новый P1: provenance и remote schema parity пока не сертифицированы, checksum rows не менялись. Локальный PG17 не заменяет deployment rehearsal на PG18 Neon.
+На пяти fresh PostgreSQL18.6 БД replay25 миграций даёт zero drift. Обе неизвестные checksum восстановлены как смешанные EOL bytes первоначального SQL; coordinate SQL также восстановлен в rawCRLF. Теперь25/25 точных raw SHA256 совпадают с read-only production history. SQL команды и metadata не менялись. Дополнительное PG18 сравнение477 constraints,16enum fingerprints,35functions,4triggers (532объекта) совпало; независимый synthetic pg_dump/restore46таблиц и immutable audit PASS. См. LC-21/LC-14 и доказательства.
 
 DurationRule — важный открытый блокер AI: elapsed time в engine и person-minutes в Sheet не согласованы; regular/deep bands требуют подтверждения. Конфликт oven 30/60 разрешён владельцем: 45 человеко-минут на единицу; значение предложено в CRM для новой версии правила, без изменения production и старых snapshots. Нужен versioned rollout. Неизвестные extras при zero uncertainty reserve корректно запрещают auto scheduling.
 
@@ -60,7 +60,7 @@ Read-only БД: global AUTO, WEBSITE AUTO, Telegram/Viber/WhatsApp OFF, allowed 
 
 В старом коде server=true + DB/channel AUTO мог разрешить replies/Lead при manual-only release, хотя финальное бронирование отдельно проверяло readiness. Новый effectiveMode fail-closed при uncertified release применяется к claims, tool access, persistence и outbound checks. Owner kill switch, revision и leases сохранены. Без допуска нет автоматической записи; explicit recap confirmation, verified identity/slots/current price/duration, human review и readiness продолжают проверяться на booking boundary.
 
-Изолированный smoke подтвердил: при OFF нет provider invocation/Order/Lead; исходное сообщение сохраняется. Mocked burst/race suite проверяет supersession, timeout/fallback, lease recovery и takeover. **Полный старый DB agent suite: 8 PASS / 46 FAIL** с каскадом отсутствующих contexts при текущих gates/contracts. Это реальный FAIL набора, не 46 независимых доказанных production exploits. Native providers, actual owner confirmation/live booking и current-source signed proof остаются BLOCKED. AI server flag не включался; owner authorization не заменяет readiness.
+Изолированный smoke подтвердил: при OFF нет provider invocation/Order/Lead; исходное сообщение сохраняется. Mocked burst/race suite проверяет supersession, timeout/fallback, lease recovery и takeover. Исторический DB agent suite дал8PASS/46FAIL из-за readiness/fixture/contracts; после разрешённой владельцем isolated fixture актуальный результат **57PASS/0FAIL/0SKIP**. Native providers и current-source signed live proof остаются BLOCKED; synthetic HMAC не является их заменой. Production AI server flag не включался; owner authorization не заменяет readiness.
 
 Knowledge обновлена из свежих 01–06: 530 entries, source version/hash, crypto +5% и порядок service surcharge/rounding. Обычный crypto FAQ отвечает фактом; явный выбор crypto создаёт PAYMENT_REVIEW без автоматической final-fee/asset/network confirmation. Автоматические holiday/crypto API поля отсутствуют — не объявлены реализованными. Новые alias packages из Sheet не превращаются в auto-enabled services.
 
@@ -113,3 +113,11 @@ Billing API дал полный summary доступного окна 31.10 07:0
 4. Полный current-source autonomous suite, source-bound evidence, проверенный staged production build и отдельное production rollout approval.
 
 До этого Website AI остаётся OFF, а full release — BLOCKED. Подробные приёмочные тесты для каждого LC-ID находятся в FINDINGS; неразрешённые live операции не выполнялись для получения «зелёного» отчёта.
+
+## Продолжение: закрытие блокировок и границы доказательств
+
+Все45 упавших дочерних AI сценариев и родительский FAIL разобраны в ai-suite-reconciliation.json. Позитивные synthetic readiness fixtures разрешены владельцем только loopback; production AI code ради suite не менялся. Последний прогон57/57 включает новые отрицательные source/server/owner/proof сценарии.
+
+Подготовлен [отдельный baseline draft PR33](https://github.com/boooobly/lumaclean/pull/33), ancestry проверено, Quality#3 PASS; merge не выполнен. Vercel Git disconnected, production branch не настроена. Конкретный main protection payload подготовлен, не применён. Обязательность quality независима от AI gate.
+
+Финальная локальная регрессия и статусы находятся только в [RELEASE_READINESS](RELEASE_READINESS.md) и verification.json; прежние даты/числа в историческом повествовании не заменяют текущий протокол. Поля crypto/holiday остаются manual-review. Duration point50 подтверждён, шаблон ограничен min=max50 и не активен; широкие диапазоны не одобрены. Остаток после local fixes: P0=0, P1=7, P2=7; production исправления не опубликованы.

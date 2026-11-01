@@ -23,7 +23,7 @@ SSO protection: all_except_custom_domains. READY означает завершё
 
 Production URL: [lumacleanrs.com](https://lumacleanrs.com). Проверенный deployment identity: [production deployment](https://lumaclean-9n6g1f3u3-vladislavs-projects-0eae0ea3.vercel.app). Это текущий baseline, не URL исправленной audit-сборки.
 
-Опубликованный vercel.json содержит два queue/v2beta triggers: `lumaclean-notifications`, `lumaclean-agent`, retryAfterSeconds=200; workers visibility=240s, function maxDuration=180s. Cron `/api/agent/recover`: `0 6 * * *`, то есть 06:00 UTC (07:00 в UTC+1 на дату аудита). Регистрация/успешное исполнение scheduler отдельно не подтверждены. Drains отсутствуют.
+Опубликованный vercel.json содержит два queue/v2beta triggers: `lumaclean-notifications`, `lumaclean-agent`, retryAfterSeconds=200; workers visibility=240s, function maxDuration=180s. Cron `/api/agent/recover`: `0 6 * * *`, то есть 06:00 UTC (07:00 в UTC+1 на дату аудита). Dashboard Cron enabled и расписание подтверждены read-only; успешное внешнее исполнение не подтверждено. Локальный настоящий HTTP recovery проверяет401/non-ASCII auth, expired jobs/leases, UNKNOWN non-retry и повторный запуск (PASS). Drains отсутствуют.
 
 ## Neon / PostgreSQL
 
@@ -38,7 +38,7 @@ Branches основного проекта: main; homepage-focused-ux-test; rele
 
 Sensitive Vercel DATABASE_URL не раскрыт connector API. Provider main restriction подтверждает Vercel production role этой ветки, но независимое сравнение **точной** deployed connection host/branch/db не выполнено. Перед любым remote test/write это обязательный gate.
 
-Локальная лаборатория: `127.0.0.1:55449`, PostgreSQL 17.11, data_directory внутри `upholstery-premium/artifacts/release-readiness/pgdata`. Отдельные admin/bootstrap/migration/reliability/ai test databases, только synthetic fixtures. Существовавшие тестовые БД сохранены переименованием. Локальная версия PG17 против remote PG18 — ограничение переносимости, а не PASS production migration rehearsal.
+Локальная лаборатория обновлена до PostgreSQL18.6: `127.0.0.1:55449`, directory `artifacts/release-readiness/pgdata18`; opt-in `LUMACLEAN_LOCAL_PG18=true`. Старый PG17 cluster остановлен и сохранён. Пять fresh migration DB и отдельная `lumaclean_staging_test`, только synthetic data. Runtime staging role `lumaclean_staging_app`, owner/migrator `lumaclean_staging_migrator`; SCRAM, noDDL/no migration metadata у приложения, cross-DB denied. DB identity и HTTP smoke в staging-local.json/staging-smoke.json. Native PG18 restore rehearsal PASS; production recovery SLA отдельно BLOCKED.
 
 ## Env requirements — только имена и назначения
 
@@ -90,3 +90,11 @@ Lead сохранён, Queue publish упал: outbox должен пережи�
 - Routing gateway/MOTIS/BusMaps/Google представлены кодом/config; внешний live routing и account permissions не сертифицированы. Карта не доказывает live routing.
 - Railway plugin inventory был запрошен, но connector не вернул project data (error); состояние routing host/account этим аудитом не подтверждено.
 - Main/release/AI knowledge reports с прежними датами исторические. `docs/production-release-2026-10-31.md` точно описывает тот выпуск, но не подтверждает текущие local changes.
+
+## Подтверждённая политика Git и подготовленные PR
+
+Vercel Settings/Git: **This Project is not connected to a Git repository**; Production environment: **No branch configuration**. Исторические CLI releases объясняют drift. Git push сейчас не имеет настроенного autodeploy в основном проекте. Подключение Git/production branch — отдельное owner-approved изменение, не делать вместе с merge автоматически. См. [vercel-git-settings.json](evidence/vercel-git-settings.json).
+
+[Draft PR32](https://github.com/boooobly/lumaclean/pull/32) — исправления; [draft PR33](https://github.com/boooobly/lumaclean/pull/33) — production ancestry→main плюс Quality/защитные настройки. PR33 Quality#3 PASS, main ещё не изменён. Оба безопасных branch-name отключены в vercel.json на случай последующего подключения Git. Remote branch protection не применена; payload `.github/main-protection.json` подготовлен. Новых проверенных Preview deployments нет: опубликованные старые READY адреса не являются smoke текущего source.
+
+Перед выпуском требуется операционное подтверждение hosting account владельцем (LC-22); частные детали не включены в репозиторий.

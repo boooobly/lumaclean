@@ -1,0 +1,46 @@
+[
+  {
+    "name": "20261001090000_admin_foundation",
+    "deployment": "dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH",
+    "fileId": "9a708dee908547e9af3106e8722602748a555a30",
+    "matchingContent": [
+      {
+        "normalization": "raw",
+        "sha256": "ae0b6f9054ea3f14923c10ffaeb2e28f784cd7e9b7e231ade76ea3b91988930d",
+        "bytes": 29345
+      },
+      {
+        "normalization": "LF",
+        "sha256": "ae0b6f9054ea3f14923c10ffaeb2e28f784cd7e9b7e231ade76ea3b91988930d",
+        "bytes": 29345
+      }
+    ],
+    "downloadStatus": "Connector base64 response truncated; not used for checksum",
+    "appliedChecksumMatch": false,
+    "comparisonScope": "Historical production deployment Git-normalized files; before restoration of original applied EOL bytes",
+    "currentRepositoryAppliedRawMatch": true,
+    "originalByteEvidence": "migration-original-bytes.json"
+  },
+  {
+    "name": "20261001210000_admin_ai_agent",
+    "deployment": "dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH",
+    "fileId": "1035bcfafa7e648c71f88f2f9022a7d10500b5f4",
+    "matchingContent": [
+      {
+        "normalization": "raw",
+        "sha256": "a361eae3b0512627857fc2f2f0acd9553a05665d03d9c3f5a6ceab757f6fa359",
+        "bytes": 5787
+      },
+      {
+        "normalization": "LF",
+        "sha256": "a361eae3b0512627857fc2f2f0acd9553a05665d03d9c3f5a6ceab757f6fa359",
+        "bytes": 5787
+      }
+    ],
+    "downloadStatus": "Connector base64 response truncated; not used for checksum",
+    "appliedChecksumMatch": false,
+    "comparisonScope": "Historical production deployment Git-normalized files; before restoration of original applied EOL bytes",
+    "currentRepositoryAppliedRawMatch": true,
+    "originalByteEvidence": "migration-original-bytes.json"
+  }
+]

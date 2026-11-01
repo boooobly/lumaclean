@@ -1,0 +1,210 @@
+{
+  "unitSkipped": 34,
+  "scope": "Top-level environment tests; independent phases do not rewrite unit skip status",
+  "suites": [
+    {
+      "name": "admin authorization, real aggregates, auth policies and DB invariants",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "first-admin provisioning is atomic, stores only a hash and preserves audit",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "actual AI tool, active CRM catalogue and public calculator agree",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "autonomy domain actions on isolated Preview",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "behavior uses durable conversation state and native jobs in isolated Preview",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "actual knowledge tools, Lead persistence and booking boundaries on the disposable branch",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "Chat V2 HTTP: cookie scope, SSE reconnect, uploads and real receipts",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "additive Chat V2 migration preserves orders, mode and duplicate legacy history",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "Chat V2 real database safety and concurrency",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "native isolated Preview: human continuity and unanswered client bursts",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "source proposals, partial-list blocking and CRM safety through actual Preview tools",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "exact golden replay through persistence, jobs, domain tools, Lead and calculator",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "real incident: native Preview persistence, soft review, contact and hard safety",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "customer transports reuse existing workflow on isolated Preview only",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "public chat and Inbox HTTP security",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "real database agent boundaries, booking and concurrency",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "targeted live-readiness database boundaries",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "additive AI migration preserves finance-era CRM and conversation history",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "durable handoff delivery, two-minute reminder, claim and concurrency",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "window refusal persists through inbox and worker on the isolated RC database",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "homepage intake: persistence, consent, prices, notification, retry and history",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "CRM core: database transactions and authenticated HTTP flows",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "additive migration preserves legacy records and phone backfill is idempotent",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "duration, finance and import commands stay transactional",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "additive migration preserves existing CRM, schedule, expenses and duration versions",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "PR23 CONTACT_REQUEST uses the same durable, idempotent, limited intake",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "reliability: isolated PostgreSQL intake and delivery regressions",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "ordered release migrations preserve legacy Lead and Order snapshots and permit genuine contacts",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "actual recovery HTTP authenticates cron, reclaims OFF work and preserves UNKNOWN sends",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "upholstery: actual HTTP and PostgreSQL preserve one Lead and outbox across concurrent retries",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "routing cache, proposal transactions and protected endpoints",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "real Railway routing persists and reuses RouteCalculation; transaction leaves no fixture",
+      "unitStatus": "SKIP",
+      "separatePhase": "BLOCKED_ENV_OR_NATIVE_NOT_RUN",
+      "note": "Existing source-bound remote/native guard or provider credentials are absent; no host spoof, paid call or real message"
+    },
+    {
+      "name": "scheduling transactions, concurrency and authenticated calendar",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    },
+    {
+      "name": "additive scheduling migration preserves legacy crew/hours and backfills elapsed end",
+      "unitStatus": "SKIP",
+      "separatePhase": "PASS_ISOLATED",
+      "note": "See dedicated PG18 logs/counts in verification.json; unit SKIP remains SKIP"
+    }
+  ]
+}

@@ -28,12 +28,13 @@
 - Файлы: полная история в `artifacts/audit-20261101/production-commits.txt`, diff в `production-drift.txt`; затронуты API lead/upholstery, agent runner/tools/inbox, next.config, lockfile и страницы. Новых migration SQL в этом диапазоне нет; schema annotations менялись.
 - Решение: отдельный baseline reconciliation PR, затем audit fixes; без cherry-pick дублирования истории. Приёмка: main содержит release ancestry, совпадают application inventory, 25 migration checksums и env requirements; только затем staged rollout.
 
-## LC-04 · P1 · Полный AI booking suite не готов — FAIL / BLOCKED
+## LC-04 · P1 · Автономный AI integration suite — FIXED_ISOLATED / native proof отдельно
 
-- Доказательство: свежий isolated `tests/agent/integration.test.ts`: **8 PASS / 46 FAIL / 0 SKIP**. Артефакт `legacy-ai-integration.log`. Первый контекст не получает claim при uncertified release; последующие legacy assertions каскадно падают, завершение читает отсутствующий fixture.
-- Это не 46 доказанных production-дефектов и не тест внешних моделей. Старые fixture/readiness предположения несовместимы с текущими gates и qualification API. Исторический отчёт также отмечал непроходящий автономный набор.
-- Последствие: нельзя доказать безопасную автономную запись по текущему source. Gate не ослаблялся ради PASS; доказательство не переподписано.
-- Решение: выделенные synthetic fixtures с актуальными фактами/ownership/consent, source-bound сертификация и native proof на независимом staging. Приёмка: полный набор, negative booking, concurrency, owner takeover, kill switch, provider failures — без skips и gate overrides в приложении.
+- Исторический результат 8 PASS / 46 FAIL сохранён в legacy-ai-integration.log. Это 45 дочерних FAIL и FAIL родительского suite, а не 46 отдельных production bugs.
+- Причины: source/readiness fixture не проходил настоящие admission gates; каскад отсутствующих claims/slots/orders; устаревшие даты и qualification/owner-resume contracts; неверные expectations handoff/content repair; permission notification channel. Полная привязка каждого старого FAIL: [ai-suite-reconciliation.json](evidence/ai-suite-reconciliation.json).
+- Исправлены только tests/agent/integration.test.ts, isolated-readiness.ts и изолированный runner. Production AI gates ради тестов не менялись. Fixture разрешён владельцем, требует opt-in, точные loopback host/port/DB/PG18 directory, пустые Client/Order, запрещает внешнюю сеть и восстанавливает env/fetch.
+- Приёмка: **57 PASS / 0 FAIL / 0 SKIP**, PostgreSQL 18.6; реальная БД/транзакции и MOCKED providers. Проверены uncertified source, server OFF, owner confirmation, tampered/stale proof, source change, permissions, kill switch, takeover, concurrency, provider outage, leases и idempotency.
+- Синтетическая HMAC fixture не является native/live или production certificate. WEBSITE_AI_AUTO остаётся BLOCKED по независимым gates B.
 
 ## LC-05 · P1 · Live delivery нового source не подтверждена — BLOCKED_OWNER
 
@@ -42,19 +43,20 @@
 - Риск: сбой Queue/Telegram после локально успешного Lead остаётся непроверенным для финального release. Доставка 26 октября не доказывает новый source.
 - Решение: согласованный synthetic recipient, изолированная БД, намеренно контролируемые queue/provider ошибки; отдельно разрешённый live-proof. Приёмка: один Lead → один durable event → Queue → worker → receipt → CRM SENT; повтор/timeout не удваивает доставку. UNKNOWN вручную выясняется, не пересылается автоматически.
 
-## LC-06 · P1 · Preview DB/Blob/получатели не полностью доказаны — BLOCKED
+## LC-06 · P1 · Remote staging DB/Blob/получатели не доказаны — PARTLY_FIXED / BLOCKED_REMOTE
 
-- Доказательство: sensitive Vercel DATABASE_URL не возвращается даже при decrypt=true; BLOB_READ_WRITE_TOKEN имеет production/preview/development targets; CHAT_STORAGE_NAMESPACE задан для preview. Neon test branches имеют `init_source=parent-data`.
-- Причина: inherited credentials и исторические ветки не являются документированной схемой staging isolation.
-- Последствие: риск доступа к рабочим данным/общему storage при ошибке конфигурации. Само наличие общей Blob env записи не доказывает межсредовое удаление: namespace guard существует.
-- Решение: подтвердить точные deployment host → Neon branch → database → role; schema-only/sanitized fixtures, отдельные recipients, AI OFF, явный storage namespace. Приёмка: denylist production endpoint, отсутствие PII, write canary только в synthetic БД, namespace boundary tests. Аудит-ветка не запускает автоматический Vercel deployment.
+- Новый локальный staging: PostgreSQL 18.6, 127.0.0.1:55449, lumaclean_staging_test, пустой replay 25 миграций и только synthetic records. Старые базы сохранены; production clients не копировались.
+- scripts/release-readiness/audit-staging.mjs создаёт отдельные SCRAM runtime/migrator roles без superuser/createDB/createRole/bypassRLS; runtime не имеет DDL или доступа к _prisma_migrations. Другие БД и неверный пароль отвергаются. Сервер не получает migration credential.
+- Приёмка: [staging-local.json](evidence/staging-local.json), [staging-smoke.json](evidence/staging-smoke.json): реальный HTTP + app-role DB, RU/SR/EN, auth, два неактивных duration draft, идемпотентная заявка/linen=2/7500 RSD/один PENDING outbox, 0 Orders; server/global/channels AI OFF.
+- Remote BLOCKED: точные host/branch/role/deployment, отдельные test bot/chat и Blob store/token permissions ещё не подтверждены. Namespace не является границей прав общего Blob token. Production analytics credentials в local runner очищены, hostname guard дополнительно запрещает их на localhost. Native Blob upload и внешняя отправка не заявлены PASS.
+- Приёмка remote: schema-only empty PG18 без parent-data PII, least-privilege role, отдельные получатели/storage credentials, env attestation и bounded smoke после согласования.
 
-## LC-07 · P1 · Duration rules не соответствуют свежей бизнес-основе — PARTLY_RESOLVED / rollout BLOCKED
+## LC-07 · P1 · DurationRule: точка 50 м² подтверждена, широкие диапазоны нет — PARTLY_RESOLVED / B BLOCKED
 
-- Доказательство: live read-only DurationRule: regular 1–100 м² / 2 исполнителя / 150 минут; deep 40–60 м² / 480 минут. Sheets дают 180 чел.-мин для REG_1 и 480 чел.-мин для DEEP_2, а engine хранит elapsed minutes и не делит на команду. Oven в БД 30 минут; в строке Sheets труд=30, комментарий владельца=60 активных минут.
-- Причина: различие единиц person-minutes/elapsed и противоречащие друг другу колонки; нельзя автоматически заменить правила или делить всё на два.
-- Последствие: неверная оценка продолжительности/слотов, часть диапазонов не поддерживается. Не все расхождения ведут к недооценке: некоторые консервативны.
-- Решение владельца 01.11: духовка **45 человеко-минут на единицу**, вместо противоречащих 30/60. В `appliance-catalog.ts` закреплена норма; CRM предлагает 45 в черновике нового правила/новой версии. Старые записи и snapshots сохраняются. Глобальные elapsed правила по команде и диапазонам ещё требуют согласования; автоматического деления на число клинеров нет. Приёмка: 2 духовки = 90 минут дополнений, старое правило с 30 остаётся читаемым, новая версия не активируется автоматически. Production rules не изменялись.
+- Владелец подтвердил 50 м²/обычное загрязнение/без допуслуг/без дороги/два человека: regular 120 elapsed, deep 360 elapsed; oven 45 person-min. Повторного решения по этим значениям не требуется.
+- src/components/admin/finance-forms.tsx предлагает только неактивную точку min=max=referenceArea=50, crew=2, 120/360 минут, oven45. SSR проверяет min/max, default и отсутствие активирования. Исторические rules и Order snapshots не переписаны.
+- [PRICING_PARITY.md](PRICING_PARITY.md) разделяет исходные person-min, capacity команды, elapsed, последовательные extras и календарные/route буферы. Пропорциональные другие диапазоны — предложения, не факты или активные правила.
+- Для B нужны утверждённые интервалы/soil/extras/parallel constraints либо согласованный canary строго 50 м²; versioned prospective DB update и signed proof. Ручной A не должен обещать автоматический слот/длительность; это не самостоятельный blocker A.
 
 ## LC-08 · P1 · Условный Steam не маркируется в Website Lead — FIXED_LOCAL
 
@@ -62,12 +64,11 @@
 - Исправление: сохраняется humanReviewRequired=true для steam, RU/SR/EN показывают согласование оборудования/поверхности. AI activePrice уже запрещал автономное бронирование steam — это существующая защита, а не новая находка обхода.
 - Приёмка: isolated saveWebsiteLead + outbox, флаг review, UI; не удалять запрос клиента и не превращать его в подтверждённый слот. Остаток: оборудование владелец должен подтвердить фактически; DB active не равно готовности.
 
-## LC-09 · P1 · Crypto/holiday не являются автоматическими полями сметы — PARTLY_FIXED / MANUAL
+## LC-09 · P2 · Crypto/holiday остаются ручными условиями — MANUAL / feature gap
 
-- Доказательство: RULE-PAY-017/018/022 подтверждают crypto +5% после одной service surcharge 20%; runtime quote имеет urgent boolean, но не payment method/holiday calendar. Старые AI docs отрицали подтверждение crypto.
-- Исправлено: актуальная knowledge version 2026-11-01, три правила оплаты и rounding; явный crypto-choice создаёт PAYMENT_REVIEW во всех каналах через существующую policy, обычный FAQ не передаётся человеку. Тест выбора сначала FAIL, затем PASS RU/SR/EN.
-- Остаток: автоматическое начисление holiday/crypto не реализовано. Эти суммы требует подтвердить человек с явной причиной price adjustment; нельзя выдать базовый calculator total за окончательную crypto смету.
-- Приёмка будущей автоматизации: один 20% при urgent+holiday, затем 5%, один ceil; выбранный asset/network, provenance и финансовый snapshot. Нельзя тестом арифметической формулы объявить PASS отсутствующий API flow.
+- Автоматических holiday/calendar/crypto полей в смете нет. Public UI/AI не должны подтверждать окончательный итог, валюту или сеть. Явный выбор crypto ведёт в PAYMENT_REVIEW, неподтверждённые условия — к оператору; нет скрытого автоматического списания или скидки.
+- Это P2 для manual A при сохранённом handoff; для B запрещено автоматически бронировать такой запрос до реализации и проверки утверждённого правила. Автономный обычный RSD canary не требует включать crypto/holiday.
+- Приёмка: pricing golden tests, knowledge/tools parity и AI negative payment/discount/contamination scenarios; расширение полей только отдельной согласованной задачей.
 
 ## LC-10 · P1 → P2 · Граница 100+ подтверждена; комментарий Sheets устарел — RESOLVED_OWNER / source text pending
 
@@ -75,7 +76,7 @@
 - Причина: ставки и текст метода расчёта не согласованы. Старые DB bands с другими ценами закрыты validUntil и не являются активным дублем.
 - Решение владельца 01.11: **скачок остаётся**, числовые тарифы менять не нужно. Deep 99.99/100/100.01 = 17000/18000/18100 RSD, move = 18400/18000/18100 RSD после финального округления. Закреплено отдельным regression test и owner decision в контракте. P1 решения закрыт; комментарий Sheets «скачка нет» остаётся устаревшим и должен быть исправлен при отдельной редактуре источника. Live Sheet и production не менялись.
 
-## LC-11 · P2 · Closed/hidden widget продолжает SSE polling — FIXED_LOCAL
+## LC-11 · P2 · Closed/hidden SSE исправлен; открытый idle stream дорогой — PARTLY_FIXED
 
 - Файлы: `website-chat.tsx`, `/api/chat/events`, `inbox.publicConversation`.
 - Доказательство: browser на production с API mock открывает EventSource уже при закрытом виджете во всех трёх языках; isolated 40 snapshots = 200 SQL queries, 5 на snapshot; интервал 1500 ms ≈200/min плюс admission/reconnect.
@@ -95,11 +96,12 @@
 - Воспроизведение: одинаковая JS string length, разная UTF-8 byte length в Authorization → timingSafeEqual бросал RangeError до auth reject.
 - Исправление: Buffer.byteLength перед constant-time comparison. `recover-auth.test.ts`: сначала FAIL, затем 401 PASS без обращения к БД. Не является обходом авторизации.
 
-## LC-14 · P1 · Backup/protection/restore не сертифицированы — BLOCKED_OWNER
+## LC-14 · P1 · Production recovery / RPO / RTO не подтверждены — PARTLY_FIXED / BLOCKED_OWNER
 
-- Доказательство: main `protected:false`, но есть provider restrictions delete/delete-rw-endpoint/move-rw-endpoint (Vercel production). Поэтому «никакой защиты нет» было бы неверно. history_retention_seconds=21600 (6 часов); backup branches существуют.
-- Риск: provider delete restrictions не заменяют роли приложения, PITR/SLA и доказанное восстановление; parent-data previews могут содержать PII. Приложен `neon-protection.json`.
-- Решение: подтвердить доступный план/права, RPO/RTO и срок истории; отдельный минимальный runtime role; restore в изолированный branch и сверка checksums/counts. Synthetic migration preservation PASS не равен восстановлению production backup. Не включались платные настройки, защита или миграции.
+- Main protected:false, но provider запрещает delete/delete-rw-endpoint/move-rw-endpoint для Vercel production branch. PITR history 21600s — срок хранения 6ч, **не гарантированный RPO 6ч**. Owner application role не аттестован.
+- Новый scripts/release-readiness/audit-backup-rehearsal.mjs: native PG18 pg_dump custom → новая isolated DB → pg_restore single transaction. Все 46 таблиц (включая metadata) совпали count/full-row hash; 532 schema objects и 25 raw migration checksums совпали; AuditLog immutable trigger реально отклонил UPDATE.
+- [backup-rehearsal.json](evidence/backup-rehearsal.json): PASS_LOCAL_SYNTHETIC. Первое сравнение timestamp rendering выявило разные session timezone; исправлен SET TIME ZONE UTC в обеих hash queries, поля не исключались. Неуспешная test DB сохранена.
+- Малый synthetic restore за секунды не является production RTO. Production backup не копировали, PII в staging не переносили. Нужны подтверждение владельцем текущего retention/SLA/ответственного и согласованная процедура production recovery в отдельную защищённую цель. Никаких платных настроек не меняли.
 
 ## LC-15 · P1 · Required checks main отсутствуют — PREPARED
 
@@ -131,20 +133,34 @@
 - Исправлено на «Режим AI» и «Сохранённый режим». Фактический production effective mode — OFF, основание: владелец прочитал серверный hint и проверена его привязка к env в коде.
 - Приёмка: enabled=false не утверждает, что ответы включены; owner/master/channel/release gates отображаются отдельно. Production label исправится только после разрешённого rollout.
 
-## LC-20 · P2/P3 · Ограничения интерфейса количества и оставшийся долг — OPEN
+## LC-20 · P2 · Количества белья / API limits — FIXED_LOCAL; P3 косметика
 
-- `estimate.tsx`, `quantityExtras`: linen по прайсу за кровать, UI toggle выражает только одну; counts могут выйти за API limit=100, запрос затем отвергается. Не менять тариф/единицу ради обхода ограничений.
-- Решение: отдельная небольшая UX задача — quantity для белья, согласованный max и local validation, сохранение payload совместимости. Приёмка: 0/1/2/100/101, RU/SR/EN, idempotent retry.
-- P3: 2 img-warning для локальных photo-preview; косметику не смешивать с release blockers.
+- src/components/site/estimate.tsx: linen переведён с toggle на число кроватей; все counters ограничены 0..100, plus disabled на100. src/lib/domain/crm-pricing.ts: linen quantity integer0..100, binary extras остаются max1. Тариф750 RSD/кровать сохранён.
+- Приёмка: pricing-contract valid0/1/2/100, invalid -1/1.5/101; browser RU/SR/EN actual UI 0/1/2/100, over100 disabled, mocked POST quantity2; staging real HTTP/DB хранит quantity2 и итог7500 без двойного Lead.
+- tests/browser/estimate-chat.mjs обновлён под явное linen=1, прежние итоговые21300/25500 сохранены. Публичные 225 layouts и13 сценариев форм проходят с intercepted transport.
+- P3 остаются два lint img-warning для локальных chat photo previews; это не утверждение ошибки внешней доставки.
 
-## LC-21 · P1 · Два checksum migration history не соответствуют Git — OPEN / BLOCKED
+## LC-21 · P1 · Migration checksums — FIXED_LOCAL / 25 из25 raw PASS
 
-- Доказательство: read-only `_prisma_migrations` и SHA-256 25 локальных SQL. 22 совпали raw/LF; ещё одна миграция совпала после явного CRLF normalization. `20261001090000_admin_foundation` и `20261001210000_admin_ai_agent` не совпали ни с текущими файлами, ни с найденными историческими версиями всех fetched refs, ни с проверенными BOM/EOL/trailing-newline вариантами.
-- Файлы: `evidence/deployed-migrations.json`, `migration-parity.json`, `migration-history.json`; воспроизведение `node scripts/release-readiness/audit-migrations.mjs` возвращает exit 1 и 23/25 совпадений.
-- Причина не установлена: возможны применённые до commit SQL или ручное baselining. Read-only comparison 45 таблиц подтвердил совпадение columns/defaults/nullability/precision, indexes и ограничений с independent replay. PG18 NOT NULL catalog entries сопоставлены через column nullability, поскольку local PG17 хранит их иначе. Functions/triggers/enum labels/privileges в этом сравнении не покрыты. Это не доказательство повреждения данных; совпадение исследованной схемы не объясняет remote history.
-- Последствие: нельзя сертифицировать воспроизводимость production migration baseline и безопасно считать историю main/DB идентичной.
-- Решение: найти точные применённые SQL/initial deploy artifacts, сравнить read-only production schema с independent replay, документировать owner-approved baseline/recovery. **Не изменять checksum rows, не делать migrate resolve/reset/seed ради зелёного статуса.**
-- Приёмка: provenance для всех 25 checksums, понятный schema diff и restore rehearsal; только после согласования корректирующая процедура, если она понадобится. Production metadata не менялись.
+- Причина восстановлена: Git нормализовал смешанные окончания строк первоначально применённых SQL. Foundation имеет LF body + final CRLF; ai_agent — CRLF только у последнего внутреннего и конечного separator; coordinate_confirmation — CRLF полностью.
+- [migration-original-bytes.json](evidence/migration-original-bytes.json) содержит SHA256 и рецепты. Foundation также совпал raw SHA1 с file UID первоначального Vercel deployment dpl_8F6gkVhByHeK94XffVWxoc3cUPPc. Исторический Git search сам по себе совпадений не дал; source viewer нормализует строки, payload connector усечён и не использовался как raw доказательство.
+- Восстановлены только EOL bytes трёх migration.sql, нормализованные SQL команды неизменны. .gitattributes -text сохраняет именно эти bytes. tests/admin/migration-integrity.test.ts и audit-migrations.mjs требуют **точного raw SHA256 всех25**, без LF/CRLF allowance.
+- Независимый PG18 replay: zero Prisma drift; read-only production parity45 таблиц и дополнительно532 объектов (477constraints,16enum fingerprints,35functions,4triggers; views/policies0), diff=[]. См. schema-objects-parity.json.
+- Процедура reconciliation: restore exact SQL bytes → raw SHA256 → Git index raw SHA256 → fresh PG18 replay/schema parity/backup rehearsal → review. Новой baseline history не требуется. Production _prisma_migrations не изменялась; migrate resolve/reset не применялись.
+
+## LC-22 · P1 · Hosting operational confirmation — BLOCKED_OWNER
+
+- Dashboard требует операционного действия владельца до безопасного релиза. Детали аккаунта и финансов не публикуются в публичном репозитории; владельцу сообщены отдельно.
+- Не менялись billing/payment settings, plan, domains или deployment. Приёмка: владелец устраняет предупреждение и подтверждает устойчивую доступность текущего hosting account; затем повторная read-only проверка.
+
+## Открытые находки и независимые gates
+
+**P0: 0 подтверждённых; P1: 7; P2: 7.** Это остаток после local fixes, а не число production-исправлений (production не менялся).
+
+- P1: LC-03,05,06,07,14,15,22. LC-07 относится к B, остальные требуют инфраструктурной/операционной проверки и для A.
+- P2: LC-09,10,11,12,16,17,18. LC-10 business-решение принято, остался комментарий Sheets; LC-11 closed/hidden исправлен, open-idle оптимизация отложена.
+- LC-20 local P2 закрыт, остаток P3 cosmetic. LC-04 isolated suite и LC-21 bytes закрыты; native certification не скрыта внутри их PASS.
+- Общие acceptance/исключения и residual risk: [RELEASE_READINESS.md](RELEASE_READINESS.md). Ни одна открытая P1 не считается автоматически согласованной только потому, что есть план.
 
 ## Неверные предварительные подозрения, снятые проверкой
 

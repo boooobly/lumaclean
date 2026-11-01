@@ -1,45 +1,67 @@
-# Release readiness — 01.11.2026
+# Release readiness — 01.11.2026, продолжение
 
-**Полный production-релиз: BLOCKED. AI AUTO: BLOCKED.** Исправления подготовлены в audit-ветке; в production не опубликованы. Сохранённые AUTO в БД и название переключателя не являются доказательством работающего/готового AI.
+**A WEBSITE_MANUAL_AI_OFF: BLOCKED для выпуска. B WEBSITE_AI_AUTO: BLOCKED отдельно.** Подтверждённых P0:0; открытых P1:7, P2:7 после local fixes. Production не менялся. [Реестр](FINDINGS.md), [протокол](evidence/verification.json).
 
-Статусы: PASS — выполненная проверка в указанной среде; MOCKED — заменён внешний транспорт/браузерный API; FAIL — воспроизведённое отклонение; BLOCKED — нужен доступ, решение или разрешённый внешний тест; NOT RUN — проверка не запускалась. Unit skips не входят в PASS.
+PASS относится только к указанной среде. ISOLATED — реальные PostgreSQL/HTTP с synthetic данными; MOCKED — внешний provider/transport заменён. SKIP/BLOCKED/INCONCLUSIVE не входят в PASS. Исторические провалы сохранены отдельно.
 
-| Gate | Статус | Доказательство / граница |
+## Проверенная основа
+
+| Проверка | Результат / граница |
+|---|---|
+| Baseline | main22b5818; production544da11 / dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH; release574d055 |
+| Node / Next / React |24.22.2 /16.4.3 /19.2.4 |
+| Unit regression | **1057 PASS /0 FAIL /34 SKIP**; environment suites запускаются отдельно |
+| Client SSR | **16/16 PASS**, inactive duration draft/oven45/point50 |
+| Types / ESLint / build / Prisma validate | PASS local; lint0 errors/2 существующих img warnings |
+| Pricing / knowledge / quantities | PASS local: oracle760 комбинаций плюс area/boundary tests; final ceil100 один раз; linen integer0..100 RU/SR/EN. Crypto/holiday manual |
+| Raw migration history | **25/25 PASS**, точный SHA256, без normalization allowance; исходные mixed EOL восстановлены, metadata/reset/resolve не менялись |
+| PG18 replay / schema |25 migrations на5 fresh DB/zero drift;45table fingerprints и532schema objects равны read-only production |
+| Admin/CRM/calendar/routing +3 preservation migrations | **43 PASS /0 FAIL /2 SKIP** (AI migration/ChatV2 требуют отдельного env). Clock-dependent urgent fixture исправлен, cutoff gate сохранён |
+| Отдельные миграции / bootstrap | AI migration1/1, reliability migration1/1, first-admin bootstrap1/1 PASS PG18. ChatV2 native-Neon migration BLOCKED, guard не обходили |
+| Finance | **15/15 PASS**, fresh synthetic DB, предыдущие fixtures сохранены |
+| Reliability/intake/contact/upholstery/recovery | **18/18 PASS**, actual HTTP/PG18, controlled delivery transport;400/429/UNKNOWN/leases/idempotency/recovery |
+| Chat HTTP | **14/14 PASS** PG18, server AI OFF |
+| AI integration | **57/57 PASS ISOLATED/MOCKED**; [46 historical FAIL→причины](evidence/ai-suite-reconciliation.json), production gates не ослаблялись |
+| Browser RU/SR/EN |75pages×3widths=225layouts PASS; формы13groups/21viewports; quantities0/1/2/100 PASS. API/external writes intercepted |
+| Chat subscription | closed0/open1 streams, hidden/offline pause/reconnect restores history PASS MOCKED. Измерено5 SQLqueries/snapshot; открытый idle всё ещё≈200/min |
+| Local staging | PostgreSQL18.6/lumaclean_staging_test; отдельные SCRAM runtime+migrator; noDDL/no metadata/cross-DB denied. Real HTTP auth/forms/drafts,1Lead/1pending outbox/0Orders, AI OFF |
+| Backup restore | PASS_LOCAL_SYNTHETIC: native pg_dump→pg_restore,46tables full-row hashes,532objects,25checksums, immutable audit. Не production RPO/RTO |
+| Dependency / secrets | Предыдущий audit0high/critical,11moderate; limited pattern scan без secrets, не forensic guarantee |
+| SEO / performance | Исторический read-only SEO69URLs/19groups PASS ограниченный; LH home88/100,upholstery89/100 mobile/desktop — lab. CrUX/INP INCONCLUSIVE; physical Safari/screenreader NOT RUN |
+
+## Gate A — WEBSITE_MANUAL_AI_OFF
+
+| Критерий | Статус | Что осталось |
 |---|---|---|
-| Фактический production baseline | PASS | Vercel alias/deployment `dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH`, SHA `544da11`; main `22b5818` |
-| Согласованность main и production | FAIL | Production на 18 коммитов впереди; merge не выполнен |
-| Безопасная локальная ветка | PASS | `codex/full-product-audit-20261101` от `574d055`; чужие изменения сохранены |
-| Node / Next / React | PASS | Проверки на Node 24.22.2; Next 16.4.3, React 19.2.4 |
-| Unit / regression | PASS с SKIP | 1055 PASS / 0 FAIL / 33 environment SKIP; окончательный протокол в `evidence/verification.json` |
-| Client SSR | PASS | 16/16; CSS/navigation substitutes только внутри тестового SSR процесса |
-| ESLint | PASS с предупреждениями | 0 errors; 2 существующих предупреждения локальных preview img чата |
-| TypeScript / build / Prisma validate | PASS | Логи `artifacts/audit-20261101/`; финальный протокол фиксирует повтор после последних правок |
-| Replay миграций / Prisma schema | PASS isolated | 25 миграций на пяти loopback БД, zero drift; production read-only: 25 finished, 0 unfinished |
-| Production migration history parity | FAIL / BLOCKED | 23/25 совпадений с учётом CRLF; foundation и ai_agent checksum не найдены в Git. LC-21; production metadata не исправлялись |
-| Admin / CRM / scheduling / routing | PASS isolated | 40 проверок; реальные PostgreSQL и HTTP, внешние routing/providers не сертифицированы |
-| Финансы / snapshots / импорт | PASS isolated | 15 проверок на свежей БД; первый прогон на загрязнённом общем fixture упал и сохранён отдельно |
-| Intake / outbox / CONTACT_REQUEST / upholstery | PASS isolated + MOCKED | Финальный объединённый прогон 17/17; транспорт доставки контролируемый |
-| Химчистка HTTP / сохранность миграций | PASS isolated | 2 проверки; Lead/outbox, concurrent retry, старые snapshots |
-| Chat HTTP / auth / CSRF | PASS isolated | 14 проверок; server AI выключен, внешняя доставка отключена |
-| Старый автономный AI integration suite | FAIL | `legacy-ai-integration.log`: несовместимые fixtures/readiness; не подменён ручной установкой release gate |
-| Округление и core price parity | PASS local | `final-rounding`, `pricing-contract`, domain tests; 25 bands и 14 extras; owner подтвердил скачок на 100 м², духовка 45 минут в новом draft |
-| Праздник / crypto в автоматическом расчёте | BLOCKED / manual | Автоматических полей/праздничного календаря нет. Условия и итог согласует команда; crypto-choice открывает review |
-| Условные услуги | PASS local / production pending | Steam сохраняет humanReviewRequired; upholstery autoBook=false; в production steam всё ещё active |
-| RU/SR/EN, mobile/desktop | PASS MOCKED | 75 страниц × 375/768/1440 = 225 проверок, 0 page/console errors; отдельные формы и reconnect |
-| Production SEO read-only | PASS ограниченный | 69 sitemap URL, 19 групп проверок, issues=[]; Search Console фактическая индексация не подтверждена |
-| SSE closed/hidden/reconnect | PASS MOCKED + isolated measurement | Production closed-widget подписывается; локально нет подписки. 5 queries/snapshot, около 200/min для открытого чата |
-| Lighthouse production lab | PASS как измерение, OPEN performance | 4 run: home 88/100, upholstery 89/100 mobile/desktop; A/BP/SEO 100. По одному прогону, consent panel видима; это не before/after улучшение |
-| Core Web Vitals / CrUX | INCONCLUSIVE | Лабораторный Lighthouse не является полевым INP; свежие полевые samples не получены |
-| Dependencies | PASS по high/critical, OPEN P2 | 0 high / 0 critical / 11 moderate; без major upgrades |
-| История секретов | PASS ограниченный | По выбранным regex/path-паттернам совпадений нет; это не полная forensic-проверка |
-| Live Website → Queue → Telegram | BLOCKED | Новых реальных заявок/сообщений не создавали; нужен согласованный synthetic recipient и отдельное разрешение |
-| Effective production AI | PASS: установлен OFF | Owner прочитал dynamic server hint: AI_AGENT_ENABLED выключен · AUTO. Код подтверждает связь hint с server env; `evidence/effective-ai.json` |
-| Native providers / live booking proof | BLOCKED | Диагностика 25.10 устарела; финальная сборка не сертифицирована для AUTO; платные вызовы не запускались |
-| Preview isolation / remote smoke | BLOCKED | Sensitive DATABASE_URL не раскрывается API; нельзя доказать точные host/branch/DB и безопасных получателей |
-| Backup / restore | BLOCKED для production recovery | Neon retention 6 часов; synthetic migrations проверены, восстановление рабочего backup не подтверждено |
-| Main required checks / protected branch | PREPARED | Локальный Quality workflow; remote enforcement не включён |
-| Rollout / rollback | PREPARED | Порядок в RELEASE_PLAN; production не выпускался |
+| Сайт/формы/прайс/CRM/ручной чат | PASS local | Remote smoke на том же source |
+| AI гарантированно OFF | PASS local / production owner hint OFF | Release serverflag=false; uncertified AUTO→effectiveOFF; DB AUTO не активировать |
+| Сохранить опубликованную историю | PREPARED, merge BLOCKED | [Draft PR33](https://github.com/boooobly/lumaclean/pull/33), Quality#3 PASS; main ещё старый |
+| Required checks / защита main | PREPARED, не enforced | .github/main-protection.json; exact context quality; независимый reviewer; без потери merge ancestry |
+| Remote staging identity/storage/recipient | BLOCKED | Точные host/branch/DB/role/deployment, отдельные Blob store/token и test bot/chat. Namespace не ограничивает права общего token |
+| Новый Queue→Telegram live proof | BLOCKED | Отдельное разрешение bounded synthetic сообщений; доставка26.10 не proof нового source |
+| Recovery Cron | PARTIAL | Dashboard enabled/0 6 * * * UTC; local HTTP recovery PASS, external execution/SLA не доказаны |
+| Recovery capability / owner SLA | PARTIAL / BLOCKED_OWNER | Synthetic restore PASS; подтвердить retention/RPO/RTO/ответственного.6h retention не равно RPO |
+| Hosting operational confirmation | BLOCKED_OWNER | LC-22: действие владельца по account warning; детали переданы приватно, billing/plan не менялись |
+| Rollout/rollback | PREPARED | Owner approval на конкретные SHA/deployment; staged production без domain promotion, затем controlled promotion |
 
-Разрешение владельца на включение Website AI получено в этом чате. Оно **не снимает** обязательные технические gates и запрет подменять BLOCKED/PASS. Для включения нужны точный runtime flag, исправленный и проверенный source, независимый staging, native proof, согласованные базовые duration/payment/holiday правила и явная процедура включения только WEBSITE. Ответ по духовке (45 человеко-минут) и сохранению скачка 100 м² зафиксирован в [решениях владельца](OWNER_DECISIONS_2026-11-01.md); соответствующие бизнес-вопросы больше не ожидают ответа.
+Блокировки B не используются, чтобы автоматически задерживать A. Native AI, signed booking proof и автоматические длительности не нужны ручному A при отсутствии автоматических обещаний/записи. Открытые инфраструктурные P1 A не считаются согласованными из-за наличия плана.
 
-Финальный источник результатов текущего запуска: [verification.json](evidence/verification.json). Исторический отчёт `docs/production-release-2026-10-31.md` нельзя использовать вместо свежего live-proof.
+## Gate B — WEBSITE_AI_AUTO
+
+| Дополнительный критерий | Статус | Граница |
+|---|---|---|
+| Весь Gate A | BLOCKED | Безопасная инфраструктура обязательна |
+| Autonomous suite / negative gates | PASS ISOLATED/MOCKED |57/57: uncertified source/serverOFF/owner/proof/permissions/kill switch/races, не native proof |
+| DurationRule / crew / calendar | PARTIAL | Owner50м²/2человека/normal/noextras: regular120/deep360 elapsed,oven45person-min. Draft min=max50 не активен; другие bands/soil/parallel extras не утверждены. Либо согласовать диапазоны, либо отдельный point50canary |
+| Native providers / tools / places / routes | BLOCKED | Diagnostics25.10 устарели; требуется согласованный budget/env; paid calls не делали |
+| Signed source-bound booking proof | BLOCKED | Настоящий isolated Preview proof+cleanup+config fingerprint, diagnostics<1h/proof<7days, не synthetic HMAC |
+| Certified source release | BLOCKED | aiAutoReady=false сохранён; нельзя переписать true или просто включить env |
+| Canary / ручное управление | PREPARED | Только WEBSITE после gates; messenger AI OFF; owner confirmation/takeover/kill switch |
+
+Владелец уже разрешил synthetic readiness только loopback и подтвердил oven45, скачок100м², elapsed120/360 на50м². Эти вопросы повторно не задаются. Production Order, сообщения клиентам, звонки, AI activation и deployment не выполнялись.
+
+## GitHub и внешние проверки
+
+[PR32](https://github.com/boooobly/lumaclean/pull/32) — исправления; [PR33](https://github.com/boooobly/lumaclean/pull/33) — baseline sync. Предыдущий опубликованный PR32: [Quality#2 PASS](https://github.com/boooobly/lumaclean/actions/runs/41327934603). PR33: [Quality#3 PASS](https://github.com/boooobly/lumaclean/actions/runs/41333250402). Новый head/CI фиксируется в evidence/ci-current.json после публикации; старый PASS не сертифицирует новый head.
+
+Vercel Git disconnected, production branch отсутствует. Адресный git.deploymentEnabled=false для audit/baseline branches сохранён на случай подключения Git. Новых проверенных Preview deployments нет. [RELEASE_PLAN](RELEASE_PLAN.md) содержит порядок и bounded внешние проверки до разрешения.

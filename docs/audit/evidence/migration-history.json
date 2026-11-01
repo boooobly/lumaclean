@@ -3,12 +3,18 @@
     "name": "20261001090000_admin_foundation",
     "matchingHistoricalCommit": null,
     "cosmeticMatch": null,
-    "diff": null
+    "diff": null,
+    "status": "RESOLVED_EXACT_BYTES",
+    "initialHistoricalGitSearch": "No exact committed match; original mixed EOL normalized by Git",
+    "resolution": "migration-original-bytes.json; exact raw SHA256 now matches production history"
   },
   {
     "name": "20261001210000_admin_ai_agent",
     "matchingHistoricalCommit": null,
     "cosmeticMatch": null,
-    "diff": null
+    "diff": null,
+    "status": "RESOLVED_EXACT_BYTES",
+    "initialHistoricalGitSearch": "No exact committed match; original mixed EOL normalized by Git",
+    "resolution": "migration-original-bytes.json; exact raw SHA256 now matches production history"
   }
 ]

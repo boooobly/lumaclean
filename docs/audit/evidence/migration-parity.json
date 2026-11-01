@@ -1,8 +1,8 @@
 [
   {
     "name": "20261001090000_admin_foundation",
-    "match": false,
-    "normalization": "MISMATCH"
+    "match": true,
+    "normalization": "raw"
   },
   {
     "name": "20261001100000_audit_immutable",
@@ -36,8 +36,8 @@
   },
   {
     "name": "20261001210000_admin_ai_agent",
-    "match": false,
-    "normalization": "MISMATCH"
+    "match": true,
+    "normalization": "raw"
   },
   {
     "name": "20261001220000_ai_go_live",
@@ -52,7 +52,7 @@
   {
     "name": "20261003130000_address_coordinate_confirmation",
     "match": true,
-    "normalization": "CRLF"
+    "normalization": "raw"
   },
   {
     "name": "20261003160000_hybrid_routing",

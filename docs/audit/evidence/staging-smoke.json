@@ -1,0 +1,66 @@
+{
+  "status": "PASS_LOCAL",
+  "scope": "Actual local HTTP/PG18; external delivery BLOCKED, not mocked as successful",
+  "base": "http://localhost:3108",
+  "identity": {
+    "database": "lumaclean_staging_test",
+    "role": "lumaclean_staging_app"
+  },
+  "sourceFingerprint": "5e8f7456bae22745171e84c0ac5882e1d55640c882f5c5cc7154c515170bdc79",
+  "getStatuses": [
+    {
+      "path": "/ru",
+      "status": 200
+    },
+    {
+      "path": "/sr",
+      "status": 200
+    },
+    {
+      "path": "/en",
+      "status": 200
+    },
+    {
+      "path": "/api/booking-policy",
+      "status": 200
+    },
+    {
+      "path": "/admin/login",
+      "status": 200
+    }
+  ],
+  "auth": true,
+  "inactiveDurationDrafts": [
+    {
+      "service": "regular",
+      "baseMinutes": 120,
+      "active": false
+    },
+    {
+      "service": "deep",
+      "baseMinutes": 360,
+      "active": false
+    }
+  ],
+  "leadIdempotency": true,
+  "linenQuantity": 2,
+  "leadPriceRsd": 7500,
+  "notifications": [
+    {
+      "deliveryState": "PENDING",
+      "count": 1
+    }
+  ],
+  "ordersCreated": 0,
+  "aiServer": false,
+  "aiSettings": {
+    "aiAgentMode": "OFF",
+    "aiChannelModes": {
+      "VIBER": "OFF",
+      "WEBSITE": "OFF",
+      "TELEGRAM": "OFF",
+      "WHATSAPP": "OFF"
+    }
+  },
+  "productionAccess": false
+}
