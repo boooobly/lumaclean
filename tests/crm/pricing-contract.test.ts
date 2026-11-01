@@ -25,3 +25,11 @@ test('approved crypto information is available in RU/SR/EN without granting book
   assert(entry,query);assert.match(entry.description,/5%/);assert.equal(entry.autoBook,false);assert.equal(entry.autoCalculate,false);
  }
 });
+
+test('owner retains the deep and move discontinuities at 100 square metres',()=>{
+ for(const [service,below,at,above] of [['deep',17000,18000,18100],['move',18400,18000,18100]] as const){
+  assert.equal(calculatePrice(service,99.99,[],false).total,below);
+  assert.equal(calculatePrice(service,100,[],false).total,at);
+  assert.equal(calculatePrice(service,100.01,[],false).total,above);
+ }
+});

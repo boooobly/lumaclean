@@ -10,8 +10,8 @@
 | Согласованность main и production | FAIL | Production на 18 коммитов впереди; merge не выполнен |
 | Безопасная локальная ветка | PASS | `codex/full-product-audit-20261101` от `574d055`; чужие изменения сохранены |
 | Node / Next / React | PASS | Проверки на Node 24.22.2; Next 16.4.3, React 19.2.4 |
-| Unit / regression | PASS с SKIP | 1053 PASS / 0 FAIL / 33 environment SKIP; окончательный протокол в `evidence/verification.json` |
-| Client SSR | PASS | 15/15; CSS/navigation substitutes только внутри тестового SSR процесса |
+| Unit / regression | PASS с SKIP | 1055 PASS / 0 FAIL / 33 environment SKIP; окончательный протокол в `evidence/verification.json` |
+| Client SSR | PASS | 16/16; CSS/navigation substitutes только внутри тестового SSR процесса |
 | ESLint | PASS с предупреждениями | 0 errors; 2 существующих предупреждения локальных preview img чата |
 | TypeScript / build / Prisma validate | PASS | Логи `artifacts/audit-20261101/`; финальный протокол фиксирует повтор после последних правок |
 | Replay миграций / Prisma schema | PASS isolated | 25 миграций на пяти loopback БД, zero drift; production read-only: 25 finished, 0 unfinished |
@@ -22,7 +22,7 @@
 | Химчистка HTTP / сохранность миграций | PASS isolated | 2 проверки; Lead/outbox, concurrent retry, старые snapshots |
 | Chat HTTP / auth / CSRF | PASS isolated | 14 проверок; server AI выключен, внешняя доставка отключена |
 | Старый автономный AI integration suite | FAIL | `legacy-ai-integration.log`: несовместимые fixtures/readiness; не подменён ручной установкой release gate |
-| Округление и core price parity | PASS local | `final-rounding`, `pricing-contract`, domain tests; 25 bands и 14 extras |
+| Округление и core price parity | PASS local | `final-rounding`, `pricing-contract`, domain tests; 25 bands и 14 extras; owner подтвердил скачок на 100 м², духовка 45 минут в новом draft |
 | Праздник / crypto в автоматическом расчёте | BLOCKED / manual | Автоматических полей/праздничного календаря нет. Условия и итог согласует команда; crypto-choice открывает review |
 | Условные услуги | PASS local / production pending | Steam сохраняет humanReviewRequired; upholstery autoBook=false; в production steam всё ещё active |
 | RU/SR/EN, mobile/desktop | PASS MOCKED | 75 страниц × 375/768/1440 = 225 проверок, 0 page/console errors; отдельные формы и reconnect |
@@ -40,6 +40,6 @@
 | Main required checks / protected branch | PREPARED | Локальный Quality workflow; remote enforcement не включён |
 | Rollout / rollback | PREPARED | Порядок в RELEASE_PLAN; production не выпускался |
 
-Разрешение владельца на включение Website AI получено в этом чате. Оно **не снимает** обязательные технические gates и запрет подменять BLOCKED/PASS. Для включения нужны точный runtime flag, исправленный и проверенный source, независимый staging, native proof, согласованные duration/payment/holiday правила и явная процедура включения только WEBSITE.
+Разрешение владельца на включение Website AI получено в этом чате. Оно **не снимает** обязательные технические gates и запрет подменять BLOCKED/PASS. Для включения нужны точный runtime flag, исправленный и проверенный source, независимый staging, native proof, согласованные базовые duration/payment/holiday правила и явная процедура включения только WEBSITE. Ответ по духовке (45 человеко-минут) и сохранению скачка 100 м² зафиксирован в [решениях владельца](OWNER_DECISIONS_2026-11-01.md); соответствующие бизнес-вопросы больше не ожидают ответа.
 
 Финальный источник результатов текущего запуска: [verification.json](evidence/verification.json). Исторический отчёт `docs/production-release-2026-10-31.md` нельзя использовать вместо свежего live-proof.

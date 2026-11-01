@@ -16,6 +16,7 @@ function Options({ labels }: { labels: Record<string, string> }) {
 import { expenseLabels } from "@/lib/domain/finance";
 import { soilLabels, extraLabels } from "@/lib/domain/crm-types";
 import type { DurationConfig } from "@/lib/domain/duration";
+import { ovenWorkMinutes } from "@/lib/appliance-catalog";
 export async function financeMutation(command: string, payload: unknown) {
   const r = await fetch(`/api/admin/finance/${command}`, {
     method: "POST",
@@ -221,7 +222,7 @@ export function DurationRulesEditor({
     service = old
       ? (services.find((s) => s.id === old.serviceId)?.code ?? "regular")
       : selected;
-  const r = old ?? {
+  const template = old ?? {
     ...blankRule,
     ...(service === "deep"
       ? { minArea: 40, maxArea: 60, referenceArea: 50, baseMinutes: 480 }
@@ -229,6 +230,9 @@ export function DurationRulesEditor({
         ? {}
         : { baseMinutes: undefined }),
   };
+  // The form creates a new version; never mutate the selected historical rule.
+  const draftExtraMinutes: DurationConfig['extraMinutes'] = {...template.extraMinutes, oven: ovenWorkMinutes};
+  const r = {...template, extraMinutes: draftExtraMinutes};
   async function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (pending) return;
@@ -366,6 +370,12 @@ export function DurationRulesEditor({
               ))}
             </div>
             <h3>Дополнения · минут на единицу</h3>
+            <p className="crm-hint">
+              Для духовки владелец утвердил 45 минут работы одного исполнителя.
+              Это значение предложено для новой версии; она начнёт действовать
+              после отдельного сохранения и активации. Старые заказы сохраняют свои снимки.
+              На количество клинеров автоматически не делим.
+            </p>
             <p className="crm-hint">
               Пустое поле означает, что дополнение ещё не калибровано. Заказ с
               таким дополнением получает PARTIALLY_CONFIGURED. Без явно заданного безопасного резерва запись передаётся человеку. Обычные заказы без extras продолжают рассчитываться. Ноль означает

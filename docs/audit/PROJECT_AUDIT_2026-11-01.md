@@ -1,6 +1,6 @@
 # LumaClean: технический аудит и релизная готовность — 01.11.2026
 
-**Итог: полный release пока BLOCKED.** Подтверждённые локальные дефекты исправлены в отдельной ветке; production не изменён. Главные незакрытые области: main/release reconciliation, текущий native AI/booking proof, согласование duration/100+/holiday/crypto правил, изоляция remote Preview, live delivery и backup recovery. Этот отчёт не является «100% готово» или разрешением на deploy.
+**Итог: полный release пока BLOCKED.** Подтверждённые локальные дефекты исправлены в отдельной ветке; production не изменён. Главные незакрытые области: main/release reconciliation, текущий native AI/booking proof, согласование базовых duration/holiday/crypto правил, изоляция remote Preview, live delivery и backup recovery. Владелец после аудита подтвердил духовку 45 человеко-минут и сохранение скачка 100 м²: [решения](OWNER_DECISIONS_2026-11-01.md). Этот отчёт не является «100% готово» или разрешением на deploy.
 
 Артефакты: [реестр P0–P3](FINDINGS.md), [readiness](RELEASE_READINESS.md), [инфраструктура](INFRASTRUCTURE_MAP.md), [прайс](PRICING_PARITY.md), [rollout/rollback](RELEASE_PLAN.md), [финальный протокол](evidence/verification.json). Статусы и ограничения каждого теста важнее суммарного числа PASS.
 
@@ -50,7 +50,7 @@ Steam в БД active, но оборудование не подтвержден�
 
 На локальных пяти БД replay всех 25 migrations и schema diff — zero drift. Отдельные preservation tests проверяют historical Lead/Order/finance/crew/time snapshots. Remote main: 25 finished migrations, 0 unfinished, только read-only. **Однако независимая проверка checksum выявила 2 неизвестных расхождения из 25**: foundation и ai_agent; одна другая разница объясняется CRLF. Применённые версии первых двух не найдены в fetched Git history. Это LC-21, новый P1: provenance и remote schema parity пока не сертифицированы, checksum rows не менялись. Локальный PG17 не заменяет deployment rehearsal на PG18 Neon.
 
-DurationRule — важный открытый блокер AI: elapsed time в engine и person-minutes в Sheet не согласованы; regular/deep bands и oven 30/60 расходятся/противоречат источнику. Нельзя менять правила production без owner decision и versioned rollout. Неизвестные extras при zero uncertainty reserve корректно запрещают auto scheduling.
+DurationRule — важный открытый блокер AI: elapsed time в engine и person-minutes в Sheet не согласованы; regular/deep bands требуют подтверждения. Конфликт oven 30/60 разрешён владельцем: 45 человеко-минут на единицу; значение предложено в CRM для новой версии правила, без изменения production и старых snapshots. Нужен versioned rollout. Неизвестные extras при zero uncertainty reserve корректно запрещают auto scheduling.
 
 ## AI: точный текущий режим и границы
 
@@ -109,7 +109,7 @@ Billing API дал полный summary доступного окна 31.10 07:0
 
 1. Review и согласование конкретных audit PR, затем отдельный baseline reconciliation без неожиданного auto-deploy.
 2. Exact staging env identity и synthetic recipients; разрешённый bounded live delivery/native AI proof с бюджетом и cleanup.
-3. Owner решения по source conflicts/duration/индивидуальным условиям/holiday/crypto, retention/RPO/RTO и мониторингу.
+3. Owner решения по базовым duration/индивидуальным условиям/holiday/crypto, retention/RPO/RTO и мониторингу.
 4. Полный current-source autonomous suite, source-bound evidence, проверенный staged production build и отдельное production rollout approval.
 
 До этого Website AI остаётся OFF, а full release — BLOCKED. Подробные приёмочные тесты для каждого LC-ID находятся в FINDINGS; неразрешённые live операции не выполнялись для получения «зелёного» отчёта.

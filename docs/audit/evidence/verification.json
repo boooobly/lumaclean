@@ -1,7 +1,7 @@
 {
-  "at": "2026-11-01T13:55:16.403Z",
+  "at": "2026-11-01T16:44:33.060Z",
   "node": "v24.22.2",
-  "sourceFingerprint": "9ef3fe6aacf857a424876c4457da1d0168f3f368bc33227182221b4c55cd6bde",
+  "sourceFingerprint": "6114a558a923c38b2822ffab7a6ac486a33aac911a49836d4cb188e4eb20245a",
   "releaseCertification": {
     "verified": false,
     "count": 1150
@@ -9,12 +9,12 @@
   "productionChanged": false,
   "aiEnabled": false,
   "unit": {
-    "pass": 1053,
+    "pass": 1055,
     "fail": 0,
     "skip": 33
   },
   "client": {
-    "pass": 15,
+    "pass": 16,
     "fail": 0,
     "skip": 0
   },
@@ -312,6 +312,14 @@
     "Remote Preview exact env identity",
     "Production migration history provenance (2 checksums)",
     "Production backup recovery and main reconciliation",
-    "Owner duration/100+/holiday/crypto decisions"
-  ]
+    "Owner base duration/holiday/crypto decisions"
+  ],
+  "ownerDecisionFollowUp": {
+    "date": "2026-11-01",
+    "ovenWorkMinutes": 45,
+    "preserve100SquareDiscontinuities": true,
+    "liveSheetChanged": false,
+    "productionDatabaseChanged": false
+  },
+  "evidenceScope": "Unit, client SSR, lint, typecheck and build rerun after owner decisions. DB integrations, browser and Lighthouse are carried forward from the initial audit; this follow-up changes only the duration rule draft and approval metadata."
 }
