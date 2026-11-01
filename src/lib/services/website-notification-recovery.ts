@@ -9,16 +9,19 @@ export async function recoverWebsiteLeadNotifications(
 ) {
   const started = clock();
   const now = new Date(started);
-  const rows = await db.notification.findMany({
-    where: {
-      kind: 'WEBSITE_LEAD', audience: 'ADMIN', channel: 'TELEGRAM',
-      OR: [
-        {deliveryState: 'PENDING', scheduledAt: {lte: now}, OR: [{nextAttemptAt: null}, {nextAttemptAt: {lte: now}}]},
-        {deliveryState: 'SENDING', leaseUntil: {lt: now}},
-      ],
-    },
-    orderBy: [{scheduledAt: 'asc'}, {id: 'asc'}], take: 10, select: {id: true},
-  });
+  // Voice staging shares the WEBSITE_LEAD notification kind. Bind selection to
+  // the persisted Lead channel as well, before LIMIT, so foreign work cannot
+  // consume the batch or be delivered by this Website-only safety net.
+  const rows = await db.$queryRaw<{id:string}[]>`
+    SELECT n.id FROM "Notification" n
+    JOIN "Lead" l ON l.id = n.payload->>'leadId'
+    WHERE n.kind = 'WEBSITE_LEAD' AND n.audience = 'ADMIN' AND n.channel = 'TELEGRAM'
+      AND l.channel = 'WEBSITE'
+      AND ((n."deliveryState" = 'PENDING' AND n."scheduledAt" <= ${now}
+            AND (n."nextAttemptAt" IS NULL OR n."nextAttemptAt" <= ${now}))
+        OR (n."deliveryState" = 'SENDING' AND n."leaseUntil" < ${now}))
+    ORDER BY n."scheduledAt" ASC, n.id ASC LIMIT 10
+  `;
   let processed = 0, errors = 0;
   for (const row of rows) {
     // Leave time for a single bounded Telegram request and final DB writes.

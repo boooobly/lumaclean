@@ -19,8 +19,7 @@ test('Cron rejects missing, incorrect and same-length non-ASCII credentials with
 
 test('Recovery leaves unstarted work durable when its time budget expires', async () => {
   let now = 0, calls = 0;
-  const db = {notification: {findMany: async (query: {select: {id?: boolean}}) => query.select.id ?
-    [{id: 'first'}, {id: 'second'}, {id: 'third'}] : [{deliveryState: 'PENDING'}]}} as unknown as PrismaClient;
+  const db = {$queryRaw:async()=>[{id:'first'},{id:'second'},{id:'third'}],notification: {findMany: async () => [{deliveryState: 'PENDING'}]}} as unknown as PrismaClient;
   const result = await recoverWebsiteLeadNotifications(db, async () => {calls++; now = 30_001;}, () => now);
   assert.equal(calls, 1);
   assert.deepEqual(result, {selected: 3, processed: 1, deferred: 2, errors: 0, sent: 0, pending: 1, failed: 0, unknown: 0, durationMs: 30_001});
@@ -34,6 +33,7 @@ test('Isolated PostgreSQL: committed leads survive Telegram outage and concurren
   const db = new PrismaClient({adapter: new PrismaPg({connectionString: url!})});
   const ids: string[] = [];
   const unrelatedKey = `pro-other:${randomUUID()}`;
+  const recipientId=randomUUID();
   const payload = () => ({submissionId: randomUUID(), phone: '0641234567', locale: 'ru', consent: true, requestKind: 'CONTACT_REQUEST'});
   const notify = async (id: string) => db.notification.findUniqueOrThrow({where: {eventKey: `website-lead:${id}:telegram`}});
   try {
@@ -76,18 +76,25 @@ test('Isolated PostgreSQL: committed leads survive Telegram outage and concurren
       assert.equal((await recoverWebsiteLeadNotifications(db, async () => assert.fail('No work'))).selected, 0);
     });
     await t.test('batches are bounded and do not touch other notification kinds', async () => {
-      const other = await db.notification.create({data: {eventKey: unrelatedKey, kind: 'HANDOFF_TELEGRAM', audience: 'ADMIN', channel: 'TELEGRAM', text: 'Synthetic unrelated event', scheduledAt: new Date(0), deliveryState: 'PENDING'}});
+      await db.user.create({data:{id:recipientId,email:`pro-recovery-${recipientId}@example.test`,name:'Synthetic notification recipient',role:'ADMIN'}});
+      const other = await db.notification.create({data: {eventKey: unrelatedKey, userId:recipientId, kind: 'HANDOFF_TELEGRAM', audience: 'ADMIN', channel: 'TELEGRAM', text: 'Synthetic unrelated event', scheduledAt: new Date(0), deliveryState: 'PENDING'}});
+      // Sofija uses the shared WEBSITE_LEAD kind but its Lead channel is OTHER.
+      const voice=await saveWebsiteLead(db,payload());ids.push(voice.id);
+      await db.lead.update({where:{id:voice.id},data:{channel:'OTHER'}});
+      await db.notification.update({where:{id:(await notify(voice.id)).id},data:{scheduledAt:new Date(0)}});
       for (let i = 0; i < 12; i++) {const lead = await saveWebsiteLead(db, payload()); ids.push(lead.id);}
       const result = await recoverWebsiteLeadNotifications(db, (client, id) => deliverNotification(client, id, async () => ({status: 'DELIVERED'})));
       assert.equal(result.selected, 10); assert.equal(result.sent, 10);
       assert.equal((await recoverWebsiteLeadNotifications(db, (client, id) => deliverNotification(client, id, async () => ({status: 'DELIVERED'})))).sent, 2);
       assert.equal((await db.notification.findUniqueOrThrow({where: {id: other.id}})).deliveryState, 'PENDING');
+      assert.equal((await notify(voice.id)).deliveryState,'PENDING','Voice WEBSITE_LEAD must remain outside website recovery');
     });
   } finally {
     // Only this test's synthetic records in a dedicated localhost database.
     await db.notification.deleteMany({where: {eventKey: {in: ids.map(id => `website-lead:${id}:telegram`)}}});
     await db.notification.deleteMany({where: {eventKey: unrelatedKey}});
     await db.lead.deleteMany({where: {id: {in: ids}}});
+    await db.user.deleteMany({where:{id:recipientId}});
     await db.$disconnect();
   }
 });
