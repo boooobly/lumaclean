@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import contract from '../../docs/audit/evidence/pricing-contract.json';
 import {priceMatrix,extrasPrices,calculatePrice,type ServiceId} from '../../src/lib/pricing';
 import {businessKnowledge,searchBusinessKnowledge} from '../../src/lib/agent/knowledge/search';
+import {extrasSchema} from '../../src/lib/validation/crm';
 test('runtime core bands and extras match the reviewed live Sheets contract',()=>{
  assert.deepEqual(priceMatrix,contract.bands);
  for(const [code,item] of Object.entries(contract.extras))assert.equal(extrasPrices[code as keyof typeof extrasPrices],item.amount,code);
@@ -32,4 +33,13 @@ test('owner retains the deep and move discontinuities at 100 square metres',()=>
   assert.equal(calculatePrice(service,100,[],false).total,at);
   assert.equal(calculatePrice(service,100.01,[],false).total,above);
  }
+});
+
+test('linen is counted per bed in public and CRM payloads, with the existing 100-unit API cap',()=>{
+ for(const quantity of [0,1,2,100]){
+  assert(extrasSchema.safeParse([{code:'linen',quantity}]).success);
+  assert.equal(calculatePrice('regular',55,[{code:'linen',quantity}],false).total,Math.ceil((6000+750*quantity)/100)*100);
+ }
+ for(const quantity of [-1,1.5,101])assert(!extrasSchema.safeParse([{code:'linen',quantity}]).success);
+ assert(!extrasSchema.safeParse([{code:'steam',quantity:2}]).success);
 });

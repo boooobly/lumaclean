@@ -196,11 +196,11 @@ const blankRule: Pick<
   | "soilMultipliers"
   | "extraMinutes"
 > = {
-  minArea: 1,
-  maxArea: 100,
-  referenceArea: 100,
+  minArea: 50,
+  maxArea: 50,
+  referenceArea: 50,
   cleanerCount: 2,
-  baseMinutes: 150,
+  baseMinutes: 120,
   minutesPerSquare: 0,
   reserveMinutes: 0,
   soilMultipliers: { LIGHT: 1, NORMAL: 1, HEAVY: 1, EXTREME: 1 },
@@ -225,7 +225,7 @@ export function DurationRulesEditor({
   const template = old ?? {
     ...blankRule,
     ...(service === "deep"
-      ? { minArea: 40, maxArea: 60, referenceArea: 50, baseMinutes: 480 }
+      ? { baseMinutes: 360 }
       : service === "regular"
         ? {}
         : { baseMinutes: undefined }),
@@ -291,10 +291,11 @@ export function DurationRulesEditor({
           должно совпасть с правилом. Резерв хранится отдельно.
         </p>
         <p>
-          Ориентиры: поддерживающая до 100 м², 2 клинера — 150 минут;
-          генеральная около 50 м², 2 клинера — полный день. Для второго шаблона
-          выбрано 480 минут — проверьте длину рабочего дня. Шаблоны не
-          активируются автоматически.
+          Владелец подтвердил для 50 м² и двух исполнителей при обычном
+          загрязнении без допуслуг: поддерживающая — 120 минут, генеральная —
+          360 минут на объекте, без дороги. Для других площадей нужны отдельные
+          подтверждённые правила. Новые шаблоны охватывают только 50 м² и
+          активируются после ручного подтверждения.
         </p>
         <label className="crm-field">
           Создать правило или новую версию

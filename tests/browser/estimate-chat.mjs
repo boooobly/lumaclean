@@ -120,6 +120,7 @@ try{
       const counter=form.locator('.site-extra-counter').first();
       await counter.locator('button').last().click();await counter.locator('button').last().click();
       await total(15600);
+      await form.locator('.site-extra-counter').filter({hasText:/кровать|krevet|bed/i}).locator('button').last().click();
       for(const check of await form.locator('.site-extra-options input[type="checkbox"]').all())await check.check();
       await total(21300);
       await form.locator('.site-urgent input').check();await total(25500);

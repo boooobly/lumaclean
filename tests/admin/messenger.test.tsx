@@ -29,6 +29,9 @@ function render(children: React.ReactNode) {
 test('new duration draft proposes the approved oven work without auto activation',()=>{
  const html=render(<DurationRulesEditor rules={[]} services={[{id:'regular',code:'regular',name:'Regular'}]}/>);
  assert.match(html, /name="extra-oven"[^>]*value="45"/);
+ assert.match(html, /name="baseMinutes"[^>]*value="120"/);
+ assert.match(html, /name="minArea"[^>]*value="50"/);
+ assert.match(html, /name="maxArea"[^>]*value="50"/);
  assert.doesNotMatch(html, /name="active"[^>]*checked/);
 });
 
