@@ -1,0 +1,81 @@
+{
+  "dependencyCounts": {
+    "info": 0,
+    "low": 0,
+    "moderate": 11,
+    "high": 0,
+    "critical": 0,
+    "total": 11
+  },
+  "dependencies": [
+    {
+      "name": "@vercel/queue",
+      "severity": "moderate",
+      "isDirect": true,
+      "fixAvailable": false
+    },
+    {
+      "name": "archiver",
+      "severity": "moderate",
+      "isDirect": false,
+      "fixAvailable": false
+    },
+    {
+      "name": "archiver-utils",
+      "severity": "moderate",
+      "isDirect": false,
+      "fixAvailable": true
+    },
+    {
+      "name": "exceljs",
+      "severity": "moderate",
+      "isDirect": true,
+      "fixAvailable": false
+    },
+    {
+      "name": "fstream",
+      "severity": "moderate",
+      "isDirect": false,
+      "fixAvailable": true
+    },
+    {
+      "name": "glob",
+      "severity": "moderate",
+      "isDirect": false,
+      "fixAvailable": true
+    },
+    {
+      "name": "minimatch",
+      "severity": "moderate",
+      "isDirect": false,
+      "fixAvailable": false
+    },
+    {
+      "name": "readdir-glob",
+      "severity": "moderate",
+      "isDirect": false,
+      "fixAvailable": false
+    },
+    {
+      "name": "rimraf",
+      "severity": "moderate",
+      "isDirect": false,
+      "fixAvailable": true
+    },
+    {
+      "name": "unzipper",
+      "severity": "moderate",
+      "isDirect": false,
+      "fixAvailable": true
+    },
+    {
+      "name": "zip-stream",
+      "severity": "moderate",
+      "isDirect": false,
+      "fixAvailable": true
+    }
+  ],
+  "sensitiveFileHistoryMatches": false,
+  "highConfidenceHistoryPatternMatches": false,
+  "historyScope": "All fetched refs; selected high-confidence regexes, not an exhaustive forensic secret audit"
+}

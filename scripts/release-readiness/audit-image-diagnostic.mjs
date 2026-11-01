@@ -1,0 +1,4 @@
+import {pathToFileURL} from 'node:url';
+const {chromium}=await import(pathToFileURL(process.env.PLAYWRIGHT_CORE_PATH));
+const browser=await chromium.launch({channel:'chrome',headless:true});
+try{const page=await browser.newPage({viewport:{width:1440,height:1000}});await page.route('**/api/**',r=>r.fulfill({json:{conversation:null,allowed:true}}));await page.goto('http://localhost:3100/ru');await page.evaluate(()=>document.fonts.ready);console.log(JSON.stringify(await page.evaluate(()=>[...document.images].filter(i=>{const r=i.getBoundingClientRect();return r.width>0&&r.height>0&&r.top<innerHeight&&r.bottom>0&&(!i.complete||!i.naturalWidth);}).map(i=>({class:i.className,loading:i.loading,priority:i.fetchPriority,visibility:getComputedStyle(i).visibility,opacity:getComputedStyle(i).opacity,parent:i.parentElement.className,src:i.getAttribute('src')?.slice(0,150)})))));}finally{await browser.close();}

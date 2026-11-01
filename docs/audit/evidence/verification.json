@@ -1,0 +1,317 @@
+{
+  "at": "2026-11-01T13:55:16.403Z",
+  "node": "v24.22.2",
+  "sourceFingerprint": "9ef3fe6aacf857a424876c4457da1d0168f3f368bc33227182221b4c55cd6bde",
+  "releaseCertification": {
+    "verified": false,
+    "count": 1150
+  },
+  "productionChanged": false,
+  "aiEnabled": false,
+  "unit": {
+    "pass": 1053,
+    "fail": 0,
+    "skip": 33
+  },
+  "client": {
+    "pass": 15,
+    "fail": 0,
+    "skip": 0
+  },
+  "adminIntegration": {
+    "pass": 40,
+    "fail": 0,
+    "skip": 0
+  },
+  "financeFresh": {
+    "pass": 15,
+    "fail": 0,
+    "skip": 0
+  },
+  "reliabilityFinal": {
+    "pass": 17,
+    "fail": 0,
+    "skip": 0
+  },
+  "chatHttp": {
+    "pass": 14,
+    "fail": 0,
+    "skip": 0
+  },
+  "upholsteryMigrations": {
+    "pass": 2,
+    "fail": 0,
+    "skip": 0
+  },
+  "legacyAi": {
+    "pass": 8,
+    "fail": 46,
+    "skip": 0
+  },
+  "pages": {
+    "status": "PASS",
+    "pages": 75,
+    "matrix": 225,
+    "errors": 0
+  },
+  "forms": {
+    "scenarios": 13,
+    "writesMocked": true,
+    "errors": 0
+  },
+  "upholstery": {
+    "status": "PASS",
+    "matrix": 30
+  },
+  "chat": {
+    "base": "http://localhost:3100",
+    "mocked": true,
+    "localFix": true,
+    "cases": [
+      {
+        "locale": "ru",
+        "initiallyClosed": 0,
+        "opened": 1,
+        "resumeGets": 1,
+        "replyRestored": true
+      },
+      {
+        "locale": "sr",
+        "initiallyClosed": 0,
+        "opened": 1,
+        "resumeGets": 1,
+        "replyRestored": true
+      },
+      {
+        "locale": "en",
+        "initiallyClosed": 0,
+        "opened": 1,
+        "resumeGets": 1,
+        "replyRestored": true
+      }
+    ]
+  },
+  "databaseChat": {
+    "host": "127.0.0.1",
+    "port": "55449",
+    "database": "/lumaclean_ai_test",
+    "clusterVerified": true,
+    "aiOffNoCallsOrOrders": true,
+    "steamManualReview": true,
+    "snapshots": 40,
+    "queries": 200,
+    "queriesPerSnapshot": 5,
+    "projectedQueriesPerMinuteAt1500ms": 200
+  },
+  "lighthouse": {
+    "source": "local Lighthouse against production, synthetic lab only",
+    "consentBanner": "fresh profile, not hidden or preaccepted",
+    "apiAndTelemetry": "blocked; no form writes",
+    "runs": [
+      {
+        "path": "/ru",
+        "device": "mobile",
+        "exit": 0,
+        "scores": {
+          "performance": 88,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 3188.322,
+        "tbt": 157,
+        "cls": 0
+      },
+      {
+        "path": "/ru",
+        "device": "desktop",
+        "exit": 0,
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 355.121,
+        "tbt": 0,
+        "cls": 0
+      },
+      {
+        "path": "/ru/himchistka-mebeli",
+        "device": "mobile",
+        "exit": 0,
+        "scores": {
+          "performance": 89,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 3629.485,
+        "tbt": 100,
+        "cls": 0
+      },
+      {
+        "path": "/ru/himchistka-mebeli",
+        "device": "desktop",
+        "exit": 0,
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 710.498,
+        "tbt": 0,
+        "cls": 0.00003527712109272393
+      }
+    ]
+  },
+  "migrationHistory": [
+    {
+      "name": "20261001090000_admin_foundation",
+      "match": false,
+      "normalization": "MISMATCH"
+    },
+    {
+      "name": "20261001100000_audit_immutable",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001120000_crm_core",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001121000_crm_search_indexes",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001150000_admin_scheduling",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001180000_admin_routing",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001193000_admin_finance_duration",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001210000_admin_ai_agent",
+      "match": false,
+      "normalization": "MISMATCH"
+    },
+    {
+      "name": "20261001220000_ai_go_live",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261002110000_live_readiness",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261003130000_address_coordinate_confirmation",
+      "match": true,
+      "normalization": "CRLF"
+    },
+    {
+      "name": "20261003160000_hybrid_routing",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261004130000_website_chat_v2",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261004180000_agent_behavior_hardening",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261004200000_customer_channels",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261007170000_historical_import",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261011090000_calendar_repeats",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261011150000_upholstery",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261011153000_item_pricing_basis",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261011180000_simple_upholstery_intake",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261014122500_appliance_catalog",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261014153000_appliance_units",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261018190000_optional_website_lead_name",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261018190100_contact_request_kind",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261019220000_website_notification_recipient",
+      "match": true,
+      "normalization": "raw"
+    }
+  ],
+  "schemaParity": {
+    "scope": "Column types/defaults/nullability/precision, index definitions and constraints only; excludes data, privileges, functions, triggers and enum labels",
+    "productionTables": 45,
+    "localTables": 45,
+    "differences": []
+  },
+  "checks": {
+    "build": true,
+    "typecheck": true,
+    "tsc": true,
+    "prismaValidate": true,
+    "lint": true
+  },
+  "blocked": [
+    "Full native AI/current-source autonomous integration",
+    "Live Queue/Telegram receipt",
+    "Remote Preview exact env identity",
+    "Production migration history provenance (2 checksums)",
+    "Production backup recovery and main reconciliation",
+    "Owner duration/100+/holiday/crypto decisions"
+  ]
+}

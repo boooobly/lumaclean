@@ -1,0 +1,127 @@
+[
+  {
+    "name": "20261001090000_admin_foundation",
+    "match": false,
+    "normalization": "MISMATCH"
+  },
+  {
+    "name": "20261001100000_audit_immutable",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261001120000_crm_core",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261001121000_crm_search_indexes",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261001150000_admin_scheduling",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261001180000_admin_routing",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261001193000_admin_finance_duration",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261001210000_admin_ai_agent",
+    "match": false,
+    "normalization": "MISMATCH"
+  },
+  {
+    "name": "20261001220000_ai_go_live",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261002110000_live_readiness",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261003130000_address_coordinate_confirmation",
+    "match": true,
+    "normalization": "CRLF"
+  },
+  {
+    "name": "20261003160000_hybrid_routing",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261004130000_website_chat_v2",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261004180000_agent_behavior_hardening",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261004200000_customer_channels",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261007170000_historical_import",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261011090000_calendar_repeats",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261011150000_upholstery",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261011153000_item_pricing_basis",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261011180000_simple_upholstery_intake",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261014122500_appliance_catalog",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261014153000_appliance_units",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261018190000_optional_website_lead_name",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261018190100_contact_request_kind",
+    "match": true,
+    "normalization": "raw"
+  },
+  {
+    "name": "20261019220000_website_notification_recipient",
+    "match": true,
+    "normalization": "raw"
+  }
+]

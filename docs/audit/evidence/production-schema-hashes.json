@@ -1,0 +1,272 @@
+[
+  {
+    "table_name": "AIInvocation",
+    "columns_hash": "6ad52b508fa5d2bf8a4989516eac0110",
+    "indexes_hash": "8f159c2ebf1cce60193ffa794ebe13ed",
+    "constraints_hash": "ab23515c596ae3bf675d004aadec0fc7"
+  },
+  {
+    "table_name": "Account",
+    "columns_hash": "dcca6d35d65e9b45842bf9beb040339d",
+    "indexes_hash": "ca3be0cfc069c9626bfb86b55afc3640",
+    "constraints_hash": "4b74cfe50984ba9ddefd2117cee20b63"
+  },
+  {
+    "table_name": "AgentJob",
+    "columns_hash": "30f73fd08c845b3378d442a7d69f5be6",
+    "indexes_hash": "6a779394b6c4d2118dbf0029515ccf89",
+    "constraints_hash": "ab23515c596ae3bf675d004aadec0fc7"
+  },
+  {
+    "table_name": "AgentLiveTest",
+    "columns_hash": "14c08d72f94d72cfea13ac809a4623dc",
+    "indexes_hash": "7a560cc7bca5bc9d7d3bbcc7eb185705",
+    "constraints_hash": "4c6419b3704337bbfe50f018842a9ad3"
+  },
+  {
+    "table_name": "AgentSlot",
+    "columns_hash": "4f74f2e153802d2469b134985718c436",
+    "indexes_hash": "a4a4f2dabe6e627bcbb17f7c22e7e178",
+    "constraints_hash": "ab23515c596ae3bf675d004aadec0fc7"
+  },
+  {
+    "table_name": "AgentToolTrace",
+    "columns_hash": "0cf5fc0a2cea50cc5ce0812dfb5d394f",
+    "indexes_hash": "83382401feb62a6e296fa7377e94c462",
+    "constraints_hash": "ab23515c596ae3bf675d004aadec0fc7"
+  },
+  {
+    "table_name": "AuditLog",
+    "columns_hash": "d7a331f8542c460ffb1ae4e1b82643cc",
+    "indexes_hash": "dedbdd44af8c6ade9e821578adc72b12",
+    "constraints_hash": "7701d696fedf15617558d791ec8f20f3"
+  },
+  {
+    "table_name": "BusinessSettings",
+    "columns_hash": "8a3cee07ea2a4a1cc9b7043fa8753b77",
+    "indexes_hash": "2f033847483ca308d68fac392994ed67",
+    "constraints_hash": "0b8bdd861b4b8935366ca22402aed8da"
+  },
+  {
+    "table_name": "ChatAttachment",
+    "columns_hash": "88c4a5e83ceee274c8982f6ce66a6f2a",
+    "indexes_hash": "836109a401a1054aceb71310253f7ede",
+    "constraints_hash": "14ddc59943cc331704c8147b60c6c1a3"
+  },
+  {
+    "table_name": "Cleaner",
+    "columns_hash": "c33540c1e9f943d83dcc785d115d5e47",
+    "indexes_hash": "6511184a4d930c72a1a58c8957d3b562",
+    "constraints_hash": "43ee1ef546e7ae9813bb0381d5411fcc"
+  },
+  {
+    "table_name": "CleanerAvailability",
+    "columns_hash": "46b2081ea5f745a9215d581d07a59114",
+    "indexes_hash": "e07d5b8a5b3e9f846e77f64a285ef9ba",
+    "constraints_hash": "71826e5d8cf68a7a1804c4fdfd5479cd"
+  },
+  {
+    "table_name": "CleanerPayout",
+    "columns_hash": "ebeb8b0ca4e2cf434862522aa9424092",
+    "indexes_hash": "f70f1a4c21bf08af6aa11ebd1329806e",
+    "constraints_hash": "7576832b199d533a971b8908a54ebe77"
+  },
+  {
+    "table_name": "Client",
+    "columns_hash": "8b4e10c2701f020908d234c738fb8712",
+    "indexes_hash": "121a011eb0cfa154597db312e5d02f79",
+    "constraints_hash": "b4974729990a02c557f1cf4e4d7c4c92"
+  },
+  {
+    "table_name": "ClientAddress",
+    "columns_hash": "015b00ce7381043cd4818b34c20aea18",
+    "indexes_hash": "b4ed679341a9f51b594b3ee4d701e803",
+    "constraints_hash": "1eb0366543d8c52083271e7a367ee5d7"
+  },
+  {
+    "table_name": "Conversation",
+    "columns_hash": "bf54187df7f0875ec3e09859b9aa4877",
+    "indexes_hash": "f59e36434074b127608ad54aec5df1eb",
+    "constraints_hash": "67cc7b96484beb3d7b2b05d091a02ed0"
+  },
+  {
+    "table_name": "DurationRule",
+    "columns_hash": "fd69972986c75a71eadfc1541c441efc",
+    "indexes_hash": "23cd5f62704ca9da9e58dcb3f39a4674",
+    "constraints_hash": "90f52eb727445785a5f4b7334058c6f5"
+  },
+  {
+    "table_name": "Expense",
+    "columns_hash": "608443f36dfa3fd3002d90010620677c",
+    "indexes_hash": "ef04a43e3ce498f9f31ac0fa7a7ca1c3",
+    "constraints_hash": "0e970c2a0d99d3dc509a02356bce5f52"
+  },
+  {
+    "table_name": "HumanHandoff",
+    "columns_hash": "e7fbda1d689f8a232aa96c25e6c3fb75",
+    "indexes_hash": "f70e486a8d4fb8ca679d296e282b17a9",
+    "constraints_hash": "0e8776f8881fb8b4f9f9daf50fafa8e1"
+  },
+  {
+    "table_name": "ImportBatch",
+    "columns_hash": "b6833bb6ea7d3dee95db995e27782ddd",
+    "indexes_hash": "9f2615a16d9fa2af0816eeb0945631ca",
+    "constraints_hash": "6663c5b191a9f5875fb500d79a807d6a"
+  },
+  {
+    "table_name": "ImportRecord",
+    "columns_hash": "41ee0bbc77e98cd437233332d6d464e1",
+    "indexes_hash": "9dbdf00be09eb6e16a7718f6b5d0ad92",
+    "constraints_hash": "3e312a2fe11a4e4d9d372a0794cf4145"
+  },
+  {
+    "table_name": "Investment",
+    "columns_hash": "b61e9d802d9d5be946783e64038467e4",
+    "indexes_hash": "d7322b6a6fa2f14766bdcb0692c872fe",
+    "constraints_hash": "f51bd0a746913a57feec47ae273c0f6d"
+  },
+  {
+    "table_name": "Lead",
+    "columns_hash": "5db39b3f11b8075bc134a666a7e0195d",
+    "indexes_hash": "9d9c37dd03d87c614fc5d0fc09812333",
+    "constraints_hash": "6126f4409ff47e42b00ddb56da053c4f"
+  },
+  {
+    "table_name": "LeadExtra",
+    "columns_hash": "b40545ae54f148fd9fcb30972a522bc5",
+    "indexes_hash": "4c10c62d23302ab25914fed601b9f793",
+    "constraints_hash": "7113eb0389fda8f531c5af409679f6f7"
+  },
+  {
+    "table_name": "Message",
+    "columns_hash": "5be67e441987ee8038c99b77c214bffa",
+    "indexes_hash": "e8c57b035b10e532ef08ab0567914c23",
+    "constraints_hash": "34b37a31691211d2134e22270d49f11e"
+  },
+  {
+    "table_name": "Notification",
+    "columns_hash": "4a32de0619c2a1a7074a288f611f1486",
+    "indexes_hash": "af2fa60b9965d6cd6db4a104506c8cf6",
+    "constraints_hash": "ab1c856adfba7c27a4615be397148518"
+  },
+  {
+    "table_name": "Order",
+    "columns_hash": "88ac212e15cc09d71a33770d7686a6d9",
+    "indexes_hash": "ee47712413bad1e9c44f52912d6cce77",
+    "constraints_hash": "f4c30d55e88b557cbcb87d4babbd278c"
+  },
+  {
+    "table_name": "OrderCleaner",
+    "columns_hash": "71c1cc3aa2c368f4be8b0eb80b67c5f7",
+    "indexes_hash": "47582c5902afb29e2677336ae56e071c",
+    "constraints_hash": "55ee71bce7bca14c0afeee23fe050b86"
+  },
+  {
+    "table_name": "OrderExtra",
+    "columns_hash": "d1be723f57244b092038eb8b6b62c978",
+    "indexes_hash": "0569f5956ac15027a01311bb86794f67",
+    "constraints_hash": "b3bae65eb3b2e8697fc0579cd8c3c8d9"
+  },
+  {
+    "table_name": "OrderRepeatSeries",
+    "columns_hash": "9fbdadd030c4953849037a680f84efa9",
+    "indexes_hash": "8d5c01bacb9530353bcefcb42080b1f5",
+    "constraints_hash": "94780872ddf94bb10882ed0381d39764"
+  },
+  {
+    "table_name": "OrderUpholstery",
+    "columns_hash": "e26b37dfb679d401055e4346fb12b804",
+    "indexes_hash": "1c40b2d804088c2c229a2b97bfc63c31",
+    "constraints_hash": "f404331cd1ebd320aec8933db1b4b241"
+  },
+  {
+    "table_name": "RateLimit",
+    "columns_hash": "d2a98c6c69d4cdb1e351b5317a521f8d",
+    "indexes_hash": "cf7f7427112be9706b3c94357e397e8e",
+    "constraints_hash": "4c6419b3704337bbfe50f018842a9ad3"
+  },
+  {
+    "table_name": "RouteCalculation",
+    "columns_hash": "3bca0e99c8d952bf62d5868d4e03c0df",
+    "indexes_hash": "73b1dcceccfecaffcdbe8d26829407ec",
+    "constraints_hash": "e62c1195458d06675a58eb80cd445557"
+  },
+  {
+    "table_name": "RoutingBenchmark",
+    "columns_hash": "896787c075d22637bc43c652283bd429",
+    "indexes_hash": "beeb6a66e4414e8c35e2c657575f2baf",
+    "constraints_hash": "30034a3cc0f8343c7526d1bd2fce5c99"
+  },
+  {
+    "table_name": "RoutingRequestLease",
+    "columns_hash": "5dd9215f828e79c14e8fe0ad60bc18c2",
+    "indexes_hash": "8426fbbc100225c8605eef985b949d97",
+    "constraints_hash": "729d3ed6c85722f863da384d2313331e"
+  },
+  {
+    "table_name": "RoutingUsageMonth",
+    "columns_hash": "242189f4b8752d543281c43a8a2ae05d",
+    "indexes_hash": "b838ae02f7f9261f1d4d1e4c69fec7ab",
+    "constraints_hash": "6e429337cc48889e21801b1495c3d28a"
+  },
+  {
+    "table_name": "SchedulingOverride",
+    "columns_hash": "107c9792b655a168a7016ce3b7faeaea",
+    "indexes_hash": "2b5ea0675b8e241d47a0ddd4ac55c80a",
+    "constraints_hash": "5bc8ef8f287a1fc70317a2d10d836f97"
+  },
+  {
+    "table_name": "SchedulingProposal",
+    "columns_hash": "702baf4546b1369cf0d6cdccb23bf754",
+    "indexes_hash": "2f0b09e83510f40cd35c1b68c4f285f9",
+    "constraints_hash": "c47f58a611e8077a764022433e6c60aa"
+  },
+  {
+    "table_name": "Service",
+    "columns_hash": "22ddda4632c0f5fe005eafee8578f9f4",
+    "indexes_hash": "3dd49aea43d85641e8645e2ca9d32eba",
+    "constraints_hash": "4c6419b3704337bbfe50f018842a9ad3"
+  },
+  {
+    "table_name": "ServiceExtra",
+    "columns_hash": "2485d74e17834c8cc5627dd3b09b3b8f",
+    "indexes_hash": "70b69a5f5681df04ecc26eaf2da5fee8",
+    "constraints_hash": "d86e7f3f8df73735f7bb49c0d0ed437a"
+  },
+  {
+    "table_name": "ServicePriceBand",
+    "columns_hash": "99d7b6921d2717499e217d07fc5824d7",
+    "indexes_hash": "cd5a427a4d784041d82283d5ad79df72",
+    "constraints_hash": "c42953d3731b7e4465884cc9da8ff584"
+  },
+  {
+    "table_name": "Session",
+    "columns_hash": "bdebf72500846ba7075d396370a689da",
+    "indexes_hash": "9bd285125c350cf13b6aaf6ce98d157f",
+    "constraints_hash": "4b74cfe50984ba9ddefd2117cee20b63"
+  },
+  {
+    "table_name": "ShadowSuggestion",
+    "columns_hash": "83b4a002bdea96edfa6009043bf6a0f7",
+    "indexes_hash": "7655f6708b79a81d64eefa8f6b18cf54",
+    "constraints_hash": "4c6419b3704337bbfe50f018842a9ad3"
+  },
+  {
+    "table_name": "UpholsterySettings",
+    "columns_hash": "6fd739cc2e28818b570dab54eb402b92",
+    "indexes_hash": "7c8240d80a8c536855fb31c07b63e9a3",
+    "constraints_hash": "6f09c00568c92c7ae450d3461879e8ec"
+  },
+  {
+    "table_name": "User",
+    "columns_hash": "e5772d0d1391becee2620b3568e7842a",
+    "indexes_hash": "5c59385747bfc69e8b8771e47d96cd78",
+    "constraints_hash": "4c6419b3704337bbfe50f018842a9ad3"
+  },
+  {
+    "table_name": "Verification",
+    "columns_hash": "875fdd4547b95230c7908a71f5ba33ab",
+    "indexes_hash": "cb9abbb7f90404a1e4570f37a09428bb",
+    "constraints_hash": "4c6419b3704337bbfe50f018842a9ad3"
+  }
+]

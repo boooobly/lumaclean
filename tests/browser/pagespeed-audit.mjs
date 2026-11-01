@@ -57,7 +57,9 @@ try{
  }
  for(const route of internal){const r=await context.request.get(base+route);report.links.push({route,status:r.status()});assert.ok(r.status()<400,`Broken link ${route}`);}
  for(const width of [375,1440]){
-  await page.setViewportSize({width,height:1000});await page.goto(base+'/ru');await page.evaluate(()=>document.fonts.ready);await page.waitForLoadState('networkidle');
+  await page.setViewportSize({width,height:1000});await page.goto(base+'/ru');await page.evaluate(()=>document.fonts.ready);
+  // Media streaming need not become network-idle; observe the visible image readiness.
+  await page.waitForFunction(()=>[...document.images].filter(i=>{const r=i.getBoundingClientRect();return getComputedStyle(i).visibility==='visible'&&r.width>0&&r.height>0&&r.top<innerHeight&&r.bottom>0;}).every(i=>i.complete&&i.naturalWidth>0));
   report.resources.push(await page.evaluate(()=>({width:innerWidth,images:[...document.images].map(i=>({class:i.className,src:i.currentSrc,loading:i.loading,priority:i.fetchPriority})),requests:performance.getEntriesByType('resource').map(e=>({url:e.name,bytes:e.transferSize,duration:e.duration})),fonts:[...document.querySelectorAll('link[as="font"]')].map(e=>e.href)})));
   await page.screenshot({path:`${out}/home-${width}.png`});
   for(const [name,selector] of [['bathroom','.bathroom-infographic'],['rates','#rates']]){

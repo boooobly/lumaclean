@@ -1,0 +1,6 @@
+{
+  "scope": "Column types/defaults/nullability/precision, index definitions and constraints only; excludes data, privileges, functions, triggers and enum labels",
+  "productionTables": 45,
+  "localTables": 45,
+  "differences": []
+}

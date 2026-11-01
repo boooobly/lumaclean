@@ -1,0 +1,102 @@
+[
+  {
+    "migration_name": "20261001090000_admin_foundation",
+    "checksum": "37eea79653b621c8e0fec806152b32c79ed0e9cca5342a39246ba49cb9d2965a"
+  },
+  {
+    "migration_name": "20261001100000_audit_immutable",
+    "checksum": "0326ee374a4e955e26d1e46d4217546f88d66cbe9cd8a408269c9f0dfa69d159"
+  },
+  {
+    "migration_name": "20261001120000_crm_core",
+    "checksum": "e4689e37a9b1579ab5c9576ad3a63bc28a3b063f2f57407df5b52472272b8571"
+  },
+  {
+    "migration_name": "20261001121000_crm_search_indexes",
+    "checksum": "1814776b2cf47c2f6437aedb417673b5b5652d5a4c667ba5e125cc38f1f3aaf2"
+  },
+  {
+    "migration_name": "20261001150000_admin_scheduling",
+    "checksum": "dc72524e37b21827796b055c1b0bd8444197d1151e92cf2e62c7c686c6426b94"
+  },
+  {
+    "migration_name": "20261001180000_admin_routing",
+    "checksum": "b9d084974ca7af989f9c5dae4d9e31c0b7df08d4e4c4538a132ef46c1a422f6e"
+  },
+  {
+    "migration_name": "20261001193000_admin_finance_duration",
+    "checksum": "11d2bad261a7b1028070ab3c9dba644cec207dc72e0a8cd4f072ba272a41631a"
+  },
+  {
+    "migration_name": "20261001210000_admin_ai_agent",
+    "checksum": "20266ae604922c407b5cb934155b9abc026252381e7ad6a14cdf16b5cdffcb6c"
+  },
+  {
+    "migration_name": "20261001220000_ai_go_live",
+    "checksum": "f3a6cce6b83d8cfce0447d7bd8b33a0b938d51de708049c1f2355a09019193e5"
+  },
+  {
+    "migration_name": "20261002110000_live_readiness",
+    "checksum": "4114b7249c7f4363bdb14a2c8ee6079711a20954d1436f040e75af28fa6ea568"
+  },
+  {
+    "migration_name": "20261003130000_address_coordinate_confirmation",
+    "checksum": "7700ea24580aa9f8fd53fa1eeb5530ec554fabb52defe8b4044e666f0251e06b"
+  },
+  {
+    "migration_name": "20261003160000_hybrid_routing",
+    "checksum": "bdab53e2473230f254aa3ae6dcf1408f1c9d76edb26f7fabc9c11d4429f5bc59"
+  },
+  {
+    "migration_name": "20261004130000_website_chat_v2",
+    "checksum": "15cc4eea6209738af8b446ab46838e52a8a298a9f45f0295934bf6e63ea5f558"
+  },
+  {
+    "migration_name": "20261004180000_agent_behavior_hardening",
+    "checksum": "00ff2d07c0ac6e48b82c822f69c9cd527ead8af56206d0833c5653d9c64b738a"
+  },
+  {
+    "migration_name": "20261004200000_customer_channels",
+    "checksum": "aefb064d89622fcca16d3dcd12af9809560dd3cd11977a0ba2d400a84fc86172"
+  },
+  {
+    "migration_name": "20261007170000_historical_import",
+    "checksum": "c970fc1daf07a477963011cb9f6f2dbcfe538fb0cf749f45d5591ae067dd03d3"
+  },
+  {
+    "migration_name": "20261011090000_calendar_repeats",
+    "checksum": "54292cdd205024946cb9a55168b5594f9d837ef748f034b0c2e4e10064d587f3"
+  },
+  {
+    "migration_name": "20261011150000_upholstery",
+    "checksum": "d7d1072cfdc51204051b4e0580ed3452d9c4cfc4a78237b8d754eefdcb010abd"
+  },
+  {
+    "migration_name": "20261011153000_item_pricing_basis",
+    "checksum": "64c30d160f889993aa866b068098d65025d9c88f6956cd5a12eef3e5cb76a668"
+  },
+  {
+    "migration_name": "20261011180000_simple_upholstery_intake",
+    "checksum": "ca865a2a608b7c3e40146d82c44617346c348227bc2d6b7d6b55c2aa9b4fe80a"
+  },
+  {
+    "migration_name": "20261014122500_appliance_catalog",
+    "checksum": "bca771e34e549f14c80759b46bae4d4f43d1cafb00b0107329daad65e329b827"
+  },
+  {
+    "migration_name": "20261014153000_appliance_units",
+    "checksum": "b920a4961a65b95ad1bd1cecb1d0b09a414b4b0e524f84c9d4e0025310b5c418"
+  },
+  {
+    "migration_name": "20261018190000_optional_website_lead_name",
+    "checksum": "86972d9d66dd3c2f675ff840a783fd70bbc3f6817fdb0eb7e7392eaf11fd1f8a"
+  },
+  {
+    "migration_name": "20261018190100_contact_request_kind",
+    "checksum": "d2bed7b3dec5c3c7c796b5809bd77859ed161cff983b8def2f137e050777db92"
+  },
+  {
+    "migration_name": "20261019220000_website_notification_recipient",
+    "checksum": "a30a67dc19d1000eb0de3ee131571d1526db51a0f774cc50c3623404eafd10a2"
+  }
+]

@@ -393,10 +393,19 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
     };
   }, [refresh, pageLocale]);
   const hasConversation = !!chat;
+  const [visible, setVisible] = useState(true);
   useEffect(() => {
-    if (!hasConversation) return;
+    const changed = () => setVisible(document.visibilityState === 'visible');
+    changed();
+    document.addEventListener('visibilitychange', changed);
+    return () => document.removeEventListener('visibilitychange', changed);
+  }, []);
+  useEffect(() => {
+    if (!hasConversation || !open || !visible || !online) return;
     let active = true,
       fallback: ReturnType<typeof setInterval> | undefined;
+    // Reopening/reconnecting always catches up from the authoritative snapshot.
+    void refresh().catch(() => {});
     const stream = new EventSource("/api/chat/events");
     const receive = (event: MessageEvent) => {
       if (!active) return;
@@ -428,7 +437,7 @@ export function WebsiteChat({ locale: pageLocale }: { locale: string }) {
       stream.close();
       if (fallback) clearInterval(fallback);
     };
-  }, [hasConversation, snapshot, refresh]);
+  }, [hasConversation, open, visible, online, snapshot, refresh]);
   useEffect(() => {
     openRef.current = open;
     if (open) {
