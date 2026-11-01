@@ -17,6 +17,7 @@ import {
   calculatePrice,
   basePrice,
   serviceIds,
+  priceMatrix,
   extrasPrices,
 } from "../../src/lib/pricing";
 import { listOptions, orderWhere } from "../../src/lib/domain/crm-filters";
@@ -72,12 +73,12 @@ test("public price regression across 800 areas and every service with extras and
         { code: "oven" as const, quantity: 1 },
       ];
       const subtotal =
-        basePrice(service, area) +
+        (area>=100?area*priceMatrix[service][4]:basePrice(service, area)) +
         2 * extrasPrices.standardWindow +
         extrasPrices.oven;
       assert.equal(
         calculatePrice(service, area, extras, true).total,
-        subtotal + Math.round((subtotal * 0.2) / 100) * 100,
+        Math.ceil(subtotal * 1.2 / 100) * 100,
       );
     }
 });

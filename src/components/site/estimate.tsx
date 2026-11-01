@@ -60,8 +60,9 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
     const quote = calculatePrice(service,area,extras,urgent);
     const lines = [{label:`${content.pricing.serviceNames[service]} · ${area} m²`, value:quote.base}, ...quote.extras.map(e => ({label:`${content.calculator.labels[e.code]}${countKeys.includes(e.code as CountExtra) ? ` × ${e.quantity}` : ""}`,value:e.unitPrice*e.quantity}))];
     if (urgent) lines.push({label:content.calculator.urgent,value:quote.surcharge});
+    if (quote.roundingAdjustment) lines.push({label:({ru:'Округление итога вверх до 100 RSD',sr:'Zaokruživanje ukupnog iznosa naviše na 100 RSD',en:'Total rounded up to 100 RSD'})[locale],value:quote.roundingAdjustment});
     return {lines,total:quote.total,extras};
-  }, [area, content, counts, service, toggles, urgent]);
+  }, [area, content, counts, service, toggles, urgent, locale]);
 
   const selectedExtras=Object.values(counts).filter(n=>n>0).length+Object.values(toggles).filter(Boolean).length;
 
@@ -126,7 +127,8 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
               </div>
             ))}
             </ExtraGroup>)}
-            {toggleKeys.map((key) => <label key={key}><input type="checkbox" checked={toggles[key]} onChange={(event) => setToggles((current) => ({...current, [key]: event.target.checked}))}/><span>{content.calculator.labels[key]}</span><small>+{formatRsd(extrasPrices[key], locale)}</small></label>)}
+            {toggleKeys.map((key) => <label key={key}><input type="checkbox" checked={toggles[key]} onChange={(event) => setToggles((current) => ({...current, [key]: event.target.checked}))}/><span>{content.calculator.labels[key]}{key==='steam'&&` · ${({ru:'по согласованию',sr:'po dogovoru',en:'by agreement'})[locale]}`}</span><small>+{formatRsd(extrasPrices[key], locale)}</small></label>)}
+            {toggles.steam&&<p className="estimate-enquiry-note">{({ru:'Паровая обработка возможна после подтверждения оборудования и совместимости поверхности. Заявка не подтверждает выезд.',sr:'Tretman parom je moguć nakon potvrde opreme i prikladnosti površine. Upit ne potvrđuje dolazak.',en:'Steam treatment requires confirmation of equipment and surface suitability. An enquiry does not confirm a visit.'})[locale]}</p>}
             {!focused&&urgency}
 
           </div>

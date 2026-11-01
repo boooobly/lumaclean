@@ -1,0 +1,133 @@
+{
+  "version": "2026-11-01",
+  "sourceId": "1Xua3GrAYAgYfcbYUEWrU6I6cMZEA0IULLdSuKrbW4DY",
+  "sourceRanges": "Tabs 01–06, bounded A1:R400 (06 A1:R90)",
+  "bands": {
+    "regular": [
+      4900,
+      6000,
+      8200,
+      9800,
+      98
+    ],
+    "deep": [
+      9900,
+      11400,
+      14200,
+      17000,
+      180
+    ],
+    "move": [
+      10700,
+      12800,
+      15600,
+      18400,
+      180
+    ],
+    "airbnb": [
+      4900,
+      5800,
+      7400,
+      9000,
+      90
+    ],
+    "office": [
+      4900,
+      5800,
+      7400,
+      9000,
+      90
+    ]
+  },
+  "extras": {
+    "standardWindow": {
+      "sourceCode": "ADD-WINDOW-001",
+      "amount": 700,
+      "unit": "окно",
+      "status": "Оказываем"
+    },
+    "largeWindow": {
+      "sourceCode": "ADD-WINDOW-002",
+      "amount": 1000,
+      "unit": "окно",
+      "status": "Оказываем"
+    },
+    "balcony": {
+      "sourceCode": "ADD-OUTDOOR-001",
+      "amount": 1200,
+      "unit": "балкон",
+      "status": "Оказываем"
+    },
+    "fridge": {
+      "sourceCode": "ADD-KITCHEN-001",
+      "amount": 1000,
+      "unit": "прибор",
+      "status": "Оказываем"
+    },
+    "oven": {
+      "sourceCode": "ADD-KITCHEN-004",
+      "amount": 1400,
+      "unit": "прибор",
+      "status": "Оказываем"
+    },
+    "microwave": {
+      "sourceCode": "ADD-KITCHEN-005",
+      "amount": 700,
+      "unit": "прибор",
+      "status": "Оказываем"
+    },
+    "hood": {
+      "sourceCode": "ADD-KITCHEN-006",
+      "amount": 1000,
+      "unit": "прибор",
+      "status": "Оказываем"
+    },
+    "dishwasher": {
+      "sourceCode": "ADD-KITCHEN-008",
+      "amount": 1000,
+      "unit": "прибор",
+      "status": "Оказываем"
+    },
+    "washingMachine": {
+      "sourceCode": "ADD-KITCHEN-009",
+      "amount": 1000,
+      "unit": "прибор",
+      "status": "Оказываем"
+    },
+    "cabinets": {
+      "sourceCode": "ADD-KITCHEN-017",
+      "amount": 500,
+      "unit": "секция",
+      "status": "Оказываем"
+    },
+    "ironing": {
+      "sourceCode": "ADD-TEXTILE-005",
+      "amount": 900,
+      "unit": "30 минут",
+      "status": "Оказываем"
+    },
+    "linen": {
+      "sourceCode": "ADD-TEXTILE-008",
+      "amount": 750,
+      "unit": "кровать",
+      "status": "Оказываем"
+    },
+    "petHair": {
+      "sourceCode": "ADD-PET-001",
+      "amount": 900,
+      "unit": "заказ",
+      "status": "Оказываем"
+    },
+    "steam": {
+      "sourceCode": "ADD-SPECIAL-020",
+      "amount": 2800,
+      "unit": "пакет",
+      "status": "По согласованию"
+    }
+  },
+  "minimumRsd": 4000,
+  "roundUpTo": 100,
+  "sameDayOrHolidayPercent": 20,
+  "cryptoPercent": 5,
+  "automaticHolidayOrCryptoSupported": false
+}

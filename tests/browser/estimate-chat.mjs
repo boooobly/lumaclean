@@ -121,8 +121,8 @@ try{
       await counter.locator('button').last().click();await counter.locator('button').last().click();
       await total(15600);
       for(const check of await form.locator('.site-extra-options input[type="checkbox"]').all())await check.check();
-      await total(21250);
-      await form.locator('.site-urgent input').check();await total(25550);
+      await total(21300);
+      await form.locator('.site-urgent input').check();await total(25500);
       await form.locator('[name="upholsteryRequested"]').check();
       await fields();
       await form.locator('.site-comment summary').click();
@@ -161,7 +161,7 @@ try{
       assert.equal(payload.locale,locale);assert.equal(payload.requestKind,'CLEANING_UPHOLSTERY');assert.equal(payload.area,60);
       assert.equal(payload.service,'deep');assert.equal(payload.urgent,true);
       assert.equal(payload.extras.find(e=>e.code==='standardWindow').quantity,2);
-      assert.match(payload.estimate,/25[\s,.]?550/);
+      assert.match(payload.estimate,/25[\s,.]?500/);
       await shot(`success-${locale}.png`);
       await form.locator('[name="requestKind"]').selectOption('UPHOLSTERY');
       await form.evaluate(el=>el.requestSubmit());

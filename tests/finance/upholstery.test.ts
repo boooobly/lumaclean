@@ -145,8 +145,8 @@ test("urgent surcharge is the shared existing twenty percent rule", () => {
     urgent: true,
   });
   assert.equal(q.subtotal, 10600);
-  assert.equal(q.surcharge, 2100);
-  assert.equal(q.total, 12700);
+  assert.equal(q.surcharge, 2120);
+  assert.equal(q.total, 12800);
 });
 test("admin catalogue is configurable without altering earlier snapshots", () => {
   const a = quote({ mode: "STANDALONE", items: [item()], urgent: false }),

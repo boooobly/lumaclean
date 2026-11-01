@@ -38,7 +38,7 @@ export function basePrice(service: ServiceId, area: number) {
   if (area < 60) return row[1];
   if (area < 80) return row[2];
   if (area < 100) return row[3];
-  return Math.max(4000, Math.round((area * row[4]) / 100) * 100);
+  return roundEstimate(area * row[4]);
 }
 
 export function formatRsd(value: number, locale = "sr") {
@@ -47,11 +47,15 @@ export function formatRsd(value: number, locale = "sr") {
 
 // One source for public calculation and CRM snapshots.
 export function calculatePrice(service: ServiceId, area: number, extras: {code: keyof typeof extrasPrices; quantity: number}[], urgent: boolean) {
-  const base = basePrice(service, area);
+  // Keep the area amount unrounded until all work and the service surcharge are included.
+  const base = area >= 100 ? area * priceMatrix[service][4] : basePrice(service, area);
   const lines = extras.filter(e => e.quantity > 0).map(e => ({...e, unitPrice: extrasPrices[e.code]}));
   const subtotal = base + lines.reduce((sum,e) => sum + e.quantity * e.unitPrice, 0);
   const surcharge = urgentSurcharge(subtotal, urgent);
-  return {base, extras:lines, surcharge, total:subtotal+surcharge};
+  const total = roundEstimate(subtotal + surcharge);
+  const roundingAdjustment = Math.round((total - subtotal - surcharge) * 100) / 100;
+  return {base, extras:lines, surcharge, roundingAdjustment, total};
 }
-// Preserve the existing +20% and RSD 100 rounding for every visit type.
-export function urgentSurcharge(subtotal:number,urgent:boolean){return urgent?Math.round(subtotal*0.2/100)*100:0;}
+// Approved RULE-GENERAL-008: round only the final estimate up to 100 RSD.
+export function roundEstimate(amount:number,minimum=4000){return Math.ceil(Math.max(minimum,Math.round(amount*100)/100)/100)*100;}
+export function urgentSurcharge(subtotal:number,urgent:boolean){return urgent?Math.round(subtotal*20)/100:0;}

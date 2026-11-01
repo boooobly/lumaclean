@@ -68,7 +68,7 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown, source
           phone: input.phone,
           normalizedPhone: normalizedPhone(input.phone),
           locale: input.locale,
-          requestKind,upholsteryRequested,humanReviewRequired:upholsteryRequested||contact,consentAt:new Date(),
+          requestKind,upholsteryRequested,humanReviewRequired:upholsteryRequested||contact||input.extras.some(e=>e.code==='steam'&&e.quantity>0),consentAt:new Date(),
           serviceId: service?.id??null,
           area: standalone||contact?null:input.area,
           estimatedPrice: calculated?.total??null,
