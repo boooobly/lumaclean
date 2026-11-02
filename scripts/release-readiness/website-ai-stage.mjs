@@ -1,0 +1,35 @@
+// Explicit owner-approved staged build only: never promotes, migrates, seeds or enables DB AUTO.
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
+import {parseEnv} from 'node:util';
+import {spawnSync,execFileSync} from 'node:child_process';
+import path from 'node:path';
+import pg from 'pg';
+import {sourceFingerprint,verifiedRelease} from '../../src/lib/agent/release-verification.mjs';
+const root=path.resolve('artifacts/website-ai-activation-20261102'),old=path.resolve('artifacts/vercel-pro-20261101');
+const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+assert.equal(process.env.OWNER_APPROVED_WEBSITE_AI_STAGE,sha,'Separate exact-commit staged-build approval required');
+assert.equal(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim(),'','Clean tracked source required');
+const evidence=JSON.parse(readFileSync('release/ai-go-live.json','utf8')),native=JSON.parse(readFileSync('release/website-ai-native-20261102.json','utf8'));
+assert.equal(evidence.fingerprint,sourceFingerprint());assert(verifiedRelease().verified);
+assert.equal(evidence.nativeBookingVerified,true);assert.equal(native.status,'PASS_NATIVE_PREVIEW_PRODUCTION_PENDING');assert.equal(native.successfulAttempt.fingerprint,evidence.fingerprint);
+const privateReport=JSON.parse(readFileSync(path.join(root,'native-cloud-report-v3.json'),'utf8'));
+assert.equal(privateReport.status,'PASS_NATIVE_TWO_BOOKINGS');assert.equal(privateReport.productionWrites,0);assert.equal(privateReport.bookings.length,2);
+for(const b of privateReport.bookings)assert(b.status==='PASSED'&&b.cleaned&&b.proof?.signature);
+const liveAt=Math.min(...privateReport.bookings.map(b=>Date.parse(b.proof.at)));assert(Date.now()-liveAt>=0&&Date.now()-liveAt<7*86400000,'Native proof expired');
+const env=parseEnv(readFileSync(path.join(old,'production-private-verification.env'),'utf8')),dbUrl=new URL(env.DATABASE_URL);
+assert.equal(dbUrl.hostname,'ep-bitter-mode-b8r8ruag-pooler.c-14.us-east-1.aws.neon.tech');assert.equal(dbUrl.pathname,'/neondb');dbUrl.searchParams.set('sslmode','verify-full');
+const db=new pg.Client({connectionString:dbUrl.toString(),connectionTimeoutMillis:15000});
+try{await db.connect();await db.query('BEGIN READ ONLY');const row=(await db.query('SELECT "aiAgentMode","aiChannelModes" FROM "BusinessSettings" WHERE id=\'default\'')).rows[0];assert.equal(row.aiAgentMode,'OFF','Production must stay OFF throughout staged preparation');for(const c of ['TELEGRAM','VIBER','WHATSAPP'])assert.equal(row.aiChannelModes[c],'OFF');await db.query('ROLLBACK');}finally{await db.end();}
+const file=readFileSync('C:/Users/vleko/Desktop/Luma/openrouter_apikey_02112026.txt','utf8'),keys=[...new Set(file.match(/sk-or-v1-[A-Za-z0-9_-]{32,200}/g)??[])];assert(keys.length===1,'Expected owner-provided OpenRouter credential');
+const source=path.join(root,'staged-ai-source-'+sha.slice(0,8));assert(!existsSync(source),'Do not create duplicate stage');mkdirSync(source);
+const archive=path.join(root,'staged-ai-source-'+sha.slice(0,8)+'.tar');execFileSync('git',['archive','--format=tar','-o',archive,sha]);execFileSync('tar',['-xf',archive,'-C',source]);
+assert.equal(sourceFingerprint(source),evidence.fingerprint);const pkg=JSON.parse(readFileSync(path.join(source,'package.json'),'utf8'));assert.equal(pkg.scripts.build,'prisma generate && next build');assert.equal(pkg.scripts.postinstall,'prisma generate');
+const overrides={AI_AGENT_ENABLED:'true',AI_READINESS_CRON_ENABLED:'true',OPENROUTER_API_KEY:keys[0]};
+const args=['C:/Users/vleko/AppData/Roaming/npm/node_modules/vercel/dist/index.js','deploy',source,'--prod','--skip-domain','--project','prj_Q4nkQeWNwBIFz1AsthDvyEeJ5BeZ','--scope','vladislavs-projects-0eae0ea3','--global-config',path.join(old,'cli-auth'),'--yes','--no-wait','--meta','githubCommitSha='+sha,'--meta','githubCommitRef=codex/website-ai-activation-20261102','--meta','sourceFingerprint='+evidence.fingerprint,'--meta','releaseScope=website-ai-staged-db-off'];
+for(const[k,v]of Object.entries(overrides))args.push('--env',k+'='+v,'--build-env',k+'='+v);
+const result=spawnSync(process.execPath,args,{env:{...process.env,CI:'1',NO_UPDATE_NOTIFIER:'1',VERCEL_TELEMETRY_DISABLED:'1',XDG_CACHE_HOME:path.join(old,'cli-cache')},encoding:'utf8',windowsHide:true,maxBuffer:8*1024*1024});
+writeFileSync(path.join(root,'staged-ai-private-deploy.log'),((result.stdout??'')+(result.stderr??'')).replaceAll(keys[0],'[REDACTED]'));
+const urls=[...new Set([...(result.stdout??'').matchAll(/https:\/\/[a-zA-Z0-9.-]+\.vercel\.app/g)].map(m=>m[0]))];
+const receipt={status:result.status,urls,source:sha,fingerprint:evidence.fingerprint,project:'prj_Q4nkQeWNwBIFz1AsthDvyEeJ5BeZ',target:'production-staged',domainsAssigned:false,promoted:false,globalDbMode:'OFF',serverAdmission:true,healthCronAdmission:true,productionProjectEnvChanged:false,databaseWrites:0,providerCalls:0,telegramMessages:0};
+writeFileSync(path.join(root,'staged-ai-receipt.json'),JSON.stringify(receipt,null,2));console.log(JSON.stringify(receipt));assert.equal(result.status,0,'Inspect redacted private stage log');assert.equal(urls.length,1);

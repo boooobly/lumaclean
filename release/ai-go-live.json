@@ -376,10 +376,10 @@
   "migration": true,
   "build": true,
   "aiAutoReady": true,
-  "releaseProfile": "WEBSITE_AI_SOURCE_TESTED_NATIVE_PENDING",
+  "releaseProfile": "WEBSITE_AI_PREVIEW_VERIFIED_PRODUCTION_PENDING",
   "productionReady": false,
-  "nativeBookingVerified": false,
-  "cloudPreviewCertified": false,
+  "nativeBookingVerified": true,
+  "cloudPreviewCertified": true,
   "checkedAt": "2026-11-02T16:10:27.422Z",
   "checks": {
     "full": {
@@ -406,5 +406,7 @@
   "previousVerification": {
     "fingerprint": "9130991dcac2136dc3e5fdab8cea3f3e6155888904cb69a09a558801fbdc7486",
     "checkedAt": "2026-11-02T16:01:32.972Z"
-  }
+  },
+  "nativeEvidence": "release/website-ai-native-20261102.json",
+  "nativeScope": "Two real isolated Preview bookings; staff mirror and business records cleaned; actual MOTIS WALKING/fallback routing; production configuration/HMAC compatibility and rollout remain separate gates."
 }
