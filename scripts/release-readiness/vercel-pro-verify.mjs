@@ -7,7 +7,7 @@ import pg from 'pg';
 import {isolatedEnvironment} from './environment.mjs';
 const [action='unit',target='admin',...args]=process.argv.slice(2);
 assert(['admin','reliability','recovery'].includes(target));
-const root='artifacts/vercel-pro-20261101/release-verification';mkdirSync(root,{recursive:true});
+const root=process.env.LUMACLEAN_VERIFICATION_SCOPE==='website-ai-20261102'?'artifacts/website-ai-activation-20261102/release-verification':'artifacts/vercel-pro-20261101/release-verification';mkdirSync(root,{recursive:true});
 const database=target==='recovery'?'lumaclean_pro_recovery_test_v2':`lumaclean_${target}_test`;
 const port=target==='admin'?3128:target==='reliability'?3129:3130;
 const env=isolatedEnvironment(target==='admin'?'lumaclean_admin_test':'lumaclean_reliability_test',port);

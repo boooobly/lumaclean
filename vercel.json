@@ -10,6 +10,7 @@
   },
   "crons": [
     {"path":"/api/agent/recover","schedule":"0 6 * * *"},
-    {"path":"/api/notifications/recover","schedule":"*/5 * * * *"}
+    {"path":"/api/notifications/recover","schedule":"*/5 * * * *"},
+    {"path":"/api/agent/health","schedule":"*/30 * * * *"}
   ]
 }

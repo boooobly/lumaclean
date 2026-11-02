@@ -57,7 +57,7 @@ test('starter duration cannot activate without explicit confirmation and reserve
  assert(aiSettingsSchema.safeParse({action:'starter-duration',service:'deep',reserveMinutes:0,confirm:true}).success);
 });
 test('Website readiness has five systems and warnings do not become hard blockers',()=>{
- const ids=['master','credentials','primary','fallback','places','transit','duration','pricing','cleaners','settings','tests','scope','channels','liveBooking'];
+ const ids=['master','credentials','primary','fallback','places','transit','duration','pricing','cleaners','settings','tests','scope','channels','liveBooking','healthCron'];
  const checks=ids.map(id=>({id,label:id,detail:'',status:'READY' as const}));assert.deepEqual(websiteSummary(checks),{ready:5,total:5});assert.equal(websiteSummary(checks.map(c=>c.id==='transit'?{...c,status:'BLOCKS_AUTO' as const}:c)).ready,4);
 });
 

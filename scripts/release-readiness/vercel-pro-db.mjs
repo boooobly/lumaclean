@@ -7,7 +7,7 @@ import pg from 'pg';
 import {isolatedEnvironment} from './environment.mjs';
 const target=process.argv[2];assert(['admin','reliability','recovery'].includes(target));
 const name=target==='recovery'?'lumaclean_pro_recovery_test_v2':`lumaclean_${target}_test`;
-const root='artifacts/vercel-pro-20261101/release-verification';mkdirSync(root,{recursive:true});
+const root=process.env.LUMACLEAN_VERIFICATION_SCOPE==='website-ai-20261102'?'artifacts/website-ai-activation-20261102/release-verification':'artifacts/vercel-pro-20261101/release-verification';mkdirSync(root,{recursive:true});
 const env=isolatedEnvironment(target==='admin'?'lumaclean_admin_test':'lumaclean_reliability_test');
 Object.assign(env,{DATABASE_URL:`postgresql://postgres@127.0.0.1:55461/${name}`,DIRECT_URL:`postgresql://postgres@127.0.0.1:55461/${name}`,__NEXT_PROCESSED_ENV:'true'});
 env.PATH=path.dirname(process.execPath)+path.delimiter+env.PATH;

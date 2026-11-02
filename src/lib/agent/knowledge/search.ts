@@ -49,6 +49,7 @@ function lookup(input:unknown){
   if(entry.code==='RULE-PAY-015'&&/ремонт|renovat|renovir|реновир/iu.test(query))score+=25;
   if(entry.code==='RULE-PAY-014'&&/плесен|плесень|mold|mould|buđ|budj|буђ/iu.test(query))score+=25;
   if(entry.code==='RULE-PAY-005'&&/карт|card|kartic|картиц/iu.test(query))score+=25;
+  if(entry.code==='RULE-PAY-017'&&/крипт|crypto|kripto/iu.test(query))score+=30;
   if(entry.code==='RULE-LOYALTY-011'&&/скид|discount|popust|попуст|регулярн|regular customer|redovn|редовн/iu.test(query))score+=25;
   if(entry.code==='RULE-URGENCY-001'&&/сегодня|срочн|today|urgent|danas|hitno|данас|хитно/iu.test(query))score+=25;
   if(entry.code==='RULE-PAY-011'&&/недостат|претенз|замечан|reklamac|рекламац|defect|quality|complaint/iu.test(query))score+=20;

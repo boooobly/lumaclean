@@ -2,19 +2,25 @@ import type {AgentLocale, AgentState, HandoffReason} from './contracts';
 import {nextQualification,quoteText} from './conversion-intake';
 import {inputQuestion} from './chat-presentation';
 
+// Owner scope, 2026-11-02: larger apartments always need team agreement.
+export const websiteAutoAreaMinimum = 25;
+export const websiteAutoAreaMaximum = 120;
+export function areaRequiresReview(area:number){return !Number.isFinite(area)||area<websiteAutoAreaMinimum||area>websiteAutoAreaMaximum;}
+
 export const softReasons = ['DISCOUNT','PRICE_REVIEW','CREW_PREFERENCE','ACCESS_REVIEW','PAYMENT_REVIEW','OUTSIDE_SERVICE_AREA','NO_DURATION_RULE','ROUTING_UNRELIABLE'] as const;
 export function reasonLevel(reason:string):'AI_HANDLES'|'SOFT_REVIEW'|'HARD_HANDOFF' {
  if(['NO_SLOTS','AMBIGUOUS'].includes(reason))return 'AI_HANDLES';
  return (softReasons as readonly string[]).includes(reason)?'SOFT_REVIEW':'HARD_HANDOFF';
 }
 /** A topic mention is not authorization or a request to perform exceptional work. */
+export function cryptoPaymentChoice(text:string){return /(?:оплачу|плачу|оплатим|оплатить хочу).{0,30}крипт|(?:i will pay|i'll pay|paying|we will pay).{0,30}crypto|(?:platiću|platicu|platimo|plaćam|placam).{0,30}kripto/iu.test(text);}
 export function contextualReason(text:string,reason:HandoffReason|null):HandoffReason|null {
  if(!reason)return null;
  const question=/\?|^(?:как|что|есть|какие|можно ли|do you|how|what|are there|can i|da li|kako|šta|sta|да ли|како|шта)/iu.test(text.trim());
  const exception=/индивидуаль|сделайте.{0,20}скид|дайте.{0,20}скид|хочу.{0,20}скид|special discount|give me.{0,20}discount|\bcustom\b|\bexception\b|poseban popust|dajte.{0,20}popust|посебан попуст|дајте.{0,20}попуст/iu.test(text);
  if(reason==='DISCOUNT'&&question&&!exception)return null;
  if(reason==='COMPLAINT'&&question&&/policy|procedure|rules|порядок|правила|срок|правил|reklamacij.{0,20}(?:rok|pravil)|политик/iu.test(text)&&!/my (?:order|cleaner)|мой заказ|сломал|повредил|damaged|broke|верните|refund me|поквари|oštet/iu.test(text))return null;
- if(reason==='PAYMENT_REVIEW'&&question&&!/сч[её]т.{0,20}(?:компан|фирм)|invoice|faktur|фактур|только.{0,15}карт|only.{0,15}card/iu.test(text))return null;
+ if(reason==='PAYMENT_REVIEW'&&question&&!cryptoPaymentChoice(text)&&!/сч[её]т.{0,20}(?:компан|фирм)|invoice|faktur|фактур|только.{0,15}карт|only.{0,15}card/iu.test(text))return null;
  if(reason==='ACCESS_REVIEW'&&question&&!/хран|хранить|keep|store|čuv|cuv|чув|остав.{0,25}(?:навсегда|недел)|leave.{0,25}week/iu.test(text))return null;
  if(reason==='ARRIVAL_REVIEW'&&!/где|where|gde|где|опазд|late|kasn|касн|\beta\b/iu.test(text))return null;
  if(['MOLD','RENOVATION','HAZARDOUS_CLEANING','HEAVY_LIFTING'].includes(reason)){

@@ -9,9 +9,10 @@ import {acceptMessage} from './inbox';
 import {liveConfigFingerprint,previewTestAllowed,signLiveProof} from './live-proof';
 import {normalizedPhone} from '@/lib/domain/crm';
 import {writeAudit} from '@/lib/services/audit';
+import {assertNativeTestBudget,currentNativeTestBudget,withNativeTestBudget,NativeTestBudgetError} from '@/lib/services/native-test-budget';
 
 export const liveTestSteps=['AI поняла запрос','Цена рассчитана','Duration рассчитан','Адрес найден','Маршрут рассчитан','Свободный слот найден','Повторная проверка слота','Order создан'] as const;
-export type LiveTestReport={status:'PASSED'|'FAILED';steps:{label:string;ok:boolean}[];blocker:string|null;cleaned:boolean;service?:'regular'|'deep';booking?:{estimatedDurationMinutes:number|null;cleaningReserveMinutes:number;travelBufferMinutes:number;requiredCleaners:number;assignedCleaners:number;price:number};aiAttempts?:{provider:string;model:string;ok:boolean;errorCode:string|null;latencyMs:number}[];proof?:ReturnType<typeof signLiveProof>};
+export type LiveTestReport={status:'PASSED'|'FAILED';steps:{label:string;ok:boolean}[];blocker:string|null;cleaned:boolean;service?:'regular'|'deep';booking?:{estimatedDurationMinutes:number|null;cleaningReserveMinutes:number;travelBufferMinutes:number;requiredCleaners:number;assignedCleaners:number;price:number};aiAttempts?:{provider:string;model:string;ok:boolean;errorCode:string|null;latencyMs:number}[];proof?:ReturnType<typeof signLiveProof>;nativeBudget?:ReturnType<typeof currentNativeTestBudget>};
 /** A syntactically valid response still has to qualify the explicit synthetic request. */
 export function qualificationProvider(provider:AIProvider,input:ReturnType<typeof qualificationSchema.parse>):AIProvider{
   return{name:provider.name,model:provider.model,complete:async(messages,signal)=>{
@@ -47,6 +48,10 @@ export async function cleanupLiveTest(db:PrismaClient,batchId:string){
 }
 
 export async function runLiveBookingTest(db:PrismaClient,userId:string,date:string,selectedService?:'regular'|'deep'):Promise<LiveTestReport>{
+  if(!previewTestAllowed())throw new AgentError('PREVIEW_TEST_ONLY');
+  return withNativeTestBudget('booking',()=>runLiveBookingTestInternal(db,userId,date,selectedService));
+}
+async function runLiveBookingTestInternal(db:PrismaClient,userId:string,date:string,selectedService?:'regular'|'deep'):Promise<LiveTestReport>{
   // This check precedes every write, including reports, and cannot be bypassed by request parameters.
   if(!previewTestAllowed())throw new AgentError('PREVIEW_TEST_ONLY');
   if(!await db.user.count({where:{id:userId,active:true,role:'ADMIN'}}))throw new AgentError('FORBIDDEN');
@@ -113,9 +118,10 @@ export async function runLiveBookingTest(db:PrismaClient,userId:string,date:stri
     const order=await db.order.findUniqueOrThrow({where:{id:created.orderId!},select:{estimatedDurationMinutes:true,cleaningReserveMinutes:true,travelBufferMinutes:true,requiredCleaners:true,finalPrice:true,_count:{select:{assignments:true}}}});
     report.booking={estimatedDurationMinutes:order.estimatedDurationMinutes,cleaningReserveMinutes:order.cleaningReserveMinutes,travelBufferMinutes:order.travelBufferMinutes,requiredCleaners:order.requiredCleaners,assignedCleaners:order._count.assignments,price:Number(order.finalPrice)};
     if(order.estimatedDurationMinutes!==ctx.state.duration?.minutes||order.cleaningReserveMinutes!==ctx.state.duration.reserve||order.requiredCleaners!==ctx.state.duration.requiredCleaners||order._count.assignments!==order.requiredCleaners||order.travelBufferMinutes!==settings.defaultTravelBufferMinutes||Number(order.finalPrice)!==ctx.state.quote?.total)throw new AgentError('BOOKING_SNAPSHOT_MISMATCH');
-    report.status='PASSED';
-  }catch(e){report.blocker=e instanceof AgentError?e.code:'LIVE_TEST_FAILED';}
+    assertNativeTestBudget();report.status='PASSED';
+  }catch(e){report.blocker=e instanceof AgentError||e instanceof NativeTestBudgetError?e.code:'LIVE_TEST_FAILED';}
   try{await cleanupLiveTest(db,batchId);report.cleaned=true;}catch{report.status='FAILED';report.blocker='LIVE_TEST_CLEANUP_REQUIRED';}
+  report.nativeBudget=currentNativeTestBudget();
   if(report.status==='PASSED'&&report.cleaned){
     if(config!==await liveConfigFingerprint(db)){report.status='FAILED';report.blocker='CONFIGURATION_CHANGED_DURING_TEST';}
     else{report.proof=signLiveProof(config,batchId);await db.businessSettings.update({where:{id:'default'},data:{aiLiveTestProof:json(report.proof)}});}
