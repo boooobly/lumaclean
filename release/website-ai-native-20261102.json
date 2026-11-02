@@ -1,0 +1,32 @@
+{
+  "scope": "Owner-approved protected Preview diagnostics; no production writes",
+  "status": "BLOCKED",
+  "blocker": "OPENROUTER_PREVIEW_PROVIDER_HTTP_401",
+  "deployment": "dpl_33JVzJNTGbi6MxY1L4bGRMA9r82o",
+  "url": "https://lumaclean-release-candidate-3s91pxle2.vercel.app",
+  "source": "91eb55e8c32edc248548a85f2fce33ac5a9517dd",
+  "fingerprint": "fbff1ffcb5fb03a1d9ec32c36d9acd5ce45a299ed9984c4b236b3399b408b801",
+  "attemptAt": "2026-11-02T15:50:24.786Z",
+  "nativeDiagnostics": {
+    "primary": "PASS",
+    "fallback": "FAIL_HTTP_401",
+    "places": "PASS_MOTIS",
+    "routing": "PASS_DEGRADED_WALKING_FALLBACK_80_MINUTES",
+    "liveTransitVerified": false
+  },
+  "transportAttempts": {
+    "llm": 2,
+    "motis": 3,
+    "google": 0,
+    "telegram": 0,
+    "budgetExceeded": false
+  },
+  "nativeBookings": {"run": 0, "pass": 0, "status": "BLOCKED_BY_FALLBACK_GATE"},
+  "cloudSmoke": {"localizedPages": 3, "adminLogin": "PASS", "healthWithoutBearer": 401, "healthPreview": "SKIP_DISABLED_CONFIRMED"},
+  "cleanup": {"status": "PASS", "temporaryStaffRemoved": 2, "temporaryDurationRulesRemoved": 2, "remainingClients": 0, "remainingOrders": 0, "remainingConversations": 0, "remainingMessages": 0, "previousSyntheticLeadsPreserved": 10, "previewMode": "OFF", "temporaryShareRevoked": true},
+  "productionWrites": 0,
+  "productionDeployment": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
+  "productionSource": "b9a16f69a669b064884df96d1c688013bf6b7b5b",
+  "websiteAiEnabled": false,
+  "nextAction": "Owner updates OPENROUTER_API_KEY for Preview in lumaclean-release-candidate using protected Vercel settings, never chat. New deployment must inherit the repaired credential; rerun mandatory diagnostics before either booking. Do not weaken fallback readiness. Remaining native requests require budget reconciliation before retry."
+}
