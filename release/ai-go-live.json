@@ -1,5 +1,5 @@
 {
-  "fingerprint": "9130991dcac2136dc3e5fdab8cea3f3e6155888904cb69a09a558801fbdc7486",
+  "fingerprint": "ff37b27b7936a8148908efaed1b61e1bcacc178449b7ea531415c61eece08f88",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -205,7 +205,7 @@
     "src/lib/agent/knowledge/vocabulary.ts": "2ccad20bea3c9b5726c773eadf41f29d37c756ea5c600faa5d608db0246bae3e",
     "src/lib/agent/knowledge-scenarios.ts": "f818d9f46e2742022b05af64e7a9be78c5f7bd70d192e30e395b8eb4c63a52c1",
     "src/lib/agent/live-proof.ts": "ef6d87668d05e67ac93d9930d7110a2f31be35fe622583096b421b4bb8c566bf",
-    "src/lib/agent/live-test.ts": "917e2ffceedd7acd96a72d706faa96c8321d850888337e8f8093ed0b804a117a",
+    "src/lib/agent/live-test.ts": "3cfb9d0a60a21e124e7a163889a5017362f6f934accc14bb848386699b9d0a57",
     "src/lib/agent/notifications.ts": "0c3489468ca6a260b45d062afdb09181c3d9b71369267b41915646f91c857cff",
     "src/lib/agent/persona.ts": "dc8d31c52606857ea2302ceaf6c75e8be2dfa5354150785afa6b0891192978b6",
     "src/lib/agent/policy.ts": "77d3fe92d29a0e4ffb7f2cc5b46d4fa8d5fd75942dcd86efb6bdbdd111c92474",
@@ -370,7 +370,7 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 1070,
+  "tests": 1071,
   "lint": true,
   "typecheck": true,
   "migration": true,
@@ -380,13 +380,13 @@
   "productionReady": false,
   "nativeBookingVerified": false,
   "cloudPreviewCertified": false,
-  "checkedAt": "2026-11-02T16:01:32.972Z",
+  "checkedAt": "2026-11-02T16:10:27.422Z",
   "checks": {
     "full": {
-      "pass": 1070,
+      "pass": 1071,
       "fail": 0,
       "skip": 34,
-      "sha256": "29b2cb62a3d12fac7754ecbd49f1b9d947e261b1b92f1544a8fccb73a2a6bf8d"
+      "sha256": "5252a120a7d121cbaa10387886b6908fe208372c7b9d9784a0d4ab7ddf672f23"
     },
     "integration": {
       "pass": 59,
@@ -404,7 +404,7 @@
   "vercelConfigSha256": "1487793a0907c10e067bde6d0efada4a714553b4502b922aab0646b246096d37",
   "verificationScope": "Software source admission for protected native-verification Preview. Unit/domain and real loopback PostgreSQL/HTTP checks passed with explicitly mocked external providers. This is NOT native certification or production admission. Runtime readiness still independently requires real provider diagnostics, approved operational rules/crew, signed source/config-bound fresh Preview booking proof, owner confirmation and production maintenance configuration. No production mode is enabled by this file.",
   "previousVerification": {
-    "fingerprint": "fbff1ffcb5fb03a1d9ec32c36d9acd5ce45a299ed9984c4b236b3399b408b801",
-    "checkedAt": "2026-11-02T15:45:52.505Z"
+    "fingerprint": "9130991dcac2136dc3e5fdab8cea3f3e6155888904cb69a09a558801fbdc7486",
+    "checkedAt": "2026-11-02T16:01:32.972Z"
   }
 }

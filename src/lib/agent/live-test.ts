@@ -19,7 +19,12 @@ export function qualificationProvider(provider:AIProvider,input:ReturnType<typeo
     const result=await provider.complete(messages,signal);
     if(result.toolCalls.length!==1||result.toolCalls[0].name!=='calculatePrice')throw new AgentError('NATIVE_QUALIFICATION_INVALID');
     let facts:unknown;try{facts=qualificationSchema.parse(JSON.parse(result.toolCalls[0].arguments));}catch{throw new AgentError('NATIVE_QUALIFICATION_INVALID');}
-    if(canonicalJson(facts)!==canonicalJson(input))throw new AgentError('NATIVE_QUALIFICATION_FACTS_MISMATCH');
+    if(canonicalJson(facts)!==canonicalJson(input)){
+      // Synthetic Preview only. Identify the rejected fields, never log their values,
+      // model arguments, credentials, contacts or staff/location configuration.
+      if(process.env.VERCEL_ENV==='preview')console.info(JSON.stringify({event:'native_qualification_mismatch',provider:provider.name,fields:Object.keys(input).filter(key=>canonicalJson((facts as Record<string,unknown>)[key])!==canonicalJson(input[key as keyof typeof input]))}));
+      throw new AgentError('NATIVE_QUALIFICATION_FACTS_MISMATCH');
+    }
     return result;
   }};
 }

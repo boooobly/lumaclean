@@ -1,7 +1,9 @@
 {
   "scope": "Owner-approved protected Preview diagnostics; no production writes",
   "status": "BLOCKED",
-  "blocker": "OPENROUTER_PREVIEW_PROVIDER_HTTP_401",
+  "blocker": "NATIVE_QUALIFICATION_FACTS_MISMATCH_WITH_RETRY_ALLOWANCE_CAP",
+  "originalBlocker": "OPENROUTER_PREVIEW_PROVIDER_HTTP_401",
+  "credentialRepairedPreviewOnly": true,
   "deployment": "dpl_33JVzJNTGbi6MxY1L4bGRMA9r82o",
   "url": "https://lumaclean-release-candidate-3s91pxle2.vercel.app",
   "source": "91eb55e8c32edc248548a85f2fce33ac5a9517dd",
@@ -21,12 +23,25 @@
     "telegram": 0,
     "budgetExceeded": false
   },
-  "nativeBookings": {"run": 0, "pass": 0, "status": "BLOCKED_BY_FALLBACK_GATE"},
+  "nativeBookings": {"run": 1, "pass": 0, "fail": 1, "cleaned": true, "status": "PRIMARY_FACTS_MISMATCH_FALLBACK_TRANSPORT_BLOCKED_BY_REMAINING_ALLOWANCE"},
+  "secondAttempt": {
+    "deployment": "dpl_Hi7TBj6DEqLV6pfVCMgkPwbjGSwY",
+    "url": "https://lumaclean-release-candidate-ldyvmoidb.vercel.app",
+    "source": "7c10b28bb5b7916c7fd50bf66631e1d4e2570699",
+    "diagnostics": {"primary": "FAIL_PROVIDER_TIMEOUT_OR_NETWORK", "fallback": "PASS_NATIVE", "places": "PASS_MOTIS", "routing": "PASS_DEGRADED_WALKING"},
+    "transportAttempts": {"llm": 3, "motis": 3, "google": 0, "telegram": 0},
+    "regularBooking": {"status": "FAIL", "primary": "NATIVE_QUALIFICATION_FACTS_MISMATCH", "fallback": "NOT_SENT_BUDGET_LIMIT", "cleaned": true, "orderCreated": false},
+    "deepBooking": "NOT_RUN",
+    "staffAndRulesCleanup": "PASS",
+    "previewModeAfterCleanup": "OFF",
+    "temporaryShareRevoked": true
+  },
+  "aggregateTransportAttempts": {"llm": 5, "motis": 6, "google": 0, "telegram": 0},
   "cloudSmoke": {"localizedPages": 3, "adminLogin": "PASS", "healthWithoutBearer": 401, "healthPreview": "SKIP_DISABLED_CONFIRMED"},
   "cleanup": {"status": "PASS", "temporaryStaffRemoved": 2, "temporaryDurationRulesRemoved": 2, "remainingClients": 0, "remainingOrders": 0, "remainingConversations": 0, "remainingMessages": 0, "previousSyntheticLeadsPreserved": 10, "previewMode": "OFF", "temporaryShareRevoked": true},
   "productionWrites": 0,
   "productionDeployment": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
   "productionSource": "b9a16f69a669b064884df96d1c688013bf6b7b5b",
   "websiteAiEnabled": false,
-  "nextAction": "Owner updates OPENROUTER_API_KEY for Preview in lumaclean-release-candidate using protected Vercel settings, never chat. New deployment must inherit the repaired credential; rerun mandatory diagnostics before either booking. Do not weaken fallback readiness. Remaining native requests require budget reconciliation before retry."
+  "nextAction": "Credential repair is complete and confirmed by native OpenRouter diagnostics. Preserve all production gates. Owner approval is needed for another bounded native pass with real fallback: up to6additional LLM and72MOTIS, within the original$1 monetary ceiling, zero Telegram/production writes. Diagnose changed qualification field names without logging their values; do not accept mismatched facts."
 }
