@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { calculatePrice, serviceIds, urgentSurcharge } from "./pricing";
+import { calculatePrice, serviceIds, urgentSurcharge, roundEstimate } from "./pricing";
 export const upholsteryPriceKeys = [
   "sofa3Light",
   "sofa3Normal",
@@ -149,10 +149,11 @@ export function calculateUpholstery(
     minimumAdjustment =
       v.mode === "STANDALONE" ? Math.max(0, p.minimumVisit - itemsSubtotal) : 0;
   const cleaningBase = v.cleaning
-    ? calculatePrice(v.cleaning.service, v.cleaning.area, [], false).total
+    ? calculatePrice(v.cleaning.service, v.cleaning.area, [], false).base
     : 0;
   const subtotal = cleaningBase + itemsSubtotal + minimumAdjustment,
     surcharge = urgentSurcharge(subtotal, v.urgent);
+  const total=roundEstimate(subtotal+surcharge,v.mode==='STANDALONE'?p.minimumVisit:0);
   const reviewReasons = [
     ...new Set(
       v.items.flatMap((i) => [
@@ -173,7 +174,8 @@ export function calculateUpholstery(
     cleaningBase,
     subtotal,
     surcharge,
-    total: subtotal + surcharge,
+    roundingAdjustment: Math.round((total-subtotal-surcharge)*100)/100,
+    total,
     currency: "RSD" as const,
     deliveryIncluded: true,
     from: lines.some((l) => l.from),

@@ -209,6 +209,7 @@ export function UpholsteryCalculator({ locale, catalog, version, serviceNames }:
         <h3>{p.summary}</h3>
         <div className="up-receipt-lines">{calculation?.quote.lines.map((line, i) => <div key={i}><span>{c.types[line.type]}{line.quantity > 1 && ` × ${line.quantity}`}{line.type === "CORNER" && ` · ${items[i].seats} ${c.seats.toLowerCase()}`}</span><strong>{line.from && `${c.from} `}{formatRsd(line.amount, locale)}</strong></div>)}
           {!!calculation?.quote.minimumAdjustment && <div><span>{c.minimumAdjustment}</span><strong>{formatRsd(calculation.quote.minimumAdjustment, locale)}</strong></div>}
+          {!!calculation?.quote.roundingAdjustment && <div><span>{({ru:'Округление до 100 RSD',sr:'Zaokruživanje na 100 RSD',en:'Rounding to 100 RSD'})[locale]}</span><strong>{formatRsd(calculation.quote.roundingAdjustment, locale)}</strong></div>}
           {mode === "ADDON" && calculation && <div><span>{serviceNames[service]} · {area} m²</span><strong>{formatRsd(calculation.quote.cleaningBase, locale)}</strong></div>}
         </div>
         <div className="up-total" aria-live="polite" aria-atomic="true"><span>{c.total}</span><strong key={calculation?.quote.total}>{calculation && !unsafe ? `${c.from} ${formatRsd(calculation.quote.total, locale)}` : "—"}</strong></div>

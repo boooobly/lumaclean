@@ -31,7 +31,7 @@ const extras: [Parameters<typeof calculatePrice>[2],number][] = [
   [[{code:'dishwasher',quantity:1}],1000], [[{code:'washingMachine',quantity:1}],1000],
 ];
 for (const [lines,amount] of extras) test(`approved extras ${JSON.stringify(lines)}`,()=>{
-  assert.equal(calculatePrice('regular',39,lines,false).total,4900+amount);
+  assert.equal(calculatePrice('regular',39,lines,false).total,Math.ceil((4900+amount)/100)*100);
   assert.deepEqual(quote('regular',39,lines,false),calculatePrice('regular',39,lines,false));
 });
 for(const [type,amount] of [['SOFA2',4000],['SOFA3',4600],['ARMCHAIR',2200],['CHAIR',600]] as const) test(`upholstery ${type}, no second minimum on addon`,()=>{

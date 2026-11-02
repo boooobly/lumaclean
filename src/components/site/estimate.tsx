@@ -60,8 +60,9 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
     const quote = calculatePrice(service,area,extras,urgent);
     const lines = [{label:`${content.pricing.serviceNames[service]} · ${area} m²`, value:quote.base}, ...quote.extras.map(e => ({label:`${content.calculator.labels[e.code]}${countKeys.includes(e.code as CountExtra) ? ` × ${e.quantity}` : ""}`,value:e.unitPrice*e.quantity}))];
     if (urgent) lines.push({label:content.calculator.urgent,value:quote.surcharge});
+    if (quote.roundingAdjustment) lines.push({label:({ru:'Округление до 100 RSD',sr:'Zaokruživanje na 100 RSD',en:'Rounding to 100 RSD'})[locale],value:quote.roundingAdjustment});
     return {lines,total:quote.total,extras};
-  }, [area, content, counts, service, toggles, urgent]);
+  }, [area, content, counts, service, toggles, urgent, locale]);
 
   const selectedExtras=Object.values(counts).filter(n=>n>0).length+Object.values(toggles).filter(Boolean).length;
 
