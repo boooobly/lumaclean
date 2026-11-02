@@ -6,6 +6,13 @@ test('native diagnostics stops before a third paid model request',()=>{
  const b=new NativeTestBudget('diagnostics');b.authorize('https://api.poyo.ai/v1/responses',request);b.authorize('https://api.poyo.ai/v1/responses',request);
  assert.throws(()=>b.authorize('https://api.poyo.ai/v1/responses',request),NativeTestBudgetError);assert.equal(b.report().attempted.llm,2);assert.throws(()=>b.assertAllowed(),NativeTestBudgetError);
 });
+
+test('retry ceilings can only shrink an approved native profile',()=>{
+ const booking=new NativeTestBudget('booking',null,{llm:1});booking.authorize('https://api.poyo.ai/v1/responses',request);
+ assert.throws(()=>booking.authorize('https://api.poyo.ai/v1/responses',request),NativeTestBudgetError);assert.equal(booking.report().attempted.llm,1);
+ const diagnostics=new NativeTestBudget('diagnostics','https://routing.example.test',{routing:5});for(let i=0;i<5;i++)diagnostics.authorize('https://routing.example.test/route');assert.throws(()=>diagnostics.authorize('https://routing.example.test/route'),NativeTestBudgetError);
+ for(const lower of[{llm:3},{routing:33},{places:1},{llm:-1},{routing:NaN}])assert.throws(()=>new NativeTestBudget('booking',null,lower),/NATIVE_TEST_PROFILE_NOT_APPROVED/);
+});
 test('native budget refuses changed models, larger input/output, unknown services and Google calls',()=>{
  for(const [url,init]of[
   ['https://api.poyo.ai/v1/responses',{...request,body:JSON.stringify({model:'different',max_output_tokens:1200})}],

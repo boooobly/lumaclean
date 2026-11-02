@@ -1,5 +1,5 @@
 {
-  "fingerprint": "fbff1ffcb5fb03a1d9ec32c36d9acd5ce45a299ed9984c4b236b3399b408b801",
+  "fingerprint": "9130991dcac2136dc3e5fdab8cea3f3e6155888904cb69a09a558801fbdc7486",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -311,7 +311,7 @@
     "src/lib/services/lead-notifications.ts": "82e6980134a2ffa43b7459e76685dbc7638a8918d9273069dc268f610d3d7b88",
     "src/lib/services/lead-rate-limit.ts": "3336638573360ce72ac4df973534a8cde340856b2a4904efa3970d2ce9ea3b99",
     "src/lib/services/legacy-import.ts": "f2b636e307afa4a9497bd00705b53e0c1ee98eaf2acb65aed7731ea8e58ecd56",
-    "src/lib/services/native-test-budget.ts": "3a0699440287de51e64e3fee45fe1e5f829a7d2045036d71c9e75b839fe6b441",
+    "src/lib/services/native-test-budget.ts": "c4ddacbf166a2a08c5815f77e294bed79d6174adcfa04f4f6bc4dae64bab1581",
     "src/lib/services/payout-calculation.ts": "f34ea4ccd7baa6e993ae9a3680c698d8f81389c60c9e8f316711e608432958a8",
     "src/lib/services/route-cache.ts": "7f38d8400d34fe72fa91eb11f025b1767e76b755162fd9fbd73a27ebfa83477d",
     "src/lib/services/routing-planning.ts": "717cd88641469dcd495a03f43cba634c8d231d56484d8c2db2c21d302e5096e6",
@@ -370,7 +370,7 @@
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "tests": 1069,
+  "tests": 1070,
   "lint": true,
   "typecheck": true,
   "migration": true,
@@ -380,19 +380,19 @@
   "productionReady": false,
   "nativeBookingVerified": false,
   "cloudPreviewCertified": false,
-  "checkedAt": "2026-11-02T15:45:52.505Z",
+  "checkedAt": "2026-11-02T16:01:32.972Z",
   "checks": {
     "full": {
-      "pass": 1069,
+      "pass": 1070,
       "fail": 0,
       "skip": 34,
-      "sha256": "5d2afe88a2bf9d75e60769f63cd30180644fbd9a1de783ff5821b7ba68fdffb0"
+      "sha256": "29b2cb62a3d12fac7754ecbd49f1b9d947e261b1b92f1544a8fccb73a2a6bf8d"
     },
     "integration": {
       "pass": 59,
       "fail": 0,
       "skip": 0,
-      "sha256": "f72ae7c49b308102c6dbc77a7d1070d79ca8b3ceb493bd7ac2d174436a106f2c"
+      "sha256": "5338eecd52ae49ec68a04245e0334fdc6eba2ff5dce3c5cfbab97776cfbbcdf6"
     },
     "release-verification/admin": {
       "pass": 40,
@@ -404,7 +404,7 @@
   "vercelConfigSha256": "1487793a0907c10e067bde6d0efada4a714553b4502b922aab0646b246096d37",
   "verificationScope": "Software source admission for protected native-verification Preview. Unit/domain and real loopback PostgreSQL/HTTP checks passed with explicitly mocked external providers. This is NOT native certification or production admission. Runtime readiness still independently requires real provider diagnostics, approved operational rules/crew, signed source/config-bound fresh Preview booking proof, owner confirmation and production maintenance configuration. No production mode is enabled by this file.",
   "previousVerification": {
-    "fingerprint": "3299f1e5e735dc13e2dd87ff57db4650dac01d56c51fc2bdc7b51cd952453d4a",
-    "checkedAt": "2026-11-01T22:35:01.466Z"
+    "fingerprint": "fbff1ffcb5fb03a1d9ec32c36d9acd5ce45a299ed9984c4b236b3399b408b801",
+    "checkedAt": "2026-11-02T15:45:52.505Z"
   }
 }

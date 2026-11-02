@@ -4,9 +4,9 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {sourceFingerprint,sourceInventory,verifiedRelease} from '../../src/lib/agent/release-verification.mjs';
 const root='artifacts/website-ai-activation-20261102/';
-assert.equal(sourceFingerprint(),'fbff1ffcb5fb03a1d9ec32c36d9acd5ce45a299ed9984c4b236b3399b408b801','Rerun checks after source changes');
+assert.equal(sourceFingerprint(),'9130991dcac2136dc3e5fdab8cea3f3e6155888904cb69a09a558801fbdc7486','Rerun checks after source changes');
 const checks={};
-for(const [file,minimum]of [['full',1069],['integration',59],['release-verification/admin',40]]){
+for(const [file,minimum]of [['full',1070],['integration',59],['release-verification/admin',40]]){
  const log=readFileSync(root+file+'.log','utf8'),count=k=>Number([...log.matchAll(new RegExp('(?:ℹ |# )'+k+' (\\d+)','g'))].at(-1)?.[1]??-1);
  assert(count('pass')>=minimum&&count('fail')===0,file);checks[file]={pass:count('pass'),fail:0,skip:count('skipped'),sha256:createHash('sha256').update(log).digest('hex')};
 }

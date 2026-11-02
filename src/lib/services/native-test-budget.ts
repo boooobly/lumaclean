@@ -12,7 +12,11 @@ export class NativeTestBudgetError extends Error {
 export class NativeTestBudget {
   private used:Record<Category,number>={llm:0,places:0,routing:0};
   private blocked=false;
-  constructor(readonly profile:NativeTestProfile,private routingOrigin:string|null=null){}
+  private ceilings:Record<Category,number>;
+  constructor(readonly profile:NativeTestProfile,private routingOrigin:string|null=null,lower:Partial<Record<Category,number>>={}){
+    this.ceilings={...limits[profile],...lower};
+    for(const category of ['llm','places','routing'] as const)if(!Number.isInteger(this.ceilings[category])||this.ceilings[category]<0||this.ceilings[category]>limits[profile][category])throw new Error('NATIVE_TEST_PROFILE_NOT_APPROVED');
+  }
   private refuse():never{this.blocked=true;throw new NativeTestBudgetError();}
   authorize(input:Parameters<typeof fetch>[0],init?:RequestInit){
     let url:URL;try{url=new URL(typeof input==='string'?input:input instanceof URL?input.href:input.url);}catch{return this.refuse();}
@@ -27,11 +31,11 @@ export class NativeTestBudget {
     }else if(url.protocol==='https:'&&['places.googleapis.com','maps.googleapis.com','routes.googleapis.com'].includes(url.hostname))category='places';
     else if(this.routingOrigin&&url.origin===this.routingOrigin)category='routing';
     else return this.refuse();
-    if(this.used[category]>=limits[this.profile][category])return this.refuse();
+    if(this.used[category]>=this.ceilings[category])return this.refuse();
     this.used[category]++;
   }
   assertAllowed(){if(this.blocked)throw new NativeTestBudgetError();}
-  report(){return{profile:this.profile,limits:{...limits[this.profile]},attempted:{...this.used},blocked:this.blocked};}
+  report(){return{profile:this.profile,limits:{...this.ceilings},attempted:{...this.used},blocked:this.blocked};}
 }
 export function currentNativeTestBudget(){return scopes.getStore()?.report();}
 export function assertNativeTestBudget(){scopes.getStore()?.assertAllowed();}
@@ -39,7 +43,14 @@ export async function withNativeTestBudget<T>(profile:NativeTestProfile,fn:()=>P
   if(scopes.getStore())throw new Error('NATIVE_TEST_BUDGET_ALREADY_ACTIVE');
   if(process.env.LUMACLEAN_ROUTING_PROVIDER!=='MOTIS')throw new Error('NATIVE_TEST_PROFILE_NOT_APPROVED');
   let origin:string|null=null;try{origin=new URL(process.env.LUMACLEAN_ROUTING_URL??'').origin;}catch{/* Unknown routing stays blocked. */}
-  const budget=new NativeTestBudget(profile,origin);
+  // A repaired credential must not reset the owner's aggregate native allowance.
+  // Preview-only overrides can lower limits; they can never raise a profile ceiling.
+  const lower:Partial<Record<Category,number>>={};
+  if(process.env.VERCEL_ENV==='preview'){
+    const key=profile==='booking'?'AI_NATIVE_BOOKING_LLM_LIMIT':'AI_NATIVE_DIAGNOSTICS_ROUTING_LIMIT';
+    if(process.env[key]!==undefined)lower[profile==='booking'?'llm':'routing']=Number(process.env[key]);
+  }
+  const budget=new NativeTestBudget(profile,origin,lower);
   return scopes.run(budget,async()=>{try{const value=await fn();budget.assertAllowed();return value;}finally{console.info(JSON.stringify({event:'native_test_budget',...budget.report()}));}});
 }
 /** In normal operation this forwards unchanged. Cached providers retain the scoped guard. */
