@@ -12,6 +12,7 @@ import { CrmError } from "@/lib/domain/crm";
 import {publicLeadPaths} from '@/lib/public-paths';
 export const runtime = "nodejs";
 export async function POST(request: Request) {
+  const started = Date.now();
   let raw:string;
   try{raw=(await boundedBody(request,16000)).toString();}
   catch(error){return NextResponse.json({ok:false},{status:error instanceof CrmError&&error.code==='TOO_LARGE'?413:400});}
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
   try {
     const db = getDatabase();
     const lead = await saveWebsiteLead(db, parsed.data, leadRequestSource(request));
+    console.info(JSON.stringify({msg: 'website_lead_saved', created: lead.created, durationMs: Date.now() - started}));
     await publishWebsiteLead(db,lead.id);
     try{after(()=>notifyWebsiteLead(db, lead, parsed.data));}
     catch{console.error(JSON.stringify({msg:'lead_notification_recovery_pending'}));}

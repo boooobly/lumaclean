@@ -1,4 +1,5 @@
 import {DEFAULT_FALLBACK_TRAVEL_MINUTES} from "@/lib/domain/routing-policy";
+import {nativeTestFetch} from '@/lib/services/native-test-budget';
 import { z } from "zod";
 import { createHash } from "node:crypto";
 import type {
@@ -105,7 +106,7 @@ export class MotisRoutingProvider implements RoutingProvider {
   constructor(
     private url = process.env.LUMACLEAN_ROUTING_URL,
     private token = process.env.LUMACLEAN_ROUTING_TOKEN,
-    private http: typeof fetch = fetch,
+    private http: typeof fetch = nativeTestFetch,
     private clock = () => new Date(),
   ) {}
   private async call(path: string, body?: unknown) {

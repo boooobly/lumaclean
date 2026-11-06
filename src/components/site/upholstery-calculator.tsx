@@ -7,7 +7,6 @@ import { upholsteryUi } from "@/lib/upholstery-content";
 import { upholsteryPremiumCopy } from "@/lib/upholstery-premium-content";
 import { calculateUpholstery, furnitureTypes, upholsteryRequestSchema, type UpholsteryCatalog, type UpholsteryRequest } from "@/lib/upholstery";
 import { formatRsd, serviceIds, type ServiceId } from "@/lib/pricing";
-import { siteContent } from "@/lib/content";
 import { isWebsitePhoneValid } from "@/lib/website-phone";
 import {leadAttribution, trackEvent} from '@/lib/analytics';
 import { ArrowIcon } from "./arrow-icon";
@@ -51,7 +50,7 @@ export function UpholsteryGallery({ locale, prices }: { locale: Locale; prices: 
   </>;
 }
 
-export function UpholsteryCalculator({ locale, catalog, version }: { locale: Locale; catalog: UpholsteryCatalog; version: number }) {
+export function UpholsteryCalculator({ locale, catalog, version, serviceNames }: { locale: Locale; catalog: UpholsteryCatalog; version: number; serviceNames: Record<ServiceId, string> }) {
   const c = upholsteryUi[locale], p = upholsteryPremiumCopy[locale];
   const [entries, setEntries] = useState([{ id: 0, value: freshItem() }]);
   const items = useMemo(() => entries.map(entry => entry.value), [entries]);
@@ -201,7 +200,7 @@ export function UpholsteryCalculator({ locale, catalog, version }: { locale: Loc
       <button type="button" className="up-add" disabled={items.length >= 20 || removingId !== null} onClick={addItem}><span aria-hidden="true">+</span>{c.add}<ArrowIcon direction="down-right" /></button>
       <div className="up-form-heading"><span>02</span><h3>{p.visitStep}</h3></div>
       <div className="up-modes" role="group" aria-label={p.visitStep}>{(["STANDALONE", "ADDON"] as const).map(value => <label className={mode === value ? "is-selected" : ""} key={value}><input type="radio" name="mode" value={value} checked={mode === value} onChange={() => setMode(value)} /><span>{value === "STANDALONE" ? c.standalone : c.addon}<small>{value === "STANDALONE" ? p.visitOnlyHint : p.visitAddonHint}</small></span></label>)}</div>
-      {mode === "ADDON" && <div className="up-field-grid up-cleaning"><label><span>{c.service}</span><SelectControl value={service} onChange={e => setService(e.target.value as ServiceId)}>{serviceIds.map(key => <option value={key} key={key}>{siteContent[locale].pricing.serviceNames[key]}</option>)}</SelectControl></label><label><span>{c.area}</span><input type="number" min={1} max={1000} value={area || ""} aria-invalid={area < 1 || area > 1000} onChange={e => setArea(Number(e.target.value))} /></label><p className="up-form-note up-full">{p.combinedNote}</p></div>}
+      {mode === "ADDON" && <div className="up-field-grid up-cleaning"><label><span>{c.service}</span><SelectControl value={service} onChange={e => setService(e.target.value as ServiceId)}>{serviceIds.map(key => <option value={key} key={key}>{serviceNames[key]}</option>)}</SelectControl></label><label><span>{c.area}</span><input type="number" min={1} max={1000} value={area || ""} aria-invalid={area < 1 || area > 1000} onChange={e => setArea(Number(e.target.value))} /></label><p className="up-form-note up-full">{p.combinedNote}</p></div>}
     </fieldset>
     <aside className="up-calc-summary" aria-label={p.summary}>
       <div className="up-receipt">
@@ -210,8 +209,8 @@ export function UpholsteryCalculator({ locale, catalog, version }: { locale: Loc
         <h3>{p.summary}</h3>
         <div className="up-receipt-lines">{calculation?.quote.lines.map((line, i) => <div key={i}><span>{c.types[line.type]}{line.quantity > 1 && ` × ${line.quantity}`}{line.type === "CORNER" && ` · ${items[i].seats} ${c.seats.toLowerCase()}`}</span><strong>{line.from && `${c.from} `}{formatRsd(line.amount, locale)}</strong></div>)}
           {!!calculation?.quote.minimumAdjustment && <div><span>{c.minimumAdjustment}</span><strong>{formatRsd(calculation.quote.minimumAdjustment, locale)}</strong></div>}
-          {mode === "ADDON" && calculation && <div><span>{siteContent[locale].pricing.serviceNames[service]} · {area} m²</span><strong>{formatRsd(calculation.quote.cleaningBase, locale)}</strong></div>}
-          {!!calculation?.quote.roundingAdjustment && <div><span>{({ru:'Округление итога вверх до 100 RSD',sr:'Zaokruživanje ukupnog iznosa naviše na 100 RSD',en:'Total rounded up to 100 RSD'})[locale]}</span><strong>{formatRsd(calculation.quote.roundingAdjustment,locale)}</strong></div>}
+          {!!calculation?.quote.roundingAdjustment && <div><span>{({ru:'Округление до 100 RSD',sr:'Zaokruživanje na 100 RSD',en:'Rounding to 100 RSD'})[locale]}</span><strong>{formatRsd(calculation.quote.roundingAdjustment, locale)}</strong></div>}
+          {mode === "ADDON" && calculation && <div><span>{serviceNames[service]} · {area} m²</span><strong>{formatRsd(calculation.quote.cleaningBase, locale)}</strong></div>}
         </div>
         <div className="up-total" aria-live="polite" aria-atomic="true"><span>{c.total}</span><strong key={calculation?.quote.total}>{calculation && !unsafe ? `${c.from} ${formatRsd(calculation.quote.total, locale)}` : "—"}</strong></div>
         <p className="up-form-note">{p.deliveryNote}</p>

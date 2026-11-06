@@ -2,6 +2,11 @@ import type {AgentLocale, AgentState, HandoffReason} from './contracts';
 import {nextQualification,quoteText} from './conversion-intake';
 import {inputQuestion} from './chat-presentation';
 
+// Owner scope, 2026-11-02: larger apartments always need team agreement.
+export const websiteAutoAreaMinimum = 25;
+export const websiteAutoAreaMaximum = 120;
+export function areaRequiresReview(area:number){return !Number.isFinite(area)||area<websiteAutoAreaMinimum||area>websiteAutoAreaMaximum;}
+
 export const softReasons = ['DISCOUNT','PRICE_REVIEW','CREW_PREFERENCE','ACCESS_REVIEW','PAYMENT_REVIEW','OUTSIDE_SERVICE_AREA','NO_DURATION_RULE','ROUTING_UNRELIABLE'] as const;
 export function reasonLevel(reason:string):'AI_HANDLES'|'SOFT_REVIEW'|'HARD_HANDOFF' {
  if(['NO_SLOTS','AMBIGUOUS'].includes(reason))return 'AI_HANDLES';

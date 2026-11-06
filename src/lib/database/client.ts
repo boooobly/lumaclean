@@ -18,6 +18,9 @@ export function getDatabase() {
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 5_000,
   });
+  // pg emits idle connection failures outside a query promise. Handle them so
+  // a transient disconnect cannot terminate the process handling other leads.
+  pool.on('error', () => console.error(JSON.stringify({msg: 'database_idle_connection_failed'})));
   // Release idle connections before Vercel Fluid suspends this instance.
   attachDatabasePool(pool);
   const adapter = new PrismaPg(pool);
