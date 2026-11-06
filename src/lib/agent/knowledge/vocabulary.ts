@@ -90,6 +90,7 @@ const specific:Record<string,string[]>={
  'UPH-CARPET-001':['низкий ворс','low pile carpet','kratka dlaka','низак флор'],
  'UPH-CARPET-002':['высокий ворс','high pile carpet','duga dlaka','дуга длака'],
  'RULE-PAY-005':['картой','card payment','kartica','картица'],
+ 'RULE-PAY-017':['криптовалюта','криптой','crypto payment','cryptocurrency','kripto','kriptovaluta','криптовалута'],
  'RULE-PAY-006':['фискальный чек','fiscal receipt','fiskalni račun','фискални рачун'],
  'RULE-PAY-004':['банковский перевод','bank transfer','rubles','рубли','bankovni transfer'],
  'RULE-PAY-003':['наличные','евро','cash','euros','gotovina','готовина'],

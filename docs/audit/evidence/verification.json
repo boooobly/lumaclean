@@ -1,0 +1,532 @@
+{
+  "at": "2026-11-01T18:44:13.402Z",
+  "node": "v24.22.2",
+  "sourceFingerprint": "5e8f7456bae22745171e84c0ac5882e1d55640c882f5c5cc7154c515170bdc79",
+  "releaseCertification": {
+    "verified": false,
+    "count": 1150
+  },
+  "productionChanged": false,
+  "aiEnabled": false,
+  "scope": "Actual local PostgreSQL18.6/HTTP and explicitly MOCKED external providers. Historical lab/production observations are labelled separately.",
+  "unit": {
+    "pass": 1057,
+    "fail": 0,
+    "skip": 34
+  },
+  "client": {
+    "pass": 16,
+    "fail": 0,
+    "skip": 0
+  },
+  "adminIntegration": {
+    "pass": 43,
+    "fail": 0,
+    "skip": 2
+  },
+  "financeFresh": {
+    "pass": 15,
+    "fail": 0,
+    "skip": 0
+  },
+  "reliabilityFinal": {
+    "pass": 18,
+    "fail": 0,
+    "skip": 0
+  },
+  "chatHttp": {
+    "pass": 14,
+    "fail": 0,
+    "skip": 0
+  },
+  "aiIsolated": {
+    "pass": 57,
+    "fail": 0,
+    "skip": 0,
+    "native": false,
+    "externalNetworkDenied": true
+  },
+  "aiMigration": {
+    "pass": 1,
+    "fail": 0,
+    "skip": 0
+  },
+  "releaseMigration": {
+    "pass": 1,
+    "fail": 0,
+    "skip": 0
+  },
+  "bootstrap": {
+    "pass": 1,
+    "fail": 0,
+    "skip": 0
+  },
+  "historicalLegacyAi": {
+    "pass": 8,
+    "fail": 46,
+    "skip": 0,
+    "current": false,
+    "reason": "45 failed children +1parent; fixture/gate/contracts corrected; see ai-suite-reconciliation.json"
+  },
+  "pages": {
+    "status": "PASS",
+    "pages": 75,
+    "matrix": 225,
+    "errors": 0,
+    "mocked": true
+  },
+  "forms": {
+    "scenarios": 13,
+    "viewports": 21,
+    "errors": 0,
+    "writesMocked": true
+  },
+  "quantities": {
+    "scope": "MOCKED transport; RU/SR/EN actual UI",
+    "cases": [
+      {
+        "locale": "ru",
+        "boundaries": [
+          0,
+          1,
+          2,
+          100
+        ],
+        "over100Disabled": true,
+        "quantity": 2,
+        "total": 7500,
+        "writesMocked": 1
+      },
+      {
+        "locale": "sr",
+        "boundaries": [
+          0,
+          1,
+          2,
+          100
+        ],
+        "over100Disabled": true,
+        "quantity": 2,
+        "total": 7500,
+        "writesMocked": 1
+      },
+      {
+        "locale": "en",
+        "boundaries": [
+          0,
+          1,
+          2,
+          100
+        ],
+        "over100Disabled": true,
+        "quantity": 2,
+        "total": 7500,
+        "writesMocked": 1
+      }
+    ],
+    "errors": [],
+    "status": "PASS"
+  },
+  "upholstery": "PASS",
+  "chat": {
+    "base": "http://localhost:3100",
+    "mocked": true,
+    "localFix": true,
+    "cases": [
+      {
+        "locale": "ru",
+        "initiallyClosed": 0,
+        "opened": 1,
+        "resumeGets": 1,
+        "replyRestored": true
+      },
+      {
+        "locale": "sr",
+        "initiallyClosed": 0,
+        "opened": 1,
+        "resumeGets": 1,
+        "replyRestored": true
+      },
+      {
+        "locale": "en",
+        "initiallyClosed": 0,
+        "opened": 1,
+        "resumeGets": 1,
+        "replyRestored": true
+      }
+    ]
+  },
+  "databaseChat": {
+    "host": "127.0.0.1",
+    "port": "55449",
+    "database": "/lumaclean_ai_test",
+    "clusterVerified": true,
+    "aiOffNoCallsOrOrders": true,
+    "steamManualReview": true,
+    "snapshots": 40,
+    "queries": 200,
+    "queriesPerSnapshot": 5,
+    "projectedQueriesPerMinuteAt1500ms": 200
+  },
+  "historicalLighthouse": {
+    "source": "local Lighthouse against production, synthetic lab only",
+    "consentBanner": "fresh profile, not hidden or preaccepted",
+    "apiAndTelemetry": "blocked; no form writes",
+    "runs": [
+      {
+        "path": "/ru",
+        "device": "mobile",
+        "exit": 0,
+        "scores": {
+          "performance": 88,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 3188.322,
+        "tbt": 157,
+        "cls": 0
+      },
+      {
+        "path": "/ru",
+        "device": "desktop",
+        "exit": 0,
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 355.121,
+        "tbt": 0,
+        "cls": 0
+      },
+      {
+        "path": "/ru/himchistka-mebeli",
+        "device": "mobile",
+        "exit": 0,
+        "scores": {
+          "performance": 89,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 3629.485,
+        "tbt": 100,
+        "cls": 0
+      },
+      {
+        "path": "/ru/himchistka-mebeli",
+        "device": "desktop",
+        "exit": 0,
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 710.498,
+        "tbt": 0,
+        "cls": 0.00003527712109272393
+      }
+    ],
+    "rerunThisContinuation": false,
+    "fieldINP": "INCONCLUSIVE"
+  },
+  "migrationHistory": [
+    {
+      "name": "20261001090000_admin_foundation",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001100000_audit_immutable",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001120000_crm_core",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001121000_crm_search_indexes",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001150000_admin_scheduling",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001180000_admin_routing",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001193000_admin_finance_duration",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001210000_admin_ai_agent",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261001220000_ai_go_live",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261002110000_live_readiness",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261003130000_address_coordinate_confirmation",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261003160000_hybrid_routing",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261004130000_website_chat_v2",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261004180000_agent_behavior_hardening",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261004200000_customer_channels",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261007170000_historical_import",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261011090000_calendar_repeats",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261011150000_upholstery",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261011153000_item_pricing_basis",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261011180000_simple_upholstery_intake",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261014122500_appliance_catalog",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261014153000_appliance_units",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261018190000_optional_website_lead_name",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261018190100_contact_request_kind",
+      "match": true,
+      "normalization": "raw"
+    },
+    {
+      "name": "20261019220000_website_notification_recipient",
+      "match": true,
+      "normalization": "raw"
+    }
+  ],
+  "schemaObjects": {
+    "productionObjects": 532,
+    "replayObjects": 532,
+    "differences": [],
+    "kinds": {
+      "constraint": 477,
+      "enum": 16,
+      "function": 35,
+      "trigger": 4
+    },
+    "scope": "public functions/procedures, noninternal triggers, enum labels/order, all constraints including PG18 NOT NULL, views and policies; no production data"
+  },
+  "backup": {
+    "status": "PASS",
+    "scope": "Synthetic full backup/restore; not proof of production backup recoverability",
+    "host": "127.0.0.1",
+    "port": 55449,
+    "postgres": "18.6",
+    "sourceDatabase": "lumaclean_ai_test",
+    "targetDatabase": "lumaclean_restore_1793554677123",
+    "tables": 46,
+    "rowsEqual": true,
+    "schemaObjects": 532,
+    "migrationChecksums": 25,
+    "auditImmutable": true,
+    "elapsedSeconds": 1,
+    "archiveSha256": "5e759abdb815f57d53ad6f1ad9dba02b0c6cb46b0fcb301b29a9317381a2e5f8",
+    "productionAccess": false
+  },
+  "staging": {
+    "status": "PASS_LOCAL",
+    "scope": "Actual local HTTP/PG18; external delivery BLOCKED, not mocked as successful",
+    "base": "http://localhost:3108",
+    "identity": {
+      "database": "lumaclean_staging_test",
+      "role": "lumaclean_staging_app"
+    },
+    "sourceFingerprint": "5e8f7456bae22745171e84c0ac5882e1d55640c882f5c5cc7154c515170bdc79",
+    "getStatuses": [
+      {
+        "path": "/ru",
+        "status": 200
+      },
+      {
+        "path": "/sr",
+        "status": 200
+      },
+      {
+        "path": "/en",
+        "status": 200
+      },
+      {
+        "path": "/api/booking-policy",
+        "status": 200
+      },
+      {
+        "path": "/admin/login",
+        "status": 200
+      }
+    ],
+    "auth": true,
+    "inactiveDurationDrafts": [
+      {
+        "service": "regular",
+        "baseMinutes": 120,
+        "active": false
+      },
+      {
+        "service": "deep",
+        "baseMinutes": 360,
+        "active": false
+      }
+    ],
+    "leadIdempotency": true,
+    "linenQuantity": 2,
+    "leadPriceRsd": 7500,
+    "notifications": [
+      {
+        "deliveryState": "PENDING",
+        "count": 1
+      }
+    ],
+    "ordersCreated": 0,
+    "aiServer": false,
+    "aiSettings": {
+      "aiAgentMode": "OFF",
+      "aiChannelModes": {
+        "VIBER": "OFF",
+        "WEBSITE": "OFF",
+        "TELEGRAM": "OFF",
+        "WHATSAPP": "OFF"
+      }
+    },
+    "productionAccess": false
+  },
+  "checks": {
+    "build": true,
+    "typegen": true,
+    "tsc": true,
+    "prismaValidate": true,
+    "lint": true
+  },
+  "ownerDecisions": {
+    "ovenPersonMinutes": 45,
+    "preserve100SquareJump": true,
+    "area": 50,
+    "crew": 2,
+    "normalSoilNoExtras": true,
+    "regularElapsedMinutes": 120,
+    "deepElapsedMinutes": 360,
+    "broaderRulesApproved": false,
+    "productionRulesChanged": false
+  },
+  "openFindings": {
+    "scope": "Remaining after local fixes; production not deployed",
+    "P0": [],
+    "P1": [
+      "LC-03",
+      "LC-05",
+      "LC-06",
+      "LC-07",
+      "LC-14",
+      "LC-15",
+      "LC-22"
+    ],
+    "P2": [
+      "LC-09",
+      "LC-10",
+      "LC-11",
+      "LC-12",
+      "LC-16",
+      "LC-17",
+      "LC-18"
+    ],
+    "gateA": "BLOCKED",
+    "gateB": "BLOCKED",
+    "ownerConfirmed": {
+      "ovenPersonMinutes": 45,
+      "preserve100SquareJump": true,
+      "crew": 2,
+      "area": 50,
+      "normalSoil": true,
+      "regularElapsed": 120,
+      "deepElapsed": 360
+    },
+    "noProductionChanges": true
+  },
+  "gateA": {
+    "status": "BLOCKED",
+    "remaining": [
+      "hosting operational owner confirmation",
+      "remote isolated identity/storage/recipient",
+      "bounded live Queue/Telegram proof",
+      "recovery SLA/receipt",
+      "main ancestry merge and enforced checks",
+      "owner-reviewed exact-head rollout"
+    ]
+  },
+  "gateB": {
+    "status": "BLOCKED",
+    "additional": [
+      "prospective approved duration rules or explicit point50 canary",
+      "native providers/places/routes",
+      "bounded signed live booking proof",
+      "source-bound readiness certification"
+    ]
+  },
+  "nativeLivePassed": false,
+  "newVerifiedPreviewDeployment": null
+}

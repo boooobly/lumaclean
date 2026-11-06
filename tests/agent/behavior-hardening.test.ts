@@ -23,6 +23,14 @@ test('native Preview qualification rejects wrong tools or changed facts and real
  assert.deepEqual(attempts,['NATIVE_QUALIFICATION_INVALID','OK']);assert.equal(result.toolCalls[0].name,'calculatePrice');
  await assert.rejects(qualificationProvider(provider('calculatePrice',{...input,area:80}),input).complete([]),/NATIVE_QUALIFICATION_FACTS_MISMATCH/);
 });
+
+test('native qualification mismatch reports field names only and still rejects the response',async()=>{
+ const before=process.env.VERCEL_ENV,log=console.info,events:string[]=[];
+ const input={service:'regular' as const,area:50,soilLevel:'NORMAL' as const,extras:[],urgent:false};
+ const provider:AIProvider={name:'synthetic',model:'synthetic',complete:async()=>({text:'private response text',toolCalls:[{id:'synthetic',name:'calculatePrice',arguments:JSON.stringify({...input,area:999,urgent:true})}],provider:'synthetic',model:'synthetic',inputTokens:1,cachedInputTokens:0,outputTokens:1,latencyMs:1,estimatedCostUsd:0})};
+ try{process.env.VERCEL_ENV='preview';console.info=(...args)=>events.push(args.join(' '));await assert.rejects(qualificationProvider(provider,input).complete([]),/NATIVE_QUALIFICATION_FACTS_MISMATCH/);assert.deepEqual(JSON.parse(events[0]),{event:'native_qualification_mismatch',provider:'synthetic',fields:['area','urgent']});assert(!events.join('').includes('999'));assert(!events.join('').includes('private response'));}
+ finally{console.info=log;if(before===undefined)delete process.env.VERCEL_ENV;else process.env.VERCEL_ENV=before;}
+});
 for(const [time,allowed] of [['16:59:59',true],['17:00:00',false],['20:00:00',false]] as const) test(`Belgrade same-day at ${time}`,()=>{
   const context=buildAgentTemporalContext(at('16:59:00'),settings,at(time));assert.equal(context.sameDayBookingAllowedNow,allowed);
   const policy=serviceDatePolicy('2026-10-04',settings,at(time));assert.equal('error' in policy,!allowed);if(!allowed)assert.equal(policy.earliestDate,'2026-10-05');

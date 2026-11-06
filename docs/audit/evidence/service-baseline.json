@@ -1,0 +1,671 @@
+{
+  "checkedAt": "2026-11-01T11:17:47.713Z",
+  "main": {
+    "sha": "22b58184e0fdb0242ec5d2ae9d0e3b8850411fa2",
+    "protected": false,
+    "checks": {
+      "enforcement_level": "off",
+      "contexts": [],
+      "checks": []
+    }
+  },
+  "gitBranches": [
+    {
+      "name": "codex/admin-ai-agent",
+      "sha": "3ef27a618f8e122240ab65c01a8dab8e8892f4c5",
+      "protected": false
+    },
+    {
+      "name": "codex/admin-ai-go-live",
+      "sha": "48b942f448460ca47bb18686a92cd1737ae08629",
+      "protected": false
+    },
+    {
+      "name": "codex/admin-crm-core",
+      "sha": "4ab5a1d1c073b8f5e74ccc07bdb0f2980a34a472",
+      "protected": false
+    },
+    {
+      "name": "codex/admin-customer-channels",
+      "sha": "b561300c24ed722556cf625862c46a9bbf1aaa0b",
+      "protected": false
+    },
+    {
+      "name": "codex/admin-finance-duration",
+      "sha": "ce8eb7bb8b81333507af5e330a64fc38026c3d09",
+      "protected": false
+    },
+    {
+      "name": "codex/admin-foundation",
+      "sha": "a07d4a49f3ea7ba13d6b09cc06f690e0174b0751",
+      "protected": false
+    },
+    {
+      "name": "codex/admin-live-readiness",
+      "sha": "b27ee64b361b163b1b24392168471f87b75ac88e",
+      "protected": false
+    },
+    {
+      "name": "codex/admin-messenger-ux",
+      "sha": "3555a560a9c77288908ec3734e3d73bd0a11919f",
+      "protected": false
+    },
+    {
+      "name": "codex/admin-motis-routing",
+      "sha": "ec48f78a125524279f20c0e74f717b1759ec1474",
+      "protected": false
+    },
+    {
+      "name": "codex/admin-routing-optimizer",
+      "sha": "162cf6cfa6374cb03c6d520e2285ae04392c7db0",
+      "protected": false
+    },
+    {
+      "name": "codex/admin-scheduling",
+      "sha": "6dde79a0644ae1bfe02c7e57c0c9f150a3356148",
+      "protected": false
+    },
+    {
+      "name": "codex/agent-autonomy-optimization",
+      "sha": "5c3ae6878f89ff89fdc1d79acbbe34f8e154bcae",
+      "protected": false
+    },
+    {
+      "name": "codex/agent-behavior-hardening",
+      "sha": "b8cec6f8984cfcd53befa980c99ac9ab66a5e374",
+      "protected": false
+    },
+    {
+      "name": "codex/agent-business-knowledge",
+      "sha": "c91c5e7e3ebf6556ebf1abeff6a8690c47c43166",
+      "protected": false
+    },
+    {
+      "name": "codex/agent-conversation-reliability",
+      "sha": "386b13a5412c08de72b38034ba49ca3af03367e4",
+      "protected": false
+    },
+    {
+      "name": "codex/agent-conversion-hardening",
+      "sha": "1fa023cb5a46cc882a038f22be9f7aa37160395c",
+      "protected": false
+    },
+    {
+      "name": "codex/agent-llm-first-benchmark",
+      "sha": "eeeeae321daa882ce7aab024c0e7c3b181dcff83",
+      "protected": false
+    },
+    {
+      "name": "codex/calendar-copy-recurring",
+      "sha": "61cc2382f68a512ed94117ecc97b586d899647e9",
+      "protected": false
+    },
+    {
+      "name": "codex/chat-consultation-refusal",
+      "sha": "fca2f19f106795718c926a33b601cca9fb449be7",
+      "protected": false
+    },
+    {
+      "name": "codex/chat-dialog-regressions",
+      "sha": "eca2f60a6bf53cff0b137ad71f0ab12b133a32a6",
+      "protected": false
+    },
+    {
+      "name": "codex/conversation-continuity-mobile-home",
+      "sha": "07b1f2964a6b3c97762bda33410f3b69939e3096",
+      "protected": false
+    },
+    {
+      "name": "codex/conversion-ux",
+      "sha": "70b5d341c7177f7950f57f1200127e42d1332b4f",
+      "protected": false
+    },
+    {
+      "name": "codex/crm-calendar-lifecycle",
+      "sha": "da95d5b1e2f15f87ba2e27304819c12d03e8ff8c",
+      "protected": false
+    },
+    {
+      "name": "codex/historical-data-import",
+      "sha": "51fed27b8ee4b3d8c3fded9406225b054c03d1d9",
+      "protected": false
+    },
+    {
+      "name": "codex/homepage-focused-ux",
+      "sha": "8b2f39ff85b1fce028e850acc653e5d8ef14e0a9",
+      "protected": false
+    },
+    {
+      "name": "codex/lumaclean-release-candidate",
+      "sha": "5c4e98d4065af12fec51b31293cc27c35756a5fd",
+      "protected": false
+    },
+    {
+      "name": "codex/mobile-home-privacy-toggle",
+      "sha": "64ad565ec82b274b11133a23222044c887a977fa",
+      "protected": false
+    },
+    {
+      "name": "codex/pricing-discovery-consistency",
+      "sha": "f2530618185177b5e04927c28550ff49a3efb14f",
+      "protected": false
+    },
+    {
+      "name": "codex/public-pages-release-20261027",
+      "sha": "574d0550682032f0c7bbc129cb20f924f2f34996",
+      "protected": false
+    },
+    {
+      "name": "codex/reliability-hardening",
+      "sha": "0fa99d9e872f214d45f00bafddef3f60d750783a",
+      "protected": false
+    },
+    {
+      "name": "codex/seo-lead-consistency",
+      "sha": "882ea6771098fa4f68c1ada9c95a48f019338bc6",
+      "protected": false
+    },
+    {
+      "name": "codex/telegram-handoff",
+      "sha": "e056683cdf93a088e27d52afa4bd7436d4b90a2d",
+      "protected": false
+    },
+    {
+      "name": "codex/update-existing-pricing",
+      "sha": "8173126ece23d731f1ddbcb615f16b42a0e622c7",
+      "protected": false
+    },
+    {
+      "name": "codex/update-window-pricing",
+      "sha": "83ec330d7474fc0b320d8abc2fa6504b8852205d",
+      "protected": false
+    },
+    {
+      "name": "codex/upholstery-cleaning",
+      "sha": "c7560f2d3031e4e2d37cf84da46e943c97fdb822",
+      "protected": false
+    },
+    {
+      "name": "codex/upholstery-premium-page",
+      "sha": "5510ef68513fe410c23136d363a905d91fbd5b6c",
+      "protected": false
+    },
+    {
+      "name": "codex/voice-agent-staging",
+      "sha": "10625b213c8e27ad217aefb0f73663123ac3b9ae",
+      "protected": false
+    },
+    {
+      "name": "codex/website-ai-replies",
+      "sha": "be1fb3f6717da7ef6eac0e29aadb1007aa9377ed",
+      "protected": false
+    },
+    {
+      "name": "codex/website-chat-v2",
+      "sha": "6d830a5980d2d15adc111ac8359944ed9ae3dd9c",
+      "protected": false
+    },
+    {
+      "name": "codex/whatsapp-go-live",
+      "sha": "951b4f5819b1b700d67d3864db65490087eef8d9",
+      "protected": false
+    },
+    {
+      "name": "main",
+      "sha": "22b58184e0fdb0242ec5d2ae9d0e3b8850411fa2",
+      "protected": false
+    }
+  ],
+  "production": {
+    "id": "dpl_3xJJgmzsGJG79fp2Jtsin7fKVEHH",
+    "name": "lumaclean",
+    "url": "lumaclean-9n6g1f3u3-vladislavs-projects-0eae0ea3.vercel.app",
+    "type": "LAMBDAS",
+    "state": "READY",
+    "createdAt": 1793470901834,
+    "project": {
+      "id": "prj_Q4nkQeWNwBIFz1AsthDvyEeJ5BeZ",
+      "name": "lumaclean",
+      "framework": "nextjs"
+    },
+    "meta": {
+      "githubCommitRef": "codex/public-pages-release-20261027",
+      "githubCommitSha": "544da114d0a129e9dd9c0f73c047a574af776fd6",
+      "githubCommitMessage": "Document blocked release and Vercel production outage",
+      "githubRepo": "lumaclean",
+      "githubOrg": "boooobly"
+    },
+    "alias": [
+      "lumacleanrs.com",
+      "lumaclean-dusky.vercel.app",
+      "www.lumacleanrs.com",
+      "lumaclean-vladislavs-projects-0eae0ea3.vercel.app"
+    ],
+    "target": "production",
+    "regions": [
+      "iad1"
+    ],
+    "buildingAt": 1793470902740,
+    "ready": 1793471031621,
+    "readyState": "READY",
+    "aliasError": null
+  },
+  "neonBranches": [
+    {
+      "id": "br-noisy-bar-b8vmyqyi",
+      "name": "main",
+      "state": "ready",
+      "protected": false,
+      "initSource": "parent-data"
+    },
+    {
+      "id": "br-jolly-cherry-b8tu1iod",
+      "name": "homepage-focused-ux-test-20261018",
+      "state": "ready",
+      "protected": false,
+      "parent": "br-noisy-bar-b8vmyqyi",
+      "initSource": "parent-data"
+    },
+    {
+      "id": "br-wandering-recipe-b8fpwhv0",
+      "name": "pricing-update-20261017",
+      "state": "archived",
+      "protected": false,
+      "parent": "br-noisy-bar-b8vmyqyi",
+      "initSource": "parent-data"
+    },
+    {
+      "id": "br-rough-bread-b8y7ehd6",
+      "name": "lumaclean-release-candidate-20261019",
+      "state": "ready",
+      "protected": false,
+      "parent": "br-jolly-cherry-b8tu1iod",
+      "initSource": "parent-data"
+    },
+    {
+      "id": "br-dawn-king-b8i78o5a",
+      "name": "website-chat-v2-preview",
+      "state": "archived",
+      "protected": false,
+      "parent": "br-noisy-bar-b8vmyqyi",
+      "initSource": "parent-data"
+    },
+    {
+      "id": "br-muddy-fire-b8q2d6uo",
+      "name": "preview",
+      "state": "archived",
+      "protected": false,
+      "parent": "br-noisy-bar-b8vmyqyi",
+      "initSource": "parent-data"
+    },
+    {
+      "id": "br-plain-river-b8h574cr",
+      "name": "pre-pr25-production-backup-20261021",
+      "state": "ready",
+      "protected": false,
+      "parent": "br-noisy-bar-b8vmyqyi",
+      "initSource": "parent-data"
+    },
+    {
+      "id": "br-summer-glitter-b89088wc",
+      "name": "pr25-release-rehearsal-20261020",
+      "state": "ready",
+      "protected": false,
+      "parent": "br-bold-pond-b8x16yq8",
+      "initSource": "parent-data"
+    },
+    {
+      "id": "br-bold-pond-b8x16yq8",
+      "name": "pre-pr25-production-backup-20261020",
+      "state": "ready",
+      "protected": false,
+      "parent": "br-noisy-bar-b8vmyqyi",
+      "initSource": "parent-data"
+    },
+    {
+      "id": "br-sweet-flower-b8e9l9ut",
+      "name": "development",
+      "state": "archived",
+      "protected": false,
+      "parent": "br-muddy-fire-b8q2d6uo",
+      "initSource": "parent-data"
+    }
+  ],
+  "settings": [
+    {
+      "aiAgentMode": "AUTO",
+      "aiChannelModes": {
+        "VIBER": "OFF",
+        "WEBSITE": "AUTO",
+        "TELEGRAM": "OFF",
+        "WHATSAPP": "OFF"
+      },
+      "aiCanary": true,
+      "aiAllowedServices": [
+        "regular",
+        "deep"
+      ],
+      "aiDiagnosticsAt": "2026-10-25T19:04:16.284Z",
+      "hasLiveProof": true
+    }
+  ],
+  "extras": [
+    {
+      "code": "balcony",
+      "active": true,
+      "unitPrice": "1200.00"
+    },
+    {
+      "code": "cabinets",
+      "active": true,
+      "unitPrice": "500.00"
+    },
+    {
+      "code": "dishwasher",
+      "active": true,
+      "unitPrice": "1000.00"
+    },
+    {
+      "code": "fridge",
+      "active": true,
+      "unitPrice": "1000.00"
+    },
+    {
+      "code": "hood",
+      "active": true,
+      "unitPrice": "1000.00"
+    },
+    {
+      "code": "ironing",
+      "active": true,
+      "unitPrice": "900.00"
+    },
+    {
+      "code": "largeWindow",
+      "active": true,
+      "unitPrice": "1000.00"
+    },
+    {
+      "code": "linen",
+      "active": true,
+      "unitPrice": "750.00"
+    },
+    {
+      "code": "microwave",
+      "active": true,
+      "unitPrice": "700.00"
+    },
+    {
+      "code": "oven",
+      "active": true,
+      "unitPrice": "1400.00"
+    },
+    {
+      "code": "petHair",
+      "active": true,
+      "unitPrice": "900.00"
+    },
+    {
+      "code": "standardWindow",
+      "active": true,
+      "unitPrice": "700.00"
+    },
+    {
+      "code": "steam",
+      "active": true,
+      "unitPrice": "2800.00"
+    },
+    {
+      "code": "washingMachine",
+      "active": true,
+      "unitPrice": "1000.00"
+    }
+  ],
+  "migrations": [
+    {
+      "migrations": "25",
+      "unfinished": "0"
+    }
+  ],
+  "aiActivity": [
+    {
+      "model_calls_since_deploy": "0",
+      "last_model_call": "2026-10-23T18:01:42.977Z",
+      "delivered_ai_since_deploy": "0"
+    }
+  ],
+  "activePriceBands": [
+    {
+      "code": "airbnb",
+      "minArea": "0.00",
+      "maxArea": "40.00",
+      "fixedPrice": "4900.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "airbnb",
+      "minArea": "40.00",
+      "maxArea": "60.00",
+      "fixedPrice": "5800.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "airbnb",
+      "minArea": "60.00",
+      "maxArea": "80.00",
+      "fixedPrice": "7400.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "airbnb",
+      "minArea": "80.00",
+      "maxArea": "100.00",
+      "fixedPrice": "9000.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "airbnb",
+      "minArea": "100.00",
+      "maxArea": null,
+      "fixedPrice": null,
+      "pricePerSquare": "90.00",
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "deep",
+      "minArea": "0.00",
+      "maxArea": "40.00",
+      "fixedPrice": "9900.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "deep",
+      "minArea": "40.00",
+      "maxArea": "60.00",
+      "fixedPrice": "11400.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "deep",
+      "minArea": "60.00",
+      "maxArea": "80.00",
+      "fixedPrice": "14200.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "deep",
+      "minArea": "80.00",
+      "maxArea": "100.00",
+      "fixedPrice": "17000.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "deep",
+      "minArea": "100.00",
+      "maxArea": null,
+      "fixedPrice": null,
+      "pricePerSquare": "180.00",
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "move",
+      "minArea": "0.00",
+      "maxArea": "40.00",
+      "fixedPrice": "10700.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "move",
+      "minArea": "40.00",
+      "maxArea": "60.00",
+      "fixedPrice": "12800.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "move",
+      "minArea": "60.00",
+      "maxArea": "80.00",
+      "fixedPrice": "15600.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "move",
+      "minArea": "80.00",
+      "maxArea": "100.00",
+      "fixedPrice": "18400.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "move",
+      "minArea": "100.00",
+      "maxArea": null,
+      "fixedPrice": null,
+      "pricePerSquare": "180.00",
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "office",
+      "minArea": "0.00",
+      "maxArea": "40.00",
+      "fixedPrice": "4900.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "office",
+      "minArea": "40.00",
+      "maxArea": "60.00",
+      "fixedPrice": "5800.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "office",
+      "minArea": "60.00",
+      "maxArea": "80.00",
+      "fixedPrice": "7400.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "office",
+      "minArea": "80.00",
+      "maxArea": "100.00",
+      "fixedPrice": "9000.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "office",
+      "minArea": "100.00",
+      "maxArea": null,
+      "fixedPrice": null,
+      "pricePerSquare": "90.00",
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "regular",
+      "minArea": "0.00",
+      "maxArea": "40.00",
+      "fixedPrice": "4900.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "regular",
+      "minArea": "40.00",
+      "maxArea": "60.00",
+      "fixedPrice": "6000.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "regular",
+      "minArea": "60.00",
+      "maxArea": "80.00",
+      "fixedPrice": "8200.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "regular",
+      "minArea": "80.00",
+      "maxArea": "100.00",
+      "fixedPrice": "9800.00",
+      "pricePerSquare": null,
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    },
+    {
+      "code": "regular",
+      "minArea": "100.00",
+      "maxArea": null,
+      "fixedPrice": null,
+      "pricePerSquare": "98.00",
+      "validFrom": "2026-10-17T20:37:43.900Z",
+      "validUntil": null
+    }
+  ],
+  "drains": {
+    "result": {
+      "drains": []
+    }
+  },
+  "aiEnabledFlag": "NOT_READABLE_VERCEL_SENSITIVE",
+  "aiAutoReady": false
+}

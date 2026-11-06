@@ -3,10 +3,16 @@ import {readFileSync,readdirSync} from 'node:fs';
 import {randomUUID} from 'node:crypto';
 import {Client} from 'pg';
 import test from 'node:test';
+import {localClusterDirectory} from '../../scripts/release-readiness/environment.mjs';
 const url=process.env.AI_TEST_DATABASE_URL;
 test('additive AI migration preserves finance-era CRM and conversation history',{skip:!url},async()=>{
-  const parsed=new URL(url!);assert.equal(parsed.hostname,'127.0.0.1');assert.equal(parsed.port,'55439');assert.equal(parsed.pathname,'/lumaclean_ai_test');
-  const name='lumaclean_ai_migration_'+randomUUID().replaceAll('-','');const control=new Client({connectionString:url});await control.connect();await control.query(`CREATE DATABASE ${name}`);await control.end();parsed.pathname='/'+name;
+  const parsed=new URL(url!);assert.equal(parsed.hostname,'127.0.0.1');assert.equal(parsed.port,process.env.LUMACLEAN_LOCAL_PG18==='true'?'55449':'55439');assert.equal(parsed.pathname,'/lumaclean_ai_test');
+  const name='lumaclean_ai_migration_'+randomUUID().replaceAll('-','');const control=new Client({connectionString:url});await control.connect();
+  if(process.env.LUMACLEAN_LOCAL_PG18==='true'){
+    assert.equal((await control.query('SHOW data_directory')).rows[0].data_directory.replaceAll('\\','/').toLowerCase(),localClusterDirectory().replaceAll('\\','/').toLowerCase());
+    assert(Number((await control.query('SHOW server_version_num')).rows[0].server_version_num)>=180000);
+  }
+  await control.query(`CREATE DATABASE ${name}`);await control.end();parsed.pathname='/'+name;
   const db=new Client({connectionString:parsed.toString()});await db.connect();
   try{
     const target='20261001210000_admin_ai_agent';for(const d of readdirSync('prisma/migrations').filter(d=>/^\d/.test(d)&&d<target).sort())await db.query(readFileSync(`prisma/migrations/${d}/migration.sql`,'utf8'));

@@ -63,12 +63,12 @@ export function AgentModeControl({
         </button>
       )}
       <div>
-        <label htmlFor="ai-mode">AI-ответы включены</label>
+        <label htmlFor="ai-mode">Режим AI</label>
         <p className="crm-hint">
           {enabled
             ? "Серверный переключатель включён"
             : "Серверный AI_AGENT_ENABLED выключен"}{" "}
-          · Текущий режим: {mode}
+          · Сохранённый режим: {mode}
         </p>
       </div>
       <select

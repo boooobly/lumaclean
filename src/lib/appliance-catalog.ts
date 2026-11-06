@@ -1,5 +1,7 @@
 /** Owner-authorized prospective tariff. Existing order/finance snapshots are immutable. */
 export const applianceCodes = ['fridge','oven','microwave','hood','dishwasher','washingMachine'] as const;
+// Owner approval, 2026-11-01: one standard oven, one worker. New rule drafts only.
+export const ovenWorkMinutes = 45;
 export type ApplianceCode = typeof applianceCodes[number];
 export const appliancePrices: Record<ApplianceCode, number> = {
  fridge:1000, oven:1400, microwave:700, hood:1000, dishwasher:1000, washingMachine:1000,

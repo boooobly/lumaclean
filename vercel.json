@@ -1,6 +1,6 @@
 {
   "installCommand": "npm ci",
-  "git": {"deploymentEnabled": {"codex/full-product-audit-20261101": false, "codex/production-baseline-sync-20261101": false}},
+  "git": {"deploymentEnabled": false},
   "functions": {
     "src/app/api/queues/notifications/route.ts": {
       "experimentalTriggers": [{"type":"queue/v2beta","topic":"lumaclean-notifications","retryAfterSeconds":200}]
@@ -9,5 +9,9 @@
       "experimentalTriggers": [{"type":"queue/v2beta","topic":"lumaclean-agent","retryAfterSeconds":200}]
     }
   },
-  "crons": [{"path":"/api/agent/recover","schedule":"0 6 * * *"}]
+  "crons": [
+    {"path":"/api/agent/recover","schedule":"0 6 * * *"},
+    {"path":"/api/notifications/recover","schedule":"*/5 * * * *"},
+    {"path":"/api/agent/health","schedule":"*/30 * * * *"}
+  ]
 }

@@ -58,7 +58,9 @@ for(const tab of [2,3])for(const r of rows(tab)){
 }
 const packages:Record<string,string>={REG:'regular',DEEP:'deep',MOVE:'move',AIRBNB:'airbnb',OFFICE:'office'};
 for(const r of rows(6)){
- const c=r.cells,key=packages[value(c[0])];if(!key)throw new Error('Unknown package');
+ // Only the five implemented package codes may acquire calculator/booking permissions.
+ // Additional sheet aliases remain enquiries, never implicit runtime services.
+ const c=r.cells,key=packages[value(c[0])];if(!key)continue;
  const e=entry(`PACKAGE-${value(c[0])}`,value(c[1]),'cleaning',6,r.row);
  e.runtimeCode=key;e.unit='м² / диапазон площади';e.includes=clean(c[4]);e.excludes=clean(c[5]);e.restrictions=clean(c[7]);e.appliesTo=[key];e.managerReview=false;e.autoCalculate=true;e.autoBook=true;e.standalone='YES';
  e.includes=e.includes.replace(/ и 15 мин/gu,'').replace(/Ожидание машины[^.]*\./gu,'Ожидание завершения стирки и дополнительный визит согласуются заранее.');
@@ -81,6 +83,7 @@ for(const r of rows(5)){
 // Public interpretations of approved rules. Excludes labour norms, buffers, economics and inactive draft fees.
 const rules:Record<string,string>={
  'RULE-GENERAL-001':'Цены указаны в RSD. Итог заказа рассчитывается сервером по подтверждённому составу работ.',
+ 'RULE-GENERAL-008':'Итоговая смета округляется вверх до 100 RSD один раз после всех согласованных работ и надбавок. Промежуточные позиции отдельно не округляются.',
  'RULE-GENERAL-009':'Один стандартный полный санузел включён в базовую уборку. Дополнительный полный санузел: поддерживающая 1 200 RSD, генеральная 2 500 RSD. Итог с таким дополнением согласуется отдельно.',
  'RULE-GENERAL-010':'Одна стандартная кухня входит в пакет; внутренности техники и шкафов оплачиваются отдельно.',
  'RULE-GENERAL-011':'Стандартные спальни входят в пределах оплаченной площади и обычного состояния квартиры.',
@@ -119,6 +122,9 @@ const rules:Record<string,string>={
  'RULE-PAY-014':'Удаление плесени, последствия затопления и опасные загрязнения не оказываем.',
  'RULE-PAY-015':'Послеремонтную уборку сейчас не оказываем. Уборка при переезде предназначена для пустой квартиры в обычном бытовом состоянии, не для строительной пыли и мусора.',
  'RULE-PAY-016':'Полное удаление всех пятен и запахов не гарантируем. Для химчистки проверяем ткань, маркировку и устойчивость цвета; совместимость и окончательную цену согласует менеджер. Точный срок высыхания без проверки условий не обещаем.',
+ 'RULE-PAY-017':'Оплата криптовалютой доступна по согласованию с надбавкой 5%. Актив, сеть и окончательную сумму подтверждает команда до оплаты. Это не автоматическое подтверждение платежа.',
+ 'RULE-PAY-018':'При выборе криптовалюты применяется 5% после единой надбавки за срочность или праздник. При других способах оплаты эта надбавка не применяется. Итог согласует команда.',
+ 'RULE-PAY-022':'Срочность и праздник вместе дают одну надбавку 20%. Затем при криптооплате применяется 5%: общий множитель 1.26. Округление итоговой суммы вверх до 100 RSD выполняется один раз. Праздник и криптооплату согласует команда: стандартный калькулятор их автоматически не учитывает.',
 };
 for(const [code,description] of Object.entries(rules)){
  const r=rows(4).find(x=>x.cells[0]===code);if(!r)throw new Error(`Missing rule ${code}`);

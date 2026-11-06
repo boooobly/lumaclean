@@ -1,0 +1,12 @@
+{
+  "productionObjects": 532,
+  "replayObjects": 532,
+  "differences": [],
+  "kinds": {
+    "constraint": 477,
+    "enum": 16,
+    "function": 35,
+    "trigger": 4
+  },
+  "scope": "public functions/procedures, noninternal triggers, enum labels/order, all constraints including PG18 NOT NULL, views and policies; no production data"
+}

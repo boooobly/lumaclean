@@ -11,6 +11,7 @@ export const quantityExtras = [
   "hood",
   "dishwasher",
   "washingMachine",
+  "linen",
 ] as const;
 export type ExtraCode = keyof typeof extrasPrices;
 export type ExtraQuantity = { code: ExtraCode; quantity: number };

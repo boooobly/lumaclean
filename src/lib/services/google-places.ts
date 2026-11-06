@@ -6,6 +6,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { CrmError } from "@/lib/domain/crm";
 import { routingTelemetry } from "@/lib/infrastructure/google-routing";
+import {nativeTestFetch} from './native-test-budget';
 export function adminAddressSearchQueries(input: string) {
   const original = input.normalize("NFC").trim();
   const latin = original.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -189,7 +190,7 @@ export async function placesRequest(
     };
   try {
     routingTelemetry("places_requests");
-    const response = await fetch(
+    const response = await nativeTestFetch(
       kind === "autocomplete"
         ? "https://places.googleapis.com/v1/places:autocomplete"
         : "https://places.googleapis.com/v1/places/" +

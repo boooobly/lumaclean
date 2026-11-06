@@ -1,4 +1,5 @@
 import { z } from "zod";
+import {nativeTestFetch} from '@/lib/services/native-test-budget';
 import { AgentError, type ToolName, nativeTools } from "./contracts";
 
 export type ToolCall = {id:string;name:ToolName;arguments:string};
@@ -56,7 +57,7 @@ export function normalizeCompletion(provider:string,model:string,protocol:"chat"
 }
 abstract class HTTPProvider implements AIProvider {
   abstract readonly name:string;
-  constructor(readonly model:string,protected key:string,protected send:typeof fetch=fetch,protected rates?:{input:number;output:number}){}
+  constructor(readonly model:string,protected key:string,protected send:typeof fetch=nativeTestFetch,protected rates?:{input:number;output:number}){}
   protected async request(url:string,body:unknown,protocol:"chat"|"responses",signal?:AbortSignal){
     if(!this.key)throw new AgentError("PROVIDER_UNCONFIGURED");
     const started=Date.now();
@@ -93,6 +94,6 @@ export function configuredProviders():[AIProvider,AIProvider]{
     if(!model||!['openrouter','poyo'].includes(provider??""))throw new AgentError("PROVIDER_UNCONFIGURED");
     const input=Number(process.env[`${prefix}_AGENT_INPUT_USD_PER_MILLION`]),output=Number(process.env[`${prefix}_AGENT_OUTPUT_USD_PER_MILLION`]);
     const rates=Number.isFinite(input)&&Number.isFinite(output)&&input>=0&&output>=0?{input,output}:undefined;
-    return provider==="poyo"?new PoyoProvider(model,process.env.POYO_API_KEY??"",fetch,rates):new OpenRouterProvider(model,process.env.OPENROUTER_API_KEY??"",fetch,rates);
+    return provider==="poyo"?new PoyoProvider(model,process.env.POYO_API_KEY??"",nativeTestFetch,rates):new OpenRouterProvider(model,process.env.OPENROUTER_API_KEY??"",nativeTestFetch,rates);
   };return[make("PRIMARY"),make("FALLBACK")];
 }

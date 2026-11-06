@@ -6,3 +6,8 @@
 *.webp binary
 *.mp4 binary
 *.xlsx binary
+
+# Preserve the exact bytes of already applied migrations (including historical mixed EOL).
+prisma/migrations/20261001090000_admin_foundation/migration.sql -text whitespace=trailing-space,space-before-tab,cr-at-eol
+prisma/migrations/20261001210000_admin_ai_agent/migration.sql -text whitespace=trailing-space,space-before-tab,cr-at-eol
+prisma/migrations/20261003130000_address_coordinate_confirmation/migration.sql -text whitespace=trailing-space,space-before-tab,cr-at-eol

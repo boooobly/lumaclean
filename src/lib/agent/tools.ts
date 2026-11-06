@@ -4,7 +4,7 @@ import { Prisma, type PrismaClient, type Conversation, type AgentMode } from "@/
 import { siteContent } from "@/lib/content";
 import {calculateUpholstery,upholsteryCatalogSchema} from '@/lib/upholstery';
 import {upholsteryBookingIntent} from '@/lib/upholstery-intent';
-import {reasonLevel,noSlotsText,transientReadFailure} from './autonomy';
+import {reasonLevel,noSlotsText,transientReadFailure,areaRequiresReview,websiteAutoAreaMinimum,websiteAutoAreaMaximum} from './autonomy';
 import { quote, priceSnapshot } from "@/lib/domain/crm-pricing";
 import { normalizedPhone, localInput, localInstant } from "@/lib/domain/crm";
 import { estimateDuration } from "@/lib/domain/duration";
@@ -67,7 +67,7 @@ async function activePrice(tx:Tx,state:AgentState,c:Conversation,input:ReturnTyp
   const calculated=quote(input.service,input.area,selected,input.urgent),discount=Number(client?.discountPercent??0);
   if(calculated.extras.some(e=>!catalog.some(item=>item.code===e.code&&Number(item.unitPrice)===e.unitPrice)))throw new AgentError('PRICE_CATALOG_MISMATCH');
   const snapshot=priceSnapshot(calculated.total,discount,null,null);
-  const requiresHumanReview=["HEAVY","EXTREME"].includes(input.soilLevel)||selected.some(e=>["largeWindow","steam"].includes(e.code))||(state.draftFacts?.bathroomCount??1)>1||!!state.knowledgeRequests?.length;
+  const requiresHumanReview=areaRequiresReview(input.area)||["HEAVY","EXTREME"].includes(input.soilLevel)||selected.some(e=>["largeWindow","steam"].includes(e.code))||(state.draftFacts?.bathroomCount??1)>1||!!state.knowledgeRequests?.length;
   void state;
   return{service,calculated,snapshot,requiresHumanReview};
 }
@@ -122,6 +122,7 @@ async function checkedSlot(tx:Tx,c:Conversation,ctx:ToolContext,token:string){
   const slot=await tx.agentSlot.findFirst({where:{id:token,conversationId:c.id}});
   if(!slot||slot.expiresAt.getTime()<Date.now()||slot.fingerprint!==slotFingerprint(ctx.state))throw new AgentError("SLOT_NO_LONGER_AVAILABLE");
   if(slot.usedAt)return slot;
+  if(ctx.state.quote&&areaRequiresReview(ctx.state.quote.input.area))throw new AgentError('PRICE_REVIEW');
   const window=ctx.state.requestedWindow!;
   const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}});
   const datePolicy=serviceDatePolicy(window.date,settings);
@@ -311,6 +312,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
       faq:payment.map(e=>({q:e.name,a:e.description})),
       search:'Use searchBusinessKnowledge for the specific current question: full extras, upholstery, package scope and business rules. This overview is not an order quote.',
       sameDayPolicy:{cutoffMinute:settings.sameDayBookingCutoffMinute,latestDepartureMinute:settings.latestCleanerDepartureMinute,timezone:settings.timezone,surchargePercent:20,requiresRealAvailability:true},
+      areaPolicy:{minimumAuto:websiteAutoAreaMinimum,maximumAuto:websiteAutoAreaMaximum,rule:'Above120square metres requires team agreement. Give only a preliminary estimate, request price review and do not confirm a booking. Duration and actual crew availability remain mandatory within the automatic range.'},
       applianceScope:applianceScope[lang],
       discounts:{publicPromotionConfirmed:false,rule:'No automatic universal discount; individual written agreement. Only server-verified client terms apply to quotes.'},
       access:{confirmedHandoverProcess:false,rule:'Key transfer/storage requires prior agreement; never invent custody or drop-off.'},
@@ -427,7 +429,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
     const settings=await tx.businessSettings.findUniqueOrThrow({where:{id:'default'}}),date=state.draftFacts?.requestedDate??state.requestedWindow?.date;
     if(date){const policy=serviceDatePolicy(date,settings);if('error' in policy)return policy;alternative.urgent=policy.urgent;}else alternative.urgent=false;
     const pricing=await activePrice(tx,state,c,alternative);
-    const q={...state.quote,input:alternative,base:pricing.calculated.base,total:pricing.snapshot.finalPrice,discountPercent:pricing.snapshot.discountPercent,requiresHumanReview:state.quote.requiresHumanReview||!!state.quote.pendingReviewItems?.length,breakdown:pricing.calculated.extras.map(e=>({...e,amount:e.quantity*e.unitPrice}))};
+    const q={...state.quote,input:alternative,base:pricing.calculated.base,total:pricing.snapshot.finalPrice,discountPercent:pricing.snapshot.discountPercent,requiresHumanReview:pricing.requiresHumanReview||state.quote.requiresHumanReview||!!state.quote.pendingReviewItems?.length,breakdown:pricing.calculated.extras.map(e=>({...e,amount:e.quantity*e.unitPrice}))};
     ctx.factAmounts=[q.base,q.total,...q.breakdown.flatMap(e=>[e.unitPrice,e.amount])];
     return{quote:q,hypothetical:true,changedSelections:false};
   }
@@ -460,6 +462,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
   }
   if(name==="estimateDuration"){
     if(!state.quote)return{error:"QUOTE_REQUIRED"};
+    if(areaRequiresReview(state.quote.input.area))return{error:'PRICE_REVIEW',requiresHumanReview:true,message:'This area needs team agreement; do not offer or confirm an automatic booking.'};
     const rules=await tx.durationRule.findMany({where:{serviceId:state.quote.serviceId,active:true},orderBy:{cleanerCount:"asc"}});
     let result:ReturnType<typeof estimateDuration>=null,crew=0;
     for(const count of [...new Set(rules.map(r=>r.cleanerCount))]){
@@ -503,7 +506,7 @@ async function dispatch(tx:Tx,c:Conversation,ctx:ToolContext,name:ToolName,paylo
       ctx.responseText=c.locale==='ru'?`На выбранную дату цена составит ${state.quote.total} RSD${input.urgent?' с доплатой 20% за сегодня':''}. Проверить свободное время?`:c.locale==='en'?`The price for that date is ${state.quote.total} RSD${input.urgent?' including the 20% same-day surcharge':''}. Shall I check availability?`:c.locale==='sr-Cyrl'?`Цена за тај датум је ${state.quote.total} RSD${input.urgent?' са доплатом 20% за данас':''}. Да проверим термине?`:`Cena za taj datum je ${state.quote.total} RSD${input.urgent?' sa doplatom 20% za danas':''}. Da proverim termine?`;
       return{error:'URGENT_REPRICE_REQUIRED',quote:state.quote,message:'Present the corrected server price to the customer before offering slots; call slot search again only after presenting it.'};
     }
-    if(!state.quote||state.quote.requiresHumanReview)return{error:"PRICE_REVIEW"};
+    if(!state.quote||state.quote.requiresHumanReview||areaRequiresReview(state.quote.input.area))return{error:"PRICE_REVIEW",requiresHumanReview:true};
     if(!state.duration)return{error:"NO_DURATION_RULE"};
     if(!state.address?.proof&&!state.address?.addressId)return{error:"ADDRESS_REQUIRED"};
     if(c.orderId&&!state.rescheduleRequested)return{error:"RESCHEDULE_REQUEST_REQUIRED"};

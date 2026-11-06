@@ -3,12 +3,13 @@ import {mkdirSync, readFileSync, readdirSync, copyFileSync, writeFileSync} from 
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import pg from 'pg';
-import {isolatedEnvironment} from './environment.mjs';
+import {isolatedEnvironment,localClusterDirectory} from './environment.mjs';
 const require = createRequire(import.meta.url);
 const [action, target = 'admin', ...args] = process.argv.slice(2);
-const database = target === 'reliability' ? 'lumaclean_reliability_test' : target === 'ai' ? 'lumaclean_ai_test' : 'lumaclean_admin_test';
-const port = target === 'reliability' ? 3106 : target === 'ai' ? 3101 : 3100;
+const database = target === 'staging' ? 'lumaclean_staging_test' : target === 'reliability' ? 'lumaclean_reliability_test' : target === 'ai' ? 'lumaclean_ai_test' : 'lumaclean_admin_test';
+const port = target === 'staging' ? 3108 : target === 'reliability' ? 3106 : target === 'ai' ? 3101 : 3100;
 const env = isolatedEnvironment(database, port);
+if(action==='server'&&target==='staging')env.DIRECT_URL=''; // Runtime receives no migration credential.
 if (target === 'unit') {
   env.LUMACLEAN_ROUTING_PROVIDER=''; env.LUMACLEAN_GOOGLE_ROUTING_ENABLED='';
   for (const key of Object.keys(env)) if (env[key] === '') delete env[key];
@@ -24,8 +25,9 @@ if (action === 'prepare') {
   const db = new pg.Client({connectionString: controlUrl.toString()});
   await db.connect();
   const actual = (await db.query('SHOW data_directory')).rows[0].data_directory.replaceAll('\\', '/').toLowerCase();
-  const expected = path.resolve('artifacts/release-readiness/pgdata').replaceAll('\\', '/').toLowerCase();
+  const expected = localClusterDirectory().replaceAll('\\', '/').toLowerCase();
   if (actual !== expected) throw Error('Wrong local PostgreSQL cluster');
+  if (process.env.LUMACLEAN_LOCAL_PG18 === 'true' && Number((await db.query('SHOW server_version_num')).rows[0].server_version_num) < 180000) throw Error('PostgreSQL 18 required');
   for (const name of ['lumaclean_admin_test','lumaclean_admin_bootstrap_test','lumaclean_migration_test','lumaclean_reliability_test','lumaclean_ai_test']) {
     if ((await db.query('SELECT 1 FROM pg_database WHERE datname=$1', [name])).rowCount) {
       if (target !== '--resume') throw Error(`Fresh database required: ${name}; no automatic DROP is permitted (use --resume only after an interrupted preparation)`);

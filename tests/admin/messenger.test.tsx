@@ -17,6 +17,7 @@ import { cleanerDay } from '../../src/lib/domain/cleaner-day';
 import { Temporal } from '@js-temporal/polyfill';
 import { clientSchema } from '../../src/lib/validation/crm';
 import { MessengerHistory } from '../../src/components/admin/messenger-history';
+import { DurationRulesEditor } from '../../src/components/admin/finance-forms';
 
 // SSR markup fixtures need the same router context as the real admin layout.
 const unexpectedNavigation = () => assert.fail('SSR markup must not navigate');
@@ -24,6 +25,15 @@ const router: AppRouterInstance = {back: unexpectedNavigation, forward: unexpect
 function render(children: React.ReactNode) {
   return renderToStaticMarkup(<AppRouterContext.Provider value={router}><PathnameContext.Provider value="/admin/messages">{children}</PathnameContext.Provider></AppRouterContext.Provider>);
 }
+
+test('new duration draft proposes the approved oven work without auto activation',()=>{
+ const html=render(<DurationRulesEditor rules={[]} services={[{id:'regular',code:'regular',name:'Regular'}]}/>);
+ assert.match(html, /name="extra-oven"[^>]*value="45"/);
+ assert.match(html, /name="baseMinutes"[^>]*value="120"/);
+ assert.match(html, /name="minArea"[^>]*value="50"/);
+ assert.match(html, /name="maxArea"[^>]*value="50"/);
+ assert.doesNotMatch(html, /name="active"[^>]*checked/);
+});
 
 test('latest action on an older history page navigates to the current conversation', () => {
   const markup=render(<MessengerHistory older latestHref="/admin/messages/chat-a">Old history</MessengerHistory>);

@@ -1,0 +1,262 @@
+{
+  "scope": "ISOLATED PostgreSQL18 / MOCKED providers; not native/live",
+  "historical": {
+    "pass": 8,
+    "fail": 46,
+    "children": 45,
+    "parentFailures": 1,
+    "log": "legacy-ai-integration.log"
+  },
+  "rootCauses": [
+    "A: synthetic source/readiness/diagnostics/HMAC fixture and real gates",
+    "B: current qualification API, relative future dates, verified coordinates/owner facts",
+    "C: safe provider fallback, soft-review and bounded content repair contracts",
+    "D: channel permissions and cascaded missing booking/outbox fixtures"
+  ],
+  "mapping": [
+    {
+      "historicalScenario": "anonymous token is random, hashed, scoped and expiring",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "malformed mutation and SQL tools cannot reach the database",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "unverified identity never exposes another client or addresses",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "FAQ reads shared public content without sales mutation",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "early lead has no fabricated contact and repeated calls reuse it",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "production pricing requires qualification and uses engine total",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "duration uses active rule and missing bands require review",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "strong dirt and absent Google never produce promises",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "booking before explicit confirmation has no side effects",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "cleaner cannot take over conversations or change AI settings",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "stale worker lease cannot execute even with current revision",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "two clients competing for one slot create exactly one Order",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "successful booking has scoped client, converted lead, crew and AI audit",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "duplicate booking tool retry cannot duplicate Order or Client",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "public confirmation excludes internal order/client IDs and notes",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "verified client addresses stay scoped and rescheduling uses a fresh window",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "foreign or expired slot cannot be selected",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "invalid confirmation nonce cannot authorize mutation",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "human takeover stops an in-flight provider reply",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "owner replies use idempotency key and same conversation",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "prompt injection creates human handoff without model call",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "SHADOW retains proposed facts but sends no reply and mutates no CRM records",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "provider outage safely hands off and saves sanitized telemetry",
+      "primaryRoot": "C: changed safe fallback/content/control contracts",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "resume uses actual owner history and creates a new guarded turn",
+      "primaryRoot": "C: changed safe fallback/content/control contracts",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "native fallback preserves a previously created Lead exactly once",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "expired process lease is reclaimed and old worker loses access",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "three-question draft is repaired once without repeating tools",
+      "primaryRoot": "C: changed safe fallback/content/control contracts",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "placeholder or invalid contact cannot poison lead state",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "owner retry changes queue revision and invalidates the previous lease",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "global master switch cancels stale work but preserves messages",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "unsupported canary service cannot reach pricing or booking",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "strong contamination and discount scenarios hand off without model calls",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "Google unavailable requires handoff and creates no Order",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "SR Latin flexible booking requires a fresh recap and explicit assent",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "verified repeat customer books a new conversation using their own saved address",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "address clarification returns choices and refuses a fabricated place ID",
+      "primaryRoot": "B: qualification facts, future dates, coordinates and booking fixtures",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "notification events are idempotent and never duplicate booking side effects",
+      "primaryRoot": "D: notification permissions / missing upstream order cascade",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "Website-only reminders become internal records when due; cancellation removes pending reminders",
+      "primaryRoot": "D: notification permissions / missing upstream order cascade",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "outbox retries definite rate limits but never ambiguous external sends",
+      "primaryRoot": "D: notification permissions / missing upstream order cascade",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "per-turn model-call limits stop a native tool loop and notify the owner",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "conversation cost guard stops a turn before another provider request",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "OFF cancels a delayed background response while preserving its input",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "full server readiness permits owner activation and stale diagnostics then block it",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "scope changes while AUTO cannot bypass the same readiness gate",
+      "primaryRoot": "A: source-bound synthetic readiness missing, no admitted job/claim",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    },
+    {
+      "historicalScenario": "manual CRM cancellation commits independently and saves customer/cleaner events",
+      "primaryRoot": "D: notification permissions / missing upstream order cascade",
+      "current": "PASS in current57-test suite; renamed expectations documented in diff"
+    }
+  ],
+  "current": {
+    "pass": 57,
+    "fail": 0,
+    "skip": 0,
+    "log": "ai-suite-latest.log"
+  },
+  "negativeGates": [
+    "uncertified release",
+    "AI_AGENT_ENABLED=false",
+    "owner confirmation missing",
+    "proof tamper",
+    "source fingerprint changed",
+    "permissions",
+    "kill switch / delayed worker",
+    "takeover / old lease / expired slot / confirmation nonce"
+  ],
+  "productionGatesWeakened": false,
+  "productionCertificateChanged": false,
+  "externalNetworkDenied": true
+}

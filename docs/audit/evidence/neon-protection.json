@@ -1,0 +1,22 @@
+{
+  "id": "br-noisy-bar-b8vmyqyi",
+  "projectId": "patient-butterfly-42300600",
+  "name": "main",
+  "protected": false,
+  "restrictedActions": [
+    {
+      "name": "delete",
+      "reason": "vercel production branch"
+    },
+    {
+      "name": "delete-rw-endpoint",
+      "reason": "vercel production branch read-write endpoint"
+    },
+    {
+      "name": "move-rw-endpoint-using-api",
+      "reason": "vercel production branch read-write endpoint"
+    }
+  ],
+  "historyRetentionSeconds": 21600,
+  "initSource": "parent-data"
+}

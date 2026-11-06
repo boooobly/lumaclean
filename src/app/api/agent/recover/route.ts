@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
+import {authorizedCron} from '@/lib/services/cron-auth';
 import { getDatabase } from "@/lib/database/client";
 import { drainAgentJobs } from "@/lib/agent/runner";
 import { enqueueAgent } from "@/lib/agent/queue";
@@ -8,8 +8,7 @@ import {cleanupAttachments} from '@/lib/agent/chat-attachments';
 export const runtime="nodejs";
 export const maxDuration=180;
 export async function GET(request:Request){
-  const expected=process.env.CRON_SECRET?`Bearer ${process.env.CRON_SECRET}`:null,actual=request.headers.get("authorization");
-  if(!expected||!actual||actual.length!==expected.length||!timingSafeEqual(Buffer.from(actual),Buffer.from(expected)))return NextResponse.json({ok:false},{status:401});
+  if(!authorizedCron(request))return NextResponse.json({ok:false},{status:401,headers:{'Cache-Control':'private, no-store'}});
   const db=getDatabase();
   const jobs=await db.agentJob.findMany({where:{OR:[{status:'PENDING'},{status:'RUNNING',leaseUntil:{lt:new Date()}}]},select:{conversationId:true},distinct:['conversationId'],take:50});
   for(const job of jobs){try{await enqueueAgent(db,job.conversationId);}catch{/* DB jobs are drained below. */}}

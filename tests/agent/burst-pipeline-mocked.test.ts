@@ -78,7 +78,7 @@ function provider(fn:(messages:AgentMessage[])=>Promise<string>|string):AIProvid
 }
 
 test('mocked pipeline regressions: no external systems',async t=>{
-  const saved=process.env.AI_AGENT_ENABLED;process.env.AI_AGENT_ENABLED='true';
+  const saved=process.env.AI_AGENT_ENABLED,release=process.env.AI_VERIFIED_RELEASE;process.env.AI_AGENT_ENABLED='true';process.env.AI_VERIFIED_RELEASE='true';
   try{
     await t.test('three/five accepted messages and same ID retry produce one complete current turn',async()=>{
       for(const count of [3,5]){
@@ -153,5 +153,5 @@ test('mocked pipeline regressions: no external systems',async t=>{
       await runClaimedJob(f.db,old,[p,p]);assert.equal(f.replies().length,0);
       await runClaimedJob(f.db,retry,[p,p]);assert.equal(f.replies().length,1);
     });
-  }finally{if(saved===undefined)delete process.env.AI_AGENT_ENABLED;else process.env.AI_AGENT_ENABLED=saved;}
+  }finally{if(saved===undefined)delete process.env.AI_AGENT_ENABLED;else process.env.AI_AGENT_ENABLED=saved;if(release===undefined)delete process.env.AI_VERIFIED_RELEASE;else process.env.AI_VERIFIED_RELEASE=release;}
 });

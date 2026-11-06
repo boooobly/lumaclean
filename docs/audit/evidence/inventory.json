@@ -1,0 +1,412 @@
+{
+  "sourceFiles": 327,
+  "apiRoutes": 32,
+  "api": [
+    {
+      "file": "src/app/api/admin/ai/autonomy-preview/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser",
+        "boundedBody",
+        "adminRateLimit"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/ai/conversation-preview/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser",
+        "boundedBody",
+        "adminRateLimit"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/ai-settings/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser",
+        "boundedBody",
+        "adminRateLimit"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/calendar/repeat/[action]/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/calendar/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [
+        "getCurrentUser"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/clients/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [
+        "getCurrentUser"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/crm/[command]/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/finance/[command]/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser",
+        "boundedBody",
+        "adminRateLimit"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/import/[command]/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser",
+        "boundedBody",
+        "adminRateLimit"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/inbox/attachments/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": []
+    },
+    {
+      "file": "src/app/api/admin/inbox/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser",
+        "boundedBody",
+        "adminRateLimit"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/routing/[command]/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/scheduling/[command]/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/telegram-handoff/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser",
+        "boundedBody",
+        "adminRateLimit"
+      ]
+    },
+    {
+      "file": "src/app/api/admin/upholstery/[action]/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "getCurrentUser",
+        "boundedBody",
+        "adminRateLimit"
+      ]
+    },
+    {
+      "file": "src/app/api/agent/recover/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [
+        "timingSafeEqual"
+      ]
+    },
+    {
+      "file": "src/app/api/auth/[...all]/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "guards": []
+    },
+    {
+      "file": "src/app/api/booking-policy/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": []
+    },
+    {
+      "file": "src/app/api/channels/telegram/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "customerWebhook"
+      ]
+    },
+    {
+      "file": "src/app/api/channels/viber/media/[id]/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": []
+    },
+    {
+      "file": "src/app/api/channels/viber/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "customerWebhook"
+      ]
+    },
+    {
+      "file": "src/app/api/channels/whatsapp/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "guards": [
+        "customerWebhook"
+      ]
+    },
+    {
+      "file": "src/app/api/chat/attachments/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": []
+    },
+    {
+      "file": "src/app/api/chat/attachments/[id]/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [
+        "getCurrentUser",
+        "scopedConversation"
+      ]
+    },
+    {
+      "file": "src/app/api/chat/events/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [
+        "scopedConversation"
+      ]
+    },
+    {
+      "file": "src/app/api/chat/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "guards": [
+        "trustedOrigin",
+        "scopedConversation",
+        "boundedBody"
+      ]
+    },
+    {
+      "file": "src/app/api/lead/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "boundedBody"
+      ]
+    },
+    {
+      "file": "src/app/api/queues/agent/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "handleCallback"
+      ]
+    },
+    {
+      "file": "src/app/api/queues/notifications/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "handleCallback"
+      ]
+    },
+    {
+      "file": "src/app/api/telegram/handoff/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "boundedBody"
+      ]
+    },
+    {
+      "file": "src/app/api/upholstery/lead/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "boundedBody",
+        "adminRateLimit"
+      ]
+    },
+    {
+      "file": "src/app/api/upholstery/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "guards": [
+        "boundedBody",
+        "adminRateLimit"
+      ]
+    }
+  ],
+  "models": [
+    "User",
+    "Session",
+    "Account",
+    "Verification",
+    "RateLimit",
+    "Cleaner",
+    "CleanerAvailability",
+    "Client",
+    "ClientAddress",
+    "Lead",
+    "LeadExtra",
+    "Service",
+    "ServicePriceBand",
+    "ServiceExtra",
+    "Order",
+    "UpholsterySettings",
+    "OrderUpholstery",
+    "OrderRepeatSeries",
+    "OrderCleaner",
+    "SchedulingOverride",
+    "OrderExtra",
+    "DurationRule",
+    "RouteCalculation",
+    "SchedulingProposal",
+    "Conversation",
+    "Message",
+    "ChatAttachment",
+    "HumanHandoff",
+    "Expense",
+    "CleanerPayout",
+    "Notification",
+    "AuditLog",
+    "BusinessSettings",
+    "AgentLiveTest",
+    "ShadowSuggestion",
+    "AgentJob",
+    "AIInvocation",
+    "AgentToolTrace",
+    "AgentSlot",
+    "ImportBatch",
+    "ImportRecord",
+    "Investment",
+    "RoutingUsageMonth",
+    "RoutingRequestLease",
+    "RoutingBenchmark"
+  ],
+  "migrations": [
+    "20261001090000_admin_foundation",
+    "20261001100000_audit_immutable",
+    "20261001120000_crm_core",
+    "20261001121000_crm_search_indexes",
+    "20261001150000_admin_scheduling",
+    "20261001180000_admin_routing",
+    "20261001193000_admin_finance_duration",
+    "20261001210000_admin_ai_agent",
+    "20261001220000_ai_go_live",
+    "20261002110000_live_readiness",
+    "20261003130000_address_coordinate_confirmation",
+    "20261003160000_hybrid_routing",
+    "20261004130000_website_chat_v2",
+    "20261004180000_agent_behavior_hardening",
+    "20261004200000_customer_channels",
+    "20261007170000_historical_import",
+    "20261011090000_calendar_repeats",
+    "20261011150000_upholstery",
+    "20261011153000_item_pricing_basis",
+    "20261011180000_simple_upholstery_intake",
+    "20261014122500_appliance_catalog",
+    "20261014153000_appliance_units",
+    "20261018190000_optional_website_lead_name",
+    "20261018190100_contact_request_kind",
+    "20261019220000_website_notification_recipient"
+  ],
+  "services": [
+    "src/lib/services/admin-dashboard.ts",
+    "src/lib/services/admin-http.ts",
+    "src/lib/services/audit.ts",
+    "src/lib/services/busmaps-store.ts",
+    "src/lib/services/calendar-repeat.ts",
+    "src/lib/services/crm-backfill.ts",
+    "src/lib/services/crm-commands.ts",
+    "src/lib/services/crm-queries.ts",
+    "src/lib/services/duration-engine.ts",
+    "src/lib/services/finance-calculation.ts",
+    "src/lib/services/finance-commands.ts",
+    "src/lib/services/finance-queries.ts",
+    "src/lib/services/google-places.ts",
+    "src/lib/services/lead-notifications.ts",
+    "src/lib/services/lead-rate-limit.ts",
+    "src/lib/services/legacy-import.ts",
+    "src/lib/services/payout-calculation.ts",
+    "src/lib/services/route-cache.ts",
+    "src/lib/services/routing-planning.ts",
+    "src/lib/services/scheduling-commands.ts",
+    "src/lib/services/scheduling-queries.ts",
+    "src/lib/services/upholstery-catalog.ts",
+    "src/lib/services/upholstery-commands.ts",
+    "src/lib/services/upholstery-equipment.ts",
+    "src/lib/services/upholstery-leads.ts",
+    "src/lib/services/website-leads.ts"
+  ],
+  "documents": 78,
+  "gitHead": "574d0550682032f0c7bbc129cb20f924f2f34996"
+}

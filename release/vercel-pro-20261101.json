@@ -1,0 +1,100 @@
+{
+  "scope": "Local manual release candidate; this is not AI AUTO admission or cloud deployment approval",
+  "checkedAt": "2026-11-01T22:37:04.191Z",
+  "productionBase": "544da114d0a129e9dd9c0f73c047a574af776fd6",
+  "branch": "codex/vercel-pro-optimization-20261101",
+  "fingerprint": "3299f1e5e735dc13e2dd87ff57db4650dac01d56c51fc2bdc7b51cd952453d4a",
+  "node": "24.22.2",
+  "build": true,
+  "typecheck": true,
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 2
+  },
+  "tests": {
+    "unit": {
+      "pass": 1049,
+      "fail": 0,
+      "skip": 34
+    },
+    "clientSSR": {
+      "pass": 15,
+      "fail": 0
+    },
+    "postgresRecovery": {
+      "pass": 7,
+      "fail": 0
+    },
+    "intake": {
+      "pass": 17,
+      "fail": 0
+    },
+    "adminCrmSchedulingRouting": {
+      "pass": 40,
+      "fail": 0
+    },
+    "finance": {
+      "pass": 15,
+      "fail": 0
+    }
+  },
+  "browser": {
+    "pages": 75,
+    "viewports": 225,
+    "internalLinks": 75,
+    "unexpectedErrors": 0,
+    "formScenarioGroups": 13,
+    "mockedFormSubmissions": 25,
+    "upholsteryLayouts": 30,
+    "axePages": 6,
+    "bookingRecapLocales": 4
+  },
+  "lighthouse": {
+    "productionRuns": 60,
+    "localBeforeRuns": 12,
+    "localAfterRuns": 12,
+    "fieldCWV": null,
+    "apiAndTelemetryMocked": true
+  },
+  "schemaChanges": false,
+  "productionDatabaseTouched": true,
+  "realNotificationsSent": true,
+  "cloudPreviewVerified": true,
+  "productionReady": true,
+  "aiAutoReady": false,
+  "remaining": [],
+  "report": "docs/vercel-pro-optimization-2026-11.md",
+  "vercelConfigSha256": "11f88831828ecb594a68991940aa02fce6ab763595ec274b515e73c40427f295",
+  "runtimeNotes": "Build, types, unit, client SSR, PostgreSQL recovery/intake/CRM/finance and final browser regression verified with Node 24.22.2. Comparable Lighthouse pair used Node 25.9.0 for both runs.",
+  "manualSourceVerified": true,
+  "preview": "https://lumaclean-release-candidate-oizippdef.vercel.app",
+  "previewDeployment": "dpl_6kFF76oAiBYzJQup4cUXwmy8jk1B",
+  "previewImmutableFilesMatched": 365,
+  "cloudPreviewScope": "PASS_SCOPED: source/forms/auth/DB/recovery and actual native Queue; Telegram verified separately on existing production transport",
+  "nativeQueueVerified": true,
+  "nativeQueueDeployment": "dpl_6kFF76oAiBYzJQup4cUXwmy8jk1B",
+  "productionWriteScope": "Exactly three owner-approved synthetic Leads, three durable Notification events and associated intake/rate-limit/audit records; no Orders/deletes/migrations",
+  "realNotificationsCount": 3,
+  "telegramStatus": "PASS_TRANSPORT_RECEIPTS",
+  "productionDeployed": true,
+  "productionDeployment": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
+  "productionCommit": "b9a16f69a669b064884df96d1c688013bf6b7b5b",
+  "productionUrl": "https://lumacleanrs.com",
+  "liveChecks": "PASS_SCOPED",
+  "liveCron": [
+    {
+      "path": "/api/notifications/recover",
+      "method": "GET",
+      "status": 200,
+      "at": "2026-11-01T23:25:40.127Z"
+    }
+  ],
+  "limitations": {
+    "authenticatedProductionCrm": "BLOCKED_COMPUTER_USE_BROWSER_URL_POLICY: owner session UI could not be tested. Production auth gate PASS; isolated authenticated cloud CRM and40 local CRM/calendar/routing tests PASS.",
+    "nativeQueue": "PASS actual publish/consumer on exact-source protected Preview. No extra production wake/message injected after promotion.",
+    "unitEnvironmentSkips": 34,
+    "aiAuto": "OFF; not certified or enabled",
+    "monitoring": "Initial live checks and first scheduled Cron verified. Full60-minute/24-hour/7-day observation is future work under the existing monitoring plan, not completed evidence.",
+    "dependencies": "24 moderate dependency records remain under the documented reachability/upstream assessment; no force updates."
+  }
+}

@@ -1,0 +1,2662 @@
+[
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_cachedInputTokens_not_null",
+    "definition_hash": "b08d0f3dafeba0ab3f5522628bff604a"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_conversationId_fkey",
+    "definition_hash": "e32051b8ee88d8f72f4838c6b4afa79a"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_conversationId_not_null",
+    "definition_hash": "801473a3e74817372a41528908fa7217"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_inputTokens_not_null",
+    "definition_hash": "c28e979ca2ae042e4c7ce273223951b9"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_jobId_not_null",
+    "definition_hash": "45500527984d10886c36ac75020ac00c"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_latencyMs_not_null",
+    "definition_hash": "7eb7407e01a265ce144ce8e9ec092d60"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_mode_not_null",
+    "definition_hash": "00fc405d9808ed6e40f8ecfe93a1fa9f"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_model_not_null",
+    "definition_hash": "71a10de0d9163dee4151589bbabde861"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_outputTokens_not_null",
+    "definition_hash": "f12cea28d5297b5980e0d28e4d35036f"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_provider_not_null",
+    "definition_hash": "e7cfef01ff5f5098e1de3a042af0bf29"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_success_not_null",
+    "definition_hash": "15aedc01b0cfd0343716ba1e930eceda"
+  },
+  {
+    "kind": "constraint",
+    "name": "AIInvocation.AIInvocation_toolCallCount_not_null",
+    "definition_hash": "c457c476817f3454d0a14ea417167f6a"
+  },
+  {
+    "kind": "constraint",
+    "name": "Account.Account_accountId_not_null",
+    "definition_hash": "2caf873cc054909d2ff5453fcc0f8e84"
+  },
+  {
+    "kind": "constraint",
+    "name": "Account.Account_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Account.Account_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Account.Account_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Account.Account_providerId_not_null",
+    "definition_hash": "b99fd4356bf7073cb5b34d01f03cef0a"
+  },
+  {
+    "kind": "constraint",
+    "name": "Account.Account_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "Account.Account_userId_fkey",
+    "definition_hash": "508550da9aa6deebb4719a79786bccb3"
+  },
+  {
+    "kind": "constraint",
+    "name": "Account.Account_userId_not_null",
+    "definition_hash": "b0d5ff3b8580e353b0f1e7a409aed733"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentJob.AgentJob_attempts_not_null",
+    "definition_hash": "23f81be14a707575150cd90a14e76fd7"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentJob.AgentJob_conversationId_fkey",
+    "definition_hash": "e32051b8ee88d8f72f4838c6b4afa79a"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentJob.AgentJob_conversationId_not_null",
+    "definition_hash": "801473a3e74817372a41528908fa7217"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentJob.AgentJob_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentJob.AgentJob_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentJob.AgentJob_messageId_not_null",
+    "definition_hash": "8fd6fa81905e3a11ba9422158ccb5eac"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentJob.AgentJob_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentJob.AgentJob_status_not_null",
+    "definition_hash": "f5b14d904ec3a517af562fa35ea603cd"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentLiveTest.AgentLiveTest_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentLiveTest.AgentLiveTest_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentLiveTest.AgentLiveTest_report_not_null",
+    "definition_hash": "0f3d0dcc82c88ed617cc5bc7bf4d0604"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentLiveTest.AgentLiveTest_startedAt_not_null",
+    "definition_hash": "bbbb4c9d6a201d6e5c67422fe3232076"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentLiveTest.AgentLiveTest_status_not_null",
+    "definition_hash": "f5b14d904ec3a517af562fa35ea603cd"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_conversationId_fkey",
+    "definition_hash": "e32051b8ee88d8f72f4838c6b4afa79a"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_conversationId_not_null",
+    "definition_hash": "801473a3e74817372a41528908fa7217"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_durationMinutes_not_null",
+    "definition_hash": "f07ece31a5739ae772ffdd730af992f2"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_expiresAt_not_null",
+    "definition_hash": "2d62146108a9ab4b7f7f1017ec121758"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_fingerprint_not_null",
+    "definition_hash": "8ae7196cfeb7f10b62e716c91fcb9492"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_requiredCleaners_not_null",
+    "definition_hash": "a649dd0f46dfc2121eb8374333d6f2f0"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_routingSnapshot_not_null",
+    "definition_hash": "9e6c73c79d4c5fec8e43054b50600eba"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_scheduleVersion_not_null",
+    "definition_hash": "074daf97304b402102813e202dd03dea"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentSlot.AgentSlot_start_not_null",
+    "definition_hash": "8f4e3c7e75a93f81890cb7febbb50876"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentToolTrace.AgentToolTrace_conversationId_fkey",
+    "definition_hash": "e32051b8ee88d8f72f4838c6b4afa79a"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentToolTrace.AgentToolTrace_conversationId_not_null",
+    "definition_hash": "801473a3e74817372a41528908fa7217"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentToolTrace.AgentToolTrace_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentToolTrace.AgentToolTrace_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentToolTrace.AgentToolTrace_jobId_not_null",
+    "definition_hash": "45500527984d10886c36ac75020ac00c"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentToolTrace.AgentToolTrace_latencyMs_not_null",
+    "definition_hash": "7eb7407e01a265ce144ce8e9ec092d60"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentToolTrace.AgentToolTrace_outcome_not_null",
+    "definition_hash": "cb813d00826d7aaa7fa4e99d793720e8"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentToolTrace.AgentToolTrace_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentToolTrace.AgentToolTrace_shadow_not_null",
+    "definition_hash": "8f5794a95ff3d7ede8b5bf2e272a8f43"
+  },
+  {
+    "kind": "constraint",
+    "name": "AgentToolTrace.AgentToolTrace_tool_not_null",
+    "definition_hash": "c386b0e2e6f9c6bbd93ab76251838f19"
+  },
+  {
+    "kind": "constraint",
+    "name": "AuditLog.AuditLog_action_not_null",
+    "definition_hash": "82c54f558f9908a7a724e8235ec23a0d"
+  },
+  {
+    "kind": "constraint",
+    "name": "AuditLog.AuditLog_actorType_not_null",
+    "definition_hash": "e90cd77b466ed9bebb86e1d89843aa9a"
+  },
+  {
+    "kind": "constraint",
+    "name": "AuditLog.AuditLog_actor_check",
+    "definition_hash": "4e628bb4c7fb9fb53dc63853b68d2c38"
+  },
+  {
+    "kind": "constraint",
+    "name": "AuditLog.AuditLog_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "AuditLog.AuditLog_entityId_not_null",
+    "definition_hash": "95421db4644a3341f73e03dc89770644"
+  },
+  {
+    "kind": "constraint",
+    "name": "AuditLog.AuditLog_entityType_not_null",
+    "definition_hash": "8ebd6404b875108e6122e23947c158db"
+  },
+  {
+    "kind": "constraint",
+    "name": "AuditLog.AuditLog_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "AuditLog.AuditLog_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "AuditLog.AuditLog_userId_fkey",
+    "definition_hash": "b2da3a92eddfcd051e448eb99644da11"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.AI_limits_valid",
+    "definition_hash": "a4e6d3bcec58d083f26a36b7430289a2"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_aiAgentMode_not_null",
+    "definition_hash": "88e227d8274ef2096ee1ee8949dc0160"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_aiCanary_not_null",
+    "definition_hash": "4bfcec3e4f2ab6769ec52059bd475677"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_aiChannelModes_not_null",
+    "definition_hash": "f680b7d2835cf4e8ad77e51eef7b457a"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_aiDailyCostWarningUsd_not_null",
+    "definition_hash": "e4c6da9fcbfbb6a48b5d18871ad82d40"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_aiMaxAnonymousMessages_not_null",
+    "definition_hash": "304a5715bd1a606210360e37ecb5685c"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_aiMaxConversationCostUsd_not_null",
+    "definition_hash": "32f92b7a317c5ac2f4043ccc7faeafdc"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_aiMaxModelCalls_not_null",
+    "definition_hash": "33c17f66849a4dedb21f2aa2ec97fb3e"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_aiMaxToolSteps_not_null",
+    "definition_hash": "79ef990349952a95ada6244c841b0a8b"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_behaviorSettingsVersion_not_null",
+    "definition_hash": "0f110570480f28105987faeec67d565b"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_currency_not_null",
+    "definition_hash": "6c3a13a83bce843222e634022fa17801"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_customerChannelDiagnostics_not_null",
+    "definition_hash": "40cbc23741117f72176c860c882835bd"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_customerNotificationChannels_not_null",
+    "definition_hash": "d01cc23f03e4abd30760af9e702833f0"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_defaultTravelBufferMinutes_not_null",
+    "definition_hash": "ad720409cab6648f21835980d67054b6"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_fallbackTravelMinutes_not_null",
+    "definition_hash": "85ddb4500d67748e42ffad47c2d4204a"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_latestCleanerDepartureMinute_not_null",
+    "definition_hash": "049a006be83020c60472ad8f6b863bc5"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_sameDayBookingCutoffMinute_not_null",
+    "definition_hash": "165e6c08d06eaad70b92e2d288314c56"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_timezone_not_null",
+    "definition_hash": "dcd5d3e796368610cb0ceebbfdda80fd"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.BusinessSettings_values_check",
+    "definition_hash": "b9ea0f4896aaf59197052125950fc1b3"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.fallback_travel_bounds",
+    "definition_hash": "71951c3953a2349ea8432bcd5755c37a"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.latestCleanerDepartureMinute_range",
+    "definition_hash": "e5178e21703bb098a83bcf64e27ea2d2"
+  },
+  {
+    "kind": "constraint",
+    "name": "BusinessSettings.sameDayBookingCutoffMinute_range",
+    "definition_hash": "bbd8070ed914c38495b07d2e79d8805b"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_aiAnalysisStatus_not_null",
+    "definition_hash": "b68a889ada92f9975bd587a2cb0f7e06"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_byteSize_not_null",
+    "definition_hash": "6594d9d05e8ed04bc30a4d29832d4243"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_conversationId_fkey",
+    "definition_hash": "e32051b8ee88d8f72f4838c6b4afa79a"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_conversationId_not_null",
+    "definition_hash": "801473a3e74817372a41528908fa7217"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_height_not_null",
+    "definition_hash": "d95db84ddd46a35f375ed2b6f6ad23a6"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_messageId_fkey",
+    "definition_hash": "ee03c31690e70267facc12f0ff0b8f54"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_mimeType_not_null",
+    "definition_hash": "d7d605453c620756c3af3e05aceb2cf5"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_processingStatus_not_null",
+    "definition_hash": "c65fb73e5fe7587ba8a157166b6790ba"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_requestId_not_null",
+    "definition_hash": "931f5170d177f873b93d65b295ae1c81"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_sha256_not_null",
+    "definition_hash": "8b66065f6e6b0b8c69774148c964f979"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_storageKey_not_null",
+    "definition_hash": "351b83cc660b67bb9475b8c6676fd77a"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_thumbnailKey_not_null",
+    "definition_hash": "f950cc36364fb2ab4bc300b91ce7dfc3"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_uploader_not_null",
+    "definition_hash": "ad4386b07b34c8ac5c138b0a8ad72bf6"
+  },
+  {
+    "kind": "constraint",
+    "name": "ChatAttachment.ChatAttachment_width_not_null",
+    "definition_hash": "bdb91a41a9797db7da2eb20fb0f0ff0a"
+  },
+  {
+    "kind": "constraint",
+    "name": "Cleaner.Cleaner_active_not_null",
+    "definition_hash": "e6739aa2e25b31acb848fb0599bd0d14"
+  },
+  {
+    "kind": "constraint",
+    "name": "Cleaner.Cleaner_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Cleaner.Cleaner_defaultTravelMode_not_null",
+    "definition_hash": "c9d2327615b997268a776f66e7e8a95d"
+  },
+  {
+    "kind": "constraint",
+    "name": "Cleaner.Cleaner_homeCoordinatesConfirmed_not_null",
+    "definition_hash": "a763454df48d8b7e70e0f69592449939"
+  },
+  {
+    "kind": "constraint",
+    "name": "Cleaner.Cleaner_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Cleaner.Cleaner_name_not_null",
+    "definition_hash": "16aff98a310953a807552b3536c15db7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Cleaner.Cleaner_percent_rating_coordinates_check",
+    "definition_hash": "ff71edd577d5370a9acc2e528623be88"
+  },
+  {
+    "kind": "constraint",
+    "name": "Cleaner.Cleaner_phone_not_null",
+    "definition_hash": "e4cabcf26c62a80ebbba72eca9459f3c"
+  },
+  {
+    "kind": "constraint",
+    "name": "Cleaner.Cleaner_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Cleaner.Cleaner_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "Cleaner.Cleaner_userId_fkey",
+    "definition_hash": "b2da3a92eddfcd051e448eb99644da11"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerAvailability.CleanerAvailability_cleanerId_fkey",
+    "definition_hash": "51d7a3cb5103f1b5c30e9829aaf519fe"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerAvailability.CleanerAvailability_cleanerId_not_null",
+    "definition_hash": "a84cbdf62b3a492b70d51be3121fd71b"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerAvailability.CleanerAvailability_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerAvailability.CleanerAvailability_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerAvailability.CleanerAvailability_kind_not_null",
+    "definition_hash": "a65ef3eed3d7c49644ccd31b0b262880"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerAvailability.CleanerAvailability_period_check",
+    "definition_hash": "758c55c71b68dc4d82e0b7ebf56e227f"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerAvailability.CleanerAvailability_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerAvailability.CleanerAvailability_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_amount_not_null",
+    "definition_hash": "d68026f967afa96f27d4e8f0275ea7d8"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_cleanerId_fkey",
+    "definition_hash": "585f2f13d6946bef0353b4e6a3997a41"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_currency_not_null",
+    "definition_hash": "6c3a13a83bce843222e634022fa17801"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_historical_not_null",
+    "definition_hash": "8df926df6c8b617814db98e92af1677c"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_orderId_fkey",
+    "definition_hash": "f502c20dfe95e27694832f38b3eb86ce"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_orderId_not_null",
+    "definition_hash": "ed08a9ffda22312ec96e59dca34b32d9"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_status_not_null",
+    "definition_hash": "f5b14d904ec3a517af562fa35ea603cd"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "CleanerPayout.CleanerPayout_values_check",
+    "definition_hash": "9370e595e0f54b99aaf570b38aded978"
+  },
+  {
+    "kind": "constraint",
+    "name": "Client.Client_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Client.Client_discount_check",
+    "definition_hash": "c943919b0b06336e4301047e34f308f2"
+  },
+  {
+    "kind": "constraint",
+    "name": "Client.Client_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Client.Client_name_not_null",
+    "definition_hash": "16aff98a310953a807552b3536c15db7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Client.Client_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Client.Client_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "ClientAddress.ClientAddress_active_not_null",
+    "definition_hash": "e6739aa2e25b31acb848fb0599bd0d14"
+  },
+  {
+    "kind": "constraint",
+    "name": "ClientAddress.ClientAddress_clientId_fkey",
+    "definition_hash": "218eaae9f40f698caacc99df7af2e729"
+  },
+  {
+    "kind": "constraint",
+    "name": "ClientAddress.ClientAddress_clientId_not_null",
+    "definition_hash": "357fde0402574b118f204ecd26d855f7"
+  },
+  {
+    "kind": "constraint",
+    "name": "ClientAddress.ClientAddress_coordinatesConfirmed_not_null",
+    "definition_hash": "4d2c55099e9b8083f26d3eebe579b600"
+  },
+  {
+    "kind": "constraint",
+    "name": "ClientAddress.ClientAddress_coordinates_check",
+    "definition_hash": "e7e7ab23027b9ddb4633c210b0d3b6b0"
+  },
+  {
+    "kind": "constraint",
+    "name": "ClientAddress.ClientAddress_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "ClientAddress.ClientAddress_fullAddress_not_null",
+    "definition_hash": "70eeecf442b90db1068de5d0522dff37"
+  },
+  {
+    "kind": "constraint",
+    "name": "ClientAddress.ClientAddress_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "ClientAddress.ClientAddress_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "ClientAddress.ClientAddress_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_channel_check",
+    "definition_hash": "9e710ac0fb827e7d05c18beda241f451"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_channel_not_null",
+    "definition_hash": "164cd92594af6bb5f08a9df600ca02f7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_clientId_fkey",
+    "definition_hash": "737c706b3f1d78586ee83b669f13dede"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_control_not_null",
+    "definition_hash": "25a3839384c49733c62d87556ef0bece"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_displayAlias_not_null",
+    "definition_hash": "17f8f187e193b2ebb9e39a3d6703ea9a"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_identityVerified_not_null",
+    "definition_hash": "6283b7ae3dd72e2af6fdb48b2a409e6d"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_lastMessageAt_not_null",
+    "definition_hash": "ec036249b4eabda58459bf61848776ec"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_leadId_fkey",
+    "definition_hash": "966013764491389cb33a715f4676c8e8"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_locale_not_null",
+    "definition_hash": "ba40be2c57ee06ddac089dcf0c03ce10"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_needsAttention_not_null",
+    "definition_hash": "4ce4a91d384313969f1c8fa0ffefa9ff"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_orderId_fkey",
+    "definition_hash": "e08d87980faed41a5cf8b8c6683cbdd5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_revision_not_null",
+    "definition_hash": "9e25486a048ac6ced626935e3b0c68ba"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_shadowState_not_null",
+    "definition_hash": "2d5581294a5be2741abfd76346409ab9"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_stage_not_null",
+    "definition_hash": "162a219418d984264bb77a8c4005a6f0"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_state_not_null",
+    "definition_hash": "38c87e9a7f4f4fcd9731ff7235150e04"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_unreadCount_not_null",
+    "definition_hash": "15cdb4e19591c582dda40767fc4b2a07"
+  },
+  {
+    "kind": "constraint",
+    "name": "Conversation.Conversation_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_active_not_null",
+    "definition_hash": "e6739aa2e25b31acb848fb0599bd0d14"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_cleanerCount_not_null",
+    "definition_hash": "0de92d19c469b71c44d0946532831dd5"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_extraMinutes_not_null",
+    "definition_hash": "3a1f43a4859d47d647dceeaf1f6cfefa"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_referenceArea_not_null",
+    "definition_hash": "bea3a5e8a0b4d8268a3199dde5c46bee"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_reserveMinutes_not_null",
+    "definition_hash": "4b4189ee3daac4da99803e6f9ff15664"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_serviceId_fkey",
+    "definition_hash": "58953b7958a9610d27c37a5b72a64b38"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_serviceId_not_null",
+    "definition_hash": "a6e77550063ef8166e52edfa1ea7d169"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_soilMultipliers_not_null",
+    "definition_hash": "1eb44cccba5bfd460da64da3286f3d59"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_unknownExtraReserveMinutes_not_null",
+    "definition_hash": "256d08272a24a5b9c0fed9c68d1d615b"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_values_check",
+    "definition_hash": "65cbbbabe866c1102b9a9e0bde9ac395"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.DurationRule_version_not_null",
+    "definition_hash": "1aeb4b0bc6a08cf1d264013fe7192161"
+  },
+  {
+    "kind": "constraint",
+    "name": "DurationRule.Duration_unknown_reserve_valid",
+    "definition_hash": "82c5ab3b99907c7c9eac90010ecac4ed"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_amount_check",
+    "definition_hash": "1b9ff988de7ef2272c93c57d2742c441"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_amount_not_null",
+    "definition_hash": "d68026f967afa96f27d4e8f0275ea7d8"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_category_not_null",
+    "definition_hash": "48828cabb19f9db0831393258d4545d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_currency_not_null",
+    "definition_hash": "6c3a13a83bce843222e634022fa17801"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_description_not_null",
+    "definition_hash": "7aee9f673f874343f255f20953d0b397"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_occurredAt_not_null",
+    "definition_hash": "076758d0de142c48ac9e93987b550780"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_orderId_fkey",
+    "definition_hash": "e08d87980faed41a5cf8b8c6683cbdd5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_payoutId_fkey",
+    "definition_hash": "48a22fce553ba3c5998e3b1ab20bd906"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Expense.Expense_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "HumanHandoff.HumanHandoff_conversationId_fkey",
+    "definition_hash": "e32051b8ee88d8f72f4838c6b4afa79a"
+  },
+  {
+    "kind": "constraint",
+    "name": "HumanHandoff.HumanHandoff_conversationId_not_null",
+    "definition_hash": "801473a3e74817372a41528908fa7217"
+  },
+  {
+    "kind": "constraint",
+    "name": "HumanHandoff.HumanHandoff_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "HumanHandoff.HumanHandoff_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "HumanHandoff.HumanHandoff_reason_check",
+    "definition_hash": "eba11ad848141c0c28d55c7266c6705b"
+  },
+  {
+    "kind": "constraint",
+    "name": "HumanHandoff.HumanHandoff_reason_not_null",
+    "definition_hash": "b4f1192ee7faf8b47df8655e2160fd8d"
+  },
+  {
+    "kind": "constraint",
+    "name": "HumanHandoff.HumanHandoff_requestedAt_not_null",
+    "definition_hash": "ab320423208f2ecdcd25f10ee1ebce3f"
+  },
+  {
+    "kind": "constraint",
+    "name": "HumanHandoff.HumanHandoff_resolvedById_fkey",
+    "definition_hash": "0b8c8a59f84f9dce0abd8a6a1945e1b2"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportBatch.ImportBatch_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportBatch.ImportBatch_expiresAt_not_null",
+    "definition_hash": "2d62146108a9ab4b7f7f1017ec121758"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportBatch.ImportBatch_fileHash_not_null",
+    "definition_hash": "970bf8bace79c76401b69164afa0a879"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportBatch.ImportBatch_fileName_not_null",
+    "definition_hash": "b5ed588c191451696923fce226213b51"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportBatch.ImportBatch_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportBatch.ImportBatch_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportBatch.ImportBatch_preview_not_null",
+    "definition_hash": "945590b0b1928b94da53ae92c2f48f7f"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportBatch.ImportBatch_userId_fkey",
+    "definition_hash": "b5ca29f1ab51098f8a483e8b3d3b0f86"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportBatch.ImportBatch_userId_not_null",
+    "definition_hash": "b0d5ff3b8580e353b0f1e7a409aed733"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportRecord.ImportRecord_batchId_fkey",
+    "definition_hash": "246b6434b2565feee64caab731d6f8db"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportRecord.ImportRecord_batchId_not_null",
+    "definition_hash": "05e43606fc569879dc682e419a02630b"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportRecord.ImportRecord_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportRecord.ImportRecord_entityId_not_null",
+    "definition_hash": "95421db4644a3341f73e03dc89770644"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportRecord.ImportRecord_entityType_not_null",
+    "definition_hash": "8ebd6404b875108e6122e23947c158db"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportRecord.ImportRecord_pkey",
+    "definition_hash": "850e8f201091012772247c1310ef7b03"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportRecord.ImportRecord_rowHash_not_null",
+    "definition_hash": "08d58ef823b0a5e118d51e9256d63db7"
+  },
+  {
+    "kind": "constraint",
+    "name": "ImportRecord.ImportRecord_sourceKey_not_null",
+    "definition_hash": "5c7a119783ed7aade9ca3a7a638018bc"
+  },
+  {
+    "kind": "constraint",
+    "name": "Investment.Investment_amount_not_null",
+    "definition_hash": "d68026f967afa96f27d4e8f0275ea7d8"
+  },
+  {
+    "kind": "constraint",
+    "name": "Investment.Investment_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Investment.Investment_currency_not_null",
+    "definition_hash": "6c3a13a83bce843222e634022fa17801"
+  },
+  {
+    "kind": "constraint",
+    "name": "Investment.Investment_description_not_null",
+    "definition_hash": "7aee9f673f874343f255f20953d0b397"
+  },
+  {
+    "kind": "constraint",
+    "name": "Investment.Investment_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Investment.Investment_occurredAt_not_null",
+    "definition_hash": "076758d0de142c48ac9e93987b550780"
+  },
+  {
+    "kind": "constraint",
+    "name": "Investment.Investment_paidBy_not_null",
+    "definition_hash": "2686630e7f29d98a907835db7df2a1f3"
+  },
+  {
+    "kind": "constraint",
+    "name": "Investment.Investment_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Investment.Investment_returnedAmount_not_null",
+    "definition_hash": "2327fca249434baaf45fbe5ddcdf395c"
+  },
+  {
+    "kind": "constraint",
+    "name": "Investment.Investment_values_check",
+    "definition_hash": "c1882f39388361116e1a3745528cc2c3"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_channel_not_null",
+    "definition_hash": "164cd92594af6bb5f08a9df600ca02f7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_clientId_fkey",
+    "definition_hash": "737c706b3f1d78586ee83b669f13dede"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_contact_request_check",
+    "definition_hash": "17ff96d29d8a22be5779693132119a1a"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_crm_values_check",
+    "definition_hash": "e701f90a5c91491e78c6e27c499b2ad8"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_humanReviewRequired_not_null",
+    "definition_hash": "565a7984ff020a1dba66c10e3407a80e"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_lost_reason_check",
+    "definition_hash": "5fd631dd08c71500e6c982c117f9f6bc"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_phone_not_null",
+    "definition_hash": "e4cabcf26c62a80ebbba72eca9459f3c"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_requestKind_not_null",
+    "definition_hash": "f61bd49e14a2ddeff4ed74c6bd4e170a"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_request_kind_check",
+    "definition_hash": "88a67ad97cd364e725a04488c1cd247c"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_serviceId_fkey",
+    "definition_hash": "e029911d232dba31df2208f46f369c57"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_status_not_null",
+    "definition_hash": "f5b14d904ec3a517af562fa35ea603cd"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_telegramStatus_not_null",
+    "definition_hash": "077e497afe8cf18d4e23ac805307c2d7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_upholsteryRequested_not_null",
+    "definition_hash": "7821af1709b8ab9c92e67b9368d6b6b3"
+  },
+  {
+    "kind": "constraint",
+    "name": "Lead.Lead_urgent_not_null",
+    "definition_hash": "dc957c8a93d31f68ee578c4ae7a11c69"
+  },
+  {
+    "kind": "constraint",
+    "name": "LeadExtra.LeadExtra_extraId_fkey",
+    "definition_hash": "5a1ee8ac6eee0a92d321a2d8096f30e6"
+  },
+  {
+    "kind": "constraint",
+    "name": "LeadExtra.LeadExtra_extraId_not_null",
+    "definition_hash": "fa701ec17c140cfec087ba8a62e0a108"
+  },
+  {
+    "kind": "constraint",
+    "name": "LeadExtra.LeadExtra_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "LeadExtra.LeadExtra_leadId_fkey",
+    "definition_hash": "74e23986a9cbc50f607652dd017dcc57"
+  },
+  {
+    "kind": "constraint",
+    "name": "LeadExtra.LeadExtra_leadId_not_null",
+    "definition_hash": "148ca642303f04e701cc2e76989b3e74"
+  },
+  {
+    "kind": "constraint",
+    "name": "LeadExtra.LeadExtra_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "LeadExtra.LeadExtra_quantity_not_null",
+    "definition_hash": "84c9ae7da357a8f6e2a5009c54a2c56f"
+  },
+  {
+    "kind": "constraint",
+    "name": "LeadExtra.LeadExtra_unitPrice_not_null",
+    "definition_hash": "e163f0b48715a0e049c34ad833777f29"
+  },
+  {
+    "kind": "constraint",
+    "name": "LeadExtra.LeadExtra_values_check",
+    "definition_hash": "ff6a567cd57d4f7f0a71223ead110e8a"
+  },
+  {
+    "kind": "constraint",
+    "name": "Message.Message_author_not_null",
+    "definition_hash": "0577a4431c905caeb1025018efe7c8b8"
+  },
+  {
+    "kind": "constraint",
+    "name": "Message.Message_conversationId_fkey",
+    "definition_hash": "e32051b8ee88d8f72f4838c6b4afa79a"
+  },
+  {
+    "kind": "constraint",
+    "name": "Message.Message_conversationId_not_null",
+    "definition_hash": "801473a3e74817372a41528908fa7217"
+  },
+  {
+    "kind": "constraint",
+    "name": "Message.Message_deliveryAttempts_not_null",
+    "definition_hash": "3c91aac6293008999373dc71c03ab987"
+  },
+  {
+    "kind": "constraint",
+    "name": "Message.Message_deliveryStatus_not_null",
+    "definition_hash": "4d777cdb57da54c6811e258ff6950040"
+  },
+  {
+    "kind": "constraint",
+    "name": "Message.Message_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Message.Message_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Message.Message_responseToMessageId_fkey",
+    "definition_hash": "d3c60826756f964c879650491bff71ee"
+  },
+  {
+    "kind": "constraint",
+    "name": "Message.Message_sentAt_not_null",
+    "definition_hash": "8c2e495621fd420ef4813041a3684b52"
+  },
+  {
+    "kind": "constraint",
+    "name": "Message.Message_text_not_null",
+    "definition_hash": "5fe018cdb5376910d934c8a39c2d506f"
+  },
+  {
+    "kind": "constraint",
+    "name": "Message.Message_userId_fkey",
+    "definition_hash": "b2da3a92eddfcd051e448eb99644da11"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_attempts_not_null",
+    "definition_hash": "23f81be14a707575150cd90a14e76fd7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_channel_not_null",
+    "definition_hash": "164cd92594af6bb5f08a9df600ca02f7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_cleanerId_fkey",
+    "definition_hash": "67afd78bed1c7e305ad542f45c4e97c5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_clientId_fkey",
+    "definition_hash": "737c706b3f1d78586ee83b669f13dede"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_deliveryState_not_null",
+    "definition_hash": "fbb0027125e5431f9d9bc0716b2e97f9"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_recipient_check",
+    "definition_hash": "84c909f811e274763e62e25707a35af6"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_scheduledAt_not_null",
+    "definition_hash": "2e5659912e16429f07baca63f38817ad"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_status_not_null",
+    "definition_hash": "f5b14d904ec3a517af562fa35ea603cd"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_text_not_null",
+    "definition_hash": "5fe018cdb5376910d934c8a39c2d506f"
+  },
+  {
+    "kind": "constraint",
+    "name": "Notification.Notification_userId_fkey",
+    "definition_hash": "b2da3a92eddfcd051e448eb99644da11"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_addressId_clientId_fkey",
+    "definition_hash": "927aee06f6e7879abdd110f395fc1e4d"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_addressId_not_null",
+    "definition_hash": "4bbb3bf81ac54ecd5ef214d0f1992d47"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_amounts_duration_check",
+    "definition_hash": "e84c73f4eed7b912eddd183f23044ec5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_area_not_null",
+    "definition_hash": "c546b61036c693914172e15e9c6fbda7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_cleaningReserveMinutes_not_null",
+    "definition_hash": "b26e73189f1975c9ebd86e8b88b59298"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_clientId_fkey",
+    "definition_hash": "218eaae9f40f698caacc99df7af2e729"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_clientId_not_null",
+    "definition_hash": "357fde0402574b118f204ecd26d855f7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_completion_check",
+    "definition_hash": "05bbab1bc87e48932aed031a3ff13eb6"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_copiedFromId_fkey",
+    "definition_hash": "d12509720f7d891ae1009f452bffdc7c"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_crm_values_check",
+    "definition_hash": "cee066956cce78f207e00a6ade0404fb"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_currency_not_null",
+    "definition_hash": "6c3a13a83bce843222e634022fa17801"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_discountAmount_not_null",
+    "definition_hash": "6cf98f11972aebdd782320b3b2967a10"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_discountPercent_not_null",
+    "definition_hash": "195386f75ca5a1cc4a7059659e719836"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_durationRuleId_fkey",
+    "definition_hash": "ae60d4e86397c025bc62c61f62e33fe7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_historical_not_null",
+    "definition_hash": "8df926df6c8b617814db98e92af1677c"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_leadId_fkey",
+    "definition_hash": "966013764491389cb33a715f4676c8e8"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_live_service_check",
+    "definition_hash": "84dc72d299ccfe849e5f14e66baaa900"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_pricingBasis_not_null",
+    "definition_hash": "b83cf1c6524c793993815b57ba5ef9c0"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_repeatSeriesId_fkey",
+    "definition_hash": "b7772b11745777adce70c147d3fc6f41"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_requiredCleaners_not_null",
+    "definition_hash": "a649dd0f46dfc2121eb8374333d6f2f0"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_scheduleMode_not_null",
+    "definition_hash": "5341947354aeb7a5c4bedc186145461f"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_schedule_check",
+    "definition_hash": "f2e5af0207dbbc4f8cf0349d281adf19"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_serviceId_fkey",
+    "definition_hash": "58953b7958a9610d27c37a5b72a64b38"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_source_not_null",
+    "definition_hash": "e782c45d380073ad64d82332f65b90ce"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_status_not_null",
+    "definition_hash": "f5b14d904ec3a517af562fa35ea603cd"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_travelBufferMinutes_not_null",
+    "definition_hash": "b7a8ad527d9db6c71cf955d0b2f6bd89"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "Order.Order_urgent_not_null",
+    "definition_hash": "dc957c8a93d31f68ee578c4ae7a11c69"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderCleaner.OrderCleaner_assignedAt_not_null",
+    "definition_hash": "57f69a14ac1785a31611e94dc887af3f"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderCleaner.OrderCleaner_cleanerId_fkey",
+    "definition_hash": "585f2f13d6946bef0353b4e6a3997a41"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderCleaner.OrderCleaner_cleanerId_not_null",
+    "definition_hash": "a84cbdf62b3a492b70d51be3121fd71b"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderCleaner.OrderCleaner_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderCleaner.OrderCleaner_orderId_fkey",
+    "definition_hash": "f502c20dfe95e27694832f38b3eb86ce"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderCleaner.OrderCleaner_orderId_not_null",
+    "definition_hash": "ed08a9ffda22312ec96e59dca34b32d9"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderCleaner.OrderCleaner_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderExtra.OrderExtra_amount_check",
+    "definition_hash": "2d9e04a439bdc76b8b6bac27a1cee501"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderExtra.OrderExtra_extraId_fkey",
+    "definition_hash": "5a1ee8ac6eee0a92d321a2d8096f30e6"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderExtra.OrderExtra_extraId_not_null",
+    "definition_hash": "fa701ec17c140cfec087ba8a62e0a108"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderExtra.OrderExtra_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderExtra.OrderExtra_orderId_fkey",
+    "definition_hash": "f502c20dfe95e27694832f38b3eb86ce"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderExtra.OrderExtra_orderId_not_null",
+    "definition_hash": "ed08a9ffda22312ec96e59dca34b32d9"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderExtra.OrderExtra_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderExtra.OrderExtra_quantity_not_null",
+    "definition_hash": "84c9ae7da357a8f6e2a5009c54a2c56f"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderExtra.OrderExtra_unitPrice_not_null",
+    "definition_hash": "e163f0b48715a0e049c34ad833777f29"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_endsOn_not_null",
+    "definition_hash": "f37ca579b81be06e9cb4110f0a0402d0"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_requestHash_not_null",
+    "definition_hash": "ca36be51788c0e51079897d7cae96afc"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_requestId_not_null",
+    "definition_hash": "931f5170d177f873b93d65b295ae1c81"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_sourceOrderId_fkey",
+    "definition_hash": "0a43ee2ffb41f734a968e53915e698b3"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_sourceOrderId_not_null",
+    "definition_hash": "1ae3882a6d11afff65709683949013b7"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_template_not_null",
+    "definition_hash": "f1e80c8a8a2527c1c2eb058c73b5fc01"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_weekdays_not_null",
+    "definition_hash": "d43aa946b11712adb16db803bddd2593"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderRepeatSeries.OrderRepeatSeries_weekly_not_null",
+    "definition_hash": "065652b5d91a76e7c49985f203e58113"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderUpholstery.OrderUpholstery_input_not_null",
+    "definition_hash": "90139026ad2886bb8734d9d3c6a88817"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderUpholstery.OrderUpholstery_orderId_fkey",
+    "definition_hash": "ab4c00bdacba3fe0963631bf76907902"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderUpholstery.OrderUpholstery_orderId_not_null",
+    "definition_hash": "ed08a9ffda22312ec96e59dca34b32d9"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderUpholstery.OrderUpholstery_patchTestConfirmed_not_null",
+    "definition_hash": "7ccd4eff2e9adf6c5ac3714ded383d73"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderUpholstery.OrderUpholstery_pkey",
+    "definition_hash": "f5f17a84faeb8f6e3b6619eed905a73e"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderUpholstery.OrderUpholstery_quote_not_null",
+    "definition_hash": "48a62c718a5869b017e8ed5a826e68dd"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderUpholstery.OrderUpholstery_reviewStatus_not_null",
+    "definition_hash": "bfe681e554b1cbfe684c012b89bb5096"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderUpholstery.OrderUpholstery_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderUpholstery.upholstery_intervals",
+    "definition_hash": "c5dd79b8384066628b764ed3cfc61d28"
+  },
+  {
+    "kind": "constraint",
+    "name": "OrderUpholstery.upholstery_review",
+    "definition_hash": "a4fd71040faa3ea494a085627d5e6281"
+  },
+  {
+    "kind": "constraint",
+    "name": "RateLimit.RateLimit_count_not_null",
+    "definition_hash": "c6baa7f7572cf0256e68a12e8a838f85"
+  },
+  {
+    "kind": "constraint",
+    "name": "RateLimit.RateLimit_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "RateLimit.RateLimit_key_not_null",
+    "definition_hash": "68fc6834cf0bce9e8776a47a266107be"
+  },
+  {
+    "kind": "constraint",
+    "name": "RateLimit.RateLimit_lastRequest_not_null",
+    "definition_hash": "01591510711d3882afa7a81217b08710"
+  },
+  {
+    "kind": "constraint",
+    "name": "RateLimit.RateLimit_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_cacheKey_not_null",
+    "definition_hash": "abe409438fe687d21fc8ed7c0858c095"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_calculatedAt_not_null",
+    "definition_hash": "db96d314b1f9b3e66f504c250315da41"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_destination_not_null",
+    "definition_hash": "6fcdf3b54294cfe4625e9e6fc8a20a0a"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_distanceMeters_not_null",
+    "definition_hash": "f50a0e40525716deba308ccd18a4e898"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_durationSeconds_not_null",
+    "definition_hash": "b21257914a84c35a0a2893f366311280"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_expiresAt_not_null",
+    "definition_hash": "2d62146108a9ab4b7f7f1017ec121758"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_origin_not_null",
+    "definition_hash": "ac51c6826ce412cbeb7da69e27458551"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_provider_not_null",
+    "definition_hash": "e7cfef01ff5f5098e1de3a042af0bf29"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_travelMode_not_null",
+    "definition_hash": "235b16a92436902234786513f858526d"
+  },
+  {
+    "kind": "constraint",
+    "name": "RouteCalculation.RouteCalculation_values_check",
+    "definition_hash": "19cba2de7390293676c64562c4a30b7c"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingBenchmark.RoutingBenchmark_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingBenchmark.RoutingBenchmark_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingBenchmark.RoutingBenchmark_request_not_null",
+    "definition_hash": "7b2cd756cb90df075627ca10f1cabfbb"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingBenchmark.benchmark_reference_bounds",
+    "definition_hash": "fd2f3c616ce5cb10683bd22f71282575"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingRequestLease.RoutingRequestLease_expiresAt_not_null",
+    "definition_hash": "2d62146108a9ab4b7f7f1017ec121758"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingRequestLease.RoutingRequestLease_key_not_null",
+    "definition_hash": "68fc6834cf0bce9e8776a47a266107be"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingRequestLease.RoutingRequestLease_owner_not_null",
+    "definition_hash": "22b4dbd1d39055281f08e112eabcf894"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingRequestLease.RoutingRequestLease_pkey",
+    "definition_hash": "e9887b31fc359de4ef0bdecc78d0411b"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingUsageMonth.RoutingUsageMonth_cacheHits_not_null",
+    "definition_hash": "d0ab97df6d47c61f492d1e27a58ab8c8"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingUsageMonth.RoutingUsageMonth_errors_not_null",
+    "definition_hash": "c95ebba91d4a9c36bca9aeab77f4a26c"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingUsageMonth.RoutingUsageMonth_fallbackLegs_not_null",
+    "definition_hash": "1157cc5dfe1974f848c87adec03e14ef"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingUsageMonth.RoutingUsageMonth_liveLegs_not_null",
+    "definition_hash": "cebfc579401cd85c290965d080436a98"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingUsageMonth.RoutingUsageMonth_period_not_null",
+    "definition_hash": "4860cd41ce03d48aa1b2e08f2dbbfa1b"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingUsageMonth.RoutingUsageMonth_pkey",
+    "definition_hash": "d06adaab09ed827ebef80a0d42eb7074"
+  },
+  {
+    "kind": "constraint",
+    "name": "RoutingUsageMonth.RoutingUsageMonth_requests_not_null",
+    "definition_hash": "16043319a9224d3e6aa90efa978825b9"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingOverride.SchedulingOverride_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingOverride.SchedulingOverride_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingOverride.SchedulingOverride_issueKeys_not_null",
+    "definition_hash": "c50256581be012174aca72f907c11690"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingOverride.SchedulingOverride_orderId_fkey",
+    "definition_hash": "f502c20dfe95e27694832f38b3eb86ce"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingOverride.SchedulingOverride_orderId_not_null",
+    "definition_hash": "ed08a9ffda22312ec96e59dca34b32d9"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingOverride.SchedulingOverride_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingOverride.SchedulingOverride_reason_check",
+    "definition_hash": "d2096d049c9ec3e228d4b77feed322f3"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingOverride.SchedulingOverride_reason_not_null",
+    "definition_hash": "b4f1192ee7faf8b47df8655e2160fd8d"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingOverride.SchedulingOverride_userId_fkey",
+    "definition_hash": "b5ca29f1ab51098f8a483e8b3d3b0f86"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingOverride.SchedulingOverride_userId_not_null",
+    "definition_hash": "b0d5ff3b8580e353b0f1e7a409aed733"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingProposal.SchedulingProposal_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingProposal.SchedulingProposal_date_check",
+    "definition_hash": "1b1a50224a6ea66677fb4e2071f79d35"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingProposal.SchedulingProposal_date_not_null",
+    "definition_hash": "781e8b45833ba827734147569fa90d1f"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingProposal.SchedulingProposal_expiresAt_not_null",
+    "definition_hash": "2d62146108a9ab4b7f7f1017ec121758"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingProposal.SchedulingProposal_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingProposal.SchedulingProposal_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingProposal.SchedulingProposal_plan_not_null",
+    "definition_hash": "4d3ab934c2096799a8979ba5565a2342"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingProposal.SchedulingProposal_userId_fkey",
+    "definition_hash": "b5ca29f1ab51098f8a483e8b3d3b0f86"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingProposal.SchedulingProposal_userId_not_null",
+    "definition_hash": "b0d5ff3b8580e353b0f1e7a409aed733"
+  },
+  {
+    "kind": "constraint",
+    "name": "SchedulingProposal.SchedulingProposal_version_not_null",
+    "definition_hash": "1aeb4b0bc6a08cf1d264013fe7192161"
+  },
+  {
+    "kind": "constraint",
+    "name": "Service.Service_active_not_null",
+    "definition_hash": "e6739aa2e25b31acb848fb0599bd0d14"
+  },
+  {
+    "kind": "constraint",
+    "name": "Service.Service_code_not_null",
+    "definition_hash": "84adddb186a830f127c68083cb76fab8"
+  },
+  {
+    "kind": "constraint",
+    "name": "Service.Service_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Service.Service_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Service.Service_name_not_null",
+    "definition_hash": "16aff98a310953a807552b3536c15db7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Service.Service_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Service.Service_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServiceExtra.ServiceExtra_active_not_null",
+    "definition_hash": "e6739aa2e25b31acb848fb0599bd0d14"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServiceExtra.ServiceExtra_code_not_null",
+    "definition_hash": "84adddb186a830f127c68083cb76fab8"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServiceExtra.ServiceExtra_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServiceExtra.ServiceExtra_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServiceExtra.ServiceExtra_name_not_null",
+    "definition_hash": "16aff98a310953a807552b3536c15db7"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServiceExtra.ServiceExtra_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServiceExtra.ServiceExtra_price_check",
+    "definition_hash": "d03e27de83ec7c5acb899840dc825866"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServiceExtra.ServiceExtra_unitPrice_not_null",
+    "definition_hash": "e163f0b48715a0e049c34ad833777f29"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServiceExtra.ServiceExtra_unit_not_null",
+    "definition_hash": "8a7a97878d44f06605c994ec5bab8e6a"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServiceExtra.ServiceExtra_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServicePriceBand.ServicePriceBand_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServicePriceBand.ServicePriceBand_minArea_not_null",
+    "definition_hash": "f605ff45e3a52cb2e7bca59841e8070f"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServicePriceBand.ServicePriceBand_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServicePriceBand.ServicePriceBand_range_check",
+    "definition_hash": "535393953970dbc535fdea6f0ab1a987"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServicePriceBand.ServicePriceBand_serviceId_fkey",
+    "definition_hash": "58953b7958a9610d27c37a5b72a64b38"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServicePriceBand.ServicePriceBand_serviceId_not_null",
+    "definition_hash": "a6e77550063ef8166e52edfa1ea7d169"
+  },
+  {
+    "kind": "constraint",
+    "name": "ServicePriceBand.ServicePriceBand_validFrom_not_null",
+    "definition_hash": "517d31a0cca67062749236a90fc0cee4"
+  },
+  {
+    "kind": "constraint",
+    "name": "Session.Session_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Session.Session_expiresAt_not_null",
+    "definition_hash": "2d62146108a9ab4b7f7f1017ec121758"
+  },
+  {
+    "kind": "constraint",
+    "name": "Session.Session_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Session.Session_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Session.Session_token_not_null",
+    "definition_hash": "48bbbacb357faaaac4d74de688cdf7d7"
+  },
+  {
+    "kind": "constraint",
+    "name": "Session.Session_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "Session.Session_userId_fkey",
+    "definition_hash": "508550da9aa6deebb4719a79786bccb3"
+  },
+  {
+    "kind": "constraint",
+    "name": "Session.Session_userId_not_null",
+    "definition_hash": "b0d5ff3b8580e353b0f1e7a409aed733"
+  },
+  {
+    "kind": "constraint",
+    "name": "ShadowSuggestion.ShadowSuggestion_conversationId_not_null",
+    "definition_hash": "801473a3e74817372a41528908fa7217"
+  },
+  {
+    "kind": "constraint",
+    "name": "ShadowSuggestion.ShadowSuggestion_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "ShadowSuggestion.ShadowSuggestion_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "ShadowSuggestion.ShadowSuggestion_jobId_not_null",
+    "definition_hash": "45500527984d10886c36ac75020ac00c"
+  },
+  {
+    "kind": "constraint",
+    "name": "ShadowSuggestion.ShadowSuggestion_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "ShadowSuggestion.ShadowSuggestion_snapshot_not_null",
+    "definition_hash": "66938e1a28f8346c5b872c22a2c4339d"
+  },
+  {
+    "kind": "constraint",
+    "name": "UpholsterySettings.UpholsterySettings_catalog_not_null",
+    "definition_hash": "0b531864a60900f22aa13335ab06c8d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "UpholsterySettings.UpholsterySettings_extractorQuantity_not_null",
+    "definition_hash": "dbd3c3bc7c94a9c2e9e9d8c56c4bd8e2"
+  },
+  {
+    "kind": "constraint",
+    "name": "UpholsterySettings.UpholsterySettings_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "UpholsterySettings.UpholsterySettings_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "UpholsterySettings.UpholsterySettings_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "UpholsterySettings.UpholsterySettings_version_not_null",
+    "definition_hash": "1aeb4b0bc6a08cf1d264013fe7192161"
+  },
+  {
+    "kind": "constraint",
+    "name": "UpholsterySettings.extractor_quantity",
+    "definition_hash": "e139f3790395324d50080df322d273e3"
+  },
+  {
+    "kind": "constraint",
+    "name": "User.User_active_not_null",
+    "definition_hash": "e6739aa2e25b31acb848fb0599bd0d14"
+  },
+  {
+    "kind": "constraint",
+    "name": "User.User_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "User.User_emailVerified_not_null",
+    "definition_hash": "75da8fa0fa20ae6191e501ad8c22962d"
+  },
+  {
+    "kind": "constraint",
+    "name": "User.User_email_not_null",
+    "definition_hash": "091c50bf4d67b3a529b69a82e80a933b"
+  },
+  {
+    "kind": "constraint",
+    "name": "User.User_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "User.User_name_not_null",
+    "definition_hash": "16aff98a310953a807552b3536c15db7"
+  },
+  {
+    "kind": "constraint",
+    "name": "User.User_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "User.User_role_not_null",
+    "definition_hash": "e1b52c0743144481b002e2b3e5ad939d"
+  },
+  {
+    "kind": "constraint",
+    "name": "User.User_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "Verification.Verification_createdAt_not_null",
+    "definition_hash": "be1f2dbb06a4a366dd01457e753a3358"
+  },
+  {
+    "kind": "constraint",
+    "name": "Verification.Verification_expiresAt_not_null",
+    "definition_hash": "2d62146108a9ab4b7f7f1017ec121758"
+  },
+  {
+    "kind": "constraint",
+    "name": "Verification.Verification_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "Verification.Verification_identifier_not_null",
+    "definition_hash": "abb764a161ec7f102e09fb26c6f22d40"
+  },
+  {
+    "kind": "constraint",
+    "name": "Verification.Verification_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "Verification.Verification_updatedAt_not_null",
+    "definition_hash": "e5d951db01db98e428b1df9a6197d2d4"
+  },
+  {
+    "kind": "constraint",
+    "name": "Verification.Verification_value_not_null",
+    "definition_hash": "0dc456c085ca0ab234f4580cf6f5a9bb"
+  },
+  {
+    "kind": "constraint",
+    "name": "_prisma_migrations._prisma_migrations_applied_steps_count_not_null",
+    "definition_hash": "7c6a09d13ce419577a1e72795ab53ae9"
+  },
+  {
+    "kind": "constraint",
+    "name": "_prisma_migrations._prisma_migrations_checksum_not_null",
+    "definition_hash": "c4a952c1698f25917d096db795577d01"
+  },
+  {
+    "kind": "constraint",
+    "name": "_prisma_migrations._prisma_migrations_id_not_null",
+    "definition_hash": "74bfd71b5c9c2256d408814b8328c7a5"
+  },
+  {
+    "kind": "constraint",
+    "name": "_prisma_migrations._prisma_migrations_migration_name_not_null",
+    "definition_hash": "1bd3223e34c43465b8f1887706a48848"
+  },
+  {
+    "kind": "constraint",
+    "name": "_prisma_migrations._prisma_migrations_pkey",
+    "definition_hash": "36fb45f017e92d02c76bed4ec6520f00"
+  },
+  {
+    "kind": "constraint",
+    "name": "_prisma_migrations._prisma_migrations_started_at_not_null",
+    "definition_hash": "89c3bf05ded38a558d4617a25da5bbe9"
+  },
+  {
+    "kind": "enum",
+    "name": "ActorType",
+    "definition_hash": "3c8f743afdd8080a6b2daadd55e3c05e"
+  },
+  {
+    "kind": "enum",
+    "name": "AgentMode",
+    "definition_hash": "422e620d6885bb7bc0a79a2713c69bb7"
+  },
+  {
+    "kind": "enum",
+    "name": "AvailabilityKind",
+    "definition_hash": "3114faabfe9b46ff23f7cc53785f9dbd"
+  },
+  {
+    "kind": "enum",
+    "name": "Channel",
+    "definition_hash": "9a1724de6ce336ce45a8de075b49f8cb"
+  },
+  {
+    "kind": "enum",
+    "name": "ConversationControl",
+    "definition_hash": "1162d3a05f32671857d8e6341ec3ba15"
+  },
+  {
+    "kind": "enum",
+    "name": "ConversationStage",
+    "definition_hash": "46d2b3bcdcf4bf2894f843975cfc7814"
+  },
+  {
+    "kind": "enum",
+    "name": "ExpenseCategory",
+    "definition_hash": "831dd8c8f8dff1f4a1076ef86a6780e7"
+  },
+  {
+    "kind": "enum",
+    "name": "LeadStatus",
+    "definition_hash": "117e22dcc1af8b9fbb40208b921f8861"
+  },
+  {
+    "kind": "enum",
+    "name": "MessageAuthor",
+    "definition_hash": "0290faa45c2bd8613e4a07c1c5f2237d"
+  },
+  {
+    "kind": "enum",
+    "name": "NotificationStatus",
+    "definition_hash": "624519776eee3595b98980c68b6fc142"
+  },
+  {
+    "kind": "enum",
+    "name": "OrderStatus",
+    "definition_hash": "e6769c8e259913b0137ffafa78d031e4"
+  },
+  {
+    "kind": "enum",
+    "name": "PaymentStatus",
+    "definition_hash": "9b0f208949e5903b4b68be790f5a2896"
+  },
+  {
+    "kind": "enum",
+    "name": "Role",
+    "definition_hash": "4cda260949ba5c92a3e5825934127f64"
+  },
+  {
+    "kind": "enum",
+    "name": "ScheduleMode",
+    "definition_hash": "8f31ceec2487a2019f9761c2638fbda1"
+  },
+  {
+    "kind": "enum",
+    "name": "SoilLevel",
+    "definition_hash": "a36d4450d099f0a17069a5cb8c47c9e9"
+  },
+  {
+    "kind": "enum",
+    "name": "TravelMode",
+    "definition_hash": "c2fa09449d9a9b6d24daf024fe865893"
+  },
+  {
+    "kind": "function",
+    "name": "chat_response_source_guard()",
+    "definition_hash": "d3b9076f8ca1c07106f66552bc704110"
+  },
+  {
+    "kind": "function",
+    "name": "gin_extract_query_trgm(text, internal, smallint, internal, internal, internal, internal)",
+    "definition_hash": "908112f5743e0dc3307ce7da24a3d095"
+  },
+  {
+    "kind": "function",
+    "name": "gin_extract_value_trgm(text, internal)",
+    "definition_hash": "42bc3d69fe7ae6ba4409315e68686e93"
+  },
+  {
+    "kind": "function",
+    "name": "gin_trgm_consistent(internal, smallint, text, integer, internal, internal, internal, internal)",
+    "definition_hash": "3b5516ee327d210cf276d0f7cbec6a1b"
+  },
+  {
+    "kind": "function",
+    "name": "gin_trgm_triconsistent(internal, smallint, text, integer, internal, internal, internal)",
+    "definition_hash": "ebb9557e4d7f2342aa65aa319bf2f6ad"
+  },
+  {
+    "kind": "function",
+    "name": "gtrgm_compress(internal)",
+    "definition_hash": "0ac3144cfd060482fab5339fe0e2a9e1"
+  },
+  {
+    "kind": "function",
+    "name": "gtrgm_consistent(internal, text, smallint, oid, internal)",
+    "definition_hash": "00d55f7471e62f08ca85d8d4e61991e7"
+  },
+  {
+    "kind": "function",
+    "name": "gtrgm_decompress(internal)",
+    "definition_hash": "217b0af3efb9f430e911c6e2aeb0aa99"
+  },
+  {
+    "kind": "function",
+    "name": "gtrgm_distance(internal, text, smallint, oid, internal)",
+    "definition_hash": "374c53a6404b5daf685b2c4222c76a54"
+  },
+  {
+    "kind": "function",
+    "name": "gtrgm_in(cstring)",
+    "definition_hash": "85d9e1867f8d5b1ad99fbeac7a03595e"
+  },
+  {
+    "kind": "function",
+    "name": "gtrgm_options(internal)",
+    "definition_hash": "18b083f2c473ca71bc90b18732d82493"
+  },
+  {
+    "kind": "function",
+    "name": "gtrgm_out(gtrgm)",
+    "definition_hash": "03641c6b5e277450ea5f628094c0a607"
+  },
+  {
+    "kind": "function",
+    "name": "gtrgm_penalty(internal, internal, internal)",
+    "definition_hash": "4f0a4190629a524609fe1b21fc480341"
+  },
+  {
+    "kind": "function",
+    "name": "gtrgm_picksplit(internal, internal)",
+    "definition_hash": "366a79f83941d97999f208690619b79d"
+  },
+  {
+    "kind": "function",
+    "name": "gtrgm_same(gtrgm, gtrgm, internal)",
+    "definition_hash": "e34ae9aee761b36d68942175420b9030"
+  },
+  {
+    "kind": "function",
+    "name": "gtrgm_union(internal, internal)",
+    "definition_hash": "1e514b035bac6c001492f0ec64f222b8"
+  },
+  {
+    "kind": "function",
+    "name": "lumaclean_audit_append_only()",
+    "definition_hash": "69076c546241d2c6c0b36a638d4b8e30"
+  },
+  {
+    "kind": "function",
+    "name": "lumaclean_duration_immutable()",
+    "definition_hash": "a25f111a35dc803a0ff407ffce84701f"
+  },
+  {
+    "kind": "function",
+    "name": "lumaclean_order_end()",
+    "definition_hash": "ed13cf793c72c12f3e19b9a89a657f12"
+  },
+  {
+    "kind": "function",
+    "name": "set_limit(real)",
+    "definition_hash": "c30ba59e63bc3cb36608046c50620e39"
+  },
+  {
+    "kind": "function",
+    "name": "show_limit()",
+    "definition_hash": "4be49f417a851b1848da525e573e408d"
+  },
+  {
+    "kind": "function",
+    "name": "show_trgm(text)",
+    "definition_hash": "42aa0974abb454971132812dcce06cac"
+  },
+  {
+    "kind": "function",
+    "name": "similarity(text, text)",
+    "definition_hash": "fd931cb85ba442355f277550b8836710"
+  },
+  {
+    "kind": "function",
+    "name": "similarity_dist(text, text)",
+    "definition_hash": "831e333ae2231e3fb1e6e88a55ccc0a0"
+  },
+  {
+    "kind": "function",
+    "name": "similarity_op(text, text)",
+    "definition_hash": "c62f80a7a7107d232daf8683decbfaf5"
+  },
+  {
+    "kind": "function",
+    "name": "strict_word_similarity(text, text)",
+    "definition_hash": "523450d477b4e105989795603c58761a"
+  },
+  {
+    "kind": "function",
+    "name": "strict_word_similarity_commutator_op(text, text)",
+    "definition_hash": "49fe0d7b5f628c2f13e21ad6d0c5d28f"
+  },
+  {
+    "kind": "function",
+    "name": "strict_word_similarity_dist_commutator_op(text, text)",
+    "definition_hash": "e4384ee3a07267eb13f09bb4b042f334"
+  },
+  {
+    "kind": "function",
+    "name": "strict_word_similarity_dist_op(text, text)",
+    "definition_hash": "bc660db5cc387e8821747f1ecfb347eb"
+  },
+  {
+    "kind": "function",
+    "name": "strict_word_similarity_op(text, text)",
+    "definition_hash": "fa21d1ae2c217ba161bb3f7777e5e020"
+  },
+  {
+    "kind": "function",
+    "name": "word_similarity(text, text)",
+    "definition_hash": "f9acfb3b071c96db4b1bb593b621c747"
+  },
+  {
+    "kind": "function",
+    "name": "word_similarity_commutator_op(text, text)",
+    "definition_hash": "98ece0ccacd71230bea0e7805d310670"
+  },
+  {
+    "kind": "function",
+    "name": "word_similarity_dist_commutator_op(text, text)",
+    "definition_hash": "db36854b61d077b4cb945606bab01fc6"
+  },
+  {
+    "kind": "function",
+    "name": "word_similarity_dist_op(text, text)",
+    "definition_hash": "ab0c2cb7ec6c0cbe0937ec3288d2cfda"
+  },
+  {
+    "kind": "function",
+    "name": "word_similarity_op(text, text)",
+    "definition_hash": "9cb3bc9ce246a2c4c4d17c7205f4a17f"
+  },
+  {
+    "kind": "trigger",
+    "name": "AuditLog.AuditLog_append_only",
+    "definition_hash": "7b720d1da4cbf4d09b1954d1a136bf35"
+  },
+  {
+    "kind": "trigger",
+    "name": "DurationRule.DurationRule_immutable",
+    "definition_hash": "706f768c9daa1bdad47f6990d82aca89"
+  },
+  {
+    "kind": "trigger",
+    "name": "Message.chat_response_source_guard",
+    "definition_hash": "990da5dbbf435429a5c96feb7a2aad73"
+  },
+  {
+    "kind": "trigger",
+    "name": "Order.Order_derived_end",
+    "definition_hash": "de39589efa16624c632185f9eafe724c"
+  }
+]

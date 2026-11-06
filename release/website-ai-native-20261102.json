@@ -1,0 +1,142 @@
+{
+  "scope": "Owner-approved protected Preview diagnostics; no production writes",
+  "status": "PASS_NATIVE_PREVIEW_PRODUCTION_PENDING",
+  "blocker": null,
+  "originalBlocker": "OPENROUTER_PREVIEW_PROVIDER_HTTP_401",
+  "credentialRepairedPreviewOnly": true,
+  "deployment": "dpl_33JVzJNTGbi6MxY1L4bGRMA9r82o",
+  "url": "https://lumaclean-release-candidate-3s91pxle2.vercel.app",
+  "source": "91eb55e8c32edc248548a85f2fce33ac5a9517dd",
+  "fingerprint": "fbff1ffcb5fb03a1d9ec32c36d9acd5ce45a299ed9984c4b236b3399b408b801",
+  "attemptAt": "2026-11-02T15:50:24.786Z",
+  "nativeDiagnostics": {
+    "primary": "PASS",
+    "fallback": "FAIL_HTTP_401",
+    "places": "PASS_MOTIS",
+    "routing": "PASS_DEGRADED_WALKING_FALLBACK_80_MINUTES",
+    "liveTransitVerified": false
+  },
+  "transportAttempts": {
+    "llm": 2,
+    "motis": 3,
+    "google": 0,
+    "telegram": 0,
+    "budgetExceeded": false
+  },
+  "nativeBookings": {
+    "run": 3,
+    "pass": 2,
+    "fail": 1,
+    "cleaned": true,
+    "scope": "Actual isolated Preview; failed historical attempt retained"
+  },
+  "secondAttempt": {
+    "deployment": "dpl_Hi7TBj6DEqLV6pfVCMgkPwbjGSwY",
+    "url": "https://lumaclean-release-candidate-ldyvmoidb.vercel.app",
+    "source": "7c10b28bb5b7916c7fd50bf66631e1d4e2570699",
+    "diagnostics": {
+      "primary": "FAIL_PROVIDER_TIMEOUT_OR_NETWORK",
+      "fallback": "PASS_NATIVE",
+      "places": "PASS_MOTIS",
+      "routing": "PASS_DEGRADED_WALKING"
+    },
+    "transportAttempts": {
+      "llm": 3,
+      "motis": 3,
+      "google": 0,
+      "telegram": 0
+    },
+    "regularBooking": {
+      "status": "FAIL",
+      "primary": "NATIVE_QUALIFICATION_FACTS_MISMATCH",
+      "fallback": "NOT_SENT_BUDGET_LIMIT",
+      "cleaned": true,
+      "orderCreated": false
+    },
+    "deepBooking": "NOT_RUN",
+    "staffAndRulesCleanup": "PASS",
+    "previewModeAfterCleanup": "OFF",
+    "temporaryShareRevoked": true
+  },
+  "aggregateTransportAttempts": {
+    "llm": 9,
+    "motis": 39,
+    "google": 0,
+    "telegram": 0
+  },
+  "cloudSmoke": {
+    "localizedPages": 3,
+    "adminLogin": "PASS",
+    "healthWithoutBearer": 401,
+    "healthPreview": "SKIP_DISABLED_CONFIRMED"
+  },
+  "cleanup": {
+    "status": "PASS",
+    "temporaryStaffRemoved": 2,
+    "temporaryDurationRulesRemoved": 2,
+    "remainingClients": 0,
+    "remainingOrders": 0,
+    "remainingConversations": 0,
+    "remainingMessages": 0,
+    "previousSyntheticLeadsPreserved": 10,
+    "previewMode": "OFF",
+    "temporaryShareRevoked": true
+  },
+  "productionWrites": 0,
+  "productionDeployment": "dpl_BoZRwQkeGhZawFUFgedrCQDqYWCe",
+  "productionSource": "b9a16f69a669b064884df96d1c688013bf6b7b5b",
+  "websiteAiEnabled": false,
+  "nextAction": "Separate owner approval for exact staged production build --prod --skip-domain. Production DB mode remains OFF; no migrations, seed, proof import, duration edits, native calls or promotion. Production configuration/HMAC admission remains unverified until staged checks and approved prospective rule application.",
+  "successfulAttempt": {
+    "deployment": "dpl_ECwhA2RjcNj8JKVv1icFtxdQjoj3",
+    "url": "https://lumaclean-release-candidate-cjxxgk6st.vercel.app",
+    "source": "ce8e9b2939dd5c9743cca352d40aafca3f14c037",
+    "fingerprint": "ff37b27b7936a8148908efaed1b61e1bcacc178449b7ea531415c61eece08f88",
+    "diagnostics": {
+      "primary": "PASS_NATIVE",
+      "fallback": "PASS_NATIVE",
+      "places": "PASS_MOTIS",
+      "routing": "PASS_DEGRADED_WALKING",
+      "liveTransitVerified": false
+    },
+    "bookings": [
+      {
+        "service": "regular",
+        "status": "PASS_NATIVE",
+        "steps": 8,
+        "minutes": 120,
+        "cleaningReserveMinutes": 30,
+        "travelBufferMinutes": 30,
+        "requiredCleaners": 2,
+        "assignedCleaners": 2,
+        "price": 6000,
+        "cleaned": true,
+        "proofAt": "2026-11-02T16:18:08.079Z",
+        "config": "6d4d454de4557cd7e103fd17ebf7d7a02cd30584f92c8514815f657a798a068e"
+      },
+      {
+        "service": "deep",
+        "status": "PASS_NATIVE",
+        "steps": 8,
+        "minutes": 360,
+        "cleaningReserveMinutes": 30,
+        "travelBufferMinutes": 30,
+        "requiredCleaners": 2,
+        "assignedCleaners": 2,
+        "price": 11400,
+        "cleaned": true,
+        "proofAt": "2026-11-02T16:18:24.431Z",
+        "config": "6d4d454de4557cd7e103fd17ebf7d7a02cd30584f92c8514815f657a798a068e"
+      }
+    ],
+    "transportAttempts": {
+      "llm": 4,
+      "motis": 33,
+      "google": 0,
+      "telegram": 0
+    },
+    "cleanup": "PASS",
+    "previewModeAfterCleanup": "OFF",
+    "productionWrites": 0
+  }
+}

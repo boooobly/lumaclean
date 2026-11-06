@@ -1,0 +1,35 @@
+{
+  "status": "PASS_LOCAL",
+  "identity": {
+    "role": "lumaclean_staging_app",
+    "database": "lumaclean_staging_test",
+    "host": "127.0.0.1/32",
+    "port": 55449,
+    "version": "180006"
+  },
+  "source": "empty PG18 + migrations + synthetic catalogue only",
+  "counts": {
+    "clients": 0,
+    "leads": 0,
+    "orders": 0,
+    "messages": 0
+  },
+  "settings": {
+    "aiAgentMode": "OFF",
+    "aiChannelModes": {
+      "VIBER": "OFF",
+      "WEBSITE": "OFF",
+      "TELEGRAM": "OFF",
+      "WHATSAPP": "OFF"
+    }
+  },
+  "runtimeDdlDenied": true,
+  "migrationMetadataDenied": true,
+  "wrongPasswordDenied": true,
+  "otherDatabaseDenied": true,
+  "blobTokenConfigured": false,
+  "blobNamespace": "audit-20261101-local",
+  "telegramConfigured": false,
+  "serverAI": false,
+  "remoteDeployment": "BLOCKED: dedicated bot/chat and Blob store/token absent; hosting operational confirmation required"
+}

@@ -20,6 +20,7 @@ import {
   validateXlsxZip,
 } from "../../src/lib/domain/legacy-import";
 import { overrideReason } from "../../src/lib/services/duration-engine";
+import { ovenWorkMinutes } from "../../src/lib/appliance-catalog";
 export const rule: DurationConfig = {
   id: "rule-v1",
   serviceId: "regular",
@@ -42,6 +43,15 @@ const input = {
   requiredCleaners: 2,
   extras: [],
 };
+test("approved oven work is 45 minutes per unit in a new version, preserving legacy rules", () => {
+  assert.equal(ovenWorkMinutes, 45);
+  const previous = {...rule, extraMinutes: {oven: 30}};
+  const next = {...previous, id: "rule-v2", version: 2, extraMinutes: {...previous.extraMinutes, oven: ovenWorkMinutes}};
+  const request = {...input, extras: [{code: "oven", quantity: 2}]};
+  assert.equal(estimateDuration(request, [next])?.factors.extraMinutes, 90);
+  assert.equal(estimateDuration(request, [previous])?.factors.extraMinutes, 60);
+  assert.equal(previous.extraMinutes.oven, 30);
+});
 test("duration is deterministic and bounded to a configured area/service/crew", () => {
   assert.deepEqual(
     estimateDuration(input, [rule]),

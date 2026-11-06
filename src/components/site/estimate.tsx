@@ -15,11 +15,11 @@ import {ArrowIcon} from "@/components/site/arrow-icon";
 import {enquiryCopy} from '@/lib/lead-intent';
 import {AnimatedPrice} from './animated-price';
 
-type CountExtra = "standardWindow" | "largeWindow" | "cabinets" | "ironing" | "fridge" | "oven" | "microwave" | "hood" | "dishwasher" | "washingMachine";
-type ToggleExtra = "balcony" | "steam" | "petHair" | "linen";
+type CountExtra = "standardWindow" | "largeWindow" | "cabinets" | "ironing" | "fridge" | "oven" | "microwave" | "hood" | "dishwasher" | "washingMachine" | "linen";
+type ToggleExtra = "balcony" | "steam" | "petHair";
 
-const countKeys: CountExtra[] = ["standardWindow", "largeWindow", "cabinets", "ironing", "fridge", "oven", "microwave", "hood", "dishwasher", "washingMachine"];
-const toggleKeys: ToggleExtra[] = ["balcony", "steam", "petHair", "linen"];
+const countKeys: CountExtra[] = ["standardWindow", "largeWindow", "cabinets", "ironing", "fridge", "oven", "microwave", "hood", "dishwasher", "washingMachine", "linen"];
+const toggleKeys: ToggleExtra[] = ["balcony", "steam", "petHair"];
 
 type EstimateProps={locale:Locale;copy:EditorialContent['estimate'];content:SiteContent;initialService?:ServiceId;initialRequest?:'CLEANING'|'UPHOLSTERY';focused?:boolean};
 export function Estimate({locale, copy, content, initialService = "regular", initialRequest = 'CLEANING', focused = false}:EstimateProps) {
@@ -38,8 +38,8 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
   const [service, setService] = useState<ServiceId>(initialService);
   const eventData = {locale, service: onlyUpholstery ? 'upholstery' : service, form_type: 'estimate'};
   const [area, setArea] = useState(55);
-  const [counts, setCounts] = useState<Record<CountExtra, number>>({standardWindow: 0, largeWindow: 0, cabinets: 0, ironing: 0,fridge:0,oven:0,microwave:0,hood:0,dishwasher:0,washingMachine:0});
-  const [toggles, setToggles] = useState<Record<ToggleExtra, boolean>>({balcony: false, steam: false, petHair: false, linen: false});
+  const [counts, setCounts] = useState<Record<CountExtra, number>>({standardWindow: 0, largeWindow: 0, cabinets: 0, ironing: 0,fridge:0,oven:0,microwave:0,hood:0,dishwasher:0,washingMachine:0,linen:0});
+  const [toggles, setToggles] = useState<Record<ToggleExtra, boolean>>({balcony: false, steam: false, petHair: false});
   const [urgent, setUrgent] = useState(false);
   const [sameDayAllowed,setSameDayAllowed]=useState(false);
   useEffect(()=>{
@@ -60,8 +60,9 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
     const quote = calculatePrice(service,area,extras,urgent);
     const lines = [{label:`${content.pricing.serviceNames[service]} · ${area} m²`, value:quote.base}, ...quote.extras.map(e => ({label:`${content.calculator.labels[e.code]}${countKeys.includes(e.code as CountExtra) ? ` × ${e.quantity}` : ""}`,value:e.unitPrice*e.quantity}))];
     if (urgent) lines.push({label:content.calculator.urgent,value:quote.surcharge});
+    if (quote.roundingAdjustment) lines.push({label:({ru:'Округление итога вверх до 100 RSD',sr:'Zaokruživanje ukupnog iznosa naviše na 100 RSD',en:'Total rounded up to 100 RSD'})[locale],value:quote.roundingAdjustment});
     return {lines,total:quote.total,extras};
-  }, [area, content, counts, service, toggles, urgent]);
+  }, [area, content, counts, service, toggles, urgent, locale]);
 
   const selectedExtras=Object.values(counts).filter(n=>n>0).length+Object.values(toggles).filter(Boolean).length;
 
@@ -118,15 +119,16 @@ export function Estimate({locale, copy, content, initialService = "regular", ini
         <fieldset>
           <legend className={focused?"rate-sr-only":undefined}>{copy.extras}</legend>
           <div className="extra-options site-extra-options">
-            {(focused ? [countKeys.filter(k=>k==='standardWindow'||k==='largeWindow'),countKeys.filter(k=>['fridge','oven','microwave','hood','dishwasher','washingMachine'].includes(k)),countKeys.filter(k=>k==='cabinets'||k==='ironing')] : [countKeys]).map((keys,index)=><ExtraGroup key={index} {...(focused?{className:"estimate-extra-group"}:{})}>{focused&&<h4>{[ux.windows,ux.appliances,ux.care][index]}</h4>}
+            {(focused ? [countKeys.filter(k=>k==='standardWindow'||k==='largeWindow'),countKeys.filter(k=>['fridge','oven','microwave','hood','dishwasher','washingMachine'].includes(k)),countKeys.filter(k=>k==='cabinets'||k==='ironing'||k==='linen')] : [countKeys]).map((keys,index)=><ExtraGroup key={index} {...(focused?{className:"estimate-extra-group"}:{})}>{focused&&<h4>{[ux.windows,ux.appliances,ux.care][index]}</h4>}
             {keys.map((key) => (
               <div className="site-extra-counter" key={key}>
                 <span>{content.calculator.labels[key]}</span><small>+{formatRsd(extrasPrices[key], locale)}</small>
-                <div><button type="button" disabled={counts[key]===0} onClick={() => setCounts((current) => ({...current, [key]: Math.max(0, current[key] - 1)}))} aria-label={`${content.calculator.labels[key]}: −`}><Minus size={13}/></button><b>{counts[key]}</b><button type="button" onClick={() => setCounts((current) => ({...current, [key]: current[key] + 1}))} aria-label={`${content.calculator.labels[key]}: +`}><Plus size={13}/></button></div>
+                <div><button type="button" disabled={counts[key]===0} onClick={() => setCounts((current) => ({...current, [key]: Math.max(0, current[key] - 1)}))} aria-label={`${content.calculator.labels[key]}: −`}><Minus size={13}/></button><b>{counts[key]}</b><button type="button" disabled={counts[key]>=100} onClick={() => setCounts((current) => ({...current, [key]: Math.min(100,current[key] + 1)}))} aria-label={`${content.calculator.labels[key]}: +`}><Plus size={13}/></button></div>
               </div>
             ))}
             </ExtraGroup>)}
-            {toggleKeys.map((key) => <label key={key}><input type="checkbox" checked={toggles[key]} onChange={(event) => setToggles((current) => ({...current, [key]: event.target.checked}))}/><span>{content.calculator.labels[key]}</span><small>+{formatRsd(extrasPrices[key], locale)}</small></label>)}
+            {toggleKeys.map((key) => <label key={key}><input type="checkbox" checked={toggles[key]} onChange={(event) => setToggles((current) => ({...current, [key]: event.target.checked}))}/><span>{content.calculator.labels[key]}{key==='steam'&&` · ${({ru:'по согласованию',sr:'po dogovoru',en:'by agreement'})[locale]}`}</span><small>+{formatRsd(extrasPrices[key], locale)}</small></label>)}
+            {toggles.steam&&<p className="estimate-enquiry-note">{({ru:'Паровая обработка возможна после подтверждения оборудования и совместимости поверхности. Заявка не подтверждает выезд.',sr:'Tretman parom je moguć nakon potvrde opreme i prikladnosti površine. Upit ne potvrđuje dolazak.',en:'Steam treatment requires confirmation of equipment and surface suitability. An enquiry does not confirm a visit.'})[locale]}</p>}
             {!focused&&urgency}
 
           </div>

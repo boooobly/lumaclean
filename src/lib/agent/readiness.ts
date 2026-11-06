@@ -7,23 +7,32 @@ import { placesRequest } from '@/lib/services/google-places';
 import { routingProvider,motisSelected } from '@/lib/infrastructure/routing-provider';
 import {MotisRoutingProvider} from '@/lib/infrastructure/motis-routing';
 import {busMapsAccess} from '@/lib/infrastructure/busmaps-status';
-import { configuredProviders } from './providers';
+import { configuredProviders,type AgentMessage,type AIProvider } from './providers';
 import { AgentError,toolSchemas } from './contracts';
-import {liveConfigFingerprint,validLiveProof} from './live-proof';
+import {liveConfigFingerprint,validLiveProof,previewTestAllowed} from './live-proof';
+import {assertNativeTestBudget,withNativeTestBudget} from '@/lib/services/native-test-budget';
 import {channelReady,customerChannels} from './channel-diagnostics';
 
 export type Check = { id:string; label:string; status:'READY'|'WARNING'|'BLOCKS_AUTO'; detail:string;href?:string;action?:string };
 type DB=Prisma.TransactionClient;
 type Probe={ok:boolean;code:string;quality?:string};
 type Diagnostics={fingerprint:string;primary:Probe;fallback:Probe;places:Probe;transit:Probe};
+export type DiagnosticsOptions={beforeModelCall?:(messages:AgentMessage[],provider:AIProvider)=>Promise<void>};
 export const channelNames=['WEBSITE','TELEGRAM','WHATSAPP','VIBER'] as const;
 export function effectiveMode(s:Pick<BusinessSettings,'aiAgentMode'|'aiChannelModes'>,channel:Channel):AgentMode {
   const scope=(s.aiChannelModes as Record<string,string>)[channel]??'OFF';
   if(process.env.AI_AGENT_ENABLED!=='true'||s.aiAgentMode==='OFF'||scope==='OFF')return 'OFF';
-  return s.aiAgentMode==='AUTO'&&scope==='AUTO'?'AUTO':'SHADOW';
+  // Persisted AUTO can outlive a manual-only deployment. Apply the source-bound
+  // release gate at every runtime check, including replies, tools and outbox.
+  if(s.aiAgentMode==='AUTO'&&scope==='AUTO')return process.env.AI_VERIFIED_RELEASE==='true'?'AUTO':'OFF';
+  return 'SHADOW';
 }
 function fingerprint(){
   return createHash('sha256').update(JSON.stringify(['POYO_API_KEY','OPENROUTER_API_KEY','PRIMARY_AGENT_MODEL','FALLBACK_AGENT_MODEL','PRIMARY_AGENT_PROVIDER','FALLBACK_AGENT_PROVIDER','LUMACLEAN_ROUTING_PROVIDER','LUMACLEAN_ROUTING_URL','LUMACLEAN_ROUTING_TOKEN','BUSMAPS_STATUS','BUSMAPS_API_KEY','TELEGRAM_CUSTOMER_BOT_TOKEN'].map(k=>process.env[k]??''))).digest('hex');
+}
+export function diagnosticsAreFresh(s:Pick<BusinessSettings,'aiDiagnostics'|'aiDiagnosticsAt'>|null|undefined,maximumAge=3600000){
+  const diag=s?.aiDiagnostics as Diagnostics|null|undefined,at=s?.aiDiagnosticsAt?.getTime(),age=at===undefined?Infinity:Date.now()-at;
+  return !!diag&&diag.fingerprint===fingerprint()&&age>=0&&age<maximumAge;
 }
 export function cleanerReadiness(c:{active:boolean;name?:string;phone?:string;homeAddress:string|null;homeCoordinatesConfirmed?:boolean;homeLatitude:unknown;homeLongitude:unknown;languages:string[];payoutPercent:unknown;availability:{startMinute:number|null;endMinute:number|null;kind:string}[]}){
   const hours=c.availability.some(a=>a.kind==='WEEKLY'&&a.startMinute!==null&&a.endMinute!==null&&a.endMinute>a.startMinute);
@@ -32,7 +41,7 @@ export function cleanerReadiness(c:{active:boolean;name?:string;phone?:string;ho
   return {ready:c.active&&contact&&hours&&address&&coordinates,contact,active:c.active,hours,address,coordinates,languages:!!c.languages.length,payout:c.payoutPercent!==null};
 }
 export function websiteSummary(checks:Check[]){
-  const groups=[['master','credentials','primary','fallback'],['places','transit'],['duration','pricing'],['cleaners','settings'],['tests','scope','channels','liveBooking']];
+  const groups=[['master','credentials','primary','fallback'],['places','transit'],['duration','pricing'],['cleaners','settings'],['tests','scope','channels','liveBooking','healthCron']];
   return{ready:groups.filter(ids=>ids.every(id=>checks.some(c=>c.id===id&&c.status!=='BLOCKS_AUTO'))).length,total:groups.length};
 }
 export function previewBookingReady(checks:Check[],confirmedTestService:boolean){
@@ -46,9 +55,11 @@ export async function readiness(db:DB,provided?:BusinessSettings){
   const add=(id:string,label:string,ready:boolean,detail:string,warning=false)=>checks.push({id,label,status:ready?'READY':warning?'WARNING':'BLOCKS_AUTO',detail});
   add('settings','Scheduling',!!settings&&settings.timezone==='Europe/Belgrade'&&Number.isInteger(settings.defaultTravelBufferMinutes)&&settings.defaultTravelBufferMinutes>=0,settings?`${settings.timezone} · транспортный буфер ${settings.defaultTravelBufferMinutes} мин`:'BusinessSettings отсутствуют');
   add('master','AI server',process.env.AI_AGENT_ENABLED==='true','AI_AGENT_ENABLED должен быть true');
+  const production=process.env.VERCEL==='1'&&process.env.VERCEL_ENV==='production';
+  add('healthCron','Обновление readiness',!production||process.env.AI_READINESS_CRON_ENABLED==='true','В production требуется согласованная фоновая диагностика: проверки действуют1час. Live-proof обновляется отдельно раз в7дней.');
   add('credentials','AI credentials',!!process.env.POYO_API_KEY&&!!process.env.OPENROUTER_API_KEY&&!!process.env.PRIMARY_AGENT_MODEL&&!!process.env.FALLBACK_AGENT_MODEL,'Ключи остаются только на сервере. Модели задаются через env.');
   const diag=settings?.aiDiagnostics as Diagnostics|null;
-  const fresh=!!diag&&diag.fingerprint===fingerprint()&&!!settings?.aiDiagnosticsAt&&Date.now()-settings.aiDiagnosticsAt.getTime()<3600000;
+  const fresh=diagnosticsAreFresh(settings);
   for(const [id,label] of [['primary','Primary model'],['fallback','Fallback model'],['places','Поиск адреса'],['transit','Дорога и транспорт']] as const){
     const probe=fresh?diag?.[id]:null;
     add(id,label,!!probe?.ok,probe?.code??'Запустите диагностику: проверка отсутствует или старше 1 часа');
@@ -100,11 +111,17 @@ export async function assertAutoReady(db:DB,settings?:BusinessSettings){
   const report=await readiness(db,settings);
   if(!report.canActivate)throw new AgentError('AUTO_BLOCKED: '+report.blockers.map(c=>c.label).join(', '));
 }
-export async function runDiagnostics(db:DB){
+export async function runDiagnostics(db:DB,options:DiagnosticsOptions={}){
+  if(previewTestAllowed())return withNativeTestBudget('diagnostics',()=>runDiagnosticsInternal(db,options));
+  return runDiagnosticsInternal(db,options);
+}
+async function runDiagnosticsInternal(db:DB,options:DiagnosticsOptions){
   const probe=async(fn:()=>Promise<boolean>):Promise<Probe>=>{try{return await fn()?{ok:true,code:'Работает'}:{ok:false,code:'Нет подтверждённого ответа'};}catch(e){return {ok:false,code:e instanceof AgentError?e.code:'PROVIDER_UNAVAILABLE'};}};
   let primary:Probe={ok:false,code:'PROVIDER_UNCONFIGURED'},fallback={...primary};
   try{const providers=configuredProviders();[primary,fallback]=await Promise.all(providers.map(p=>probe(async()=>{
-    const r=await p.complete([{role:'system',content:'Synthetic connectivity check. No customer data or CRM actions. Call getBusinessInfo with {} using native tool calling.'},{role:'user',content:'Call getBusinessInfo now.'}]);
+    const messages:AgentMessage[]=[{role:'system',content:'Synthetic connectivity check. No customer data or CRM actions. Call getBusinessInfo with {} using native tool calling.',allowedTools:['getBusinessInfo']},{role:'user',content:'Call getBusinessInfo now.'}];
+    await options.beforeModelCall?.(messages,p);
+    const r=await p.complete(messages);
     const call=r.toolCalls.find(t=>t.name==='getBusinessInfo');
     if(!call){if(process.env.VERCEL_ENV==='preview')console.info(JSON.stringify({event:'agent_native_probe',provider:p.name,nativeCalls:r.toolCalls.length,hasText:!!r.text}));throw new AgentError('NATIVE_TOOL_CALL_MISSING');}
     let args:unknown;try{args=JSON.parse(call.arguments);}catch{throw new AgentError('NATIVE_TOOL_ARGUMENTS_INVALID');}
@@ -119,6 +136,7 @@ export async function runDiagnostics(db:DB){
   const transit=await probe(async()=>{const provider=routingProvider();if(motisSelected()){const h=await new MotisRoutingProvider().datasetsStatus();if(!h.engine.healthy)return false;}const r=await provider.getTravelTime({origin:{latitude:44.8125,longitude:20.4612},destination:{latitude:44.8168,longitude:20.4156},mode:'TRANSIT',at:new Date(Date.now()+86400000).toISOString()});routeQuality=r.quality;return r.status==='VERIFIED'&&r.durationSeconds!==null;});
   if(routeQuality)transit.quality=routeQuality;
   if(transit.ok&&motisSelected())transit.code=routeQuality==='LIVE_EXTERNAL'?'Работает: BusMaps verified':'DEGRADED · MOTIS healthy, walking / резерв 80 мин; BusMaps необязателен';
+  assertNativeTestBudget();
   const diagnostics:Diagnostics={fingerprint:fingerprint(),primary,fallback,places,transit};
   await db.businessSettings.update({where:{id:'default'},data:{aiDiagnostics:diagnostics,aiDiagnosticsAt:new Date()}});
   return {primary,fallback,places,transit};

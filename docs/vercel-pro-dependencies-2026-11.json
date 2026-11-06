@@ -1,0 +1,304 @@
+{
+  "at": "2026-11-01T22:31:15.589Z",
+  "allModerate": 24,
+  "productionGraphModerate": 9,
+  "devOnlyModerate": 15,
+  "high": 0,
+  "critical": 0,
+  "rootAdvisory": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+  "patchedRoot": "minimatch11.0.1",
+  "rows": [
+    {
+      "package": "@eslint-community/eslint-utils",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint",
+        "version": "4.0.0",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "@eslint/config-array",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint",
+        "version": "4.0.0",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "@eslint/eslintrc",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint",
+        "version": "4.0.0",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "@next/eslint-plugin-next",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "12.0.4",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "@typescript-eslint/eslint-plugin",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": true,
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "@typescript-eslint/parser",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "12.0.4",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "@typescript-eslint/type-utils",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": true,
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "@typescript-eslint/typescript-estree",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "12.0.4",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "@typescript-eslint/utils",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "12.0.4",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "@vercel/queue",
+      "severity": "moderate",
+      "runtimeGraph": true,
+      "scope": "Runtime package; minimatch matches repository-controlled function patterns in dev mapping",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "@vercel/queue",
+        "version": "0.1.1",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "archiver",
+      "severity": "moderate",
+      "runtimeGraph": true,
+      "scope": "Runtime ExcelJS archive dependency; app uses bounded admin-only XLSX read, not archive-glob export",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "4.1.1",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "archiver-utils",
+      "severity": "moderate",
+      "runtimeGraph": true,
+      "scope": "Runtime ExcelJS archive dependency; app uses bounded admin-only XLSX read, not archive-glob export",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "4.1.1",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "eslint",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint",
+        "version": "4.0.0",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "eslint-config-next",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "12.0.4",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "eslint-plugin-import",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": true,
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "eslint-plugin-jsx-a11y",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "12.0.4",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "eslint-plugin-react",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "12.0.4",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "exceljs",
+      "severity": "moderate",
+      "runtimeGraph": true,
+      "scope": "Runtime ExcelJS archive dependency; app uses bounded admin-only XLSX read, not archive-glob export",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "4.1.1",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "glob",
+      "severity": "moderate",
+      "runtimeGraph": true,
+      "scope": "Runtime ExcelJS archive dependency; app uses bounded admin-only XLSX read, not archive-glob export",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "4.1.1",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "minimatch",
+      "severity": "moderate",
+      "runtimeGraph": true,
+      "scope": "Runtime ExcelJS archive dependency; app uses bounded admin-only XLSX read, not archive-glob export",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint",
+        "version": "4.0.0",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "readdir-glob",
+      "severity": "moderate",
+      "runtimeGraph": true,
+      "scope": "Runtime ExcelJS archive dependency; app uses bounded admin-only XLSX read, not archive-glob export",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "4.1.1",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "rimraf",
+      "severity": "moderate",
+      "runtimeGraph": true,
+      "scope": "Runtime ExcelJS archive dependency; app uses bounded admin-only XLSX read, not archive-glob export",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": true,
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "typescript-eslint",
+      "severity": "moderate",
+      "runtimeGraph": false,
+      "scope": "Dev-only ESLint/Next lint/TypeScript lint dependency",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "12.0.4",
+        "isSemVerMajor": true
+      },
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    },
+    {
+      "package": "zip-stream",
+      "severity": "moderate",
+      "runtimeGraph": true,
+      "scope": "Runtime ExcelJS archive dependency; app uses bounded admin-only XLSX read, not archive-glob export",
+      "rootAdvisory": "GHSA-g3hv-75wg-m249",
+      "fixAvailable": true,
+      "decision": "No forced downgrade/major override. Review upstream patch and regressions separately; no public user-controlled glob identified in reviewed callsites."
+    }
+  ]
+}

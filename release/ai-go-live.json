@@ -1,5 +1,5 @@
 {
-  "fingerprint": "36854a1f22cbc51ed679ab4e50de403d4f7bfd9657e072c69be72f27b3d3de07",
+  "fingerprint": "ff37b27b7936a8148908efaed1b61e1bcacc178449b7ea531415c61eece08f88",
   "files": {
     "src/app/admin/(workspace)/analytics/page.tsx": "3e3f143bbfbdd31ab7e372e3198495a78c51ee803ac3ae25550a321101211b05",
     "src/app/admin/(workspace)/calendar/loading.tsx": "d227c9dcad9a8453b6b7acf46fed3a36eddad12fc7437a4bf54e9feeda4b2b1f",
@@ -53,7 +53,8 @@
     "src/app/api/admin/scheduling/[command]/route.ts": "a808df5f4c0be7dd68784dd330276670a3277fc469e876771d9a2e94bc457727",
     "src/app/api/admin/telegram-handoff/route.ts": "06655bdde69f4c8ac083b216c3d91a7cade36d35a4d4aaf09762f7c8965639db",
     "src/app/api/admin/upholstery/[action]/route.ts": "d16aaebbf6e1a727d7d498f55058cb3346f1651fac429efefd3f80d45c31ce84",
-    "src/app/api/agent/recover/route.ts": "49884973f933969b0d459bfaf4741f3e2481956ba11fbdb56ee846c6f8ae89c0",
+    "src/app/api/agent/health/route.ts": "6ae1aa60ecc9aad0b835909b26a1fb3ad3a5730f990b8d477325d914aa21ad81",
+    "src/app/api/agent/recover/route.ts": "5837048e599f13539f6c0fffc1b3a43faa11350f275a0c6681715526204af41a",
     "src/app/api/auth/[...all]/route.ts": "ec656fe6ca65cc8670f619a8169e199628fbfa00da10af85e3f96ded88e0c485",
     "src/app/api/booking-policy/route.ts": "4a0026b1e3656e8422f152f5c877baa4f53710d57e416826ab14b643a5d295dd",
     "src/app/api/channels/telegram/route.ts": "e1e165f500c2f08ead55313bcd7abd4bae9b58bb00a06f85375766120db7e1c5",
@@ -64,7 +65,8 @@
     "src/app/api/chat/attachments/[id]/route.ts": "eab06ed42e959aaf15ee094a6377a8ac85623242cff87c5cc6a27a978979e58f",
     "src/app/api/chat/events/route.ts": "6e358083d17edfcbd7be829b3350338b10f5501508f62dd0e4aa71e6881fd63b",
     "src/app/api/chat/route.ts": "efac93cb01c358bcde185f3fa8e68dca4810df9a6ea2c9c846b7acfc2525ebbb",
-    "src/app/api/lead/route.ts": "602544bf450fd5028bbcfa52f4c580bed6a38dff08c9ae400cd592b27c40d036",
+    "src/app/api/lead/route.ts": "e623902b36b172cbd59ed1da7de4807b1016fd5cc4f17decf90708687b213ff3",
+    "src/app/api/notifications/recover/route.ts": "38af869b868de5b16eda016ed2e5623b296789b9e8defcdb2bfabfa8d9709ddf",
     "src/app/api/queues/agent/route.ts": "9c56c701256720464971d1315ac967008863a4974d4a61b493052f775e821a54",
     "src/app/api/queues/notifications/route.ts": "e479a94f1a407c92fd008e9e7a5d28d7f078e73abdf90cc1425eba3ace8c32c4",
     "src/app/api/telegram/handoff/route.ts": "32bcc58c21cf6ba0455080f2b75b2ef2112b89dea6598631e20f9404653324af",
@@ -85,13 +87,13 @@
     "src/app/[locale]/articles/page.tsx": "e7de3e603693eaa74a411782b532e33230e6cd7d63c6ba2d99bc558397e6c1b8",
     "src/app/[locale]/articles/[slug]/page.tsx": "cb55137efed11aa012584bdcacca3f46291027d3ea9e600fc3c8130fb847d5d7",
     "src/app/[locale]/data-deletion/page.tsx": "cc85c7559aba68b99ad1b87b2b35b7655b09a8c7e89bec3b2fe5c05172a28298",
-    "src/app/[locale]/layout.tsx": "44ef9b859d274d73f2a0e7d9fb9e6ea401e53c8922b6c8cf1554fa562dce858d",
+    "src/app/[locale]/layout.tsx": "58fd23566bdeaa2a18a92c866cab65a5e654072b7fdd7669d6ddd0044b2fe3c4",
     "src/app/[locale]/page.tsx": "aadb36f38694e6e61b29abecb711d405a0632e92d3e24cb2a2d0cb5f570636aa",
     "src/app/[locale]/privacy-policy/page.tsx": "b52d5cc5c2c223ef5a9b1a92fde812688e0a169ec11ab6ad11940db9771ead72",
     "src/app/[locale]/services/[service]/page.tsx": "547bcea7d9b65ee30f469c6ffe1e0263c339196b1b581aa968ee0ded98aec33d",
     "src/app/[locale]/services/[service]/service.css": "0bce00cb72f3fae8346ef069ba5e61bff814f5cafdc1643ffab1f980e7464313",
     "src/app/[locale]/site.css": "c63a6dac5c0cc88814cda322ae8ba20186c3c2dfa76ea70097f4dab3643bb416",
-    "src/app/[locale]/[upholstery]/page.tsx": "4c5b57b52f53b7b02b93c34edb71c08616bd8cf4ec15264e3a43bb5bce5ed9df",
+    "src/app/[locale]/[upholstery]/page.tsx": "cba3463ae06ab285616820cfa1699d27216595175f3457afd1f58fa0bb265bea",
     "src/components/admin/address-autocomplete.tsx": "5371299b5eaba172b99055f3a98bd261b9bb8bfab85d99d9fe07ba19bd6a837c",
     "src/components/admin/agent-behavior-settings.tsx": "8bd258b539cf6ace1c3b6dd2937d4726dc27a3917a4707a44d75e9ff9a284a7f",
     "src/components/admin/agent-known-facts.tsx": "c65de01503e53a692e123f50b661db73ff26103149281e13f739f2c7bae6b125",
@@ -140,7 +142,7 @@
     "src/components/site/article-data-table.tsx": "c1dc2f13055eb0946d5c28d187188ffc10a9af38e90e8800e3c6ed45e16dc96c",
     "src/components/site/chat-photos.tsx": "15cf8449b47625f5e097a46f25619aca7140443d3e5af77fcb85fc4e85a21b7d",
     "src/components/site/contact-request.tsx": "be3829eca1873f7ac1b92d5717efae05f768c248687da6daf61d47e7d29cadac",
-    "src/components/site/estimate.tsx": "fa9e23c61f95b6a293042981fc1729488059a6388e3aff0c01fb90167cfac7cd",
+    "src/components/site/estimate.tsx": "01684b61b5e2d9c4bc0300d30cc21bd7b8f28c2a221800992eb48823d7b02772",
     "src/components/site/extras-ledger.tsx": "11b206eb974f7119dc5334bc7817b6e74f530fa6bb640d26d833b2b06546486e",
     "src/components/site/google-profile-links.module.css": "68b9667bc02da1087c32600f1dfd65a722e10ef4f1215e9a27292976cfd0f3f5",
     "src/components/site/google-profile-links.tsx": "cf276374eb0dc502d611d59449976a86544d4d12b2da75790d450b09d33c0e40",
@@ -152,7 +154,7 @@
     "src/components/site/service-planning.tsx": "d8bfe885bad227fbed02e270326f635ee101420944d53c7789bdc3bdb04ac96f",
     "src/components/site/site-header.tsx": "40b257ab92716a999d835b74b9f0a7a05929f20be9cabb66093e96d41a9ea7b1",
     "src/components/site/upholstery-article-prices.tsx": "60956f70fbb31e8a7437970d2814bd964c411f1b8694105f333a7ddb32788b52",
-    "src/components/site/upholstery-calculator.tsx": "7b247fc09835e61b68c6bad2f73356d39be744ec1690ba23db7a24b4bf1522f7",
+    "src/components/site/upholstery-calculator.tsx": "17c9098b2966436929003b3faf0a878a71c40222063496864a73fcbce5ed3479",
     "src/components/site/upholstery-fields.tsx": "59f4d5a96276d564c9110af58c6a63f965521a8509430b5913b816b3d41c49a6",
     "src/components/site/upholstery-motion.tsx": "fc73377bda40e2f6d70cfa1ef616e2017f749b1ba014555fe21a928746f07b4c",
     "src/components/site/upholstery-photo-button.tsx": "314b90e555af082ef005c5bda9ac6c67f70e828794d11a28ebb08930c85357b7",
@@ -160,7 +162,7 @@
     "src/components/site/upholstery-teaser.tsx": "433b1917269f340a61f530eac822a483622603a445ee5ee460eb20d06107dadb",
     "src/components/site/upholstery.css": "ff4f97a2413dd41a5659070d39501f7cc17d8bc89f337cfe5a26003e11a5293a",
     "src/components/site/website-chat.css": "59470fd58e6c7ffae8bcc78d28d377c196d04a166de64d1a578673fb04da0862",
-    "src/components/site/website-chat.tsx": "0a551fe2dcd89fec65f9f769aebbf6a39b89c15145da050896a545bd304cc787",
+    "src/components/site/website-chat.tsx": "63d9a4490ad82af7776d8782eb0c6135f983ad13cb480819958b5abe20a4afff",
     "src/i18n/request.ts": "9e8c03ca10ec8022d7c4e46ecf5e25c4d9e723d9f7c9b04fc8a5401d00aead7a",
     "src/i18n/routing.ts": "68dfd0fa0c1ade7562be6a856caf3c410205dd654859cbeb2f7c5066842b4b50",
     "src/lib/agent/alternative-price.ts": "7ad5e081647e7e1076d14a287804f5d49467da1bacdc4213fc8fe42a10a64347",
@@ -168,7 +170,7 @@
     "src/lib/agent/autonomy-corpus.ts": "3ff2f9937dc1f6a9da3de5c02ada6d9da87d6155dc96b0aac291f7229e34a46b",
     "src/lib/agent/autonomy-metrics.ts": "f0837699b20605c36e274849d0fe04fa236c314c7cd5d782da7f4b39e947c54e",
     "src/lib/agent/autonomy-preview.ts": "418219bde2344a57896a296b104fd361a6fb8a801ac230392da1d7d1ae37da2f",
-    "src/lib/agent/autonomy.ts": "9e10e0691189eb61c0ad0b5fcbffed86bf670380d9fc4eb31ec63714b8a47557",
+    "src/lib/agent/autonomy.ts": "b4bb07e24d1685b2bee3fe4f3299b0a5c643e03c28fbae613ae7166dca2f326d",
     "src/lib/agent/behavior-eval.ts": "58875967d9aebc564f9ecc67ec83768c4376a30e2591d735c10c8780b705a097",
     "src/lib/agent/behavior-telemetry.ts": "65b6f66b11127abbf6a29be0c69e56f544779477094dae99603fad5ece1d1242",
     "src/lib/agent/business-labels.ts": "aa9313bd859d8f565df06ecd3d16a0a559594a337a29d3bc75c250a88dce6f17",
@@ -182,7 +184,7 @@
     "src/lib/agent/chat-attachments.ts": "4489b694b8cffe28f25edaee4801be053319e05031ea0a20aa383e584e628daa",
     "src/lib/agent/chat-presentation.ts": "db120b2d4ff0cd66e542fb0e8be90127dd378542c4b2790ab1dac24d35dfab45",
     "src/lib/agent/chat-upload-http.ts": "217ce3fc7f5e3be3c613bfebda0d4316fd222550a0473b02daf023262dd45302",
-    "src/lib/agent/contracts.ts": "38f6585815da657e15bdff54da4714599696ad63edbc171cc1df7cfb24e04596",
+    "src/lib/agent/contracts.ts": "708c3893aef9724c8e3c5cb2c409fa32549dbb2044e1d8528ad571e8aaadee92",
     "src/lib/agent/conversation-memory.ts": "612e9a816cbfbf894600318831652cf9d96f1f4e2d6196c4a3388b4a5def9328",
     "src/lib/agent/conversation-preview.ts": "8dea853566cd5494bc7f09a74373a362719dbb9eba235decfe8b7c4b52e1e122",
     "src/lib/agent/conversation-recovery.ts": "c4f9d99403b2c825cc74e41470970c1eb3db795c15bb5151bd02030438d9b06e",
@@ -193,24 +195,25 @@
     "src/lib/agent/customer-text.ts": "e8892a70184683d7b46406906bfaca330935af122fc2f644dc429c60372f7419",
     "src/lib/agent/extraction-planning.ts": "776dffdd77f7169006642810fa8e900b469790c10bc2ca323a83f2f0c97e703c",
     "src/lib/agent/fact-proposals.ts": "92a9332da6103ae72167048690c69c92997ad7d33e26f8b0cfdb83f93c082e61",
+    "src/lib/agent/health-maintenance.ts": "c0fd44d1ab350b2d7c1e636c4af93a0697055adba27d5b7b7c2c886a93e2c2da",
     "src/lib/agent/inbox.ts": "f2f638f04ca90b6a1f6754e25fc79d0cf8a69f4837db0daa13e817e1ea065a8c",
     "src/lib/agent/knowledge/grounding.ts": "8596b346f644c55d4263faa66eb324f2620b66c3f29f216e134fbddbbd62fecc",
     "src/lib/agent/knowledge/preview-whatsapp.ts": "9e78a9587f9db12582f49f0d60d82870bf3bd0a5b9d308048f28af76ea7c669e",
     "src/lib/agent/knowledge/schema.ts": "5884ed407ca1060ad5e7b4376ffdf842f523ee1234ac58a74b72be95ba13cdc5",
-    "src/lib/agent/knowledge/search.ts": "340ce09612f4a8d1beb21bfe3ba326126b5b7cc287206d3ac77d44b6f66405b7",
-    "src/lib/agent/knowledge/snapshot.json": "53fdb6f9b97b32cc64a70c5253d6ca492321f2b69407f147baf06e65c69a90ee",
-    "src/lib/agent/knowledge/vocabulary.ts": "022836716f7fee2b01fa389b313a6b618ab3f1ff67b4abe5e9cb5df9e62300aa",
+    "src/lib/agent/knowledge/search.ts": "08f1a0453ef6833e30f468c0d61df6d101cf252249154c879ecae9c612ead83a",
+    "src/lib/agent/knowledge/snapshot.json": "070be4293f941f74c2bb413f01045f68d821edd72d02eca9fb184146c711b063",
+    "src/lib/agent/knowledge/vocabulary.ts": "2ccad20bea3c9b5726c773eadf41f29d37c756ea5c600faa5d608db0246bae3e",
     "src/lib/agent/knowledge-scenarios.ts": "f818d9f46e2742022b05af64e7a9be78c5f7bd70d192e30e395b8eb4c63a52c1",
     "src/lib/agent/live-proof.ts": "ef6d87668d05e67ac93d9930d7110a2f31be35fe622583096b421b4bb8c566bf",
-    "src/lib/agent/live-test.ts": "0f1582daf6610c84ca608a508c4ba3261d91da1f0318d68bf215831b3c3a54c1",
+    "src/lib/agent/live-test.ts": "3cfb9d0a60a21e124e7a163889a5017362f6f934accc14bb848386699b9d0a57",
     "src/lib/agent/notifications.ts": "0c3489468ca6a260b45d062afdb09181c3d9b71369267b41915646f91c857cff",
     "src/lib/agent/persona.ts": "dc8d31c52606857ea2302ceaf6c75e8be2dfa5354150785afa6b0891192978b6",
-    "src/lib/agent/policy.ts": "2d012f06b89f4da5031efe124ac7bd3da8a2a338eb4275c07ab503ac15971f49",
-    "src/lib/agent/providers.ts": "fbb8d7b8fb16b4ac5e287f7126a2848287fbc2b3b5b6c5a378d1bcfa5ab01da3",
+    "src/lib/agent/policy.ts": "77d3fe92d29a0e4ffb7f2cc5b46d4fa8d5fd75942dcd86efb6bdbdd111c92474",
+    "src/lib/agent/providers.ts": "6ca6fa146760a3cef5f45ddac2b52b2481553091972f8ab875231e693785c9c3",
     "src/lib/agent/queries.ts": "31883e6ba20713a2a97294056d48a0b03ebc57715efa9ba82c2312d3ad141655",
     "src/lib/agent/question-planning.ts": "b446bc0933d7017b1ac74c043adaa84e8f8557f6cab7141e74553383eb9bf395",
     "src/lib/agent/queue.ts": "7544dba6cb5a7dba2233c7ea74c99fe7271e17163a831898012651c5eb0019df",
-    "src/lib/agent/readiness.ts": "ff86e22baa6312cd6eed3f371fc20403fece6d534844b416cff3c649312c122d",
+    "src/lib/agent/readiness.ts": "47ae3e8f813ee5b401f943c45bad3d9bf844fc885273a15483586c1177e70313",
     "src/lib/agent/release-verification.d.mts": "922a8223a92a36f373f1f850962fb8efc441cf9944c7bae83bcda9d0ed631aff",
     "src/lib/agent/release-verification.mjs": "ebef4817a52fcd056d43e0650dc5cc397ab1c80490be49b4a51c7ccee63295dc",
     "src/lib/agent/reliability-telemetry.ts": "b50d9c2b273a33b67d03cffbdfffee0a4512efba753fb501ea589dbcf9a725bb",
@@ -220,7 +223,7 @@
     "src/lib/agent/settings.ts": "bf18dc0f06eaa3bb5551f2a846bb1fed31966cace4815843a1919b671e550017",
     "src/lib/agent/telegram-handoff.ts": "d58951bb26a7b24988fcb6bb0f484e980c8a5e93c0dce204a4548d3dff2c76f9",
     "src/lib/agent/temporal.ts": "7dff9432c06f3dd3e9da30ece37add57aa50c2f434f5dec434de3769ec39ad05",
-    "src/lib/agent/tools.ts": "56b0216bd42a09f209c3a1491d4c8a25287d4b8a63a0f64d804381e61aa12ccc",
+    "src/lib/agent/tools.ts": "f7f2bc7d170ef566e8774388372a8f1740f531c74946352ed7ab38b4dc17fefe",
     "src/lib/analytics.ts": "24539879b6db1538810c7286836990c67286fa7ca1463b81b409e1ed28affe97",
     "src/lib/appliance-catalog.ts": "a489ccf44633d0b7afeee3c6c6218245c0a20f566a526d43bfaef6cd4734c711",
     "src/lib/articles/airbnb.ts": "6ac8861e9d41cadf626a26d54c10c2da58dd6bcfa376cb5cf40d35fd19952857",
@@ -244,17 +247,18 @@
     "src/lib/articles/windows.ts": "3e7712a7b7ae50afcbfa914a661b7dd9e5f75488118d2f403b49623f629398bf",
     "src/lib/auth/config.ts": "28dba83ac7eab10e89b6d89b85e090c14258fd6b79e2f9fc65bbd2d9b821c422",
     "src/lib/auth/session.ts": "86664bdf3bf7185cded8e4669f0b8f5c5bd57bc74142e86baf6285489ade6a27",
+    "src/lib/chat-recap-copy.ts": "55525d4e650b6aba906d6338303a7676a1941e3a8751cf1e4ed5ae475deb865e",
     "src/lib/contacts.ts": "b2f5b815d86728e39746ec12383eb0124c7157ff83d338f7292088eff0fe6a58",
     "src/lib/content-revisions.ts": "c288b5819784a9c4bc1de1cecba8a15ac787e4741bf9a6ab51dcc13a17746773",
     "src/lib/content.ts": "f2c569c7ca09eddc1bd2baa29089228e589d214367ea32569349d13bef892cf8",
-    "src/lib/database/client.ts": "bccdf4e4ac91597e892be8198d47328d51f701dd7ee62c2b8921b67f5172df6e",
+    "src/lib/database/client.ts": "bdcdea82c8394fd409d10d78e9835312a1f1fb0ff26c873f78363b9c281393c3",
     "src/lib/database/connection.ts": "ec0f01d6333eced2041052d6677e55338d8c76c344d264b530aff61cd9b8860b",
     "src/lib/domain/admin-navigation.ts": "6d96a490d9536bf9a5c1113c2cd595048c5b772775369e0566155858aa9cc4d1",
     "src/lib/domain/calendar-repeat.ts": "616303af124669544056ec683de1d716e865294ea7de3b7b95ce15e0338c364a",
     "src/lib/domain/cleaner-day.ts": "5b465a5dd1c6beb78b3564c4aaceffafe5c053c87a934de67cd54b16714c9f95",
     "src/lib/domain/crm-filters.ts": "de1d97e2d5ddcef21a064c4c2ec65fa9a04a17c83f002359c6787b5c9abb6bd1",
     "src/lib/domain/crm-lifecycle.ts": "0992a0f5ae9c07c924515b69580d9900bfb78a74e061e201242dee4bbf6122d5",
-    "src/lib/domain/crm-pricing.ts": "e3dc4fc0b3abcdb9f3b8b125411bf26fd17a2e431bd18b5aa644f288d089fb6a",
+    "src/lib/domain/crm-pricing.ts": "4f8de5aab586be98ab30a2ffcaabe0768c67a7ac856e135eac256807face81d9",
     "src/lib/domain/crm-types.ts": "5b63b9b419a4fc99185c51377e614e753845802575c10f3d00d1820ad7c4704a",
     "src/lib/domain/crm.ts": "b3b5f18c1630218f226e11358aee7cc2252641457f737fb886d2c1dc474ed32d",
     "src/lib/domain/duration.ts": "bb3af35593f4a4cc121103642ae9689420430c9a51d48d7e3485ee10d573756e",
@@ -277,13 +281,13 @@
     "src/lib/infrastructure/busmaps-transit.ts": "c0d5ef6d46aa0e1fae40eed2b369c0e806353076079cace327234a46866423b5",
     "src/lib/infrastructure/google-routing.ts": "36372cebd7a5cf3bb94ce9e23d5bd28d1f128953bdc7b843aa0c6cde25973656",
     "src/lib/infrastructure/hybrid-routing.ts": "9b44f1b35499acb5a83c6463cbe6c6ee09cd5cb660fcb844b8fbc2895b543ad3",
-    "src/lib/infrastructure/motis-routing.ts": "c791890333c4ddec04cba5a9c27aee8a5207455cd0c509847da5cc0e82824d4e",
+    "src/lib/infrastructure/motis-routing.ts": "c18eee354191892f611f76b885cde5eaa6121ed4dc22da463ec9b7400790f43c",
     "src/lib/infrastructure/routing-provider.ts": "6cee7a8b737b7ed97dcdbf5b8c82cf6499ddc12c904a8993d14ec834c72f378d",
     "src/lib/lead-intent.ts": "d10b9a58afad37a5d937fad4a11143ad61c3170cb17b7dd9cae3d8d4651495d6",
     "src/lib/legacy-service-redirects.ts": "75dbab6a55634aec7710cdae6a83d61a0f6644e6d9465b3955840a27863b4f0a",
     "src/lib/legal-content.ts": "956cc29021faf278bcdedfe0f57ef82eb63edffe460488efac1fe3be81a5c8e3",
     "src/lib/notification-links.ts": "3983546aeffbd9b480c9a4a8dbcd407aa63eb70e837c7949c05ba1656e86b6f2",
-    "src/lib/pricing.ts": "d88a764a97079cb03447b4f534ce36ac44a6d60badca601bd5d34aebdea2f448",
+    "src/lib/pricing.ts": "9d33195136e9b2ca1b6bfd123e5a107430f7aee311f8835be9a5e0b6422bd675",
     "src/lib/public-paths.ts": "049de40b860c004c3e75a15aa41491cc2099b16cab86816d2607f234b534a3b0",
     "src/lib/seo-services.ts": "9c887b247b1f83caec8c00e0e7c8e4adc635fa0f2730d68dc88bfd142c8ecd7c",
     "src/lib/seo.ts": "0757f8d416b211cd9dbdf72363343ceff849b9846883a49b9786cb1172f06865",
@@ -291,20 +295,23 @@
     "src/lib/service-visuals.ts": "669c0aba1bf1e2baa7fb167ac6d25222280809532ef8ce4817b8cb3ce2731ad6",
     "src/lib/services/admin-dashboard.ts": "c08c6d87f484e0866b9ffa2a19a17042b12bc5c32ec1a36d48a1c3ab140999cb",
     "src/lib/services/admin-http.ts": "74150c1b9b7114448c7bcdfee4c8eaeb127e6cfccb7e011d97d8537d69a191b2",
+    "src/lib/services/approved-duration-rules.ts": "464415924c27cb9e57997c0fb86717bd79c47ca8e3272a827bfb11f1ee0d2f96",
     "src/lib/services/audit.ts": "554f19b97c77c47a249e6944a9fd2444b5b976676cee81c174287a02d0dd9bd0",
     "src/lib/services/busmaps-store.ts": "508de5e8e8532f4466a8c4a14dea84fab46f47012dec314ee6e0675a855d8d6b",
     "src/lib/services/calendar-repeat.ts": "1bb72a24d2b60c2364962ed72fa246e490b4668c3b1f9dc7412485549e735bc4",
     "src/lib/services/crm-backfill.ts": "3998f2502c2b966d775d6a8c028cef64611cc7f2ea8a2f965d057d0b9706972e",
     "src/lib/services/crm-commands.ts": "f3dcc762906bf7e1977b23b8735da50a133ea531bb020df9cd56d52dc56d97c5",
     "src/lib/services/crm-queries.ts": "585659a92bc2c5e342c6857cb7bd6a7772184c7e3b12bd728043c9445fb63a1c",
+    "src/lib/services/cron-auth.ts": "dd789f5fc92e6db2cf7224b20c18f6308b4eea5e95fd83f692c61b8359f8532a",
     "src/lib/services/duration-engine.ts": "1e334d4cb10b1a16c7719e617aa01cd0075ade33024d6cd38d074ed8d9123f4f",
     "src/lib/services/finance-calculation.ts": "06349e9baf7eb45f27e2efe881d9dce44d61bf28866dc3c07401ab323b2f87ae",
     "src/lib/services/finance-commands.ts": "81be933be0445c61ca260d5f1fe51bd3c95441d4f2ead68ec73abb5f9a83fab7",
     "src/lib/services/finance-queries.ts": "b9ea814cdbff19d942d29d2d2ad020abef8f5b98ac6816fb0bd0ff0c5ba4ce89",
-    "src/lib/services/google-places.ts": "8876b79ac9690c09ad4ecbc70f909275defd9afb95e3c9ffe2d5aaa88ad30008",
+    "src/lib/services/google-places.ts": "37d32c12369f4df05ef459646602c0f53cbca7d9f2918c3e9c04ee1e50a8ff54",
     "src/lib/services/lead-notifications.ts": "82e6980134a2ffa43b7459e76685dbc7638a8918d9273069dc268f610d3d7b88",
     "src/lib/services/lead-rate-limit.ts": "3336638573360ce72ac4df973534a8cde340856b2a4904efa3970d2ce9ea3b99",
     "src/lib/services/legacy-import.ts": "f2b636e307afa4a9497bd00705b53e0c1ee98eaf2acb65aed7731ea8e58ecd56",
+    "src/lib/services/native-test-budget.ts": "c4ddacbf166a2a08c5815f77e294bed79d6174adcfa04f4f6bc4dae64bab1581",
     "src/lib/services/payout-calculation.ts": "f34ea4ccd7baa6e993ae9a3680c698d8f81389c60c9e8f316711e608432958a8",
     "src/lib/services/route-cache.ts": "7f38d8400d34fe72fa91eb11f025b1767e76b755162fd9fbd73a27ebfa83477d",
     "src/lib/services/routing-planning.ts": "717cd88641469dcd495a03f43cba634c8d231d56484d8c2db2c21d302e5096e6",
@@ -315,11 +322,12 @@
     "src/lib/services/upholstery-equipment.ts": "1534e22055ac89ed29f5962e232ff78158169dfab1c886e5791af5f535252136",
     "src/lib/services/upholstery-leads.ts": "4bdf5911930c944d0368f87afd5355d0e2c9fead24d6a2f127dc491c17c33892",
     "src/lib/services/website-leads.ts": "7da4c105c1a59a4b4002be3bc8e69358dfd08cb4597388511f6295a96f76a34f",
+    "src/lib/services/website-notification-recovery.ts": "a5cdf7310b72b95363247521e4ddc4485e7c3465fd7e4002e09c8eaff2cc4db7",
     "src/lib/site-content.tsx": "6c607b9b52724c7b004eec745399ddcf36f50bd862fced7cfe8e82dd4eb22b5d",
     "src/lib/upholstery-content.ts": "80a4060297737cab5d8026399dcc56a2956a5b5ee86af431dc14108d1b9c0803",
     "src/lib/upholstery-intent.ts": "60ee31195207c686c55cedbe5dfc5a6fd8135f42032a6db87725ae8aa938f666",
     "src/lib/upholstery-premium-content.ts": "de888f43112c8e494acea320da3af693a9eca267bdebb41f4626d680abcacc52",
-    "src/lib/upholstery.ts": "8da2e634b383fb39f7218dff31e5b11781b3af64031fdf2559ba99c1a10aff9b",
+    "src/lib/upholstery.ts": "5942dcbc63f801a45d6a5186b238c3aa8e149ce1c19aec1a16a4a34d386db168",
     "src/lib/validation/admin.ts": "9c1d0a705faffed2af3fd53cf4d5ec10713ba3d90d52769370288655b95f4a4f",
     "src/lib/validation/crm.ts": "493d0737e629a7e9de32e8260c325278e746253f1f38ae1b4ef48ffb39c5cba1",
     "src/lib/validation/finance.ts": "df2f8eab0d22c94362b78ff47e4b76d21d76911a8c79f14630b50a9f1a4fb5fc",
@@ -355,136 +363,50 @@
     "prisma/migrations/20261019220000_website_notification_recipient/migration.sql": "a30a67dc19d1000eb0de3ee131571d1526db51a0f774cc50c3623404eafd10a2",
     "prisma/migrations/migration_lock.toml": "1db17a8d051aa136110736752c5e1f8b7ed92b6ea8e803112fbbe2497047c210",
     "prisma/schema.prisma": "e002af648463944744364d37821a2c676527350d04050a7268c7a2d68d089f0d",
-    "next.config.ts": "0e125723b187f77deb46a55b34811de9a75dcf92187af63ed8dcfc8d68e71b3c",
+    "next.config.ts": "f47c654050e6640c8f03262eeeb0bafd612d53c8c0d13ba82c459a1218b2cf58",
     "package.json": "a8dc844bf75a2299ecc05986b4c879338997456f7726ace055193045fe7c2380",
     "package-lock.json": "5d1c08fce73279be08abb41152cb7f7da768ae968f7e3ed1bd4e14e07e7bb103",
     "scripts/copy-maplibre-worker.mjs": "b2493c39cf2b5a4d274af5db25cc5ce66f0583cae275e2219e0db994b9dcfe7e",
     ".vercelignore": "5fc2bc47bb00f601de358e98912220998f2a7da923570c709122ccf376b59306",
     "infrastructure/routing-gateway/routing-policy.json": "620cbccf39fc6c83f9f1b66359f1b2217b00d67849efa4c721708a81b0991604"
   },
-  "assets": {
-    "public/media/extras/balcony.webp": {
-      "bytes": 98538,
-      "sha256": "1f86b24adf43bfb5cdaeb4d402321a581f448351e6c7d1ae17e8430f5c2692a6"
-    },
-    "public/media/extras/cabinets.webp": {
-      "bytes": 52490,
-      "sha256": "2b6ca60e49c86b171e125e7d164a1a8f2670ee2f6f05959ae2ee403aeaeba634"
-    },
-    "public/media/extras/dishwasher.webp": {
-      "bytes": 76246,
-      "sha256": "f3fe881643d5b3cf7cc0dbd8803cdc5d5c33cf9e438fcfc010207e4eff74629a"
-    },
-    "public/media/extras/fridge.webp": {
-      "bytes": 42732,
-      "sha256": "52a55fdc57979544ad454021620da0966043426cb5c7a3717a4c871cbb135b0c"
-    },
-    "public/media/extras/hood.webp": {
-      "bytes": 72128,
-      "sha256": "e7608e2c3601c346a5979ab81874b2624fd36789ae191a02ce112b71150d029f"
-    },
-    "public/media/extras/ironing.webp": {
-      "bytes": 45158,
-      "sha256": "297b561d93e805ffbaf21267f0d427051735f0d445142481fcae64c7a69134a6"
-    },
-    "public/media/extras/large-window.webp": {
-      "bytes": 83462,
-      "sha256": "06b2e80069db5a24b28060a1c0392dfd30349f677ae82cc7c6a4dc0fe49ae8a7"
-    },
-    "public/media/extras/linen.webp": {
-      "bytes": 89606,
-      "sha256": "a9062c6f49aa410f4b47aa3f21024a9a100ffbe186a90ec434f59f390799ceda"
-    },
-    "public/media/extras/microwave.webp": {
-      "bytes": 48146,
-      "sha256": "5760620e3997185aa9e2d94cb12db3b405c91f0abd895c2d687dfd2e784a574f"
-    },
-    "public/media/extras/oven.webp": {
-      "bytes": 67394,
-      "sha256": "b583c3e4bc05186bbd5fcefd655c0b3852e3ded64f5b58eee6e19cf1e9c5b473"
-    },
-    "public/media/extras/pet-hair.webp": {
-      "bytes": 92732,
-      "sha256": "de979a80c20db4870ab08c83beac591e4b5ac5edcdb43b5ef79b87efbe24527a"
-    },
-    "public/media/extras/standard-window.webp": {
-      "bytes": 70732,
-      "sha256": "c404d6ef03a655691fd18db7d538b7931197f5a12069cdc9bfb8e240700c79a3"
-    },
-    "public/media/extras/steam.webp": {
-      "bytes": 42586,
-      "sha256": "13cc2baaf97231978766469876323ebeecde6f67c0e0acc7e569c900cad91488"
-    },
-    "public/media/extras/washing-machine.webp": {
-      "bytes": 55242,
-      "sha256": "410df52e0e67f33c302e429ba8723f544a93ec6c3718c4e8728d4720950174c0"
-    },
-    "public/media/services/airbnb.webp": {
-      "bytes": 143242,
-      "sha256": "a746db48ef49b871fae54043c7b164ac2fc2044a16a450883d40fafe57fb974d"
-    },
-    "public/media/services/deep.webp": {
-      "bytes": 65144,
-      "sha256": "78fd963cb5fa5aa408b2bce731c08391b69978f89bee4de69da594ae361a355b"
-    },
-    "public/media/services/move.webp": {
-      "bytes": 77178,
-      "sha256": "935379b97eaa7a2117779f16377dde86ee622c1983e7048981d8898de96a05fa"
-    },
-    "public/media/services/office.webp": {
-      "bytes": 99210,
-      "sha256": "c4e8cfa02fbf24901cac4277be97ff72052254497dcd9e0ee68dc8c2fe71c695"
-    },
-    "public/media/services/regular.webp": {
-      "bytes": 66216,
-      "sha256": "bfc13b529b7e751d61400427af33b4bf1e0db81316e17089abab31f254fac20a"
-    },
-    "public/media/upholstery/spot-cleaning.webp": {
-      "bytes": 101998,
-      "sha256": "109cb842ccaa2a72b22ed34850e0e389af2e71962780ca77c3af53f1ae384b23"
-    },
-    "public/media/upholstery/fabric-check.webp": {
-      "bytes": 188728,
-      "sha256": "7cc0aba7cd06e32620d5bdb520b82f61c26089e405f16e4994655c6d6073fd7d"
-    },
-    "public/media/upholstery/hero-extraction.webp": {
-      "bytes": 218576,
-      "sha256": "8aa46e6c99985ff259f4a1d4fdc83bda948e2757dd181d7b48922cedb72300e9"
-    },
-    "public/media/journey-v5/stills/000-portrait.webp": {
-      "bytes": 88324,
-      "sha256": "34296672024b46daf19b2577a68bef09c33ab99a964ccb65090ff907fa5f28fa"
-    },
-    "public/media/journey-v5/stills/000-before-portrait.webp": {
-      "bytes": 179758,
-      "sha256": "12ec4d8edb3a328d78acd6119db13096ecf1f4209987bf20fd9e154578794ba1"
-    }
-  },
-  "tests": 1150,
+  "tests": 1071,
   "lint": true,
   "typecheck": true,
   "migration": true,
   "build": true,
-  "aiAutoReady": false,
-  "releaseProfile": "WEBSITE_MANUAL_AI_OFF",
-  "checkedAt": "2026-10-31T17:30:50.774Z",
+  "aiAutoReady": true,
+  "releaseProfile": "WEBSITE_AI_PREVIEW_VERIFIED_PRODUCTION_PENDING",
+  "productionReady": false,
+  "nativeBookingVerified": true,
+  "cloudPreviewCertified": true,
+  "checkedAt": "2026-11-02T16:10:27.422Z",
   "checks": {
-    "unit": 1044,
-    "client": 15,
-    "adminCrmSchedulingRouting": 43,
-    "finance": 16,
-    "leadOutbox": 18,
-    "chatHttp": 14
+    "full": {
+      "pass": 1071,
+      "fail": 0,
+      "skip": 34,
+      "sha256": "5252a120a7d121cbaa10387886b6908fe208372c7b9d9784a0d4ab7ddf672f23"
+    },
+    "integration": {
+      "pass": 59,
+      "fail": 0,
+      "skip": 0,
+      "sha256": "5338eecd52ae49ec68a04245e0334fdc6eba2ff5dce3c5cfbab97776cfbbcdf6"
+    },
+    "release-verification/admin": {
+      "pass": 40,
+      "fail": 0,
+      "skip": 0,
+      "sha256": "255a8b22d56cc19b1ecd7c2d1ab3017cb1e321c4e11d911a726df58e8bc9daba"
+    }
   },
-  "suites": [
-    "Fresh unit/client SSR: 1044 + 15 PASS; 33 initial environment skips individually triaged",
-    "Disposable loopback PostgreSQL and actual HTTP: 43 admin/CRM/scheduling/routing, 16 finance, 18 lead/outbox and 14 chat-security assertions PASS; transports/providers mocked or disabled",
-    "75 public pages x 3 widths; 13 form groups; Chrome/WebKit upholstery; 15 services and 30 language switches; UI writes mocked"
-  ],
-  "verificationScope": "Website performance/accessibility/security-headers and reviewed Next 16.4.3/Zod/transitive security updates only. All 14 changed fingerprinted files explicitly reviewed. Pricing, server API/CRM, queue implementation, agent code, schema and migrations remain byte-identical to preceding deployed evidence. migration=true means unchanged production migration inventory and a clean local schema diff, not a production migration. Separate synthetic local databases exercise real persistence, idempotency, authorization, outbox and retry; no live customer Order, message or notification was sent. Remaining remote-provider/native AI tests stay unverified and AI AUTO remains disabled. Production deployment and public verification are recorded separately.",
+  "vercelConfigSha256": "1487793a0907c10e067bde6d0efada4a714553b4502b922aab0646b246096d37",
+  "verificationScope": "Software source admission for protected native-verification Preview. Unit/domain and real loopback PostgreSQL/HTTP checks passed with explicitly mocked external providers. This is NOT native certification or production admission. Runtime readiness still independently requires real provider diagnostics, approved operational rules/crew, signed source/config-bound fresh Preview booking proof, owner confirmation and production maintenance configuration. No production mode is enabled by this file.",
   "previousVerification": {
-    "fingerprint": "9d165a37c70481d2eabf1db77d72d410d15222bc1553547a464b9788726f1735",
-    "tests": 1059,
-    "checkedAt": "2026-10-28T15:57:13.398Z"
-  }
+    "fingerprint": "9130991dcac2136dc3e5fdab8cea3f3e6155888904cb69a09a558801fbdc7486",
+    "checkedAt": "2026-11-02T16:01:32.972Z"
+  },
+  "nativeEvidence": "release/website-ai-native-20261102.json",
+  "nativeScope": "Two real isolated Preview bookings; staff mirror and business records cleaned; actual MOTIS WALKING/fallback routing; production configuration/HMAC compatibility and rollout remain separate gates."
 }
