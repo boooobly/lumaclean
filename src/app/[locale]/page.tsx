@@ -13,6 +13,8 @@ import {JourneyHandoff} from "@/components/site/journey-handoff";
 import {SiteHeader} from "@/components/site/site-header";
 import {Rates} from "@/components/site/rates";
 import {UpholsteryTeaser} from '@/components/site/upholstery-teaser';
+import {ExtrasLedger} from '@/components/site/extras-ledger';
+import {extrasInfo,extrasInfoUi} from '@/lib/extras-info';
 import {routing, type Locale} from "@/i18n/routing";
 import {businessContact, businessContactCopy, googleBusinessProfile, whatsappContact} from "@/lib/contacts";
 import {GoogleProfileLinks} from "@/components/site/google-profile-links";
@@ -33,16 +35,17 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   const {locale} = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({locale, namespace: "Metadata"});
+  const description = t('description', {price: formatRsd(priceMatrix.regular[0], locale)});
   const openGraphLocale = {ru: "ru_RU", sr: "sr_RS", en: "en_US"}[locale];
   return {
     title: t("title"),
-    description: t("description"),
+    description,
     alternates: {
       canonical: `/${locale}`,
       languages: {sr: "/sr", ru: "/ru", en: "/en", "x-default": "/ru"},
     },
-    openGraph: {title: t("title"), description: t("description"), type: "website", locale: openGraphLocale, siteName: "LumaClean", url: `/${locale}`, images: [{url: "/media/apartment-journey-poster.jpg", width: 1280, height: 720, alt: "LumaClean — cleaning in Belgrade"}]},
-    twitter: {card: "summary_large_image", title: t("title"), description: t("description"), images: ["/media/apartment-journey-poster.jpg"]},
+    openGraph: {title: t("title"), description, type: "website", locale: openGraphLocale, siteName: "LumaClean", url: `/${locale}`, images: [{url: "/media/apartment-journey-poster.jpg", width: 1280, height: 720, alt: "LumaClean — cleaning in Belgrade"}]},
+    twitter: {card: "summary_large_image", title: t("title"), description, images: ["/media/apartment-journey-poster.jpg"]},
     other: {"geo.region": "RS-00", "geo.placename": "Belgrade"},
   };
 }
@@ -113,14 +116,14 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
               {[c.comparison.regular, c.comparison.deep].map((item, index) => (
                 <article className={index ? "scope-deep" : ""} key={item.title}>
                   <div className="scope-index">{index ? v.scope.deep : v.scope.regular}</div>
-                  <h3>{item.title}</h3><p>{item.text}</p>
+                  <h3><Link href={getServicePath(locale, index ? 'deep' : 'regular')}><span>{item.title}</span><ArrowIcon /></Link></h3><p>{item.text}</p>
                   <ul>{item.items.map((line) => <li key={line}>{line}</li>)}</ul>
                   <div className="scope-price"><span>{c.pricing.from}</span><strong>{new Intl.NumberFormat(locale === "en" ? "en-US" : locale === "ru" ? "ru-RU" : "sr-Latn-RS").format(index ? priceMatrix.deep[0] : priceMatrix.regular[0])}</strong><small>RSD</small></div>
                 </article>
               ))}
             </div>
             <nav className="service-directory" aria-label={v.nav.services}>
-              {c.services.map((service, index) => (
+              {c.services.filter(service => service.id !== 'regular' && service.id !== 'deep').map((service, index) => (
                 <Link href={getServicePath(locale, service.id)} key={service.id}>
                   <span>{String(index + 1).padStart(2, "0")}</span><div><strong>{service.name}</strong><p>{service.description}</p></div><i aria-hidden="true"><ArrowIcon /></i>
                 </Link>
@@ -144,10 +147,10 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
             <div className="section-intro split-intro"><h2>{v.materials.title}</h2><p>{v.materials.body}</p></div>
             <div className="material-stories">
               <figure className="material-large"><Image src="/media/material-mirror.webp" alt={v.materials.mirror} fill sizes="(max-width: 900px) 100vw, 62vw"/><figcaption><span>{v.materials.mirror}</span><strong>{c.pricing.from} {formatRsd(extrasPrices.standardWindow, locale)}</strong></figcaption></figure>
-              <figure><Image src="/media/material-chrome.webp" alt={v.materials.steam} fill sizes="(max-width: 900px) 100vw, 38vw"/><figcaption><span>{v.materials.steam}</span><strong>{c.pricing.from} {formatRsd(extrasPrices.steam, locale)}</strong></figcaption></figure>
+              <figure className="material-chrome"><Image src="/media/material-chrome.webp" alt={v.materials.steam} fill sizes="(max-width: 900px) 100vw, 38vw"/><figcaption><span>{v.materials.steam}</span><strong>{c.pricing.from} {formatRsd(extrasPrices.steam, locale)}</strong></figcaption></figure>
               <figure><Image src="/media/material-cabinet.webp" alt={v.materials.appliance} fill sizes="(max-width: 900px) 100vw, 38vw"/><figcaption><span>{v.materials.appliance}</span><strong>{c.pricing.from} {formatRsd(extrasPrices.cabinets, locale)}</strong></figcaption></figure>
             </div>
-            <div className="extras-ledger">{extraKeys.map((key, index) => <div key={key}><span>{String(index + 1).padStart(2, "0")}</span><strong>{c.calculator.labels[key]}</strong><small>{c.pricing.from} {formatRsd(extrasPrices[key], locale)}</small></div>)}</div>
+            <ExtrasLedger items={extraKeys.map(key=>({id:key,title:c.calculator.labels[key],price:`${c.pricing.from} ${formatRsd(extrasPrices[key],locale)}`,description:extrasInfo[key].description[locale],image:extrasInfo[key].image}))} hint={extrasInfoUi[locale].hint} closeLabel={extrasInfoUi[locale].close}/>
           </div>
         </section>
 
@@ -176,13 +179,19 @@ export default async function HomePage({params,searchParams}: {params: Promise<{
           <div className="shell">
             <div className="section-number">{v.faq.number}</div>
             <div className="section-intro split-intro"><h2>{v.faq.title}</h2><p>{v.faq.body}</p></div>
-            <div className="site-faq-list">
-              {c.faq.items.map((item, index) => (
-                <details key={item.q} open={index === 0}>
-                  <summary><span>{String(index + 1).padStart(2, "0")}</span><strong>{item.q}</strong><i aria-hidden="true">+</i></summary>
-                  <p>{item.a}</p>
-                </details>
-              ))}
+            <div className="homepage-faq-grid">
+              <figure className="homepage-faq-image">
+                {/* The wide source needs extra resolution for the desktop portrait crop. */}
+                <Image src="/media/articles/regular-deep.webp" alt={ux.faqImageAlt} fill sizes="(max-width: 520px) 100vw, (max-width: 900px) calc(100vw - 36px), 75vw"/>
+              </figure>
+              <div className="site-faq-list">
+                {c.faq.items.map((item, index) => (
+                  <details key={item.q} open={index === 0}>
+                    <summary><span>{String(index + 1).padStart(2, "0")}</span><strong>{item.q}</strong><i aria-hidden="true">+</i></summary>
+                    <p>{item.a}</p>
+                  </details>
+                ))}
+              </div>
             </div>
           </div>
         </section>

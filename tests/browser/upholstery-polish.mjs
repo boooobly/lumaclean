@@ -14,7 +14,14 @@ const report = { base, matrix: [], scenarios: [], errors: [], mocked: true };
 async function setup(browser, options = {}) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "no-preference", ...options });
   await context.addInitScript(() => {
-    localStorage.setItem("lc-analytics-consent-v1", "no");
+    // The server-rendered gallery can be visible before its calculator effect
+    // subscribes. Observe readiness; do not synthesize a product interaction.
+    const add = window.addEventListener;
+    window.addEventListener = function(type, ...args) {
+      if (type === 'lumaclean:upholstery-select') window.__upSelectionReady = true;
+      return add.call(this, type, ...args);
+    };
+    localStorage.setItem("lc-analytics-consent-v2", "no");
     window.__upCls = 0;
     if ("PerformanceObserver" in window && PerformanceObserver.supportedEntryTypes.includes("layout-shift")) {
       new PerformanceObserver(list => list.getEntries().forEach(entry => { if (!entry.hadRecentInput) window.__upCls += entry.value; })).observe({ type: "layout-shift", buffered: true });
@@ -44,7 +51,7 @@ async function setup(browser, options = {}) {
   return { context, page, state };
 }
 
-const go = async (page, locale) => { await page.goto(base + routes[locale]); await page.locator(".up-calculator").waitFor(); await page.evaluate(() => document.fonts.ready); };
+const go = async (page, locale, waitHydration = true) => { await page.goto(base + routes[locale]); await page.locator(".up-calculator").waitFor(); if(waitHydration)await page.waitForFunction(() => window.__upSelectionReady === true); await page.evaluate(() => document.fonts.ready); };
 const settle = page => page.evaluate(async () => { await Promise.all(document.getAnimations().filter(a => a.effect?.getTiming().iterations !== Infinity).map(a => a.finished.catch(() => {}))); });
 const money = async (page, value) => page.waitForFunction(expected => Number(document.querySelector(".up-total strong")?.textContent.replace(/\D/g, "")) === expected, value);
 async function screenshotForm(page, name) {
@@ -186,7 +193,7 @@ try {
       assert.equal(await fault.page.locator(".up-gallery-item").first().evaluate(el => getComputedStyle(el).opacity), "1");
       await fault.context.close();
       const noJs = await setup(browser, { javaScriptEnabled: false, reducedMotion: "reduce" });
-      await go(noJs.page, "en");
+      await go(noJs.page, "en", false);
       for (const selector of ["h1", ".up-gallery-item", ".up-steps", ".up-price-table", ".up-calculator"]) assert.equal(await noJs.page.locator(selector).first().isVisible(), true);
       await noJs.context.close();
       report.scenarios.push(`${engine}: stagger/reveal, reduced-motion, CLS < .01, failed observer and disabled JavaScript content visibility PASS`);

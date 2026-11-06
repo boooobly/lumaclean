@@ -12,7 +12,7 @@ const tags = (html, name) => [...html.matchAll(new RegExp(`<${name}\\b[^>]*>`, '
 const text = (s) => decode(s.replace(/<[^>]*>/g, '').trim());
 async function get(path, headers = {}) {
   const response = await fetch(new URL(path, origin), {redirect: 'manual', headers, signal: AbortSignal.timeout(30000)});
-  return {status: response.status, location: response.headers.get('location'), link: response.headers.get('link'), html: await response.text()};
+  return {status: response.status, location: response.headers.get('location'), link: response.headers.get('link'), robots: response.headers.get('x-robots-tag'), html: await response.text()};
 }
 
 const sitemap = await get('/sitemap.xml');
@@ -20,11 +20,15 @@ const entries = [...sitemap.html.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) =>
   url: m[1].match(/<loc>(.*?)<\/loc>/)?.[1],
   languages: Object.fromEntries(tags(m[1], 'xhtml:link').map((t) => [t.hreflang, t.href])),
 }));
-check(sitemap.status === 200 && entries.length === 63, 'Published sitemap must contain 63 URLs and return 200');
+check(sitemap.status === 200 && entries.length > 0, 'Published sitemap must contain URLs and return 200');
+const localeCounts = ['ru','sr','en'].map(locale => entries.filter(e => new URL(e.url).pathname.startsWith(`/${locale}`)).length);
+check(localeCounts.every(count => count === localeCounts[0]), 'Published locale coverage differs');
+check(entries.filter(e => new URL(e.url).pathname.includes('/services/')).length === 15, 'Five existing cleaning services must be discoverable in all three locales');
 const urls = new Set(entries.map((e) => e.url));
 check(urls.size === entries.length, 'Duplicate sitemap URLs');
 check(entries.every(e => new URL(e.url).origin === canonicalOrigin), 'Sitemap contains another origin');
 const pages = [];
+const linkedPages = new Map();
 for (const entry of entries) {
   const path = new URL(entry.url).pathname;
   const result = await get(path);
@@ -45,6 +49,7 @@ for (const entry of entries) {
   check(h1.length === 1, `${path}: expected one H1`);
   check(Boolean(title && description), `${path}: title/description missing`);
   check(!meta.some((m) => m.name === 'robots' && /noindex/.test(m.content)), `${path}: noindex`);
+  check(!/noindex/i.test(result.robots || ''), `${path}: X-Robots-Tag blocks indexing`);
   check(result.html.match(/<html[^>]*lang="([^"]+)"/)?.[1] === path.split('/')[1], `${path}: lang mismatch`);
   check(images.every((i) => 'alt' in i), `${path}: missing alt attribute`);
   check(links.some((l) => l.rel === 'icon'), `${path}: favicon missing`);
@@ -63,7 +68,7 @@ for (const entry of entries) {
   if (path.includes('/services/')) {
     check(Boolean(service && graph.some((s) => s['@type'] === 'BreadcrumbList')), `${path}: service/breadcrumb schema missing`);
     check(service?.url === entry.url, `${path}: Service URL mismatch`);
-  } else if (!path.includes('/articles')) check(graph.some((s) => s['@type'] === 'Organization'), `${path}: organization missing`);
+  } else if (!path.includes('/articles')) check(graph.some((s) => s['@type'] === 'Organization') || service?.provider?.['@type'] === 'Organization', `${path}: organization/provider missing`);
   if (path.includes('/articles/')) {
     const article = graph.find(s => s['@type'] === 'Article');
     check(Boolean(article && graph.some(s => s['@type'] === 'BreadcrumbList')), `${path}: article/breadcrumb schema missing`);
@@ -78,7 +83,11 @@ for (const entry of entries) {
   for (const question of faq?.mainEntity || []) check(visible.includes(question.name) && visible.includes(question.acceptedAnswer.text), `${path}: FAQ not in server HTML`);
   for (const href of internalLinks) {
     const target = new URL(href, entry.url);
-    check(urls.has(target.origin + target.pathname), `${path}: internal link outside sitemap ${href}`);
+    if (!urls.has(target.origin + target.pathname)) {
+      // Legal pages need not be in a search sitemap, but their links must work.
+      if (!linkedPages.has(target.pathname)) linkedPages.set(target.pathname, await get(target.pathname));
+      check(linkedPages.get(target.pathname).status === 200, `${path}: broken linked page ${href}`);
+    }
   }
   pages.push({path, status: result.status, title, description, h1, canonical, languages, httpLink: result.link, schemaTypes: graph.map((g) => g['@type']), internalLinks: [...new Set(internalLinks)], ids, imageCount: images.length, emptyAltCount: images.filter((i) => i.alt === '').length, htmlBytes: Buffer.byteLength(result.html)});
 }
@@ -118,7 +127,7 @@ for (const locale of ['ru','sr','en']) {
   check(r.status === 307 && new URL(r.location,origin).pathname === `/${locale}`, `Root language redirect ${locale} incorrect`);
   checks.push({path:'/', language:locale, status:r.status, location:r.location});
 }
-const report = {checkedAt:new Date().toISOString(), origin, pages, checks, issues};
+const report = {checkedAt:new Date().toISOString(), origin, pages, checks, additionalLinkedPages: [...linkedPages].map(([path,result]) => ({path,status:result.status})), issues};
 if (process.argv[3]) writeFileSync(process.argv[3], JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({origin,pages:pages.length,checks:checks.length,issues},null,2));
 if (issues.length) process.exitCode=1;

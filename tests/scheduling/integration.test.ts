@@ -71,6 +71,7 @@ test(
           status: "SCHEDULED",
           scheduledStart: localInstant(time),
           manualDurationMinutes: 150,
+          durationOverrideReason: "Synthetic scheduling duration fixture",
           travelBufferMinutes: 30,
           basePrice: 4000,
           finalPrice: 4000,
@@ -111,6 +112,7 @@ test(
         expectedUpdatedAt: o.updatedAt.toISOString(),
         scheduledStart: localInput(o.scheduledStart) || null,
         manualDurationMinutes: o.manualDurationMinutes,
+        durationOverrideReason: "Synthetic scheduling duration fixture",
         cleanerIds: crew.map((a) => a.cleanerId),
         ...changes,
       };

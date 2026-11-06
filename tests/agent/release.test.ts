@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {normalizedSource} from '../../src/lib/agent/release-verification.mjs';
-import {sourceFingerprint} from '../../src/lib/agent/release-verification.mjs';
+import {sourceFingerprint,verifiedRelease} from '../../src/lib/agent/release-verification.mjs';
 import {mkdtempSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,resolve,relative,isAbsolute} from 'node:path';
@@ -22,6 +22,12 @@ test('source proof ignores platform-owned config but rejects changed application
     const before=sourceFingerprint(root);
     writeFileSync(join(root,'vercel.json'),'platform builder rewrites this');
     assert.equal(sourceFingerprint(root),before);
+    mkdirSync(join(root,'release'));
+    const evidence={fingerprint:before,tests:1,lint:true,typecheck:true,migration:true,aiAutoReady:false};
+    writeFileSync(join(root,'release/ai-go-live.json'),JSON.stringify(evidence));
+    assert.equal(verifiedRelease(root).verified,false,'Manual-only evidence cannot open the AI AUTO gate');
+    writeFileSync(join(root,'release/ai-go-live.json'),JSON.stringify({...evidence,aiAutoReady:true}));
+    assert.equal(verifiedRelease(root).verified,true);
     writeFileSync(join(root,'src/a.ts'),'const a=2;');
     assert.notEqual(sourceFingerprint(root),before);
   }finally{

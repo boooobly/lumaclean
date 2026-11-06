@@ -1,0 +1,30 @@
+{
+  "tool": "built-in image_gen",
+  "commonPrompt": "Use case: photorealistic-natural. An editorial service photograph for LumaClean upholstery cleaning in a contemporary Belgrade home. Match warm natural side daylight, restrained contrast, neutral beige/cream woven upholstery, oak details and a calm lived-in residential interior. Real fabric weave and plausible furniture proportions. No text, watermarks, logos, before/after splits, exaggerated grime, faces or graphic overlays. The composition must remain clear when cropped for a small service card. Hands must be anatomically normal with correct tool contact. ",
+  "optimization": {
+    "format": "WebP",
+    "quality": 82,
+    "effort": 6,
+    "upscaling": false
+  },
+  "assets": [
+    {
+      "key": "spot",
+      "filename": "spot-cleaning.webp",
+      "scene": "Landscape 4:3 close photograph of a pale beige fabric sofa seat with ONE small local light brown tea stain, about 4 cm across. A single naturally gloved hand holds a real compact transparent upholstery spray-extraction hand tool: one clear flattened suction head about 10 cm wide lies flat against the fabric next to the stain, attached to a single normal dark extraction hose. Plausible compact nozzle and suction lip, no spare handles, no duplicate hoses, no pressure-washer gun, no oversized vacuum floor head. Show the careful cleaning of this precise small area. Sofa seams, cushion shape and fabric texture must remain realistic, the rest of the sofa is clean. Centre the stain and nozzle together within the middle half of the frame, visible above the seat edge; some sofa back and softly blurred room establish context.",
+      "path": "public/media/upholstery/spot-cleaning.webp",
+      "width": 1000,
+      "height": 800,
+      "bytes": 101998
+    },
+    {
+      "key": "fabricCheck",
+      "filename": "fabric-check.webp",
+      "scene": "Portrait 4:5 composition, a distinct scene of assessing a sofa's fabric before wet cleaning. One naturally gloved hand presses a small folded white testing cloth against an inconspicuous seam on the lower side of a light beige woven-fabric sofa. The little cloth, contact point and surrounding intact fabric are clear in the centre of the frame. No extractor or other equipment is in this photograph. A broader view of the sofa arm and side panel establishes correct furniture shape, with neutral living-room elements softly out of focus. Quiet, careful material and colour-fastness check, no visible staining, no colored-transfer demonstration, no lab instruments. Keep the cloth and hand centred at mid-height so both wide and mobile crops retain the assessment action.",
+      "path": "public/media/upholstery/fabric-check.webp",
+      "width": 1122,
+      "height": 1402,
+      "bytes": 188728
+    }
+  ]
+}

@@ -12,7 +12,7 @@ export function ArticleCard({article, locale, featured = false}: {article: Artic
   const ui = articleUi[locale];
   return <article className={`journal-card ${featured ? "journal-card-featured" : ""}`}>
     <Link className="journal-card-link" href={articlePath(article, locale)}>
-      <div className="journal-card-image"><Image src={article.image} alt={t.imageAlt} fill sizes={featured ? "(max-width: 760px) 100vw, 65vw" : "(max-width: 760px) 100vw, 33vw"} preload={featured} />{article.status === "draft" && <span className="journal-draft">{ui.draft}</span>}</div>
+      <div className="journal-card-image"><Image src={article.image} alt={t.imageAlt} fill sizes={featured ? "(max-width: 760px) 100vw, 65vw" : "(max-width: 760px) 100vw, 33vw"} loading={featured ? "eager" : "lazy"} fetchPriority={featured ? "high" : undefined} />{article.status === "draft" && <span className="journal-draft">{ui.draft}</span>}</div>
       <div className="journal-card-copy"><div className="journal-meta"><span>{t.category}</span><span>{readingMinutes(article, locale)} {ui.minutes}</span></div><h2>{t.title}</h2><p>{t.description}</p><span className="journal-read">{ui.read}<span aria-hidden="true"><ArrowIcon /></span></span></div>
     </Link>
   </article>;

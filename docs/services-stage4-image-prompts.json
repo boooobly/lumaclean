@@ -1,0 +1,52 @@
+{
+  "tool": "built-in image_gen",
+  "commonPrompt": "Use case: photorealistic-natural. Create one editorial photograph for LumaClean, a cleaning service in Belgrade. Contemporary modest residential/office architecture, soft natural side daylight, warm neutral cream, pale oak and light stone materials, restrained contrast, realistic fine texture. Portrait 4:5 composition, usable both as a large hero photograph and cropped on a mobile screen. Photograph only, no text, lettering, numbers, logos, watermark, before/after collage or graphic overlay. No faces or invented branded equipment. Realistic furniture, surfaces and tools; if a hand is visible, exactly one anatomically correct naturally gloved hand and its forearm. Keep the meaningful action within central 60 percent of the frame. ",
+  "optimization": {
+    "format": "WebP",
+    "quality": 81,
+    "effort": 6,
+    "upscaling": false
+  },
+  "assets": [
+    {
+      "id": "regular",
+      "scene": "An ordinary ongoing light cleaning of a modern apartment kitchen opening onto a softly visible living room. A single gloved hand wipes an uncluttered pale stone countertop with a folded neutral microfiber cloth, correct contact and believable scale. Clean cabinetry, modest everyday objects, warm oak floor and a hint of sofa in background. View from counter-height at a gentle angle, wide enough to understand the apartment. No splashes, no strong dirt, no staged spray action.",
+      "path": "public/media/services/regular.webp",
+      "width": 1122,
+      "height": 1402,
+      "bytes": 66216
+    },
+    {
+      "id": "deep",
+      "scene": "Detailed domestic deep cleaning: close but contextual view of a gloved hand carefully wiping the pale painted skirting board along a kitchen wall with a folded cloth, next to natural oak flooring and a lower kitchen cabinet. The cloth meets the baseboard, no impossible reach. Tiny normal dust traces only, no exaggerated grime. Low camera perspective with baseboard line receding naturally, clean cabinet and wall joinery, warm soft daylight. One realistic forearm entering from the side.",
+      "path": "public/media/services/deep.webp",
+      "width": 1122,
+      "height": 1402,
+      "bytes": 65144
+    },
+    {
+      "id": "move",
+      "scene": "A newly vacated, unfurnished bright apartment ready for a move-in clean, with empty living space, pale oak floor, simple white walls, a doorway leading toward a small kitchen, open architectural proportions. A real rectangular flat microfiber mop rests in contact with the wood floor in the midground, its single handle leaning naturally diagonally out of frame. No people, boxes, construction debris or renovation equipment. Focus on the open usable floor and freshly prepared domestic space, believable Belgrade apartment rather than luxury showroom.",
+      "path": "public/media/services/move.webp",
+      "width": 1122,
+      "height": 1402,
+      "bytes": 77178
+    },
+    {
+      "id": "airbnb",
+      "scene": "A calm short-stay apartment prepared for its next guest. Neatly made double bed with fresh white cotton linen, subtle natural folds, beige upholstered headboard, one oak bedside table and a doorway revealing a small kitchenette in soft focus. A folded set of plain white towels rests on the foot of the bed, no decorative flower petals, no hotel signage or text. Warm side daylight, lived-in realistic rental apartment, immaculate but not glossy luxury, photograph from a gentle three-quarter angle.",
+      "path": "public/media/services/airbnb.webp",
+      "width": 1122,
+      "height": 1402,
+      "bytes": 143242
+    },
+    {
+      "id": "office",
+      "scene": "Cleaning an ordinary small office: one gloved hand wipes a clear pale oak meeting table using a folded microfiber cloth, no spray. Comfortable office chairs, a closed laptop away from the cleaning action, subtle glass partition and daylight windows in the background. Realistic modest contemporary working space, no skyscraper fantasy, no visible logos or screen text, no papers being moved. Table edge and hand contact in centre, soft natural side daylight.",
+      "path": "public/media/services/office.webp",
+      "width": 1122,
+      "height": 1402,
+      "bytes": 99210
+    }
+  ]
+}

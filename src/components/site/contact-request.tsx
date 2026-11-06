@@ -10,6 +10,7 @@ import {ArrowIcon} from './arrow-icon';
 
 export function ContactRequest({locale, copy}: {locale: Locale; copy: EditorialContent['estimate']}) {
   const c = homepageUxCopy[locale];
+  const eventData = {locale, form_type: 'contact'};
   const [phone, setPhone] = useState('');
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<'idle'|'sending'|'success'|'validation'|'error'|'limited'>('idle');
@@ -20,7 +21,7 @@ export function ContactRequest({locale, copy}: {locale: Locale; copy: EditorialC
     event.preventDefault();
     if (busy.current || status === 'success') return;
     if (!isWebsitePhoneValid(phone) || !consent) {
-      setStatus('validation'); trackEvent('lead_error', {locale, error_type: 'validation'}); return;
+      setStatus('validation'); trackEvent('lead_error', {...eventData, error_type: 'validation'}); return;
     }
     busy.current = true; setStatus('sending');
     // Freeze attribution along with the payload across timeout retries.
@@ -32,14 +33,14 @@ export function ContactRequest({locale, copy}: {locale: Locale; copy: EditorialC
       const response = await fetch('/api/lead', {method: 'POST', headers: {'Content-Type': 'application/json'}, signal: AbortSignal.timeout(20000), body: JSON.stringify({...JSON.parse(fields), submissionId: submission.current.id, attribution: JSON.parse(submission.current.payload).attribution})});
       const result = await response.json().catch(() => null);
       if (!response.ok || result?.ok !== true) {
-        setStatus(response.status===429?'limited':response.status === 400 ? 'validation' : 'error'); trackEvent('lead_error', {locale, error_type: 'server'}); return;
+        setStatus(response.status===429?'limited':response.status === 400 ? 'validation' : 'error'); trackEvent('lead_error', {...eventData, error_type: 'server'}); return;
       }
-      setStatus('success'); trackEvent('generate_lead', {locale});
+      setStatus('success'); trackEvent('generate_lead', eventData);
     } catch {
-      setStatus('error'); trackEvent('lead_error', {locale, error_type: 'network'});
+      setStatus('error'); trackEvent('lead_error', {...eventData, error_type: 'network'});
     } finally { busy.current = false; }
   }
-  return <form className="contact-request" onSubmit={submit} noValidate onFocusCapture={() => {if (!started.current) {started.current = true; trackEvent('form_start', {locale});}}}>
+  return <form className="contact-request" onSubmit={submit} noValidate onFocusCapture={() => {if (!started.current) {started.current = true; trackEvent('form_start', eventData);}}}>
     <label className="contact-phone"><span>{copy.phone}</span><input type="tel" name="phone" autoComplete="tel" inputMode="tel" value={phone} onChange={e => setPhone(e.target.value)} required maxLength={40} aria-invalid={status === 'validation' && !isWebsitePhoneValid(phone)} aria-describedby={status === 'validation' || status === 'error' || status === 'limited' ? 'contact-status' : undefined}/></label>
     <label className="site-consent"><input type="checkbox" name="consent" checked={consent} onChange={e => setConsent(e.target.checked)} required aria-invalid={status === 'validation' && !consent}/><span>{copy.consent}</span></label>
     <button type="submit" disabled={status === 'sending' || status === 'success'}>{status === 'sending' ? copy.sending : c.send}<ArrowIcon/></button>

@@ -41,7 +41,7 @@ test(
       }),
       uid = randomUUID(),
       password = randomUUID() + "Aa!7",
-      date = "2026-10-04";
+      date = "2026-11-04";
     const owner = await db.user.create({
       data: {
         id: uid,
@@ -102,6 +102,7 @@ test(
           latitude: 44.81,
           longitude: 20.46,
           placeId: "fixture-place",
+          coordinatesConfirmed: true,
         },
       }),
       cleaner = await db.cleaner.create({
@@ -111,6 +112,7 @@ test(
           homeAddress: "Dorcol",
           homeLatitude: 44.82,
           homeLongitude: 20.45,
+          homeCoordinatesConfirmed: true,
           availability: {
             create: Array.from({ length: 7 }, (_, i) => ({
               kind: "WEEKLY" as const,
@@ -250,10 +252,11 @@ test(
       await t.test(
         "missing route warning requires explicit reason and current keys",
         async () => {
+          const unconfirmed = await db.clientAddress.create({data:{clientId:client.id,fullAddress:'Synthetic unconfirmed route address'}});
           const fixed = await db.order.create({
             data: {
               clientId: client.id,
-              addressId: address.id,
+              addressId: unconfirmed.id,
               serviceId: catalog.id,
               area: 55,
               scheduledStart: localInstant("2026-10-06T09:00"),
@@ -266,6 +269,7 @@ test(
             expectedUpdatedAt: fixed.updatedAt.toISOString(),
             scheduledStart: "2026-10-06T09:00",
             manualDurationMinutes: 60,
+            durationOverrideReason: "Synthetic routing duration fixture",
             cleanerIds: [cleaner.id],
           };
           let issues: SchedulingError["issues"] = [];
@@ -350,7 +354,7 @@ test(
       await t.test(
         "creating a flexible order from a verified slot preserves its window and assigns the crew",
         async () => {
-          const future = "2026-10-08",
+          const future = "2026-11-08",
             snap = await routingSnapshot(db, future);
           const candidate = {
             ...snap.orders[0],
@@ -378,6 +382,7 @@ test(
               extras: [],
               requiredCleaners: 1,
               manualDurationMinutes: 150,
+              durationOverrideReason: "Synthetic routing duration fixture",
               scheduleMode: "FLEXIBLE",
               windowFrom: future + "T12:00",
               windowTo: future + "T17:00",
@@ -455,16 +460,15 @@ test(
             ).status,
             403,
           );
-          assert.equal(
-            (
-              await call(
+          const unsafePlace = await call(
                 "place",
                 { placeId: "../../other", sessionToken: randomUUID() },
                 { Cookie: cookie },
-              )
-            ).status,
-            400,
-          );
+              );
+          assert.equal(unsafePlace.status,200);
+          const unsafeResult = await unsafePlace.json();
+          assert.equal(unsafeResult.data.available,false);
+          assert.deepEqual(unsafeResult.data.suggestions,[]);
           await db.user.update({
             where: { id: uid },
             data: { role: "CLEANER" },
@@ -479,10 +483,10 @@ test(
       await t.test(
         "Google disabled mode keeps day and Places readable without fabricated data",
         async () => {
-          const day = await call("day", { date }, { Cookie: cookie });
+          const day = await call("day", { date: '2026-11-09' }, { Cookie: cookie });
           assert.equal(day.status, 200);
           const data = await day.json();
-          assert.equal(data.data.available, false);
+          assert.equal(data.data.available, true, 'Day DTO remains readable independently of provider availability');
           assert(
             data.data.legs.every(
               (l: { route: RouteResult }) => l.route.durationSeconds === null,

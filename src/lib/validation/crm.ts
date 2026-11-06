@@ -7,7 +7,7 @@ import {
   soilLabels,
 } from "@/lib/domain/crm-types";
 import { quantityExtras } from "@/lib/domain/crm-pricing";
-import { entrySources } from "@/lib/analytics";
+import {leadAttributionSchema} from './lead-attribution';
 import {requestKinds} from '@/lib/lead-intent';
 const keys = <T extends Record<string, string>>(labels: T) =>
   Object.keys(labels) as [
@@ -182,10 +182,7 @@ export const websiteLeadSchema = z
     requestKind:z.enum(requestKinds).optional(),
     upholsteryRequested:z.boolean().optional(),
     consent: z.literal(true),
-    attribution: z
-      .object({ landing: z.string().max(200), source: z.enum(entrySources) })
-      .strict()
-      .optional(),
+    attribution: leadAttributionSchema.optional(),
   })
   .strict().transform(v=>({...v,requestKind:v.requestKind??(v.upholsteryRequested?'CLEANING_UPHOLSTERY':'CLEANING'),upholsteryRequested:v.upholsteryRequested??(v.requestKind==='UPHOLSTERY'||v.requestKind==='CLEANING_UPHOLSTERY')})).superRefine((v,ctx)=>{
     if(v.requestKind==='CONTACT_REQUEST'){

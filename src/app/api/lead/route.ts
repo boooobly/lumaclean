@@ -9,21 +9,8 @@ import {
   publishWebsiteLead,
 } from "@/lib/services/website-leads";
 import { CrmError } from "@/lib/domain/crm";
-import { articlePath, getPublishedArticles } from "@/lib/articles";
-import { getServicePath } from "@/lib/seo-services";
-import { serviceIds } from "@/lib/pricing";
-import { routing } from "@/i18n/routing";
-import {upholsteryPath} from '@/lib/upholstery-content';
+import {publicLeadPaths} from '@/lib/public-paths';
 export const runtime = "nodejs";
-const paths = new Set(
-  routing.locales.flatMap((locale) => [
-    `/${locale}`,
-    upholsteryPath(locale),
-    `/${locale}/articles`,
-    ...serviceIds.map((s) => getServicePath(locale, s)),
-    ...getPublishedArticles().map((a) => articlePath(a, locale)),
-  ]),
-);
 export async function POST(request: Request) {
   let raw:string;
   try{raw=(await boundedBody(request,16000)).toString();}
@@ -35,10 +22,7 @@ export async function POST(request: Request) {
       .then(() => JSON.parse(raw))
       .catch(() => null),
   );
-  if (
-    !parsed.success ||
-    (parsed.data.attribution && !paths.has(parsed.data.attribution.landing))
-  ) {
+  if (!parsed.success || (parsed.data.attribution && !publicLeadPaths.includes(parsed.data.attribution.landing))) {
     console.warn(
       JSON.stringify({
         level: "warning",

@@ -7,13 +7,12 @@ import {routing} from "@/i18n/routing";
 import {siteUrl} from "@/lib/seo";
 import {Analytics} from "@/components/site/analytics";
 import {WebsiteChat} from "@/components/site/website-chat";
-import {articlePath, getPublishedArticles} from "@/lib/articles";
-import {getServicePath} from "@/lib/seo-services";
-import {upholsteryPath} from '@/lib/upholstery-content';
-import {serviceIds} from "@/lib/pricing";
+import {publicLeadPaths} from '@/lib/public-paths';
 import "../globals.css";
 
-const geist = Geist({subsets: ["latin", "cyrillic"], variable: "--font-geist"});
+// Public page templates use Onest/Golos; retain Geist as a fallback without
+// competing with the visible fonts and LCP image for preload bandwidth.
+const geist = Geist({subsets: ["latin", "cyrillic"], variable: "--font-geist", preload: false});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({locale}));
@@ -33,7 +32,7 @@ export default async function LocaleLayout({children, params}: {children: React.
   setRequestLocale(locale);
   return (
     <html lang={locale} className={geist.variable}>
-      <body>{children}<WebsiteChat locale={locale}/><Analytics locale={locale} enabled={process.env.VERCEL_ENV === "production"} measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ""} paths={routing.locales.flatMap(l => [`/${l}`, `/${l}/articles`, upholsteryPath(l), ...serviceIds.map(s => getServicePath(l, s)), ...getPublishedArticles().map(a => articlePath(a, l))])}/></body>
+      <body>{children}<WebsiteChat locale={locale}/><Analytics locale={locale} enabled={process.env.VERCEL_ENV === "production"} metrikaId={process.env.NEXT_PUBLIC_YM_COUNTER_ID || ""} measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ""} paths={publicLeadPaths}/></body>
     </html>
   );
 }

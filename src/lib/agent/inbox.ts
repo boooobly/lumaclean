@@ -22,6 +22,7 @@ import {reliabilityCount} from './reliability-telemetry';
 import {buildAgentTemporalContext} from './temporal';
 import {behaviorMetric} from './behavior-telemetry';
 import {attachmentSelect} from './chat-attachments';
+import {nextMessageTime} from './response-context';
 
 export const anonymousHash=(token:string)=>createHash("sha256").update(token).digest("hex");
 export async function rateLimit(db:PrismaClient,scope:string,max:number,periodMs=60000){
@@ -89,7 +90,10 @@ export async function acceptMessage(db:PrismaClient,c:Conversation,input:{id:str
     const confirmation=!!state.pending&&(input.confirmationNonce===state.pending.nonce||confirmsRecap(text,state.pending.recap));
   if(input.confirmationNonce&&input.confirmationNonce!==state.pending?.nonce)throw new AgentError("INVALID_CONFIRMATION");
     const sourceFacts=Object.fromEntries(Object.entries(extracted).filter(([key])=>!['name','phone','addressQuery','neighborhoodHint'].includes(key)));
-    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text,sentAt:receivedAt,externalMessageId:`in:${input.id}`,structured:json({...input.transport?.metadata as object,...(expectedInput?{inputIntent:expectedInput}:{}),factExtraction:{version:1,accepted:sourceFacts}}),...(input.transport?{inboundKey:input.transport.key,receivedAt}:{})}});
+    // Ingress time may precede a response committed while this request waited for
+    // the lock. A strict timeline also avoids random ID ordering within one ms.
+    const previous=await tx.message.findFirst({where:{conversationId:c.id},orderBy:[{sentAt:'desc'},{id:'desc'}],select:{sentAt:true}});
+    const message=await tx.message.create({data:{conversationId:c.id,author:"CLIENT",text,sentAt:nextMessageTime(receivedAt,previous?.sentAt),receivedAt,externalMessageId:`in:${input.id}`,structured:json({...input.transport?.metadata as object,...(expectedInput?{inputIntent:expectedInput}:{}),factExtraction:{version:1,accepted:sourceFacts}}),...(input.transport?{inboundKey:input.transport.key}:{})}});
     if(ids.length)await tx.chatAttachment.updateMany({where:{id:{in:ids},conversationId:c.id,messageId:null},data:{messageId:message.id}});
     if(confirmation)state.pending!.confirmedByMessageId=message.id;
     else if(state.pending)delete state.pending;

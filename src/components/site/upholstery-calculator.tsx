@@ -9,6 +9,7 @@ import { calculateUpholstery, furnitureTypes, upholsteryRequestSchema, type Upho
 import { formatRsd, serviceIds, type ServiceId } from "@/lib/pricing";
 import { siteContent } from "@/lib/content";
 import { isWebsitePhoneValid } from "@/lib/website-phone";
+import {leadAttribution, trackEvent} from '@/lib/analytics';
 import { ArrowIcon } from "./arrow-icon";
 import { UpholsteryPhotoButton } from "./upholstery-photo-button";
 
@@ -16,8 +17,8 @@ type Furniture = UpholsteryRequest["items"][number];
 const freshItem = (type: Furniture["type"] = "SOFA3"): Furniture => ({ type, quantity: 1, ...(type === "CORNER" ? { seats: 4 } : {}), soil: "NORMAL", fabric: "UNKNOWN", size: "standard", material: "", notes: "" });
 const selectionEvent = "lumaclean:upholstery-select";
 const galleryTypes = ["SOFA3", "CORNER", "ARMCHAIR", "CHAIR", "SPOT"] as const;
-const galleryImages = ["sofa", "corner", "armchair", "chair", "texture"];
-const furnitureImage = (type: Furniture["type"]) => type === "SPOT" ? "/media/material-textile.webp" : `/media/upholstery/${({ SOFA3: "sofa", SOFA2: "sofa", CORNER: "corner", ARMCHAIR: "armchair", CHAIR: "chair" } as const)[type]}.webp`;
+const galleryImages = ["sofa", "corner", "armchair", "chair", "spot-cleaning"];
+const furnitureImage = (type: Furniture["type"]) => type === "SPOT" ? "/media/upholstery/spot-cleaning.webp" : `/media/upholstery/${({ SOFA3: "sofa", SOFA2: "sofa", CORNER: "corner", ARMCHAIR: "armchair", CHAIR: "chair" } as const)[type]}.webp`;
 
 function SelectControl({ children, ...props }: ComponentProps<"select">) {
   return <span className="up-select"><select {...props}>{children}</select><svg className="up-select-chevron" width="14" height="8" viewBox="0 0 14 8" fill="none" aria-hidden="true" focusable="false"><path d="m1 1 6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span>;
@@ -39,11 +40,12 @@ export function UpholsteryGallery({ locale, prices }: { locale: Locale; prices: 
           item?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
           item?.querySelector<HTMLSelectElement>(".up-type select")?.focus({ preventScroll: true });
         });
-      }} aria-label={`${p.addLabel}: ${p.galleryNames[i]}`}>
-        <span className="up-gallery-image"><Image src={i === 4 ? "/media/material-textile.webp" : `/media/upholstery/${galleryImages[i]}.webp`} alt={p.galleryAlts[i]} fill sizes={i === 0 || i === 1 ? "(max-width: 680px) 90vw, 46vw" : "(max-width: 680px) 44vw, 30vw"} /></span>
+      }} aria-describedby="up-gallery-action" aria-pressed={selected === type}>
+        <span className="up-gallery-image"><Image src={`/media/upholstery/${galleryImages[i]}.webp`} alt={p.galleryAlts[i]} fill sizes={i === 0 || i === 1 ? "(max-width: 680px) 90vw, 46vw" : "(max-width: 680px) 44vw, 30vw"} /></span>
         <span className="up-gallery-caption"><span><strong>{p.galleryNames[i]}</strong><small>{p.galleryNotes[i]}</small></span><span className="up-gallery-price">{c.from} {formatRsd(prices[i], locale)}<span aria-hidden="true"><ArrowIcon direction="down-right" /></span></span></span>
       </button>)}
     </div>
+    <span id="up-gallery-action" className="up-sr-only">{p.addLabel}</span>
     <p className="up-image-note">{p.illustration}</p>
     <span className="up-sr-only" role="status">{announcement}</span>
   </>;
@@ -66,7 +68,8 @@ export function UpholsteryCalculator({ locale, catalog, version }: { locale: Loc
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error" | "validation" | "limited">("idle");
   const [reference, setReference] = useState("");
   const pristine = useRef(true), sending = useRef(false), completed = useRef(false);
-  const submission = useRef<{ fields: string; id: string } | null>(null);
+  const started = useRef(false);
+  const submission = useRef<{ fields: string; id: string; payload: string } | null>(null);
   const form = useRef<HTMLFormElement>(null);
   const statusRef = useRef<HTMLParagraphElement>(null);
 
@@ -137,6 +140,7 @@ export function UpholsteryCalculator({ locale, catalog, version }: { locale: Loc
     if (sending.current || completed.current || removing.current || unsafe) return;
     if (!calculation || invalidName || invalidPhone || !consent) {
       setStatus("validation");
+      trackEvent('lead_error', {locale, service: 'upholstery', form_type: 'upholstery', error_type: 'validation'});
       requestAnimationFrame(() => {
         const target = !calculation ? form.current?.querySelector<HTMLInputElement | HTMLSelectElement>("[aria-invalid='true'], input:invalid") : invalidName ? form.current?.elements.namedItem("name") : invalidPhone ? form.current?.elements.namedItem("phone") : form.current?.elements.namedItem("consent");
         if (target instanceof HTMLElement) target.focus();
@@ -148,23 +152,31 @@ export function UpholsteryCalculator({ locale, catalog, version }: { locale: Loc
     setStatus("sending");
     try {
       const fields = JSON.stringify({ name: name.trim(), phone: phone.trim(), locale, consent: true, request: calculation.request });
-      if (!submission.current || submission.current.fields !== fields) submission.current = { fields, id: crypto.randomUUID() };
-      const response = await fetch("/api/upholstery/lead", { method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(20000), body: JSON.stringify({ ...JSON.parse(fields), submissionId: submission.current.id }) });
+      // Preserve attribution and idempotency together when retrying an uncertain response.
+      if (!submission.current || submission.current.fields !== fields) submission.current = { fields, id: crypto.randomUUID(), payload: JSON.stringify({...JSON.parse(fields), attribution: leadAttribution()}) };
+      const response = await fetch("/api/upholstery/lead", { method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(20000), body: JSON.stringify({ ...JSON.parse(submission.current.payload), submissionId: submission.current.id }) });
       const result = await response.json().catch(() => null);
       if (response.ok && result?.ok === true) {
         completed.current = true;
         setReference(typeof result.result?.reference === "string" ? result.result.reference : "");
         setStatus("success");
-      } else setStatus(response.status === 429 ? "limited" : response.status === 400 ? "validation" : "error");
-    } catch { setStatus("error"); }
+        trackEvent('generate_lead', {locale, service: 'upholstery', form_type: 'upholstery'});
+      } else {
+        setStatus(response.status === 429 ? "limited" : response.status === 400 ? "validation" : "error");
+        trackEvent('lead_error', {locale, service: 'upholstery', form_type: 'upholstery', error_type: 'server'});
+      }
+    } catch {
+      setStatus("error");
+      trackEvent('lead_error', {locale, service: 'upholstery', form_type: 'upholstery', error_type: 'network'});
+    }
     finally {
       sending.current = false;
       requestAnimationFrame(() => statusRef.current?.focus());
     }
   }
 
-  return <form ref={form} className="up-calculator" onSubmit={submit} noValidate aria-label={c.estimate} aria-busy={status === "sending"}>
-    <fieldset disabled={locked} className="up-calc-controls">
+  return <form ref={form} className="up-calculator" onSubmit={submit} onFocusCapture={() => {if (!started.current) {started.current = true; trackEvent('form_start', {locale, service: 'upholstery', form_type: 'upholstery'});}}} noValidate aria-label={c.estimate} aria-busy={status === "sending"}>
+    <fieldset disabled={locked} className="up-calc-controls" onChange={() => trackEvent('calculator_interaction', {locale, service: 'upholstery', form_type: 'upholstery'})}>
       <legend className="up-sr-only">{p.furnitureStep}</legend>
       <div className="up-form-heading"><span>01</span><h3>{p.furnitureStep}</h3></div>
       {mixed && <p className="up-form-note">{p.objectNote}</p>}

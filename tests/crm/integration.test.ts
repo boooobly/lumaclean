@@ -87,6 +87,7 @@ test(
       urgent: false,
       requiredCleaners: 2,
       manualDurationMinutes: 180,
+      durationOverrideReason: "Synthetic CRM duration fixture",
       scheduleMode: "FIXED",
       scheduledStart: "2026-10-10T14:00",
       finalPrice: 12500,
@@ -129,7 +130,7 @@ test(
           });
           assert.equal(lead.service?.code, "regular");
           assert.equal(lead.normalizedPhone, "+381641234567");
-          assert.equal(Number(lead.estimatedPrice), 7700);
+          assert.equal(Number(lead.estimatedPrice), 8900);
           assert.equal(lead.extras.length, 1);
           assert.equal(
             await db.auditLog.count({
@@ -405,9 +406,9 @@ test(
             order.scheduledStart?.toISOString(),
             "2026-10-10T12:00:00.000Z",
           );
-          assert.equal(Number(order.basePrice), 7500);
-          assert.equal(Number(order.discountAmount), 750);
-          assert.equal(Number(order.priceAdjustment), 5750);
+          assert.equal(Number(order.basePrice), 8800);
+          assert.equal(Number(order.discountAmount), 880);
+          assert.equal(Number(order.priceAdjustment), 4580);
           assert.equal(order.extras.length, 2);
           assert.equal(order.estimatedDurationMinutes, null);
           const wrongAddress = (
@@ -561,7 +562,7 @@ test(
                 })
               ).unitPrice,
             ),
-            1100,
+            1400,
           );
           await db.serviceExtra.update({
             where: { id: extra.id },

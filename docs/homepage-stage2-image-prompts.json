@@ -1,0 +1,98 @@
+{
+  "tool": "built-in image_gen",
+  "useCase": "photorealistic-natural",
+  "purpose": "Illustrative cleaning-service photographs, not customer work or employee portraits",
+  "commonPrompt": "Use case: photorealistic-natural. Create ONE cohesive editorial photograph for a compact cleaning-service information card on the LumaClean website. Landscape 4:3 composition. Modern lived-in Belgrade apartment, warm neutral whites, beige stone and natural wood, calm muted palette, soft side daylight, restrained contrast, realistic materials. Close enough for the action to read at 340px wide. Leave the bottom quarter visually calm for a later HTML caption; the photograph itself contains NO text, letters, numbers, logos, watermarks or graphic overlays. Realistic equipment and human anatomy: at most one naturally gloved hand and forearm, no face, no extra fingers, plausible hand/tool contact. Not a before/after split, no collage, no turquoise props, no exaggerated dirt, no commercial guarantees implied. ",
+  "optimization": {
+    "format": "WebP",
+    "width": 960,
+    "height": 720,
+    "quality": 82
+  },
+  "assets": [
+    {
+      "key": "standardWindow",
+      "file": "public/media/extras/standard-window.webp",
+      "scenePrompt": "Subject: cleaning an ordinary single residential window with a real rubber window squeegee. A single gloved hand moves the squeegee across the wet interior glass; a few realistic water beads and a clear wiped band, intact white window frame and softly blurred apartment courtyard beyond. Frame the straight squeegee blade and its contact with the pane clearly. No high-rise exterior work.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "largeWindow",
+      "file": "public/media/extras/large-window.webp",
+      "scenePrompt": "Subject: washing a large floor-to-ceiling sliding balcony glass door from safely inside a contemporary apartment. Wider architectural composition, tall two-panel glazing, light oak floor, terrace plants beyond, a real long-handled microfiber window washer pressed against the lower-mid glass with a single naturally gloved hand entering at frame edge. Show the large scale of the glass; no ladder, no exterior high-rise work.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "balcony",
+      "file": "public/media/extras/balcony.webp",
+      "scenePrompt": "Subject: cleaning the ordinary tiled floor of a small residential balcony/terrace. Three-quarter downward view: a realistic flat mop is wiping pale beige exterior tiles, subtle wet marks, intact simple railing, two potted plants and a folded outdoor chair. One gloved hand at frame edge holds the mop handle correctly; no pressure washer, no dangerous access, no dramatic grime.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "fridge",
+      "file": "public/media/extras/fridge.webp",
+      "scenePrompt": "Subject: wiping accessible interior surfaces of an unplugged open household refrigerator. Frontal three-quarter close-up of white interior and a clear empty glass shelf. One naturally gloved hand with folded beige microfiber cloth wipes the shelf; door racks intact and empty, no dismantled parts, no food, no repair tools. Soft warm daylight with neutral white refrigerator light.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "oven",
+      "file": "public/media/extras/oven.webp",
+      "scenePrompt": "Subject: cleaning ordinary grease spots from the accessible interior floor of a cooled domestic electric oven. Low three-quarter close-up, oven door open downward, intact dark enamel cavity and normal heating elements, one gloved hand using a folded microfiber cloth on the bottom enamel. Small believable brown grease marks, no caustic spray, no fire, no tool disassembly, no impossible duplicate trays.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "microwave",
+      "file": "public/media/extras/microwave.webp",
+      "scenePrompt": "Subject: wiping the inside of an open countertop microwave oven. Tight straight-on view from slightly above, white enamel cavity with a correctly seated circular glass turntable, door hinged on the left. One naturally gloved hand uses a folded light cloth on the inner side wall. Soft residential kitchen setting and daylight, intact appliance, blank control panel with no legible symbols or text.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "hood",
+      "file": "public/media/extras/hood.webp",
+      "scenePrompt": "Subject: cleaning the accessible underside of a domestic kitchen extractor hood above a switched-off induction hob. Upward diagonal close-up with warm kitchen cabinetry in the background. One gloved hand uses a folded beige microfiber cloth to wipe the stainless steel underside beside a normal intact grease-filter grille. Show plausible intact equipment, no dismantling, no repair, no commercial duct cleaning, no flames.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "dishwasher",
+      "file": "public/media/extras/dishwasher.webp",
+      "scenePrompt": "Subject: wiping accessible interior surfaces of a domestic dishwasher, switched off with the door open downward and lower rack rolled partly out on its correct rails. Three-quarter overhead view, one naturally gloved hand and small folded cloth wipe the stainless inner door around the detergent recess. Normal intact spray arm in the cavity, no dismantling, no repairs, no misplaced washing-machine drum.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "washingMachine",
+      "file": "public/media/extras/washing-machine.webp",
+      "scenePrompt": "Subject: cleaning accessible surfaces at the round open door of a domestic front-loading washing machine. Close-up framing the intact grey rubber door seal, glass door swung to the side and stainless drum recessed normally behind the seal. One naturally gloved hand uses a folded microfiber cloth along the outer accessible seal lip. Dry switched-off machine in a warm neutral home laundry corner. No repairs, no dismantled panels, no electrical tools.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "cabinets",
+      "file": "public/media/extras/cabinets.webp",
+      "scenePrompt": "Subject: wiping the inside of an empty ordinary light-oak kitchen cabinet section. Side-on close editorial composition with an open hinged door, one empty horizontal wooden shelf and back panel. One naturally gloved hand uses a folded linen-colored microfiber cloth to wipe the accessible shelf. A small stack of household dishes sits on the nearby counter outside the cabinet. No dismantling or step ladder.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "ironing",
+      "file": "public/media/extras/ironing.webp",
+      "scenePrompt": "Subject: carefully ironing a plain cotton shirt on a real fabric-covered ironing board in a calm residential interior. Three-quarter overhead close-up; a single naturally gloved hand correctly grips a generic unbranded steam iron handle with the flat soleplate resting on the cotton shirt. Realistic iron cord falls safely away; no ironing a worn garment, no extra hands, no excessive steam. A small folded linen stack softly out of focus.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "steam",
+      "file": "public/media/extras/steam.webp",
+      "scenePrompt": "Subject: steam-cleaning a suitable ceramic tile and grout surface in a residential bathroom. Tight diagonal close-up of a real handheld steam-cleaner nozzle with a small round brush attachment touching the grout, one naturally gloved hand correctly gripping its handle. A modest thin wisp of steam, realistic scale, pale matte ceramic tiles and brushed metal edge in soft daylight. No huge smoke clouds, no pressure-washer water jet, no disinfecting claims or chemicals.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "petHair",
+      "file": "public/media/extras/pet-hair.webp",
+      "scenePrompt": "Subject: removing visible pet fur from the seat cushion of a pale textured fabric sofa with a real reusable rubber pet-hair brush. Close oblique composition, one naturally gloved hand correctly holds the simple brush, a few realistic fine hairs gather near its rubber edge. Cozy modern apartment, oak side table softly blurred. No animal needed, no wet extraction or foam, no dramatic stains, no upholstery damage.",
+      "visuallyReviewed": true
+    },
+    {
+      "key": "linen",
+      "file": "public/media/extras/linen.webp",
+      "scenePrompt": "Subject: changing and neatly tucking freshly prepared plain cotton bed linen on a domestic bed. Wider calm bedroom composition with natural oak bed frame, white and warm-grey linen, soft side daylight. One naturally gloved hand enters from the right, neatly tucking the clean fitted sheet at the near mattress corner; a fresh folded duvet cover and pillowcases rest at the foot. Realistic mattress/hand contact. No laundry service implied, no hotel logos, no face.",
+      "visuallyReviewed": true
+    }
+  ]
+}

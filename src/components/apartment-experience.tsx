@@ -1,7 +1,7 @@
 "use client";
 
 import {ArrowDown, ArrowRight, MousePointer2} from "lucide-react";
-import Image from "next/image";
+import Image, {getImageProps} from "next/image";
 import {useEffect, useRef, useState} from "react";
 import type {Locale} from "@/i18n/routing";
 
@@ -12,6 +12,7 @@ const copy = {
     body: "Pređite mišem preko sobe i pogledajte kako je izgledala pre LumaClean čišćenja.",
     hover: "Pređite mišem preko sobe",
     touch: "Dodirnite i zadržite da vidite pre",
+    beforeLabel: "Prikažite sobu pre čišćenja",
     scroll: "Skrolujte kroz prostor",
     primary: "Izračunajte cenu",
     secondary: "Zakažite čišćenje",
@@ -43,6 +44,7 @@ const copy = {
     body: "Наведите курсор на комнату и посмотрите, как она выглядела до уборки LumaClean.",
     hover: "Наведите на комнату",
     touch: "Нажмите и удерживайте, чтобы увидеть до",
+    beforeLabel: "Показать комнату до уборки",
     scroll: "Листайте, чтобы пройти по квартире",
     primary: "Рассчитать стоимость",
     secondary: "Заказать уборку",
@@ -74,6 +76,7 @@ const copy = {
     body: "Hover over the room to see how it looked before LumaClean.",
     hover: "Hover over the room",
     touch: "Touch and hold to see before",
+    beforeLabel: "Show the room before cleaning",
     scroll: "Scroll through the apartment",
     primary: "Estimate the cost",
     secondary: "Book cleaning",
@@ -104,6 +107,13 @@ const copy = {
 type Direction = "forward" | "reverse";
 
 const TOTAL_STEPS = 32;
+const JOURNEY_IMAGE_SIZES = "(max-width: 680px) min(1174px, 146svh), (max-aspect-ratio: 16/9) 178vh, 100vw";
+// This center crop keeps the full source height. At portrait mobile hero
+// ratios it discards only pixels already outside object-fit: cover.
+const PORTRAIT_MEDIA = "(max-width: 680px) and (max-aspect-ratio: 1/1)";
+const PORTRAIT_SIZES = "min(825px, 102.5svh)";
+const portraitClean = getImageProps({src: "/media/journey-v5/stills/000-portrait.webp", alt: "", fill: true, sizes: PORTRAIT_SIZES}).props;
+const portraitBefore = getImageProps({src: "/media/journey-v5/stills/000-before-portrait.webp", alt: "", fill: true, sizes: PORTRAIT_SIZES}).props;
 const CHAPTER_STEPS = [0, 12, 20, TOTAL_STEPS] as const;
 const SCRUB_CLIPS = [
   {start: 0, end: 12, file: "01"},
@@ -160,6 +170,7 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
   const [activeChapter, setActiveChapter] = useState<number | null>(null);
   const [isSeeking, setIsSeeking] = useState(false);
   const [beforeRequested, setBeforeRequested] = useState(false);
+  const [finalStillRequested, setFinalStillRequested] = useState(false);
   const [compactMobile,setCompactMobile]=useState(false);
   const text = copy[locale];
   const activePhase = getPhase(currentStep);
@@ -274,6 +285,9 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
 
     const seekToStep = (targetStep: number, direction: Direction, chapter: number | null) => {
       step = Math.max(0, Math.min(TOTAL_STEPS, targetStep));
+      // Request the last frame during the preceding chapter, off the initial
+      // critical path. Keep its element mounted so the load listener can paint it.
+      if (step >= CHAPTER_STEPS[2]) setFinalStillRequested(true);
       syncFinalStill();
       setCurrentStep(step);
       setActiveChapter(chapter);
@@ -486,14 +500,33 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
         <div
           ref={hero}
           className="journey-hero"
+          role="button"
+          tabIndex={0}
+          aria-label={text.beforeLabel}
+          onKeyDown={(event) => {
+            if (event.key === " " || event.key === "Enter") {
+              event.preventDefault();
+              revealBefore(true);
+            }
+          }}
+          onKeyUp={(event) => {
+            if (event.key === " " || event.key === "Enter") revealBefore(false);
+          }}
+          onBlur={() => revealBefore(false)}
           onPointerEnter={(event) => event.pointerType === "mouse" && revealBefore(true)}
           onPointerLeave={() => revealBefore(false)}
           onPointerDown={() => revealBefore(true)}
           onPointerUp={() => revealBefore(false)}
           onPointerCancel={() => revealBefore(false)}
         >
-          <Image className="journey-image journey-clean" src="/media/journey-v5/stills/000.webp" alt="" fill preload sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" />
-          {beforeRequested && <Image className="journey-image journey-dirty" src="/media/journey-v5/stills/000-before.webp" alt="" fill loading="eager" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" />}
+          <picture>
+            <source media={PORTRAIT_MEDIA} srcSet={portraitClean.srcSet} sizes={PORTRAIT_SIZES}/>
+            <Image className="journey-image journey-clean" src="/media/journey-v5/stills/000.webp" alt="" fill loading="eager" fetchPriority="high" sizes={JOURNEY_IMAGE_SIZES} />
+          </picture>
+          {beforeRequested && <picture>
+            <source media={PORTRAIT_MEDIA} srcSet={portraitBefore.srcSet} sizes={PORTRAIT_SIZES}/>
+            <Image className="journey-image journey-dirty" src="/media/journey-v5/stills/000-before.webp" alt="" fill loading="eager" sizes={JOURNEY_IMAGE_SIZES} />
+          </picture>}
           <div className="journey-shade" />
         </div>
 
@@ -517,15 +550,15 @@ export function ApartmentExperience({locale, calculatorHref}: {locale: Locale; c
               src="/media/journey-v5/stills/000.webp"
               alt=""
               fill
-              sizes="(max-aspect-ratio: 16/9) 178vh, 100vw"
-              loading="eager"
+              sizes={JOURNEY_IMAGE_SIZES}
+              loading="lazy"
             />
           </div>
           <div className="journey-video-vignette" />
           <picture className="journey-final-still">
-            <source media="(min-width: 681px), (orientation: landscape)" srcSet="/media/journey-v5/stills/032-desktop.webp" />
-            <source media="(max-width: 680px) and (orientation: portrait)" srcSet="/media/journey-v5/stills/032-mobile.webp" />
-            <img ref={finalStill} src="/media/journey-v5/stills/032-mobile.webp" alt="" width={608} height={1080} loading="eager" />
+            <source media="(min-width: 681px), (orientation: landscape)" srcSet={finalStillRequested ? "/media/journey-v5/stills/032-desktop.webp" : undefined} />
+            <source media="(max-width: 680px) and (orientation: portrait)" srcSet={finalStillRequested ? "/media/journey-v5/stills/032-mobile.webp" : undefined} />
+            <img ref={finalStill} src={finalStillRequested ? "/media/journey-v5/stills/032-mobile.webp" : undefined} alt="" width={608} height={1080} />
           </picture>
           <div className="journey-loading-indicator" />
         </div>

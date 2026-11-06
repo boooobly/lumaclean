@@ -35,23 +35,26 @@ let pathname = '/sr';
 let effect;
 let cleanup;
 let refIndex = 0;
+let stateIndex = 0;
+let metrikaReady = false;
+let clickHandler;
 const refs = [];
 const w = {location: {search: campaign + '&analytics_debug=1&phone=PRIVATE', hostname: 'lumacleanrs.com', origin: 'https://lumacleanrs.com'}, addEventListener() {}, removeEventListener() {}};
 const react = {
   useEffect: fn => {effect = fn;},
   useRef: initial => refs[refIndex++] ||= {current: initial},
-  useState: initial => [initial, () => {}],
+  useState: initial => [stateIndex++ === 1 ? metrikaReady : initial, () => {}],
   useSyncExternalStore: (_, read) => read(),
 };
 const componentExports = {};
 const componentCode = ts.transpileModule(fs.readFileSync('src/components/site/analytics.tsx', 'utf8'), {
   compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX}
 }).outputText;
-const modules = {'react': react, 'react/jsx-runtime': {jsx: () => null, jsxs: () => null}, 'next/script': {}, 'next/navigation': {usePathname: () => pathname}, '@/lib/analytics': exportsObject, './analytics.css': {}};
-vm.runInNewContext(componentCode, {exports: componentExports, require: name => {assert(name in modules, name); return modules[name];}, window: w, document: {referrer: '', title: 'LumaClean', addEventListener() {}, removeEventListener() {}}, localStorage, sessionStorage, URL, URLSearchParams, Date});
+const modules = {'react': react, 'react/jsx-runtime': {jsx: () => null, jsxs: () => null}, 'next/script': {}, 'next/navigation': {usePathname: () => pathname}, '@/lib/analytics': exportsObject, '@/components/site/arrow-icon': {ArrowIcon: () => null}, './analytics.css': {}};
+vm.runInNewContext(componentCode, {exports: componentExports, require: name => {assert(name in modules, name); return modules[name];}, window: w, document: {referrer: '', title: 'LumaClean', addEventListener(name, fn) {if (name === 'click') clickHandler = fn;}, removeEventListener(name, fn) {if (name === 'click' && clickHandler === fn) clickHandler = undefined;}}, localStorage, sessionStorage, URL, URLSearchParams, Date});
 function render() {
-  cleanup?.(); refIndex = 0;
-  componentExports.Analytics({locale:'sr', measurementId:'G-TEST123', enabled:true, paths:['/sr','/sr/services/ciscenje-stanova']});
+  cleanup?.(); refIndex = 0; stateIndex = 0;
+  componentExports.Analytics({locale:'sr', measurementId:'G-TEST123', metrikaId:'113807461', enabled:true, paths:['/sr','/sr/services/ciscenje-stanova']});
   cleanup = effect();
 }
 render();
@@ -59,6 +62,16 @@ assert.equal(w.dataLayer, undefined, 'No collection before consent');
 assert.equal(session.size, 0, 'No attribution storage before consent');
 local.set('lc-analytics-consent-v1', 'yes');
 render();
+assert.equal(w.ym, undefined, 'Old Google-only consent must not authorize Yandex');
+local.set('lc-analytics-consent-v2', 'yes');
+render();
+assert.equal(w.ym.a.length, 0, 'No Metrika calls before the library is ready');
+metrikaReady = true;
+render();
+assert.equal(w.ym.a.filter(args => args[1] === 'init').length, 1);
+const ymConfig = w.ym.a.find(args => args[1] === 'init')[2];
+for (const option of ['webvisor','clickmap','trackLinks','ecommerce','trackHash','accurateTrackBounce','sendTitle']) assert.equal(ymConfig[option], false);
+assert.equal(ymConfig.defer, true);
 let commands = w.dataLayer.map(args => Array.from(args));
 let page = commands.find(args => args[0] === 'event' && args[1] === 'page_view')[2];
 assert.equal(page.entry_source, 'google_business_profile');
@@ -76,8 +89,22 @@ assert.equal(page.entry_source, 'google_business_profile');
 assert.equal(page.traffic_type, 'internal', 'Debug persists after navigation');
 assert.equal(commands.at(-1)[2].traffic_type, 'internal');
 assert.equal(commands.filter(args => args[1] === 'generate_lead').length, 0);
-local.set('lc-analytics-consent-v1', 'no');
+for (const href of ['tel:+381PRIVATE', 'https://wa.me/PRIVATE?text=PRIVATE']) {
+  clickHandler({target: {closest: () => ({getAttribute: () => href})}});
+}
+commands = w.dataLayer.map(args => Array.from(args));
+assert.equal(commands.filter(args => args[1] === 'phone_click').length, 1);
+assert.equal(commands.filter(args => args[1] === 'messenger_click').length, 1);
+assert(!JSON.stringify(commands).includes('PRIVATE'), 'Contact details must never reach analytics');
+assert.equal(w.ym.a.filter(args => args[1] === 'hit').length, 2);
+assert.equal(w.ym.a.filter(args => args[1] === 'reachGoal' && args[2] === 'phone_click').length, 1);
+assert(!JSON.stringify(w.ym.a).includes('PRIVATE'), 'Metrika must not receive query strings or contacts');
+local.set('lc-analytics-consent-v2', 'no');
 render();
 assert.equal(w.lcTrack, undefined);
+assert.equal(clickHandler, undefined, 'Revoking consent removes delegated contact tracking');
 assert.equal(w['ga-disable-G-TEST123'], true);
+assert.equal(w.ym.a.at(-1)[1], 'destruct', 'Withdrawn consent destroys the Metrika counter');
+local.set('lc-analytics-consent-v2', 'yes'); render();
+assert.equal(w.ym.a.filter(args => args[1] === 'init').length, 2, 'Consent can be granted again without duplicate counters');
 console.log('PASS: real analytics effect, consent, navigation, debug persistence and no fabricated leads');

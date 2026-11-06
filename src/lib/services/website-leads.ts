@@ -101,7 +101,7 @@ export async function saveWebsiteLead(db: PrismaClient, payload: unknown, source
 export async function notifyWebsiteLead(
   db: PrismaClient,
   lead: { id: string; reference: string },
-  input: ReturnType<typeof websiteLeadSchema.parse>,
+  input?: ReturnType<typeof websiteLeadSchema.parse>,
   send: typeof fetch = fetch,
   workers = {publish:publishNotifications,deliver:deliverNotification},
 ) {
